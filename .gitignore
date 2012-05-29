@@ -8,3 +8,14 @@ CLANS_tutorial.odt
 CLANS_tutorial.pdf
 build-before-profiler.xml
 build.xml
+
+# === Eclipse files and folders ===
+# default binary directory
+bin
+# project files
+.classpath
+.project
+
+# Emacs backup files
+*~
+
