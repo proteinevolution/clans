@@ -39,7 +39,7 @@
     <Component class="javax.swing.JTextField" name="topfield">
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
-        <Property name="text" type="java.lang.String" value="CLANS (23.Jan.2012)"/>
+        <Property name="text" type="java.lang.String" value="CLANS (29.05.2012)"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
