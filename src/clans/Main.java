@@ -86,7 +86,7 @@ public class Main {
     //static String blastpath="blastp ";//command necessary to start blast (if path location is needed don't forget it)
     static boolean addblastvbparam=true;//check to see whether I have more sequences than blast would normally return hits for
     //static String formatdbpath="formatdb -p T";//command needed to execute formatdb
-    static String formatdbpath="makeblastdb ";//command needed to execute formatdb
+    static String formatdbpath="makeblastdb -dbtype prot";//command needed to execute formatdb (since blast+ 2.2.26 -dbtype is no longer an optional entry)
     //static String formatdbpath="makeblastdb -dbtype prot";//command needed to execute formatdb (or makeblastdb for blast+)
     static String[] referencedb=new String[0];//holds the databases to blast against to generate psiblast profiles
     static boolean skipcheckdone=true; //check for a DONE in tmpblasthsp and then skip all further checks (if false)
