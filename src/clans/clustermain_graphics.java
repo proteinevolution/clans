@@ -2209,7 +2209,6 @@ public class clustermain_graphics extends javax.swing.JFrame {
     }//GEN-LAST:event_exitForm
 
     private void taxonomymenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_taxonomymenuitemActionPerformed
-        // TODO add your handling code here:
         if(taxonomydialog!=null){
             taxonomydialog.setVisible(false);
             taxonomydialog.dispose();

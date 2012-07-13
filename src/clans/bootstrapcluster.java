@@ -73,7 +73,7 @@ public class bootstrapcluster {
     
     //--------------------------------------------------------------------------
     
-    static boolean bootstrapnetwork(minattvals[] dataarr, Vector clustervec, String clustermethod, int replicates, float remove, int minseqnum, boolean dooffset,boolean globalaverage,int elements,int maxrounds){
+    static boolean bootstrapnetwork(minattvals[] dataarr, Vector <cluster> clustervec, String clustermethod, int replicates, float remove, int minseqnum, boolean dooffset,boolean globalaverage, int elements,int maxrounds){
         //remove "remove" of data and then recluster for "replicates" replicates.
         //then get the cluster confidences AND sequence to cluster confidences
         Vector[] replicate=new Vector[replicates];

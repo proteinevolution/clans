@@ -15,7 +15,7 @@ import java.util.*;
 
 /**
  *
- * @author tancred
+ * @author tancred 
  */
 public class ncbitaxonomydialog extends javax.swing.JFrame {
 
@@ -466,6 +466,10 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,"ERROR, you need to load some taxonomy data first! (select the files and press the \"Load data\" button");
             return;
         }
+        if(nameshash.get(taxname)==null || java.lang.reflect.Array.getLength(nameshash.get(taxname))==0){
+        	javax.swing.JOptionPane.showMessageDialog(this,"Taxonomic identifier has not yet been validated. please press the \"Check\" button first");
+            return;        	
+        }
         //it is probably fastest to get the full tax for my current ID and then to search all of the names from root--> species
         //only those that match my full selection length are valid hits
         ArrayList<String> mynodes=new ArrayList<String>();
@@ -486,16 +490,29 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
         //now I have the list of node elements I want to check for
         String[] checkarr=mynodes.toArray(new String[0]);
         //now go through all of the sequences in parent and see whether they have a valid TAXID, and then whether they match the tax-class I am looking for
-        int seqnum=java.lang.reflect.Array.getLength(parent.data.namearr);
+        //also check whether currently I have any sequences selected in the cluster view, then base the search only on these
+        int seqnum=java.lang.reflect.Array.getLength(parent.data.selectednames);
         String[] alttax;//a single ID may contain multiple taxid's
         ArrayList<String> speclist=new ArrayList<String>();
         java.util.regex.Pattern patt = java.util.regex.Pattern.compile("\\[(.+?)\\]");
         java.util.regex.Matcher mym=null;
         int checkindex;
         ArrayList<Integer> poslist=new ArrayList<Integer>();
+        boolean useselected=false;
+        if(seqnum>0){
+        	//if I have a set of selected sequences
+        	useselected=true;
+        }else{
+        	//if none are selected, use all
+        	seqnum=java.lang.reflect.Array.getLength(parent.data.namearr);
+        }
         for(int i=seqnum;--i>=0;){
-            //now get each name and see whether this name matches my given tax identifier
-            myname=parent.data.namearr[i];
+        	//now get each name and see whether this name matches my given tax identifier
+        	if(useselected){
+        		myname=parent.data.namearr[parent.data.selectednames[i]];
+        	}else{
+        		myname=parent.data.namearr[i];
+        	}
             //now get all of the taxonomic id's from this name
             mym=patt.matcher(myname);
             speclist.clear();
@@ -541,7 +558,11 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
                         }//end for j
                         if(checkindex<0){
                             //then all elements matched, set this sequence as true and look for the next one
-                            poslist.add(new Integer(i));
+                        	if(useselected){
+                        		poslist.add(new Integer(parent.data.selectednames[i]));                        		
+                        	}else{
+                        		poslist.add(new Integer(i));
+                        	}
                             j=-1;
                         }
                     }else{

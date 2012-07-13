@@ -4,6 +4,8 @@
  * Created on April 26, 2004, 6:38 PM
  */
 package clans;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 /**
  *
  * @author  tancred
@@ -45,7 +47,6 @@ public class clusteroptionsdialog extends javax.swing.JDialog {
         networkclusterradiobutton = new javax.swing.JRadioButton();
         minseqlabel = new javax.swing.JLabel();
         minseqstextfieldnetwork = new javax.swing.JTextField();
-        emptylabel = new javax.swing.JLabel();
         offsetcheckbox = new javax.swing.JCheckBox();
         globalaveragecheckbox = new javax.swing.JCheckBox();
         emptylabel2 = new javax.swing.JLabel();
@@ -131,7 +132,9 @@ public class clusteroptionsdialog extends javax.swing.JDialog {
 
         minseqstextfieldnetwork.setText("2");
         networkpanel.add(minseqstextfieldnetwork);
-        networkpanel.add(emptylabel);
+        
+        lblNewLabel = new JLabel("");
+        networkpanel.add(lblNewLabel);
 
         offsetcheckbox.setSelected(true);
         offsetcheckbox.setText("offset values");
@@ -282,7 +285,6 @@ public class clusteroptionsdialog extends javax.swing.JDialog {
     private javax.swing.JLabel convexlabel;
     private javax.swing.JPanel convexpanel;
     private javax.swing.JTextField convextextfield;
-    private javax.swing.JLabel emptylabel;
     private javax.swing.JLabel emptylabel2;
     private javax.swing.JCheckBox globalaveragecheckbox;
     private javax.swing.JRadioButton linkageclusterradiobutton;
@@ -309,6 +311,7 @@ public class clusteroptionsdialog extends javax.swing.JDialog {
     private javax.swing.JTextField rmtextfield;
     private javax.swing.JLabel spacerlabel;
     private javax.swing.JLabel spacerlabel1;
+    private JLabel lblNewLabel;
     // End of variables declaration//GEN-END:variables
     
 }
