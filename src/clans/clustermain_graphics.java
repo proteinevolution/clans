@@ -2532,8 +2532,8 @@ public class clustermain_graphics extends javax.swing.JFrame {
             mythread.start();
             stopbutton.setText("Stop");
         }else{//if this thread is running
+        	stopbutton.setEnabled(false);
             mythread.stop=true;
-            stopbutton.setEnabled(false);
             //is unavailable until the thread has stopped running
             //the thread then sets the text to "resume" and re-enables the button.
         }
