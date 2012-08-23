@@ -611,7 +611,7 @@ public class seqgroupwindow extends javax.swing.JFrame {
                 }//end for j
             }//end for i
             parent.data.selectednames=selecteds;
-            parent.clearselectbutton.setText("Clear Selection");
+            parent.button_select_all_or_clear.setText("Clear Selection");
             if(java.lang.reflect.Array.getLength(currsel)==1){
                 if(((seqgroup)parent.data.seqgroupsvec.elementAt(currsel[0])).seqconf!=null){
                     parent.clusterconf=((seqgroup)parent.data.seqgroupsvec.elementAt(currsel[0])).seqconf;
@@ -622,7 +622,7 @@ public class seqgroupwindow extends javax.swing.JFrame {
                 parent.clusterconf=null;
             }
         }else{
-            parent.clearselectbutton.setText("Select All");
+            parent.button_select_all_or_clear.setText("Select All");
         }
     }//GEN-LAST:event_setasselectedbuttonActionPerformed
     

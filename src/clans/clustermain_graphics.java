@@ -6,6 +6,8 @@
 package clans;
 import java.util.*;
 import javax.swing.*;
+
+import java.awt.event.KeyEvent;
 import java.io.*;
 /**
  *
@@ -32,8 +34,8 @@ public class clustermain_graphics extends javax.swing.JFrame {
         if(data.scval>=0){//in that case use a score cutoff
             data.minpval=data.scval;
             data.usescval=true;
-            minpvalbutton.setText("Use SC-vals better than");
-            minpvaltextfield.setText("0");
+            button_cutoff_value.setText("Use SC-vals better than");
+            textfield_cutoff_value.setText("0");
             evalueitem.setText("SC-value plot");
             attvalcompcheckbox.setSelected(false);
         }else{
@@ -68,8 +70,8 @@ public class clustermain_graphics extends javax.swing.JFrame {
         }//end for i
         //now all my sequences have a value assigned between 0 and 1 reflecting their length
         //data.movethreads=new getmovethread[cpu];
-        minpvaltextfield.setText(String.valueOf(data.minpval));
-        minsetpvaltextfield.setText(String.valueOf(data.minpval));
+        textfield_cutoff_value.setText(String.valueOf(data.minpval));
+        textfield_info_min_blast_evalue.setText(String.valueOf(data.minpval));
         System.out.println("initializing, please wait");
         //now initialize the stuff
         mousestart[0]=0;
@@ -120,7 +122,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         mousemove[0]=0;
         mousemove[1]=0;
         */
-        clearselectbutton.setText("Select All");
+        button_select_all_or_clear.setText("Select All");
         //System.out.println("done all; displaying now");
         if(new File("positionfile.dat").canRead()){
             System.out.println("reading former data");
@@ -148,20 +150,20 @@ public class clustermain_graphics extends javax.swing.JFrame {
         graphpanel = new javax.swing.JPanel();
         buttonpanel = new javax.swing.JPanel();
         drawbuttonpanel = new javax.swing.JPanel();
-        startbutton = new javax.swing.JButton();
-        stopbutton = new javax.swing.JButton();
-        showselectbutton = new javax.swing.JButton();
-        selecttbutton = new javax.swing.JToggleButton();
-        minpvalbutton = new javax.swing.JButton();
-        minpvaltextfield = new javax.swing.JTextField();
-        minsetpvaltextfield = new javax.swing.JTextField();
-        clearselectbutton = new javax.swing.JButton();
-        shownamescheckbox = new javax.swing.JCheckBox();
-        shownumberscheckbox = new javax.swing.JCheckBox();
-        showblasthitscheckbox = new javax.swing.JCheckBox();
-        zoombutton = new javax.swing.JButton();
+        button_initialize = new javax.swing.JButton();
+        button_start_stop_resume = new javax.swing.JButton();
+        button_show_selected = new javax.swing.JButton();
+        button_select_move = new javax.swing.JToggleButton();
+        button_cutoff_value = new javax.swing.JButton();
+        textfield_cutoff_value = new javax.swing.JTextField();
+        textfield_info_min_blast_evalue = new javax.swing.JTextField();
+        button_select_all_or_clear = new javax.swing.JButton();
+        checkbox_show_names = new javax.swing.JCheckBox();
+        checkbox_show_numbers = new javax.swing.JCheckBox();
+        checkbox_show_connections = new javax.swing.JCheckBox();
+        button_zoom_on_selected = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
-        filemenu = new javax.swing.JMenu();
+        menu_file = new javax.swing.JMenu();
         loadmenuitem = new javax.swing.JMenuItem();
         savemenuitem = new javax.swing.JMenuItem();
         saveattvalsmenuitem = new javax.swing.JMenuItem();
@@ -172,7 +174,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         loadalternatemenuitem = new javax.swing.JMenuItem();
         loadtabsmenuitem = new javax.swing.JMenuItem();
         loadgroupsmenuitem = new javax.swing.JMenuItem();
-        Miscmenu = new javax.swing.JMenu();
+        menu_misc = new javax.swing.JMenu();
         getseqsmenuitem = new javax.swing.JMenuItem();
         hidesingletonsmenuitem = new javax.swing.JMenuItem();
         getchildmenuitem = new javax.swing.JMenuItem();
@@ -183,7 +185,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         cluster2dbutton = new javax.swing.JCheckBoxMenuItem();
         rescalepvaluescheckbox = new javax.swing.JCheckBoxMenuItem();
         skipdrawingrounds = new javax.swing.JMenuItem();
-        drawmenu = new javax.swing.JMenu();
+        menu_draw = new javax.swing.JMenu();
         changefontmenuitem = new javax.swing.JMenuItem();
         getdotsizemenuitem = new javax.swing.JMenuItem();
         getovalsizemenuitem = new javax.swing.JMenuItem();
@@ -204,7 +206,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         antialiasingcheckboxmenuitem = new javax.swing.JCheckBoxMenuItem();
         stereocheckboxmenuitem = new javax.swing.JCheckBoxMenuItem();
         stereoanglemenuitem = new javax.swing.JMenuItem();
-        windowmenu = new javax.swing.JMenu();
+        menu_windows = new javax.swing.JMenu();
         showoptionsmenuitem = new javax.swing.JMenuItem();
         sequencesitem = new javax.swing.JMenuItem();
         evalueitem = new javax.swing.JMenuItem();
@@ -217,7 +219,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         affymenuitem = new javax.swing.JMenuItem();
         mapmanmenuitem = new javax.swing.JMenuItem();
         taxonomymenuitem = new javax.swing.JMenuItem();
-        helpmenu = new javax.swing.JMenu();
+        menu_help = new javax.swing.JMenu();
         aboutmenuitem = new javax.swing.JMenuItem();
         helpmenuitem = new javax.swing.JMenuItem();
 
@@ -262,109 +264,120 @@ public class clustermain_graphics extends javax.swing.JFrame {
 
         drawbuttonpanel.setLayout(new java.awt.GridLayout(0, 4));
 
-        startbutton.setText("Initialize");
-        startbutton.setToolTipText("initialize a new run");
-        startbutton.addActionListener(new java.awt.event.ActionListener() {
+        button_initialize.setText("Initialize");
+        button_initialize.setToolTipText("initialize a new run");
+        button_initialize.setMnemonic(KeyEvent.VK_I);
+        button_initialize.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                startbuttonActionPerformed(evt);
+                button_initializeActionPerformed(evt);
             }
         });
-        drawbuttonpanel.add(startbutton);
+        drawbuttonpanel.add(button_initialize);
 
-        stopbutton.setText("STOP");
-        stopbutton.setToolTipText("start/resume/stop the current run");
-        stopbutton.addActionListener(new java.awt.event.ActionListener() {
+        button_start_stop_resume.setText("Stop");
+        button_start_stop_resume.setToolTipText("start/resume/stop the current run");
+        button_start_stop_resume.setMnemonic(KeyEvent.VK_S);
+        button_start_stop_resume.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                stopbuttonActionPerformed(evt);
+                button_start_stop_resumeActionPerformed(evt);
             }
         });
-        drawbuttonpanel.add(stopbutton);
+        drawbuttonpanel.add(button_start_stop_resume);
 
-        showselectbutton.setText("Show selected");
-        showselectbutton.addActionListener(new java.awt.event.ActionListener() {
+        button_show_selected.setText("Show selected");
+        button_show_selected.setMnemonic(KeyEvent.VK_O);
+        button_show_selected.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showselectbuttonActionPerformed(evt);
+                button_show_selectedActionPerformed(evt);
             }
         });
-        drawbuttonpanel.add(showselectbutton);
+        drawbuttonpanel.add(button_show_selected);
 
-        selecttbutton.setText("select/MOVE");
-        selecttbutton.setToolTipText("Toggle between moving the world and selecting sequences");
-        selecttbutton.addActionListener(new java.awt.event.ActionListener() {
+        button_select_move.setText("select/MOVE");
+        button_select_move.setToolTipText("Toggle between moving the world and selecting sequences");
+        button_select_move.setMnemonic(KeyEvent.VK_V);
+        button_select_move.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selecttbuttonActionPerformed(evt);
+                button_select_moveActionPerformed(evt);
             }
         });
-        drawbuttonpanel.add(selecttbutton);
+        drawbuttonpanel.add(button_select_move);
 
-        minpvalbutton.setText("Use P-values better than:");
-        minpvalbutton.addActionListener(new java.awt.event.ActionListener() {
+        button_cutoff_value.setText("Use P-values better than:");
+        button_cutoff_value.setMnemonic(KeyEvent.VK_B);
+        button_cutoff_value.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                minpvalbuttonActionPerformed(evt);
+                button_cutoff_valueActionPerformed(evt);
             }
         });
-        drawbuttonpanel.add(minpvalbutton);
+        drawbuttonpanel.add(button_cutoff_value);
 
-        minpvaltextfield.setText("1");
-        minpvaltextfield.addActionListener(new java.awt.event.ActionListener() {
+        textfield_cutoff_value.setText("1");
+        textfield_cutoff_value.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                minpvaltextfieldActionPerformed(evt);
+                textfield_cutoff_valueActionPerformed(evt);
             }
         });
-        drawbuttonpanel.add(minpvaltextfield);
+        drawbuttonpanel.add(textfield_cutoff_value);
 
-        minsetpvaltextfield.setEditable(false);
-        minsetpvaltextfield.setText("1");
-        minsetpvaltextfield.setToolTipText("evalue limit used for blast");
-        drawbuttonpanel.add(minsetpvaltextfield);
+        textfield_info_min_blast_evalue.setEditable(false);
+        textfield_info_min_blast_evalue.setText("1");
+        textfield_info_min_blast_evalue.setToolTipText("evalue limit used for blast");
+        drawbuttonpanel.add(textfield_info_min_blast_evalue);
 
-        clearselectbutton.setText("Clear Selection");
-        clearselectbutton.addActionListener(new java.awt.event.ActionListener() {
+        button_select_all_or_clear.setText("Clear Selection");
+        button_select_all_or_clear.setMnemonic(KeyEvent.VK_A);
+        button_select_all_or_clear.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clearselectbuttonActionPerformed(evt);
+                button_clear_selectionActionPerformed(evt);
             }
         });
-        drawbuttonpanel.add(clearselectbutton);
+        drawbuttonpanel.add(button_select_all_or_clear);
 
-        shownamescheckbox.setText("show names");
-        shownamescheckbox.setToolTipText("show sequence names");
-        shownamescheckbox.addItemListener(new java.awt.event.ItemListener() {
+        checkbox_show_names.setText("show names");
+        checkbox_show_names.setToolTipText("show sequence names");
+        checkbox_show_names.setMnemonic(KeyEvent.VK_N);
+        checkbox_show_names.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                shownamescheckboxItemStateChanged(evt);
+                checkbox_show_namesItemStateChanged(evt);
             }
         });
-        drawbuttonpanel.add(shownamescheckbox);
+        drawbuttonpanel.add(checkbox_show_names);
 
-        shownumberscheckbox.setText("show numbers");
-        shownumberscheckbox.addActionListener(new java.awt.event.ActionListener() {
+        checkbox_show_numbers.setText("show numbers");
+        checkbox_show_numbers.setMnemonic(KeyEvent.VK_U);
+        checkbox_show_numbers.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                shownumberscheckboxActionPerformed(evt);
+                checkbox_show_numbersActionPerformed(evt);
             }
         });
-        drawbuttonpanel.add(shownumberscheckbox);
+        drawbuttonpanel.add(checkbox_show_numbers);
 
-        showblasthitscheckbox.setText("show connections");
-        showblasthitscheckbox.setToolTipText("draw lines for all connections better than the selected cutoff");
-        showblasthitscheckbox.addItemListener(new java.awt.event.ItemListener() {
+        checkbox_show_connections.setText("show connections");
+        checkbox_show_connections.setToolTipText("draw lines for all connections better than the selected cutoff");
+        checkbox_show_connections.setMnemonic(KeyEvent.VK_T);
+        checkbox_show_connections.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                showblasthitscheckboxItemStateChanged(evt);
+                checkbox_show_connectionsItemStateChanged(evt);
             }
         });
-        drawbuttonpanel.add(showblasthitscheckbox);
+        drawbuttonpanel.add(checkbox_show_connections);
 
-        zoombutton.setText("Zoom on selected");
-        zoombutton.addActionListener(new java.awt.event.ActionListener() {
+        button_zoom_on_selected.setText("Zoom on selected");
+        button_zoom_on_selected.setMnemonic(KeyEvent.VK_Z);
+        button_zoom_on_selected.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                zoombuttonActionPerformed(evt);
+                button_zoom_on_selectedActionPerformed(evt);
             }
         });
-        drawbuttonpanel.add(zoombutton);
+        drawbuttonpanel.add(button_zoom_on_selected);
 
         buttonpanel.add(drawbuttonpanel);
 
         getContentPane().add(buttonpanel, java.awt.BorderLayout.SOUTH);
 
-        filemenu.setText("File");
+        menu_file.setText("File");
+        menu_file.setMnemonic(KeyEvent.VK_F);
 
         loadmenuitem.setText("Load Run");
         loadmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -372,7 +385,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 loadmenuitemActionPerformed(evt);
             }
         });
-        filemenu.add(loadmenuitem);
+        menu_file.add(loadmenuitem);
 
         savemenuitem.setText("Save Run");
         savemenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -380,7 +393,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 savemenuitemActionPerformed(evt);
             }
         });
-        filemenu.add(savemenuitem);
+        menu_file.add(savemenuitem);
 
         saveattvalsmenuitem.setText("Save attraction values to file");
         saveattvalsmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -388,7 +401,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 saveattvalsmenuitemActionPerformed(evt);
             }
         });
-        filemenu.add(saveattvalsmenuitem);
+        menu_file.add(saveattvalsmenuitem);
 
         addseqsmenuitem.setText("Add Sequences");
         addseqsmenuitem.setToolTipText("You have to do that from the command line");
@@ -398,7 +411,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 addseqsmenuitemActionPerformed(evt);
             }
         });
-        filemenu.add(addseqsmenuitem);
+        menu_file.add(addseqsmenuitem);
 
         savemtxmenuitem.setText("Save blast matrix pP-values");
         savemtxmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -406,7 +419,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 savemtxmenuitemActionPerformed(evt);
             }
         });
-        filemenu.add(savemtxmenuitem);
+        menu_file.add(savemtxmenuitem);
 
         save2dmenuitem.setText("Save 2d graph data");
         save2dmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -414,7 +427,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 save2dmenuitemActionPerformed(evt);
             }
         });
-        filemenu.add(save2dmenuitem);
+        menu_file.add(save2dmenuitem);
 
         printmenuitem.setText("Print view");
         printmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -422,7 +435,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 printmenuitemActionPerformed(evt);
             }
         });
-        filemenu.add(printmenuitem);
+        menu_file.add(printmenuitem);
 
         loadalternatemenuitem.setText("Load data in matrix format");
         loadalternatemenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -430,7 +443,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 loadalternatemenuitemActionPerformed(evt);
             }
         });
-        filemenu.add(loadalternatemenuitem);
+        menu_file.add(loadalternatemenuitem);
 
         loadtabsmenuitem.setText("Load tabular data");
         loadtabsmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -438,7 +451,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 loadtabsmenuitemActionPerformed(evt);
             }
         });
-        filemenu.add(loadtabsmenuitem);
+        menu_file.add(loadtabsmenuitem);
 
         loadgroupsmenuitem.setText("Append sequence groups from file");
         loadgroupsmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -446,11 +459,14 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 loadgroupsmenuitemActionPerformed(evt);
             }
         });
-        filemenu.add(loadgroupsmenuitem);
+        menu_file.add(loadgroupsmenuitem);
 
-        jMenuBar1.add(filemenu);
+        
+        jMenuBar1.add(menu_file);
 
-        Miscmenu.setText("Misc");
+        
+        menu_misc.setText("Misc");
+        menu_misc.setMnemonic(KeyEvent.VK_M);
 
         getseqsmenuitem.setText("Extract selected sequences");
         getseqsmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -458,7 +474,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 getseqsmenuitemActionPerformed(evt);
             }
         });
-        Miscmenu.add(getseqsmenuitem);
+        menu_misc.add(getseqsmenuitem);
 
         hidesingletonsmenuitem.setText("Hide singletons");
         hidesingletonsmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -466,7 +482,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 hidesingletonsmenuitemActionPerformed(evt);
             }
         });
-        Miscmenu.add(hidesingletonsmenuitem);
+        menu_misc.add(hidesingletonsmenuitem);
 
         getchildmenuitem.setText("Use selected subset");
         getchildmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -474,7 +490,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 getchildmenuitemActionPerformed(evt);
             }
         });
-        Miscmenu.add(getchildmenuitem);
+        menu_misc.add(getchildmenuitem);
 
         getparentmenuitem.setText("Use parent group (0)");
         getparentmenuitem.setEnabled(false);
@@ -483,7 +499,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 getparentmenuitemActionPerformed(evt);
             }
         });
-        Miscmenu.add(getparentmenuitem);
+        menu_misc.add(getparentmenuitem);
 
         setrotmenuitem.setText("Set rotation values");
         setrotmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -491,7 +507,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 setrotmenuitemActionPerformed(evt);
             }
         });
-        Miscmenu.add(setrotmenuitem);
+        menu_misc.add(setrotmenuitem);
 
         attvalcompcheckbox.setSelected(true);
         attvalcompcheckbox.setText("Complex attraction");
@@ -500,7 +516,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 attvalcompcheckboxActionPerformed(evt);
             }
         });
-        Miscmenu.add(attvalcompcheckbox);
+        menu_misc.add(attvalcompcheckbox);
 
         moveselectedonly.setText("Optimize only selected sequences");
         moveselectedonly.addActionListener(new java.awt.event.ActionListener() {
@@ -508,7 +524,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 moveselectedonlyActionPerformed(evt);
             }
         });
-        Miscmenu.add(moveselectedonly);
+        menu_misc.add(moveselectedonly);
 
         cluster2dbutton.setText("Cluster in 2D");
         cluster2dbutton.addActionListener(new java.awt.event.ActionListener() {
@@ -516,7 +532,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 cluster2dbuttonActionPerformed(evt);
             }
         });
-        Miscmenu.add(cluster2dbutton);
+        menu_misc.add(cluster2dbutton);
 
         rescalepvaluescheckbox.setText("Rescale attraction values");
         rescalepvaluescheckbox.addActionListener(new java.awt.event.ActionListener() {
@@ -524,7 +540,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 rescalepvaluescheckboxActionPerformed(evt);
             }
         });
-        Miscmenu.add(rescalepvaluescheckbox);
+        menu_misc.add(rescalepvaluescheckbox);
 
         skipdrawingrounds.setText("Only draw every Nth round (speedup)");
         skipdrawingrounds.addActionListener(new java.awt.event.ActionListener() {
@@ -532,11 +548,13 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 skipdrawingroundsActionPerformed(evt);
             }
         });
-        Miscmenu.add(skipdrawingrounds);
+        menu_misc.add(skipdrawingrounds);
 
-        jMenuBar1.add(Miscmenu);
+        jMenuBar1.add(menu_misc);
 
-        drawmenu.setText("Draw");
+        
+        menu_draw.setText("Draw");
+        menu_draw.setMnemonic(KeyEvent.VK_D);
 
         changefontmenuitem.setText("Change Font");
         changefontmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -544,7 +562,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 changefontmenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(changefontmenuitem);
+        menu_draw.add(changefontmenuitem);
 
         getdotsizemenuitem.setText("Set dot size");
         getdotsizemenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -552,7 +570,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 getdotsizemenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(getdotsizemenuitem);
+        menu_draw.add(getdotsizemenuitem);
 
         getovalsizemenuitem.setText("Set selected circle size");
         getovalsizemenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -560,7 +578,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 getovalsizemenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(getovalsizemenuitem);
+        menu_draw.add(getovalsizemenuitem);
 
         changecolormenuitem.setText("Change color (dot connections)");
         changecolormenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -568,7 +586,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 changecolormenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(changecolormenuitem);
+        menu_draw.add(changecolormenuitem);
 
         changefgcolormenuitem.setText("Change color (Foreground)");
         changefgcolormenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -576,7 +594,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 changefgcolormenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(changefgcolormenuitem);
+        menu_draw.add(changefgcolormenuitem);
 
         changebgcolormenuitem.setText("Change color (Background)");
         changebgcolormenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -584,7 +602,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 changebgcolormenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(changebgcolormenuitem);
+        menu_draw.add(changebgcolormenuitem);
 
         changeselectcolormenuitem.setText("Change color (Selecteds)");
         changeselectcolormenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -592,7 +610,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 changeselectcolormenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(changeselectcolormenuitem);
+        menu_draw.add(changeselectcolormenuitem);
 
         changenumbercolor.setText("Change color (BLAST hit numbers)");
         changenumbercolor.addActionListener(new java.awt.event.ActionListener() {
@@ -600,7 +618,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 changenumbercolorActionPerformed(evt);
             }
         });
-        drawmenu.add(changenumbercolor);
+        menu_draw.add(changenumbercolor);
 
         changeblastcolor.setText("Change color (BLAST hit circles)");
         changeblastcolor.addActionListener(new java.awt.event.ActionListener() {
@@ -608,10 +626,10 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 changeblastcolorActionPerformed(evt);
             }
         });
-        drawmenu.add(changeblastcolor);
+        menu_draw.add(changeblastcolor);
 
         lengthcolormenuitem.setText("Color dots by sequence length (yellow=short, blue=long)");
-        drawmenu.add(lengthcolormenuitem);
+        menu_draw.add(lengthcolormenuitem);
 
         colorfrustrationcheckbox.setText("Color by edge \"frustration\" (red=too long, blue=too short)");
         colorfrustrationcheckbox.addActionListener(new java.awt.event.ActionListener() {
@@ -619,10 +637,10 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 colorfrustrationcheckboxActionPerformed(evt);
             }
         });
-        drawmenu.add(colorfrustrationcheckbox);
+        menu_draw.add(colorfrustrationcheckbox);
 
         showorigcheckbox.setText("Show origin");
-        drawmenu.add(showorigcheckbox);
+        menu_draw.add(showorigcheckbox);
 
         showinfocheckbox.setSelected(true);
         showinfocheckbox.setText("Show info");
@@ -631,13 +649,13 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 showinfocheckboxActionPerformed(evt);
             }
         });
-        drawmenu.add(showinfocheckbox);
+        menu_draw.add(showinfocheckbox);
 
         shownamesselectcheckbox.setText("Show names while selecting");
-        drawmenu.add(shownamesselectcheckbox);
+        menu_draw.add(shownamesselectcheckbox);
 
         showblasthitnamescheckbox.setText("Show hsp sequence numbers");
-        drawmenu.add(showblasthitnamescheckbox);
+        menu_draw.add(showblasthitnamescheckbox);
 
         zoommenuitem.setText("Zoom");
         zoommenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -645,7 +663,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 zoommenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(zoommenuitem);
+        menu_draw.add(zoommenuitem);
 
         centermenuitem.setText("Center graph");
         centermenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -653,7 +671,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 centermenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(centermenuitem);
+        menu_draw.add(centermenuitem);
 
         antialiasingcheckboxmenuitem.setText("Antialiasing (slow !)");
         antialiasingcheckboxmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -661,7 +679,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 antialiasingcheckboxmenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(antialiasingcheckboxmenuitem);
+        menu_draw.add(antialiasingcheckboxmenuitem);
 
         stereocheckboxmenuitem.setText("Stereo");
         stereocheckboxmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -669,7 +687,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 stereocheckboxmenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(stereocheckboxmenuitem);
+        menu_draw.add(stereocheckboxmenuitem);
 
         stereoanglemenuitem.setText("Change stereo angle (0-360)");
         stereoanglemenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -677,11 +695,13 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 stereoanglemenuitemActionPerformed(evt);
             }
         });
-        drawmenu.add(stereoanglemenuitem);
+        menu_draw.add(stereoanglemenuitem);
 
-        jMenuBar1.add(drawmenu);
+        jMenuBar1.add(menu_draw);
 
-        windowmenu.setText("Windows");
+        
+        menu_windows.setText("Windows");
+        menu_windows.setMnemonic(KeyEvent.VK_W);
 
         showoptionsmenuitem.setText("Show options window");
         showoptionsmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -689,7 +709,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 showoptionsmenuitemActionPerformed(evt);
             }
         });
-        windowmenu.add(showoptionsmenuitem);
+        menu_windows.add(showoptionsmenuitem);
 
         sequencesitem.setText("Selecteds");
         sequencesitem.addActionListener(new java.awt.event.ActionListener() {
@@ -697,7 +717,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 sequencesitemActionPerformed(evt);
             }
         });
-        windowmenu.add(sequencesitem);
+        menu_windows.add(sequencesitem);
 
         evalueitem.setText("P-value plot");
         evalueitem.addActionListener(new java.awt.event.ActionListener() {
@@ -705,7 +725,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 evalueitemActionPerformed(evt);
             }
         });
-        windowmenu.add(evalueitem);
+        menu_windows.add(evalueitem);
 
         getblasthitsmenuitem.setText("Show blast hits for sequence:");
         getblasthitsmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -713,7 +733,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 getblasthitsmenuitemActionPerformed(evt);
             }
         });
-        windowmenu.add(getblasthitsmenuitem);
+        menu_windows.add(getblasthitsmenuitem);
 
         clustermenuitem.setText("find clusters");
         clustermenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -721,7 +741,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 clustermenuitemActionPerformed(evt);
             }
         });
-        windowmenu.add(clustermenuitem);
+        menu_windows.add(clustermenuitem);
 
         getseqsforselectedhits.setText("Get sequence with hits from/to selected");
         getseqsforselectedhits.addActionListener(new java.awt.event.ActionListener() {
@@ -729,7 +749,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 getseqsforselectedhitsActionPerformed(evt);
             }
         });
-        windowmenu.add(getseqsforselectedhits);
+        menu_windows.add(getseqsforselectedhits);
 
         seqscoloring.setText("Edit Groups");
         seqscoloring.addActionListener(new java.awt.event.ActionListener() {
@@ -737,7 +757,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 seqscoloringActionPerformed(evt);
             }
         });
-        windowmenu.add(seqscoloring);
+        menu_windows.add(seqscoloring);
 
         showseqsmenuitem.setText("Show selected sequences as text (copy/pastable)");
         showseqsmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -745,7 +765,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 showseqsmenuitemActionPerformed(evt);
             }
         });
-        windowmenu.add(showseqsmenuitem);
+        menu_windows.add(showseqsmenuitem);
 
         rotationmenuitem.setText("Rotation");
         rotationmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -753,7 +773,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 rotationmenuitemActionPerformed(evt);
             }
         });
-        windowmenu.add(rotationmenuitem);
+        menu_windows.add(rotationmenuitem);
 
         affymenuitem.setText("Microarray_data");
         affymenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -761,7 +781,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 affymenuitemActionPerformed(evt);
             }
         });
-        windowmenu.add(affymenuitem);
+        menu_windows.add(affymenuitem);
 
         mapmanmenuitem.setText("Functional mapping");
         mapmanmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -769,7 +789,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 mapmanmenuitemActionPerformed(evt);
             }
         });
-        windowmenu.add(mapmanmenuitem);
+        menu_windows.add(mapmanmenuitem);
 
         taxonomymenuitem.setText("Taxonomy");
         taxonomymenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -777,11 +797,13 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 taxonomymenuitemActionPerformed(evt);
             }
         });
-        windowmenu.add(taxonomymenuitem);
+        menu_windows.add(taxonomymenuitem);
 
-        jMenuBar1.add(windowmenu);
+        jMenuBar1.add(menu_windows);
 
-        helpmenu.setText("Help");
+        
+        menu_help.setText("Help");
+        menu_help.setMnemonic(KeyEvent.VK_H);
 
         aboutmenuitem.setText("About");
         aboutmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -789,7 +811,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 aboutmenuitemActionPerformed(evt);
             }
         });
-        helpmenu.add(aboutmenuitem);
+        menu_help.add(aboutmenuitem);
 
         helpmenuitem.setText("Help");
         helpmenuitem.addActionListener(new java.awt.event.ActionListener() {
@@ -797,9 +819,9 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 helpmenuitemActionPerformed(evt);
             }
         });
-        helpmenu.add(helpmenuitem);
+        menu_help.add(helpmenuitem);
 
-        jMenuBar1.add(helpmenu);
+        jMenuBar1.add(menu_help);
 
         setJMenuBar(jMenuBar1);
 
@@ -855,7 +877,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
     
     private void graphpanelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_graphpanelMouseWheelMoved
         //add zooming ability
-        if(selecttbutton.isSelected()==false){
+        if(button_select_move.isSelected()==false){
             if(evt.isShiftDown()){
                 if(evt.isControlDown()){
                     data.zoomfactor+=((float)evt.getWheelRotation())/10;
@@ -1148,8 +1170,8 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 data.orgattvals=null;
                 data.myattvals=saveddata.attvals;
                 data.myattvals=saveddata.attvals;
-                minpvalbutton.setText("Use Attraction values better than");
-                minpvaltextfield.setText("0");
+                button_cutoff_value.setText("Use Attraction values better than");
+                textfield_cutoff_value.setText("0");
                 data.elements=java.lang.reflect.Array.getLength(data.namearr);
                 //now symmetrize and normalize the attvals to range from -1 to +1
                 float minval=0;
@@ -1180,8 +1202,8 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 data.attvalsimple=true;
                 repaint=null;
                 data.minpval=1;
-                minpvaltextfield.setText("1");
-                minsetpvaltextfield.setText("1");
+                textfield_cutoff_value.setText("1");
+                textfield_info_min_blast_evalue.setText("1");
             }else{//if the data had errors
                 JOptionPane.showMessageDialog(this,"Error reading data","Error reading",JOptionPane.ERROR_MESSAGE);
                 return;
@@ -1277,9 +1299,12 @@ public class clustermain_graphics extends javax.swing.JFrame {
         repaint();
     }//GEN-LAST:event_changeblastcolorActionPerformed
     
-    private void showselectbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showselectbuttonActionPerformed
+    private void button_show_selectedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showselectbuttonActionPerformed
         // open the sequences dialog and display the names for only the selected sequences
-        if(shownames!=null){
+    	if (!this.contains_data(true)) {
+			return;
+		}
+    	if(shownames!=null){
             shownames.setVisible(false);
             shownames.dispose();
         }
@@ -1331,15 +1356,18 @@ public class clustermain_graphics extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_changenumbercolorActionPerformed
     
-    private void minpvalbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minpvalbuttonActionPerformed
+    private void button_cutoff_valueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minpvalbuttonActionPerformed
         // same as pressing return in the corresponding text field
-        if(checkstop()==false){//check for stop of run
+    	if (!this.contains_data(true)) {
+			return;
+		}
+    	if(checkstop()==false){//check for stop of run
             return;
         }
         try{
-            data.minpval=java.lang.Double.parseDouble(minpvaltextfield.getText());
+            data.minpval=java.lang.Double.parseDouble(textfield_cutoff_value.getText());
         }catch (NumberFormatException e){
-            javax.swing.JOptionPane.showMessageDialog(this,"ERROR; unable to parse double from '"+minpvaltextfield.getText()+"'");
+            javax.swing.JOptionPane.showMessageDialog(this,"ERROR; unable to parse double from '"+textfield_cutoff_value.getText()+"'");
             return;
         }
         //if I have a valid number update the attvals data
@@ -1874,14 +1902,17 @@ public class clustermain_graphics extends javax.swing.JFrame {
         repaint();
     }//GEN-LAST:event_changecolormenuitemActionPerformed
     
-    private void shownumberscheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_shownumberscheckboxActionPerformed
+    private void checkbox_show_numbersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_shownumberscheckboxActionPerformed
         // Add your handling code here:
         mousemove[0]=0;
         mousemove[1]=0;
         repaint();
     }//GEN-LAST:event_shownumberscheckboxActionPerformed
     
-    private void clearselectbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearselectbuttonActionPerformed
+    private void button_clear_selectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearselectbuttonActionPerformed
+    	if (!this.contains_data(true)) {
+			return;
+		}
         // Add your handling code here:
         if(java.lang.reflect.Array.getLength(data.selectednames)>0){//if sth. is selected clear the selection
             data.selectednames=new int[0];
@@ -1890,9 +1921,9 @@ public class clustermain_graphics extends javax.swing.JFrame {
             }
             if(zoom==true){
                 zoom=false;
-                zoombutton.setText("Zoom on selected");
+                button_zoom_on_selected.setText("Zoom on selected");
             }
-            clearselectbutton.setText("Select All");
+            button_select_all_or_clear.setText("Select All");
         }else{//if nothing is selected, select all
             int alnseqs=java.lang.reflect.Array.getLength(data.inaln);
             data.selectednames=new int[alnseqs];
@@ -1902,23 +1933,26 @@ public class clustermain_graphics extends javax.swing.JFrame {
             if(shownames!=null){
                 shownames.seqnamelist.setSelectedIndices(data.selectednames);
             }
-            clearselectbutton.setText("Clear Selection");
+            button_select_all_or_clear.setText("Clear Selection");
         }
         repaint();
     }//GEN-LAST:event_clearselectbuttonActionPerformed
     
-    private void zoombuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoombuttonActionPerformed
+    private void button_zoom_on_selectedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoombuttonActionPerformed
         //see if I want to zoom in on selected sequences
-        if(zoom==true){
-            zoombutton.setText("Zoom on selected");
+    	if (!this.contains_data(true)) {
+			return;
+		}
+    	if(zoom==true){
+            button_zoom_on_selected.setText("Zoom on selected");
             zoom=false;
         }else{
-            zoombutton.setText("Show all");
+            button_zoom_on_selected.setText("Show all");
             zoom=true;
             if(java.lang.reflect.Array.getLength(data.selectednames)<1){
                 zoom=false;
                 JOptionPane.showMessageDialog(null,"Please select some sequences","Message",JOptionPane.INFORMATION_MESSAGE);
-                zoombutton.setText("Zoom on selected");
+                button_zoom_on_selected.setText("Zoom on selected");
             }
         }
         data.zoomfactor=1;
@@ -1927,14 +1961,17 @@ public class clustermain_graphics extends javax.swing.JFrame {
         repaint();
     }//GEN-LAST:event_zoombuttonActionPerformed
     
-    private void minpvaltextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minpvaltextfieldActionPerformed
+    private void textfield_cutoff_valueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minpvaltextfieldActionPerformed
+    	if (!this.contains_data(true)) {
+			return;
+		}
         if(checkstop()==false){//check for stop of run
             return;
         }
         try{
-            data.minpval=java.lang.Double.parseDouble(minpvaltextfield.getText());
+            data.minpval=java.lang.Double.parseDouble(textfield_cutoff_value.getText());
         }catch (NumberFormatException e){
-            javax.swing.JOptionPane.showMessageDialog(this,"ERROR, unable to parse double from '"+minpvaltextfield.getText()+"'");
+            javax.swing.JOptionPane.showMessageDialog(this,"ERROR, unable to parse double from '"+textfield_cutoff_value.getText()+"'");
             return;
         }
         //if I have a valid number update the attvals data
@@ -1953,12 +1990,12 @@ public class clustermain_graphics extends javax.swing.JFrame {
         repaint();
     }//GEN-LAST:event_minpvaltextfieldActionPerformed
     
-    private void selecttbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selecttbuttonActionPerformed
+    private void button_select_moveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selecttbuttonActionPerformed
         // Add your handling code here
-        if(selecttbutton.isSelected()){
-            selecttbutton.setText("SELECT/move");
+        if(button_select_move.isSelected()){
+            button_select_move.setText("SELECT/move");
         }else{
-            selecttbutton.setText("select/MOVE");
+            button_select_move.setText("select/MOVE");
         }
     }//GEN-LAST:event_selecttbuttonActionPerformed
     
@@ -1973,7 +2010,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             int movey=evt.getY()-mousestart[1];
             moveselected(movex,movey);
         }else{
-            if(selecttbutton.isSelected()){
+            if(button_select_move.isSelected()){
                 int[] tmpreg=new int[4];
                 tmpreg[0]=selectstart[0];
                 tmpreg[1]=selectstart[1];
@@ -2004,7 +2041,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
     
     private void graphpanelMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_graphpanelMousePressed
         mouse_is_pressed=true;
-        if(selecttbutton.isSelected()==false){
+        if(button_select_move.isSelected()==false){
             if(evt.isAltDown()||evt.isControlDown()||evt.isMetaDown()){//if I want to drag a sequence in 2d
                 //move all selected sequences a certain amount
                 moveseqs=true;
@@ -2048,7 +2085,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
     }//GEN-LAST:event_graphpanelMousePressed
     
     private void graphpanelMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_graphpanelMouseDragged
-        if(selecttbutton.isSelected()==false){
+        if(button_select_move.isSelected()==false){
             if(evt.isShiftDown()){
                 draw1.xtranslate=evt.getX()-mousestart[0]+translate[0];
                 draw1.ytranslate=evt.getY()-mousestart[1]+translate[1];
@@ -2079,14 +2116,17 @@ public class clustermain_graphics extends javax.swing.JFrame {
         repaint();
     }//GEN-LAST:event_graphpanelMouseDragged
     
-    private void shownamescheckboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_shownamescheckboxItemStateChanged
+    private void checkbox_show_namesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_shownamescheckboxItemStateChanged
         mousemove[0]=0;
         mousemove[1]=0;
         repaint();
     }//GEN-LAST:event_shownamescheckboxItemStateChanged
     
-    private void stopbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopbuttonActionPerformed
-        startstopthread();
+    private void button_start_stop_resumeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopbuttonActionPerformed
+    	if (!this.contains_data(true)) {
+			return;
+		}
+    	startstopthread();
         /*//does the iteration and the stop for a thread
         mousemove[0]=0;
         mousemove[1]=0;
@@ -2136,7 +2176,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         repaint();
     }//GEN-LAST:event_stopbuttonActionPerformed
     
-    private void showblasthitscheckboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_showblasthitscheckboxItemStateChanged
+    private void checkbox_show_connectionsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_showblasthitscheckboxItemStateChanged
         mousemove[0]=0;
         mousemove[1]=0;
         repaint();
@@ -2148,8 +2188,11 @@ public class clustermain_graphics extends javax.swing.JFrame {
         repaint();
     }//GEN-LAST:event_graphpanelAncestorResized
     
-    private void startbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startbuttonActionPerformed
-        initgraph();
+    private void button_initializeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startbuttonActionPerformed
+    	if (!this.contains_data(true)) {
+			return;
+		}
+    	initgraph();
         /*currcool=1;
         String tmpstr="";
         if(myoptionswindow!=null){
@@ -2361,7 +2404,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
     clusterdata data=null;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu Miscmenu;
+    private javax.swing.JMenu menu_misc;
     private javax.swing.JMenuItem aboutmenuitem;
     private javax.swing.JMenuItem addseqsmenuitem;
     private javax.swing.JMenuItem affymenuitem;
@@ -2376,14 +2419,14 @@ public class clustermain_graphics extends javax.swing.JFrame {
     private javax.swing.JMenuItem changefontmenuitem;
     private javax.swing.JMenuItem changenumbercolor;
     private javax.swing.JMenuItem changeselectcolormenuitem;
-    public javax.swing.JButton clearselectbutton;
+    public javax.swing.JButton button_select_all_or_clear;
     private javax.swing.JCheckBoxMenuItem cluster2dbutton;
     private javax.swing.JMenuItem clustermenuitem;
     private javax.swing.JCheckBoxMenuItem colorfrustrationcheckbox;
     private javax.swing.JPanel drawbuttonpanel;
-    private javax.swing.JMenu drawmenu;
+    private javax.swing.JMenu menu_draw;
     private javax.swing.JMenuItem evalueitem;
-    private javax.swing.JMenu filemenu;
+    private javax.swing.JMenu menu_file;
     private javax.swing.JMenuItem getblasthitsmenuitem;
     private javax.swing.JMenuItem getchildmenuitem;
     private javax.swing.JMenuItem getdotsizemenuitem;
@@ -2392,7 +2435,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
     private javax.swing.JMenuItem getseqsforselectedhits;
     private javax.swing.JMenuItem getseqsmenuitem;
     private javax.swing.JPanel graphpanel;
-    private javax.swing.JMenu helpmenu;
+    private javax.swing.JMenu menu_help;
     private javax.swing.JMenuItem helpmenuitem;
     private javax.swing.JMenuItem hidesingletonsmenuitem;
     private javax.swing.JMenuBar jMenuBar1;
@@ -2402,9 +2445,9 @@ public class clustermain_graphics extends javax.swing.JFrame {
     private javax.swing.JMenuItem loadmenuitem;
     private javax.swing.JMenuItem loadtabsmenuitem;
     private javax.swing.JMenuItem mapmanmenuitem;
-    private javax.swing.JButton minpvalbutton;
-    private javax.swing.JTextField minpvaltextfield;
-    private javax.swing.JTextField minsetpvaltextfield;
+    private javax.swing.JButton button_cutoff_value;
+    private javax.swing.JTextField textfield_cutoff_value;
+    private javax.swing.JTextField textfield_info_min_blast_evalue;
     private javax.swing.JCheckBoxMenuItem moveselectedonly;
     private javax.swing.JMenuItem printmenuitem;
     private javax.swing.JCheckBoxMenuItem rescalepvaluescheckbox;
@@ -2413,28 +2456,28 @@ public class clustermain_graphics extends javax.swing.JFrame {
     private javax.swing.JMenuItem saveattvalsmenuitem;
     private javax.swing.JMenuItem savemenuitem;
     private javax.swing.JMenuItem savemtxmenuitem;
-    private javax.swing.JToggleButton selecttbutton;
+    private javax.swing.JToggleButton button_select_move;
     private javax.swing.JMenuItem seqscoloring;
     private javax.swing.JMenuItem sequencesitem;
     private javax.swing.JMenuItem setrotmenuitem;
     private javax.swing.JCheckBoxMenuItem showblasthitnamescheckbox;
-    private javax.swing.JCheckBox showblasthitscheckbox;
+    private javax.swing.JCheckBox checkbox_show_connections;
     private javax.swing.JCheckBoxMenuItem showinfocheckbox;
-    private javax.swing.JCheckBox shownamescheckbox;
+    private javax.swing.JCheckBox checkbox_show_names;
     private javax.swing.JCheckBoxMenuItem shownamesselectcheckbox;
-    private javax.swing.JCheckBox shownumberscheckbox;
+    private javax.swing.JCheckBox checkbox_show_numbers;
     private javax.swing.JMenuItem showoptionsmenuitem;
     private javax.swing.JCheckBoxMenuItem showorigcheckbox;
-    private javax.swing.JButton showselectbutton;
+    private javax.swing.JButton button_show_selected;
     private javax.swing.JMenuItem showseqsmenuitem;
     private javax.swing.JMenuItem skipdrawingrounds;
-    private javax.swing.JButton startbutton;
+    private javax.swing.JButton button_initialize;
     private javax.swing.JMenuItem stereoanglemenuitem;
     private javax.swing.JCheckBoxMenuItem stereocheckboxmenuitem;
-    private javax.swing.JButton stopbutton;
+    private javax.swing.JButton button_start_stop_resume;
     private javax.swing.JMenuItem taxonomymenuitem;
-    private javax.swing.JMenu windowmenu;
-    private javax.swing.JButton zoombutton;
+    private javax.swing.JMenu menu_windows;
+    private javax.swing.JButton button_zoom_on_selected;
     private javax.swing.JMenuItem zoommenuitem;
     // End of variables declaration//GEN-END:variables
 
@@ -2530,10 +2573,10 @@ public class clustermain_graphics extends javax.swing.JFrame {
             mythread.stop=true;
             mythread=new computethread(this);
             mythread.start();
-            stopbutton.setText("Stop");
+            button_start_stop_resume.setText("Stop");
         }else{//if this thread is running
-        	stopbutton.setEnabled(false);
             mythread.stop=true;
+            button_start_stop_resume.setEnabled(false);
             //is unavailable until the thread has stopped running
             //the thread then sets the text to "resume" and re-enables the button.
         }
@@ -2588,8 +2631,9 @@ public class clustermain_graphics extends javax.swing.JFrame {
         if(myoptionswindow!=null){
             myoptionswindow.currcoolfield.setText(String.valueOf(data.currcool));
         }
-        stopbutton.setText("Start run");
-        stopbutton.setEnabled(true);
+        button_start_stop_resume.setText("Start run");
+        button_start_stop_resume.setMnemonic(KeyEvent.VK_S);
+        button_start_stop_resume.setEnabled(true);
         data.rounds=0;
         mousemove[0]=0;
         mousemove[1]=0;
@@ -2604,23 +2648,24 @@ public class clustermain_graphics extends javax.swing.JFrame {
         }//else everything is OK
         data.loadsaved=inname;
         clustermethods.loaddata(data);
-        minsetpvaltextfield.setText(String.valueOf(data.maxvalfound));
+        textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
         if(data.blasthits==null){
-            minpvalbutton.setText("Use Attraction values better than");
-            minpvaltextfield.setText("0");
+            button_cutoff_value.setText("Use Attraction values better than");
+            textfield_cutoff_value.setText("0");
             savemtxmenuitem.setText("Save Attraction values as matrix");
             evalueitem.setText("Attraction value plot");
         }else{
             if(data.usescval){
-                minpvalbutton.setText("Use SC-vals better than");
-                minpvaltextfield.setText("0");
+                button_cutoff_value.setText("Use SC-vals better than");
+                textfield_cutoff_value.setText("0");
                 evalueitem.setText("SC-value plot");
             }else{
-                minpvalbutton.setText("Use P-values better than");
-                minpvaltextfield.setText("1");
+                button_cutoff_value.setText("Use P-values better than");
+                textfield_cutoff_value.setText("1");
                 evalueitem.setText("P-value plot");
             }
         }
+
         if(data.complexatt==true){
             attvalcompcheckbox.setSelected(true);
         }else{
@@ -2636,7 +2681,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         }else{
             showinfocheckbox.setSelected(false);
         }
-        minpvaltextfield.setText(String.valueOf(data.minpval));
+        textfield_cutoff_value.setText(String.valueOf(data.minpval));
         if(myoptionswindow!=null){
             myoptionswindow.coolfield.setText(String.valueOf(data.cooling));
             myoptionswindow.currcoolfield.setText(String.valueOf(data.currcool));
@@ -2648,7 +2693,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             myoptionswindow.minattfield.setText(String.valueOf(data.minattract));
             myoptionswindow.maxmovefield.setText(String.valueOf(data.maxmove));
         }
-        minsetpvaltextfield.setText(String.valueOf(data.maxvalfound));
+        textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
         this.setTitle("Clustering of "+inname);
     }//end loaddata
     
@@ -2864,7 +2909,23 @@ public class clustermain_graphics extends javax.swing.JFrame {
     }//end loadtabdata
     */
     //--------------------------------------------------------------------------
-    
+	boolean contains_data() {
+		return this.data.mymovearr != null;
+	}
+	
+	boolean contains_data(boolean showinfo) {
+		if (this.contains_data()){
+			return true;
+		}
+		
+		if (showinfo) {
+			javax.swing.JOptionPane.showMessageDialog(this,
+					"you have to load data first", "no data loaded",
+					javax.swing.JOptionPane.ERROR_MESSAGE);
+		}
+		return false;
+	}
+
     boolean checkstop(boolean showinfo){
         //check to see if the clustering is running
         //if so, output an error message
@@ -2900,8 +2961,8 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.blasthits=blastvec;
         data.maxmove=maxmove;
         data.minpval=pval;
-        minpvaltextfield.setText(String.valueOf(data.minpval));
-        minsetpvaltextfield.setText(String.valueOf(data.minpval));
+        textfield_cutoff_value.setText(String.valueOf(data.minpval));
+        textfield_info_min_blast_evalue.setText(String.valueOf(data.minpval));
         data.selectednames=newnumarr;
         int seqs=java.lang.reflect.Array.getLength(data.inaln);
         data.nameshash=allnameshash;
@@ -4289,9 +4350,9 @@ public class clustermain_graphics extends javax.swing.JFrame {
     void setclearbuttontext(){
         //if I have some sequences selected --. text=Clear selection
         if(java.lang.reflect.Array.getLength(data.selectednames)>0){
-            clearselectbutton.setText("Clear Selection");
+            button_select_all_or_clear.setText("Clear Selection");
         }else{
-            clearselectbutton.setText("Select All");
+            button_select_all_or_clear.setText("Select All");
         }
     }//end setclearbuttontext
     
@@ -4881,7 +4942,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 makedrawdata();
                 g.setColor(fgcolor);
                 g.drawRect(xadd-xtranslate,yadd-ytranslate,graphpanel.getWidth()-(2*xadd),graphpanel.getHeight()-(2*yadd));
-                if(showblasthitscheckbox.isSelected()){
+                if(checkbox_show_connections.isSelected()){
                     //here i am looking for a speedup by eliminating the multiple "for" loops
                     //to this effect the drawing order is computed in an earlier step. here I just have to loop through
                     //the 2d array and draw the elements in the according color
@@ -4951,7 +5012,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                         g.drawString("Best",((colornum+5)*fontwidth)-xtranslate,fontsize-ytranslate);
                     }
                 }
-                if(shownamescheckbox.isSelected()){
+                if(checkbox_show_names.isSelected()){
                     int selectednamesnum=java.lang.reflect.Array.getLength(data.selectednames);
                     String[] namearr=data.namearr;
                     if(selectednamesnum==0){
@@ -4963,7 +5024,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                             g.drawString(String.valueOf(i)+"-"+namearr[data.selectednames[i]],(int)tposarrtmp[data.selectednames[i]][0],(int)tposarrtmp[data.selectednames[i]][1]);
                         }// end for i
                     }
-                }else if(shownumberscheckbox.isSelected()){
+                }else if(checkbox_show_numbers.isSelected()){
                     for(int i=0;i<elements;i++){
                         g.drawString(String.valueOf(i),(int)tposarrtmp[i][0],(int)tposarrtmp[i][1]);
                     }// end for i
@@ -5096,7 +5157,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                     }
                 }
             }// end if elements>0
-            if(selecttbutton.isSelected()&&mouse_is_pressed){
+            if(button_select_move.isSelected()&&mouse_is_pressed){
                 g.setColor(java.awt.Color.orange);
                 if(currmousepos[0]<selectstart[0]){
                     draw[0]=currmousepos[0];
@@ -5276,7 +5337,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 data.rounds++;
                 if(data.roundslimit!=-1){
                     data.roundsdone++;
-                    stopbutton.setText("STOP ("+data.roundsdone+"/"+data.roundslimit+")");
+                    button_start_stop_resume.setText("STOP ("+data.roundsdone+"/"+data.roundslimit+")");
                     if(data.roundsdone>=data.roundslimit){
                         stop=true;
                         synchronized(parent){
@@ -5339,7 +5400,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 }
                 if(tmpcool<=1e-5){
                     stop=true;
-                    stopbutton.setText("DONE (absolute zero)");
+                    button_start_stop_resume.setText("DONE (absolute zero)");
                 }
                 if(data.rounds%skiprounds==0 && data.nographics==false){
                     //docalc="false";//don't do any further calculations until the drawing is done!
@@ -5347,8 +5408,8 @@ public class clustermain_graphics extends javax.swing.JFrame {
                     repaint();
                 }
             }// end while
-            stopbutton.setText("Resume");
-            stopbutton.setEnabled(true);
+            button_start_stop_resume.setText("Resume");
+            button_start_stop_resume.setEnabled(true);
             parent.repaint();
         }// end run
         
