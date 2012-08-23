@@ -377,22 +377,28 @@ public class customutils {
             outwrite.println("groupsize=" + in.groupsize);
             outwrite.println("usefoldchange=" + in.usefoldchange);
             outwrite.println("avgfoldchange=" + in.avgfoldchange);
+            
             if(in.namesdmp_file!=null && in.nodesdmp_file!=null){
                 outwrite.println("namesdmp_file="+in.namesdmp_file);
                 outwrite.println("nodesdmp_file="+in.nodesdmp_file);
             }
+            
             outwrite.print("colorcutoffs=");
             for (i = 0; i < java.lang.reflect.Array.getLength(in.colorcutoffs); i++) {
                 outwrite.print(in.colorcutoffs[i] + ";");
             }//end for i
             outwrite.println();
+            
             outwrite.print("colorarr=");
             for (i = 0; i < java.lang.reflect.Array.getLength(in.colorarr); i++) {
                 java.awt.Color tmp = in.colorarr[i];
                 outwrite.print("(" + tmp.getRed() + ";" + tmp.getGreen() + ";" + tmp.getBlue() + "):");
             }//end for i
             outwrite.println();
+            
+            outwrite.println("rounds_done=" + in.rounds);
             outwrite.println("</param>");
+            
             if ((in.mapfiles!=null) && (in.mapfiles.size() > 0)) {
                 outwrite.println("<function>");
                 int num = in.mapfiles.size();
@@ -773,6 +779,13 @@ public class customutils {
                                 myrun.namesdmp_file = tmparr[1];
                             } else if (tmparr[0].equalsIgnoreCase("nodesdmp_file")) {
                                 myrun.nodesdmp_file = tmparr[1];
+                            } else if (tmparr[0].equalsIgnoreCase("rounds_done")) {
+                                try {
+                                    myrun.rounds = Integer.parseInt(tmparr[1]);
+                                } catch (NumberFormatException ne) {
+                                    System.err.println("ERROR parsing int from " + tmparr[1]);
+                                    return myrun;
+                                }
                             }
                         }//end while </param>
                     } else if (inline.equalsIgnoreCase("<function>")) {

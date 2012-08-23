@@ -70,6 +70,9 @@ public class clustermethods {
         }
         myrun.colorarr=data.colorarr;
         myrun.colorcutoffs=data.colorcutoffs;
+        
+        myrun.rounds = data.rounds;
+        
         customutils.saverun(myrun,data.namearr,data.nographics);
         myrun=null;
     }
@@ -908,6 +911,8 @@ public class clustermethods {
                 System.out.println("setting colorcutoffs");
                 data.colorcutoffs=saveddata.colorcutoffs;
             }
+            data.rounds = saveddata.rounds;
+            
             int seqnum;
             seqnum=java.lang.reflect.Array.getLength(data.inaln);
             System.out.println("seqnum="+seqnum);

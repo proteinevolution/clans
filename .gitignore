@@ -8,6 +8,7 @@ CLANS_tutorial.odt
 CLANS_tutorial.pdf
 build-before-profiler.xml
 build.xml
+.settings
 
 # === Eclipse files and folders ===
 # default binary directory

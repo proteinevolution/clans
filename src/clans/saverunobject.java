@@ -52,5 +52,6 @@ public class saverunobject {
     boolean avgfoldchange=false;
     String namesdmp_file=null;
     String nodesdmp_file=null;
+    int rounds=0;
     
 }//end class
