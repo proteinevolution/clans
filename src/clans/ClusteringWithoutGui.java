@@ -10,12 +10,58 @@ package clans;
  * @author tancred
  */
 public class ClusteringWithoutGui {
-    public ClusteringWithoutGui(clusterdata data){
+
+	public clusterdata data=null;
+    computethread mythread=new computethread(this);
+
+	public ClusteringWithoutGui(clusterdata data){
         this.data=data;
         this.data.nographics = true;
     }
 
-    public clusterdata data=null;
+    class computethread extends java.lang.Thread{
+        //--------------------------------------------------------------------------
+        //------------------------THREADS-------------------------------------------
+        //--------------------------------------------------------------------------
+
+        public computethread(ClusteringWithoutGui parent){
+            this.parent=parent;
+            this.stop=false;
+            this.didrun=false;
+        }
+
+        boolean stop=true;
+        boolean didrun=false;
+        float tmpcool=1;
+        ClusteringWithoutGui parent;
+
+        @Override
+        public void run(){
+            this.didrun=true;
+            data.roundsdone=0;
+            while (stop==false){
+                data.rounds++;
+                if(data.roundslimit!=-1){
+                    data.roundsdone++;
+                  
+                    if(data.roundsdone>=data.roundslimit){
+                        stop=true;
+                        synchronized(parent){
+                            parent.notify();
+                        }
+                    }
+                }
+
+                ClusterMethods.recluster3d(data);
+                data.posarr=data.myposarr;
+                tmpcool=(((float)((int)(data.currcool*100000)))/100000);
+                if(tmpcool<=1e-5){
+                    stop=true;
+                }
+            }
+        }
+
+    }
 
     void setup_attraction_values_and_initialize(){
 
@@ -32,18 +78,12 @@ public class ClusteringWithoutGui {
         ClusterMethods.setup_attraction_values_and_initialize(data);
     }
 
-    
-    computethread mythread=new computethread(this);
-
-
-    //--------------------------------------------------------------------------
-
-    void loaddata(String inname){
-        if(mythread!=null && mythread.stop!=true){
+    void loaddata(String input_filename){
+        if(mythread != null && !mythread.stop){
             System.err.println("Warning, you should stop the clustering thread before loading another file; stopping thread now");
-            mythread.stop=true;
+            mythread.stop = true;
         }//else everything is OK
-        data.input_filename=inname;
+        data.input_filename = input_filename;
         ClusterMethods.loaddata(data);
     }//end loaddata
 
@@ -65,52 +105,4 @@ public class ClusteringWithoutGui {
             //the thread then sets the text to "resume" and re-enables the button.
         }
     }//end startstopthread
-
-
-
-    //--------------------------------------------------------------------------
-    //------------------------THREADS-------------------------------------------
-    //--------------------------------------------------------------------------
-
-    class computethread extends java.lang.Thread{
-
-        public computethread(ClusteringWithoutGui parent){
-            this.parent=parent;
-            this.stop=false;
-            this.didrun=false;
-        }
-
-        boolean stop=true;
-        boolean didrun=false;
-        float tmpcool=1;
-        ClusteringWithoutGui parent;
-
-@Override
-        public void run(){
-            this.didrun=true;
-            data.roundsdone=0;
-            while (stop==false){
-                data.rounds++;
-                if(data.roundslimit!=-1){
-                    data.roundsdone++;
-                    //stopbutton.setText("STOP ("+roundsdone+"/"+roundslimit+")");
-                    if(data.roundsdone>=data.roundslimit){
-                        stop=true;
-                        synchronized(parent){
-                            parent.notify();
-                        }
-                    }
-                }
-                //parent.data.myposarr=clustermethods.recluster3d(parent.data);
-                ClusterMethods.recluster3d(data);
-                data.posarr=data.myposarr;
-                tmpcool=(((float)((int)(data.currcool*100000)))/100000);
-                if(tmpcool<=1e-5){
-                    stop=true;
-                }
-            }// end while
-        }// end run
-
-    }// end class computethread
-
 }
