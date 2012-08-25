@@ -363,13 +363,17 @@ public class Main {
                 }
             }
         }else{//if docalc=false; i.e. the -load option was set
-            //now see whether I want to recluster this dataset
+
+        	// if dorounds and savetoname are set, we run in non-GUI mode
             if(dorounds>=0 && savetoname!=null){
                 // run CLANS in command line mode. No gui will be started. Results will be saved to a file.
                 System.out.println("LOADING data from '"+loadsaved+"' and running in non-graphical mode");
+                
                 ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                 myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
+                
                 ClusteringWithoutGui myclusterer=new ClusteringWithoutGui(myclusterdata);
+                
                 if(myclusterer.data.input_filename!=null){
                     System.out.println("loading data from "+myclusterer.data.input_filename);
                     ClusterMethods.loaddata(myclusterer.data);

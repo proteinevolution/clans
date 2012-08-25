@@ -94,10 +94,17 @@ public class ClusterData {
     int roundslimit=-1;
     boolean moveselectedonly=false;
 
-    public ClusterData(minhsp[] blasthits,AminoAcidSequence[] inaln, String[] namearr,java.util.HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
-        this.blasthits=blasthits;
-        this.sequences=ClusterMethods.remove_gaps_from_sequences(inaln);
-        this.namearr=namearr;
+    public ClusterData(minhsp[] blasthits, AminoAcidSequence[] sequences, String[] namearr, java.util.HashMap nameshash, 
+    		double eval, double pval, float scval, int verbose, int cpu, boolean savepos, String cmd, String blastpath,
+    		boolean addblastvbparam, String formatdbpath, String[] referencedb, StringBuffer errbuff, 
+    		String input_filename) {
+        
+    	this.sequences=ClusterMethods.remove_gaps_from_sequences(sequences);
+    	
+        this.movethreads=new getmovethread[cpu];
+        
+    	this.blasthits=blasthits;
+    	this.namearr=namearr;
         this.nameshash=nameshash;
         this.eval=eval;
         this.pval=pval;
@@ -111,9 +118,8 @@ public class ClusterData {
         this.formatdbpath=formatdbpath;
         this.referencedb=referencedb;
         this.errbuff=errbuff;
-        this.input_filename=loadsaved;
-        this.seqnum=java.lang.reflect.Array.getLength(namearr);
-        this.movethreads=new getmovethread[cpu];
+        this.input_filename=input_filename;
+        this.seqnum=namearr.length;
     }
     
     public void save_to_file(java.io.File output_file){
