@@ -101,6 +101,7 @@ public class Main {
     static boolean docalc=true;//do I want to do calculations or just open a clustertest window?
     static boolean nographics=false;//do I want to NOT start the graphical interface?
     static String savetoname=null;//define a savefile to save results to (only if used in conjunction with -dorounds and -load)
+    static boolean initialize=false; // if true will initialize the clustermap upon loading
     static int dorounds=-1;//how many rounds to cluster by (only if used in conjunction with -load)
     //--------------------------------------------------------------------------
     //variables used for adding new sequences to an already present dataset
@@ -126,6 +127,7 @@ public class Main {
         System.out.println("-load name-of-savefile");
         System.out.println("-rounds (int) (def:"+dorounds+") how many rounds to cluster for (only used in conjunction with -load)");
         System.out.println("-saveto String where to save the results to (only used in conjunction with -load and -rounds)");
+        System.out.println("-initialize boolean (t/F) if true randomly initializes the graph in runs without GUI");
         System.out.println("-loadalt name-of-alternate-format-savefile");
         System.out.println("-lowmem t/F (doesn't do much at the moment)");
         System.out.println("-cmd String to prepend to all commands (i.e nice (unix) cmd (windows)) (def: \"\")");
@@ -369,7 +371,9 @@ public class Main {
                 // run CLANS in command line mode. No gui will be started. Results will be saved to a file.
                 System.out.println("LOADING data from '"+loadsaved+"' and running in non-graphical mode");
                 
-                ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
+                ClusterData myclusterdata=new ClusterData(new minhsp[0], new AminoAcidSequence[0], new String[0], 
+                		new HashMap(), eval, pval, scval, verbose, cpu, savepos, cmd, blastpath, addblastvbparam, 
+                		formatdbpath, referencedb, errbuff, loadsaved);
                 myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                 
                 ClusteringWithoutGui myclusterer=new ClusteringWithoutGui(myclusterdata);
@@ -378,7 +382,11 @@ public class Main {
                     System.out.println("loading data from "+myclusterer.data.input_filename);
                     ClusterMethods.loaddata(myclusterer.data);
                 }
-//                myclusterer.initgraph();//initialize the clustering
+                
+                if(initialize){
+                	myclusterer.setup_attraction_values_and_initialize();
+                }
+                	
                 myclusterer.startstopthread();//start the thread
                 int waittime=15000;//15 seconds
                 synchronized(myclusterer){
@@ -453,6 +461,7 @@ public class Main {
                 i++;
                 continue;
             }//end infile
+            
             if((args[i].equalsIgnoreCase("-load"))||(args[i].equalsIgnoreCase("-l"))){
                 i++;
                 if(i < args.length){
@@ -465,6 +474,19 @@ public class Main {
                 i++;
                 continue;
             }//end load
+            
+            if((args[i].equalsIgnoreCase("-initialize"))){
+                i++;
+                if(i < args.length) {
+                	initialize = (args[i].equalsIgnoreCase("TRUE") || args[i].equalsIgnoreCase("T"));
+                }else{
+                    System.err.println("Error reading -initialize, missing argument.");
+                    return false;
+                }
+                i++;
+                continue;
+            }//end saveto
+            
             if((args[i].equalsIgnoreCase("-saveto"))){
                 i++;
                 if(i < args.length){
@@ -476,6 +498,7 @@ public class Main {
                 i++;
                 continue;
             }//end saveto
+            
             if((args[i].equalsIgnoreCase("-referencedb"))||(args[i].equalsIgnoreCase("-refdb"))){
                 i++;
                 if(i < args.length){
