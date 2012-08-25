@@ -982,17 +982,18 @@ public class Main {
     
     static boolean checkargs(String [] args){
         //look for any pre-conffile settings
-        int argsize=java.lang.reflect.Array.getLength(args);
-        for(int i=0;i<argsize;i++){
-            if((args[i].equalsIgnoreCase("-conf"))||(args[i].equalsIgnoreCase("-c"))){
-                if((i+1)<argsize){
+        for(int i=0;i<args.length;i++){
+        
+        	if((args[i].equalsIgnoreCase("-conf"))||(args[i].equalsIgnoreCase("-c"))){
+                if((i+1)<args.length){
                     conffilename=args[i+1];
                 }else{
                     return false;
                 }
             }// end in -conf || -c
-            if((args[i].equalsIgnoreCase("-verbose"))||(args[i].equalsIgnoreCase("-v"))){
-                if((i+1)<argsize){
+            
+        	if((args[i].equalsIgnoreCase("-verbose"))||(args[i].equalsIgnoreCase("-v"))){
+                if((i+1)<args.length){
                     try{
                         verbose=Integer.parseInt(args[i+1]);
                     }catch (NumberFormatException e){
