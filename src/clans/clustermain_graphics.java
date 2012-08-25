@@ -1374,7 +1374,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         //if I have a valid number update the attvals data
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=clustermethods.getattvals(data.blasthits,data.minpval,data);
+                data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
             }
         }else if(data.myattvals!=null){//remove all attvals below the specified value
             if(data.orgattvals==null){
@@ -1686,7 +1686,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.selectednames=new int[0];
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=clustermethods.getattvals(data.blasthits,data.minpval,data);
+                data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
             }
         }
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
@@ -1753,7 +1753,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=clustermethods.getattvals(data.blasthits,data.minpval,data);
+                data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
             }
         }
         if(myseqgroupwindow!=null){
@@ -1842,7 +1842,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.seqgroupsvec=new Vector();
         data.selectednames=new int[0];
         synchronized(data.myattvals){
-            data.myattvals=clustermethods.getattvals(data.blasthits,data.minpval,data);
+            data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
         }
         data.posarr=data.myposarr;
         data.posarrtmp=new float[data.elements][data.dimentions];
@@ -1978,7 +1978,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         //if I have a valid number update the attvals data
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=clustermethods.getattvals(data.blasthits,data.minpval,data);
+                data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
             }
         }else if(data.myattvals!=null){//remove all attvals below the specified value
             if(data.orgattvals==null){
@@ -2976,7 +2976,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.drawarrtmp=new int[data.elements][data.dimentions];
         //draw1.draworder=new Vector[0];
         data.draworder=new ArrayList[0];
-        data.myattvals=clustermethods.getattvals(data.blasthits,data.minpval,data);
+        data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
         moveselectedonly.setSelected(useselectedonly);
         int seqnum=java.lang.reflect.Array.getLength(data.inaln);
         System.out.println("seqnum="+seqnum);

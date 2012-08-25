@@ -16,7 +16,7 @@ public class clustermethods {
         data.myposarr=null;
         data.mymovearr=null;
         data.lastmovearr=null;
-        data.myposarr=cluster3d(data);
+        data.myposarr=setup_attraction_values_and_initialize(data);
         data.posarr=data.myposarr;
         data.rounds=0;
     }//end initgraph
@@ -621,7 +621,7 @@ public class clustermethods {
 
     //--------------------------------------------------------------------------
 
-    static float[][] cluster3d(clusterdata data){//minhsp[] indata,int maxiter,data){
+    static float[][] setup_attraction_values_and_initialize(clusterdata data){//minhsp[] indata,int maxiter,data){
         //take the hsp objects from indata and compute "attraction" values for all sequence pairs
         //once you have those try to cluster the data in 2d by "energy minimization" approach.
         //iterative approch, might want to specify maximum number of iterations
@@ -644,13 +644,13 @@ public class clustermethods {
         if(indata!=null){
             if(data.myattvals==null){
                 //synchronized(myattvals){//myattvals is null here; cannot sync on it
-                data.myattvals=getattvals(indata,data.minpval,data);
+                data.myattvals=compute_attraction_values(indata,data.minpval,data);
                 //}
             }
         }
         //now i have the matrix with the attraction values for each seqpair
         //next: seed the 2d environment randomly with the starting points for the sequences
-        data.myposarr=seedstart(data.myposarr);
+        data.myposarr=initialize_positions_randomly(data.myposarr);
         //then iterate
         data.mymovearr=new float[data.elements][data.dimentions];
         for(int i=data.elements;--i>=0;){
@@ -803,21 +803,17 @@ public class clustermethods {
 
     //--------------------------------------------------------------------------
 
-    static float[][] seedstart(float[][] inarr){
+    static float[][] initialize_positions_randomly(float[][] positions){
         //seed the positions array with random numbers([-1 to 1[)
-        int arrsize=java.lang.reflect.Array.getLength(inarr);
-        if(arrsize==0){
-            return inarr;
+
+        for(int i = 0; i < positions.length; i++){
+        	for(int j = 0; j < positions[j].length; j++){
+        		positions[i][j] = rand.nextFloat() * 2 - 1;
+            }
         }
-        int j;
-        int arrdepth=java.lang.reflect.Array.getLength(inarr[0]);
-        for(int i=0;i<arrdepth;i++){
-            for(j=0;j<arrsize;j++){
-                inarr[j][i]=rand.nextFloat()*2-1;
-            }// end for j
-        }// end for i
-        return inarr;
-    }// end seedstart
+        
+        return positions;
+    }
 
     //--------------------------------------------------------------------------
 
@@ -893,7 +889,7 @@ public class clustermethods {
             data.rotmtx[2][2]=data.myrotmtx[2][2];
             data.orgattvals=null;
             //first time I load myattvals; don't need to sync as nothing else can be using this yet
-            data.myattvals=getattvals(data.blasthits,data.minpval,data);
+            data.myattvals=compute_attraction_values(data.blasthits,data.minpval,data);
             data.dotsize=saveddata.dotsize;
             data.ovalsize=saveddata.ovalsize;
             data.groupsize=saveddata.groupsize;
@@ -949,7 +945,7 @@ public class clustermethods {
 
     //--------------------------------------------------------------------------
 
-    static minattvals[] getattvals(minhsp[] indata,double minpval,clusterdata data){
+    static minattvals[] compute_attraction_values(minhsp[] indata,double minpval,clusterdata data){
         if(indata==null){//possible (if alternate data source was loaded)
             System.out.println("indata is null");
             return data.myattvals;
