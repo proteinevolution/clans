@@ -29,11 +29,11 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("new CLANS");
-        if(java.lang.reflect.Array.getLength(args)==0){
+        if(args.length==0){
             docalc=false;
             //printinfo();
             //System.exit(1);
-        }else if(java.lang.reflect.Array.getLength(args)==1){
+        }else if(args.length==1){
         	if (args[0].charAt(0) != '-') {
         		loadsaved=args[0];
                 docalc=false;
@@ -432,9 +432,8 @@ public class Main {
     
     static boolean readargs(String[] args){
         //read the arguments from the command line and those that are passed from the readconf method
-        int argsize=java.lang.reflect.Array.getLength(args);
         int i=0;
-        while(i<argsize){
+        while(i < args.length){
             if(args[i].equals("?")||args[i].equals("-?")){
                 printinfo();
                 System.exit(0);
@@ -442,7 +441,7 @@ public class Main {
             if(args[i].equalsIgnoreCase("-conf")||args[i].equalsIgnoreCase("-c")){
                 //this shopuld have been read in checkargs, so here just skip it
                 i++;
-                if((i)<argsize){
+                if(i < args.length){
                     //do nothing and increase i
                 }else{
                     System.err.println("Error reading -conf, missing argument.");
@@ -453,7 +452,7 @@ public class Main {
             }
             if((args[i].equalsIgnoreCase("-infile"))||(args[i].equalsIgnoreCase("-i"))||(args[i].equalsIgnoreCase("-in"))){
                 i++;
-                if((i)<argsize){
+                if(i < args.length){
                     infilename=args[i];
                 }else{
                     System.err.println("Error reading -infile, missing argument.");
@@ -464,7 +463,7 @@ public class Main {
             }//end infile
             if((args[i].equalsIgnoreCase("-load"))||(args[i].equalsIgnoreCase("-l"))){
                 i++;
-                if((i)<argsize){
+                if(i < args.length){
                     loadsaved=args[i];
                     docalc=false;
                 }else{
@@ -476,7 +475,7 @@ public class Main {
             }//end load
             if((args[i].equalsIgnoreCase("-saveto"))){
                 i++;
-                if((i)<argsize){
+                if(i < args.length){
                     savetoname=args[i];
                 }else{
                     System.err.println("Error reading -saveto, missing argument.");
@@ -487,7 +486,7 @@ public class Main {
             }//end saveto
             if((args[i].equalsIgnoreCase("-referencedb"))||(args[i].equalsIgnoreCase("-refdb"))){
                 i++;
-                if((i)<argsize){
+                if(i < args.length){
                     referencedb=args[i].split("\\s+",0);
                 }else{
                     System.err.println("Error reading -referencedb, missing argument.");
@@ -499,7 +498,7 @@ public class Main {
             if(args[i].equalsIgnoreCase("-cmd")){
                 int quotesfound=0;
                 cmd="";
-                if((i+1)<argsize){
+                if((i+1)<args.length){
                     if(args[i+1].indexOf("\"")==-1){// if the next elem is not in quotes
                         i++;
                         cmd=args[i];
@@ -508,7 +507,7 @@ public class Main {
                     }else{
                         while (quotesfound<2){
                             i++;
-                            if(i>=argsize){
+                            if(i>=args.length){
                                 System.err.println("Error reading -cmd, missing argument.");
                                 return false;
                             }
@@ -553,7 +552,7 @@ public class Main {
                 }else{
                     while (quotesfound<2){
                         i++;
-                        if(i>=argsize){
+                        if(i>=args.length){
                             System.err.println("Error reading -blastpath, missing argument.");
                             return false;
                         }
@@ -585,7 +584,7 @@ public class Main {
             }// end if -blastpath
             if((args[i].equalsIgnoreCase("-addblastvb"))){
                 i++;
-                if(i<argsize){
+                if(i<args.length){
                     if(args[i].equalsIgnoreCase("FALSE")||args[i].equalsIgnoreCase("F")){
                         addblastvbparam=false;
                     }else{
@@ -609,7 +608,7 @@ public class Main {
                 }else{
                     while (quotesfound<2){
                         i++;
-                        if(i>=argsize){
+                        if(i>=args.length){
                             System.err.println("Error reading -formatdbpath, missing argument.");
                             return false;
                         }
@@ -641,7 +640,7 @@ public class Main {
             }// end if -formatdbpath
             if((args[i].equalsIgnoreCase("-blastblocks"))||(args[i].equalsIgnoreCase("-bb"))){
                 i++;
-                if((i)<argsize){
+                if((i)<args.length){
                     try{
                         blastblocks=Integer.parseInt(args[i]);
                     }catch (NumberFormatException e){
@@ -657,7 +656,7 @@ public class Main {
             }//end eval
             if((args[i].equalsIgnoreCase("-eval"))||(args[i].equalsIgnoreCase("-e"))){
                 i++;
-                if((i)<argsize){
+                if((i)<args.length){
                     try{
                         eval=Double.parseDouble(args[i]);
                         if(eval<pval){
@@ -676,7 +675,7 @@ public class Main {
             }//end eval
             if((args[i].equalsIgnoreCase("-pval"))||(args[i].equalsIgnoreCase("-p"))){
                 i++;
-                if((i)<argsize){
+                if((i)<args.length){
                     try{
                         pval=Double.parseDouble(args[i]);
                     }catch (NumberFormatException e){
@@ -692,7 +691,7 @@ public class Main {
             }//end pval
             if((args[i].equalsIgnoreCase("-scval"))||(args[i].equalsIgnoreCase("-sc"))){
                 i++;
-                if((i)<argsize){
+                if((i)<args.length){
                     try{
                         scval=Float.parseFloat(args[i]);
                     }catch (NumberFormatException e){
@@ -708,7 +707,7 @@ public class Main {
             }//end scval
             if((args[i].equalsIgnoreCase("-verbose"))||(args[i].equalsIgnoreCase("-v"))){
                 i++;
-                if((i)<argsize){
+                if((i)<args.length){
                     try{
                         verbose=Integer.parseInt(args[i]);
                     }catch (NumberFormatException e){
@@ -724,7 +723,7 @@ public class Main {
             }// end in -verbose||-v
             if((args[i].equalsIgnoreCase("-cpu"))){
                 i++;
-                if((i)<argsize){
+                if((i)<args.length){
                     try{
                         cpu=Integer.parseInt(args[i]);
                     }catch (NumberFormatException e){
@@ -740,7 +739,7 @@ public class Main {
             }// end in -cpu
             if((args[i].equalsIgnoreCase("-dorounds"))){
                 i++;
-                if((i)<argsize){
+                if((i)<args.length){
                     try{
                         dorounds=Integer.parseInt(args[i]);
                     }catch (NumberFormatException e){
@@ -756,7 +755,7 @@ public class Main {
             }// end in -dorounds
             if((args[i].equalsIgnoreCase("-readblast"))){
                 i++;
-                if(i<argsize){
+                if(i<args.length){
                     if(args[i].equalsIgnoreCase("FALSE")||args[i].equalsIgnoreCase("F")){
                         readblast=false;
                     }else{
@@ -771,7 +770,7 @@ public class Main {
             }// end readblast
             if((args[i].equalsIgnoreCase("-lowmem"))){
                 i++;
-                if(i<argsize){
+                if(i<args.length){
                     if(args[i].equalsIgnoreCase("TRUE")||args[i].equalsIgnoreCase("T")){
                         lowmem=true;
                     }else{
@@ -786,7 +785,7 @@ public class Main {
             }// end lowmem
             if((args[i].equalsIgnoreCase("-savepos"))){
                 i++;
-                if(i<argsize){
+                if(i<args.length){
                     if(args[i].equalsIgnoreCase("TRUE")||args[i].equalsIgnoreCase("T")){
                         savepos=true;
                     }else{
@@ -801,7 +800,7 @@ public class Main {
             }// end savepos
             if((args[i].equalsIgnoreCase("-docalc"))){
                 i++;
-                if(i<argsize){
+                if(i<args.length){
                     if(args[i].equalsIgnoreCase("TRUE")||args[i].equalsIgnoreCase("T")){
                         docalc=true;
                     }else{
@@ -816,7 +815,7 @@ public class Main {
             }// end docalc
             if((args[i].equalsIgnoreCase("-nographics"))){
                 i++;
-                if(i<argsize){
+                if(i<args.length){
                     if(args[i].equalsIgnoreCase("TRUE")||args[i].equalsIgnoreCase("T")){
                         nographics=true;
                     }else{
@@ -831,7 +830,7 @@ public class Main {
             }// end nographics
             if((args[i].equalsIgnoreCase("-exhaustive"))){
                 i++;
-                if((i)<argsize){
+                if((i)<args.length){
                     try{
                         exhaustive=Integer.parseInt(args[i]);
                     }catch (NumberFormatException e){
@@ -852,7 +851,7 @@ public class Main {
             }// end in -cpu
             if((args[i].equalsIgnoreCase("-olddata"))){
                 i++;
-                if((i)<argsize){
+                if((i)<args.length){
                     olddata=args[i];
                 }else{
                     System.err.println("Error reading -olddata, missing argument.");
@@ -863,7 +862,7 @@ public class Main {
             }//end olddata
             if((args[i].equalsIgnoreCase("-newseqs"))){
                 i++;
-                if((i)<argsize){
+                if((i)<args.length){
                     newseqs=args[i];
                 }else{
                     System.err.println("Error reading -newseqs, missing argument.");
@@ -874,7 +873,7 @@ public class Main {
             }//end newseqs
             if((args[i].equalsIgnoreCase("-enrichseqs"))){
                 i++;
-                if(i<argsize){
+                if(i<args.length){
                     if(args[i].equalsIgnoreCase("true")||args[i].equalsIgnoreCase("t")){
                         enrichseqs=true;
                     }else{
@@ -889,7 +888,7 @@ public class Main {
             }//end enrichseqs
             if(args[i].equalsIgnoreCase("-gatherseqseval")){
                 i++;
-                if(i<argsize){
+                if(i<args.length){
                     try{
                         gatherseqseval=Double.parseDouble(args[i]);
                     }catch (NumberFormatException e){
@@ -905,7 +904,7 @@ public class Main {
             }//end gatherseqseval
             if(args[i].equalsIgnoreCase("-rmseqseval")){
                 i++;
-                if(i<argsize){
+                if(i<args.length){
                     try{
                         rmseqseval=Double.parseDouble(args[i]);
                     }catch (NumberFormatException e){
@@ -921,7 +920,7 @@ public class Main {
             }//end rmseqseval
             if(args[i].equalsIgnoreCase("-maxenrichseqsnum")){
                 i++;
-                if(i<argsize){
+                if(i<args.length){
                     try{
                         gatherseqseval=Integer.parseInt(args[i]);
                     }catch (NumberFormatException e){
@@ -938,7 +937,7 @@ public class Main {
             //if I get here I have an unknown parameter
             System.err.println("unknown option "+args[i]);
             return false;
-        }// end while i<argsize
+        }// end while i<args.length
         return true;
     }// end readargs
     
