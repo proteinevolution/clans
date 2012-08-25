@@ -10,23 +10,340 @@ package clans;
  * @author tancred
  */
 public class clustermethods {
-
-    static void initgraph(clusterdata data){
-        data.currcool=1;
-        data.myposarr=null;
-        data.mymovearr=null;
-        data.lastmovearr=null;
-        data.myposarr=setup_attraction_values_and_initialize(data);
+    
+	static final java.util.Random rand=new java.util.Random(System.currentTimeMillis());
+    
+	static void initgraph(clusterdata data){
+    	data.myposarr=setup_attraction_values_and_initialize(data);
         data.posarr=data.myposarr;
+        
+        data.mymovearr=null;
+        data.lastmovearr=null;       
+        data.currcool=1;
+
         data.rounds=0;
     }//end initgraph
 
-    static final java.util.Random rand=new java.util.Random(System.currentTimeMillis());
+
 
 
     //--------------------------------------------------------------------------
+	
+	static float[][] setup_attraction_values_and_initialize(clusterdata data){//minhsp[] indata,int maxiter,data){
+	    //take the hsp objects from indata and compute "attraction" values for all sequence pairs
+	    //once you have those try to cluster the data in 2d by "energy minimization" approach.
+	    //iterative approch, might want to specify maximum number of iterations
+	    data.elements=java.lang.reflect.Array.getLength(data.namearr);
+	    if(data.elements==0){
+	        return new float[0][0];
+	    }
+	    data.myposarr=new float[data.elements][data.dimentions];
+	    data.posarrtmp=new float[data.elements][data.dimentions];
+	    data.drawarrtmp=new int[data.elements][data.dimentions];
+	    data.mymovearr=new float[data.elements][data.dimentions];
+	    data.lastmovearr=new float[data.elements][data.dimentions];
+	    for(int i=data.elements;--i>=0;){
+	        data.lastmovearr[i][0]=0;
+	        data.lastmovearr[i][1]=0;
+	        data.lastmovearr[i][2]=0;
+	    }
+	    //compute the "attraction values
+	    minhsp[] indata=data.blasthits;
+	    if(indata!=null){
+	        if(data.myattvals==null){
+	            //synchronized(myattvals){//myattvals is null here; cannot sync on it
+	            data.myattvals=compute_attraction_values(indata,data.minpval,data);
+	            //}
+	        }
+	    }
+	    //now i have the matrix with the attraction values for each seqpair
+	    //next: seed the 2d environment randomly with the starting points for the sequences
+	    data.myposarr=initialize_positions_randomly(data.myposarr);
+	    //then iterate
+	    data.mymovearr=new float[data.elements][data.dimentions];
+	    for(int i=data.elements;--i>=0;){
+	        data.mymovearr[i][0]=0;
+	        data.mymovearr[i][1]=0;
+	        data.mymovearr[i][2]=0;
+	    }
+	    return data.myposarr;
+	}// end cluster3d
 
-    static void savetofile(java.io.File savetofile,clusterdata data){
+
+
+
+	//--------------------------------------------------------------------------
+
+    //--------------------------------------------------------------------------
+	
+	static minattvals[] compute_attraction_values(minhsp[] indata,double minpval,clusterdata data){
+	    if(indata==null){//possible (if alternate data source was loaded)
+	        System.out.println("indata is null");
+	        return data.myattvals;
+	    }
+	    System.out.println("indata is size:"+java.lang.reflect.Array.getLength(indata));
+	    //compute the attraction values for all sequence pairs
+	    //values range from 0(no attraction) to 1(max); -1 denotes identity
+	    //indata is composed of one array of hsp objects
+	    //NOTE: possible multiple pvalues per hsp object (multiple hsp's for same sequence pair)
+	    int j;
+	    java.util.ArrayList<minattvals> tmpvec=new java.util.ArrayList<minattvals>();
+	    int datanum=java.lang.reflect.Array.getLength(indata);
+	    java.util.HashMap myhash=new java.util.HashMap(datanum);
+	    float newatt;
+	    String key;
+	    float maxattval=0;
+	    minattvals curratt=null;
+	    data.maxvalfound=0;//init to zero, is assigned value in getattvalsimple or mult
+	    //NOTE: this is not necessarily a symmetrical array. compute all values
+	    //and then symmetrize computing the average values
+	    int elements=data.elements;
+	    if(data.rescalepvalues==false){
+	        //make the attraction values
+	        if(data.attvalsimple){
+	            for(int i=datanum;--i>=0;){
+	                if(indata[i].query<indata[i].hit){
+	                    key=indata[i].query+"_"+indata[i].hit;
+	                }else{
+	                    key=indata[i].hit+"_"+indata[i].query;
+	                }
+	                if(myhash.containsKey(key)){
+	                    curratt=(minattvals)myhash.get(key);
+	                    if(curratt.att==-1){
+	                        //in this case keep the -1
+	                    }else{
+	                        newatt=getattvalsimple(indata[i].val,elements,minpval,data);
+	                        if(newatt==-1){
+	                            curratt.att=-1;
+	                        }else{
+	                            newatt/=2;
+	                            curratt.att+=newatt;
+	                        }
+	                    }
+	                }else{
+	                    //if I've never encountered this query-hit pair before
+	                    curratt=new minattvals();
+	                    if(indata[i].query<indata[i].hit){
+	                        curratt.query=indata[i].query;
+	                        curratt.hit=indata[i].hit;
+	                    }else{
+	                        curratt.hit=indata[i].query;
+	                        curratt.query=indata[i].hit;
+	                    }
+	                    curratt.att=getattvalsimple(indata[i].val,elements,minpval,data);
+	                    if(curratt.att!=-1){
+	                        curratt.att/=2;
+	                    }
+	                    if(curratt.att!=0){
+	                        myhash.put(key,curratt);
+	                        tmpvec.add(curratt);
+	                    }
+	                }
+	                if(curratt.att>maxattval){
+	                    maxattval=curratt.att;
+	                }
+	            }//end for i
+	        }else{
+	            for(int i=0;i<datanum;i++){
+	                if(indata[i].query<indata[i].hit){
+	                    key=indata[i].query+"_"+indata[i].hit;
+	                }else{
+	                    key=indata[i].hit+"_"+indata[i].query;
+	                }
+	                if(myhash.containsKey(key)){
+	                    curratt=(minattvals)myhash.get(key);
+	                    if(curratt.att==-1){
+	                        //in this case keep the -1
+	                    }else{
+	                        newatt=getattvalmult(indata[i].val,elements,minpval,data);
+	                        if(newatt==-1){
+	                            curratt.att=-1;
+	                        }else{
+	                            newatt/=2;
+	                            curratt.att+=newatt;
+	                        }
+	                    }
+	                }else{
+	                    //if I've never encountered this query-hit pair before
+	                    curratt=new minattvals();
+	                    if(indata[i].query<indata[i].hit){
+	                        curratt.query=indata[i].query;
+	                        curratt.hit=indata[i].hit;
+	                    }else{
+	                        curratt.hit=indata[i].query;
+	                        curratt.query=indata[i].hit;
+	                    }
+	                    curratt.att=getattvalmult(indata[i].val,elements,minpval,data);
+	                    if(curratt.att !=-1){
+	                        curratt.att/=2;
+	                    }
+	                    if(curratt.att!=0){
+	                        tmpvec.add(curratt);
+	                        myhash.put(key,curratt);
+	                    }
+	                }
+	                if(curratt.att>maxattval){
+	                    maxattval=curratt.att;
+	                }
+	            }//end for i
+	        }
+	        //divide all vals by maxattval (-->range: 0-1)
+	        //standard, just divide all values by the maximum value
+	        //note, this does NOT symmetrize the attractions
+	        if(data.usescval==false){
+	            for(int i=tmpvec.size()-1;i>=0;i--){
+	                if(((minattvals)tmpvec.get(i)).att==-1){
+	                    ((minattvals)tmpvec.get(i)).att=1;
+	                    //System.out.println(((minattvals)tmpvec.elementAt(i)).query+" "+((minattvals)tmpvec.elementAt(i)).hit+" :"+((minattvals)tmpvec.elementAt(i)).att);
+	                }else{
+	                    ((minattvals)tmpvec.get(i)).att/=maxattval;
+	                    //System.out.println(((minattvals)tmpvec.elementAt(i)).query+" "+((minattvals)tmpvec.elementAt(i)).hit+" :"+((minattvals)tmpvec.elementAt(i)).att);
+	                }
+	            }// end for i
+	            //System.out.println("maxattval"+maxattval+" offset="+0);
+	            data.p2attfactor=maxattval;
+	            data.p2attoffset=0;
+	        }else{//if using scval
+	            data.p2attfactor=1;
+	            data.p2attoffset=0;
+	        }
+	    }else{//if rescalepvaluecheckbox==true
+	        float minattval=java.lang.Float.MAX_VALUE;
+	        //rescale the attraction values to range from 0 to 1 (with the smallest positive non-zero value as zero.
+	        if(data.attvalsimple){
+	            for(int i=0;i<datanum;i++){
+	                if(indata[i].query<indata[i].hit){
+	                    key=indata[i].query+"_"+indata[i].hit;
+	                }else{
+	                    key=indata[i].hit+"_"+indata[i].query;
+	                }
+	                if(myhash.containsKey(key)){
+	                    curratt=(minattvals)myhash.get(key);
+	                    if(curratt.att==-1){
+	                        //in this case keep the -1
+	                    }else{
+	                        newatt=getattvalsimple(indata[i].val,elements,minpval,data);
+	                        if(newatt==-1){
+	                            curratt.att=-1;
+	                        }else{
+	                            newatt/=2;
+	                            curratt.att+=newatt;
+	                        }
+	                    }
+	                }else{
+	                    //if I've never encountered this query-hit pair before
+	                    curratt=new minattvals();
+	                    if(indata[i].query<indata[i].hit){
+	                        curratt.query=indata[i].query;
+	                        curratt.hit=indata[i].hit;
+	                    }else{
+	                        curratt.hit=indata[i].query;
+	                        curratt.query=indata[i].hit;
+	                    }
+	                    curratt.att=getattvalsimple(indata[i].val,elements,minpval,data);
+	                    if(curratt.att!=-1){
+	                        curratt.att/=2;
+	                    }
+	                    if(curratt.att!=0){
+	                        myhash.put(key,curratt);
+	                        tmpvec.add(curratt);
+	                    }
+	                }
+	                if(curratt.att>maxattval){
+	                    maxattval=curratt.att;
+	                }
+	                if((curratt.att>0)&&(curratt.att<minattval)){
+	                    minattval=curratt.att;
+	                }
+	            }//end for i
+	        }else{
+	            for(int i=0;i<datanum;i++){
+	                if(indata[i].query<indata[i].hit){
+	                    key=indata[i].query+"_"+indata[i].hit;
+	                }else{
+	                    key=indata[i].hit+"_"+indata[i].query;
+	                }
+	                if(myhash.containsKey(key)){
+	                    curratt=(minattvals)myhash.get(key);
+	                    if(curratt.att==-1){
+	                        //in this case keep the -1
+	                    }else{
+	                        newatt=getattvalmult(indata[i].val,elements,minpval,data);
+	                        if(newatt==-1){
+	                            curratt.att=-1;
+	                        }else{
+	                            newatt/=2;
+	                            curratt.att+=newatt;
+	                        }
+	                    }
+	
+	                }else{
+	                    //if I've never encountered this query-hit pair before
+	                    curratt=new minattvals();
+	                    if(indata[i].query<indata[i].hit){
+	                        curratt.query=indata[i].query;
+	                        curratt.hit=indata[i].hit;
+	                    }else{
+	                        curratt.hit=indata[i].query;
+	                        curratt.query=indata[i].hit;
+	                    }
+	                    curratt.att=getattvalmult(indata[i].val,elements,minpval,data);
+	                    if(curratt.att!=-1){
+	                        curratt.att/=2;
+	                    }
+	                    if(curratt.att!=0){
+	                        myhash.put(key,curratt);
+	                        tmpvec.add(curratt);
+	                    }
+	
+	                }
+	                if(curratt.att>maxattval){
+	                    maxattval=curratt.att;
+	                }
+	                if((curratt.att>0)&&(curratt.att<minattval)){
+	                    minattval=curratt.att;
+	                }
+	            }//end for i
+	        }
+	        //and divide all vals by maxattval and offset by minattval(-->range: 0-1)
+	        float divval=maxattval-minattval;
+	        for(int i=tmpvec.size()-1;i>=0;i--){
+	            if(((minattvals)tmpvec.get(i)).att==-1){
+	                ((minattvals)tmpvec.get(i)).att=1;
+	            }else{
+	                ((minattvals)tmpvec.get(i)).att=(((minattvals)tmpvec.get(i)).att-minattval)/divval;
+	            }
+	        }// end for i
+	        //System.out.println("maxattval"+maxattval+" offset="+minattval);
+	        data.p2attfactor=divval;
+	        data.p2attoffset=minattval;
+	    }
+	    minattvals[] retarr=(minattvals[])tmpvec.toArray(new minattvals[0]);
+	    System.out.println("attvals size="+java.lang.reflect.Array.getLength(retarr));
+	    return retarr;
+	}// end getattvals
+
+
+
+
+	//--------------------------------------------------------------------------
+	
+	static float[][] initialize_positions_randomly(float[][] positions){
+	    //seed the positions array with random numbers([-1 to 1[)
+	
+	    for(int i = 0; i < positions.length; i++){
+	    	for(int j = 0; j < positions[j].length; j++){
+	    		positions[i][j] = rand.nextFloat() * 2 - 1;
+	        }
+	    }
+	    
+	    return positions;
+	}
+
+
+
+
+	static void savetofile(java.io.File savetofile,clusterdata data){
         saverunobject myrun=new saverunobject();
         myrun.file=savetofile;
         myrun.inaln=data.inaln;
@@ -621,48 +938,6 @@ public class clustermethods {
 
     //--------------------------------------------------------------------------
 
-    static float[][] setup_attraction_values_and_initialize(clusterdata data){//minhsp[] indata,int maxiter,data){
-        //take the hsp objects from indata and compute "attraction" values for all sequence pairs
-        //once you have those try to cluster the data in 2d by "energy minimization" approach.
-        //iterative approch, might want to specify maximum number of iterations
-        data.elements=java.lang.reflect.Array.getLength(data.namearr);
-        if(data.elements==0){
-            return new float[0][0];
-        }
-        data.myposarr=new float[data.elements][data.dimentions];
-        data.posarrtmp=new float[data.elements][data.dimentions];
-        data.drawarrtmp=new int[data.elements][data.dimentions];
-        data.mymovearr=new float[data.elements][data.dimentions];
-        data.lastmovearr=new float[data.elements][data.dimentions];
-        for(int i=data.elements;--i>=0;){
-            data.lastmovearr[i][0]=0;
-            data.lastmovearr[i][1]=0;
-            data.lastmovearr[i][2]=0;
-        }
-        //compute the "attraction values
-        minhsp[] indata=data.blasthits;
-        if(indata!=null){
-            if(data.myattvals==null){
-                //synchronized(myattvals){//myattvals is null here; cannot sync on it
-                data.myattvals=compute_attraction_values(indata,data.minpval,data);
-                //}
-            }
-        }
-        //now i have the matrix with the attraction values for each seqpair
-        //next: seed the 2d environment randomly with the starting points for the sequences
-        data.myposarr=initialize_positions_randomly(data.myposarr);
-        //then iterate
-        data.mymovearr=new float[data.elements][data.dimentions];
-        for(int i=data.elements;--i>=0;){
-            data.mymovearr[i][0]=0;
-            data.mymovearr[i][1]=0;
-            data.mymovearr[i][2]=0;
-        }
-        return data.myposarr;
-    }// end cluster3d
-
-    //--------------------------------------------------------------------------
-
     static void getminattract2d(float[] pos1,double[] movement,double minattract){
         //get minimum attraction for 2d only
         movement[0]=-pos1[0]*minattract;
@@ -803,17 +1078,7 @@ public class clustermethods {
 
     //--------------------------------------------------------------------------
 
-    static float[][] initialize_positions_randomly(float[][] positions){
-        //seed the positions array with random numbers([-1 to 1[)
-
-        for(int i = 0; i < positions.length; i++){
-        	for(int j = 0; j < positions[j].length; j++){
-        		positions[i][j] = rand.nextFloat() * 2 - 1;
-            }
-        }
-        
-        return positions;
-    }
+    
 
     //--------------------------------------------------------------------------
 
@@ -945,252 +1210,7 @@ public class clustermethods {
 
     //--------------------------------------------------------------------------
 
-    static minattvals[] compute_attraction_values(minhsp[] indata,double minpval,clusterdata data){
-        if(indata==null){//possible (if alternate data source was loaded)
-            System.out.println("indata is null");
-            return data.myattvals;
-        }
-        System.out.println("indata is size:"+java.lang.reflect.Array.getLength(indata));
-        //compute the attraction values for all sequence pairs
-        //values range from 0(no attraction) to 1(max); -1 denotes identity
-        //indata is composed of one array of hsp objects
-        //NOTE: possible multiple pvalues per hsp object (multiple hsp's for same sequence pair)
-        int j;
-        java.util.ArrayList<minattvals> tmpvec=new java.util.ArrayList<minattvals>();
-        int datanum=java.lang.reflect.Array.getLength(indata);
-        java.util.HashMap myhash=new java.util.HashMap(datanum);
-        float newatt;
-        String key;
-        float maxattval=0;
-        minattvals curratt=null;
-        data.maxvalfound=0;//init to zero, is assigned value in getattvalsimple or mult
-        //NOTE: this is not necessarily a symmetrical array. compute all values
-        //and then symmetrize computing the average values
-        int elements=data.elements;
-        if(data.rescalepvalues==false){
-            //make the attraction values
-            if(data.attvalsimple){
-                for(int i=datanum;--i>=0;){
-                    if(indata[i].query<indata[i].hit){
-                        key=indata[i].query+"_"+indata[i].hit;
-                    }else{
-                        key=indata[i].hit+"_"+indata[i].query;
-                    }
-                    if(myhash.containsKey(key)){
-                        curratt=(minattvals)myhash.get(key);
-                        if(curratt.att==-1){
-                            //in this case keep the -1
-                        }else{
-                            newatt=getattvalsimple(indata[i].val,elements,minpval,data);
-                            if(newatt==-1){
-                                curratt.att=-1;
-                            }else{
-                                newatt/=2;
-                                curratt.att+=newatt;
-                            }
-                        }
-                    }else{
-                        //if I've never encountered this query-hit pair before
-                        curratt=new minattvals();
-                        if(indata[i].query<indata[i].hit){
-                            curratt.query=indata[i].query;
-                            curratt.hit=indata[i].hit;
-                        }else{
-                            curratt.hit=indata[i].query;
-                            curratt.query=indata[i].hit;
-                        }
-                        curratt.att=getattvalsimple(indata[i].val,elements,minpval,data);
-                        if(curratt.att!=-1){
-                            curratt.att/=2;
-                        }
-                        if(curratt.att!=0){
-                            myhash.put(key,curratt);
-                            tmpvec.add(curratt);
-                        }
-                    }
-                    if(curratt.att>maxattval){
-                        maxattval=curratt.att;
-                    }
-                }//end for i
-            }else{
-                for(int i=0;i<datanum;i++){
-                    if(indata[i].query<indata[i].hit){
-                        key=indata[i].query+"_"+indata[i].hit;
-                    }else{
-                        key=indata[i].hit+"_"+indata[i].query;
-                    }
-                    if(myhash.containsKey(key)){
-                        curratt=(minattvals)myhash.get(key);
-                        if(curratt.att==-1){
-                            //in this case keep the -1
-                        }else{
-                            newatt=getattvalmult(indata[i].val,elements,minpval,data);
-                            if(newatt==-1){
-                                curratt.att=-1;
-                            }else{
-                                newatt/=2;
-                                curratt.att+=newatt;
-                            }
-                        }
-                    }else{
-                        //if I've never encountered this query-hit pair before
-                        curratt=new minattvals();
-                        if(indata[i].query<indata[i].hit){
-                            curratt.query=indata[i].query;
-                            curratt.hit=indata[i].hit;
-                        }else{
-                            curratt.hit=indata[i].query;
-                            curratt.query=indata[i].hit;
-                        }
-                        curratt.att=getattvalmult(indata[i].val,elements,minpval,data);
-                        if(curratt.att !=-1){
-                            curratt.att/=2;
-                        }
-                        if(curratt.att!=0){
-                            tmpvec.add(curratt);
-                            myhash.put(key,curratt);
-                        }
-                    }
-                    if(curratt.att>maxattval){
-                        maxattval=curratt.att;
-                    }
-                }//end for i
-            }
-            //divide all vals by maxattval (-->range: 0-1)
-            //standard, just divide all values by the maximum value
-            //note, this does NOT symmetrize the attractions
-            if(data.usescval==false){
-                for(int i=tmpvec.size()-1;i>=0;i--){
-                    if(((minattvals)tmpvec.get(i)).att==-1){
-                        ((minattvals)tmpvec.get(i)).att=1;
-                        //System.out.println(((minattvals)tmpvec.elementAt(i)).query+" "+((minattvals)tmpvec.elementAt(i)).hit+" :"+((minattvals)tmpvec.elementAt(i)).att);
-                    }else{
-                        ((minattvals)tmpvec.get(i)).att/=maxattval;
-                        //System.out.println(((minattvals)tmpvec.elementAt(i)).query+" "+((minattvals)tmpvec.elementAt(i)).hit+" :"+((minattvals)tmpvec.elementAt(i)).att);
-                    }
-                }// end for i
-                //System.out.println("maxattval"+maxattval+" offset="+0);
-                data.p2attfactor=maxattval;
-                data.p2attoffset=0;
-            }else{//if using scval
-                data.p2attfactor=1;
-                data.p2attoffset=0;
-            }
-        }else{//if rescalepvaluecheckbox==true
-            float minattval=java.lang.Float.MAX_VALUE;
-            //rescale the attraction values to range from 0 to 1 (with the smallest positive non-zero value as zero.
-            if(data.attvalsimple){
-                for(int i=0;i<datanum;i++){
-                    if(indata[i].query<indata[i].hit){
-                        key=indata[i].query+"_"+indata[i].hit;
-                    }else{
-                        key=indata[i].hit+"_"+indata[i].query;
-                    }
-                    if(myhash.containsKey(key)){
-                        curratt=(minattvals)myhash.get(key);
-                        if(curratt.att==-1){
-                            //in this case keep the -1
-                        }else{
-                            newatt=getattvalsimple(indata[i].val,elements,minpval,data);
-                            if(newatt==-1){
-                                curratt.att=-1;
-                            }else{
-                                newatt/=2;
-                                curratt.att+=newatt;
-                            }
-                        }
-                    }else{
-                        //if I've never encountered this query-hit pair before
-                        curratt=new minattvals();
-                        if(indata[i].query<indata[i].hit){
-                            curratt.query=indata[i].query;
-                            curratt.hit=indata[i].hit;
-                        }else{
-                            curratt.hit=indata[i].query;
-                            curratt.query=indata[i].hit;
-                        }
-                        curratt.att=getattvalsimple(indata[i].val,elements,minpval,data);
-                        if(curratt.att!=-1){
-                            curratt.att/=2;
-                        }
-                        if(curratt.att!=0){
-                            myhash.put(key,curratt);
-                            tmpvec.add(curratt);
-                        }
-                    }
-                    if(curratt.att>maxattval){
-                        maxattval=curratt.att;
-                    }
-                    if((curratt.att>0)&&(curratt.att<minattval)){
-                        minattval=curratt.att;
-                    }
-                }//end for i
-            }else{
-                for(int i=0;i<datanum;i++){
-                    if(indata[i].query<indata[i].hit){
-                        key=indata[i].query+"_"+indata[i].hit;
-                    }else{
-                        key=indata[i].hit+"_"+indata[i].query;
-                    }
-                    if(myhash.containsKey(key)){
-                        curratt=(minattvals)myhash.get(key);
-                        if(curratt.att==-1){
-                            //in this case keep the -1
-                        }else{
-                            newatt=getattvalmult(indata[i].val,elements,minpval,data);
-                            if(newatt==-1){
-                                curratt.att=-1;
-                            }else{
-                                newatt/=2;
-                                curratt.att+=newatt;
-                            }
-                        }
-
-                    }else{
-                        //if I've never encountered this query-hit pair before
-                        curratt=new minattvals();
-                        if(indata[i].query<indata[i].hit){
-                            curratt.query=indata[i].query;
-                            curratt.hit=indata[i].hit;
-                        }else{
-                            curratt.hit=indata[i].query;
-                            curratt.query=indata[i].hit;
-                        }
-                        curratt.att=getattvalmult(indata[i].val,elements,minpval,data);
-                        if(curratt.att!=-1){
-                            curratt.att/=2;
-                        }
-                        if(curratt.att!=0){
-                            myhash.put(key,curratt);
-                            tmpvec.add(curratt);
-                        }
-
-                    }
-                    if(curratt.att>maxattval){
-                        maxattval=curratt.att;
-                    }
-                    if((curratt.att>0)&&(curratt.att<minattval)){
-                        minattval=curratt.att;
-                    }
-                }//end for i
-            }
-            //and divide all vals by maxattval and offset by minattval(-->range: 0-1)
-            float divval=maxattval-minattval;
-            for(int i=tmpvec.size()-1;i>=0;i--){
-                if(((minattvals)tmpvec.get(i)).att==-1){
-                    ((minattvals)tmpvec.get(i)).att=1;
-                }else{
-                    ((minattvals)tmpvec.get(i)).att=(((minattvals)tmpvec.get(i)).att-minattval)/divval;
-                }
-            }// end for i
-            //System.out.println("maxattval"+maxattval+" offset="+minattval);
-            data.p2attfactor=divval;
-            data.p2attoffset=minattval;
-        }
-        minattvals[] retarr=(minattvals[])tmpvec.toArray(new minattvals[0]);
-        System.out.println("attvals size="+java.lang.reflect.Array.getLength(retarr));
-        return retarr;
-    }// end getattvals
+    
 
     //--------------------------------------------------------------------------
 
