@@ -41,41 +41,34 @@ public class Main {
         	}
         }
         String[] inargs=args;
-        boolean allok=true;
-        //System.out.println("checking args");
-        allok=checkargs(args);//look for -conf and other pre-conf settings
-        if(allok==false){
+
+        // check if a config file is set 
+        if(!get_configuration_file_argument(args)){
             System.err.println("unable to check args.");
             return;
         }
-        //System.out.println("reading conf");
+
+        // read configuration file if it exists
         File testfile=new File(conffilename);
         if(testfile.exists()){
-            allok=readconf(conffilename);
-            if(allok==false){
+            if(!parse_configuration_file(conffilename)){
                 System.err.println("unable to read conffile "+conffilename+"; using defaults");
                 //errbuff.append("unable to read conffile '"+conffilename+"'; using defaults");
             }
         }else{
             System.err.println("Warning: "+conffilename+" does not exists, will be using default and command-line options only");
         }
-        //System.out.println("reading args");
-        allok=readargs(inargs);
-        if(allok==false){
+
+        if(!parse_arguments(inargs)){
             System.err.println("unable to read args; exiting program.");
-            printinfo();
-            return;
-        }else{
-            //System.out.println("doing check");
-            allok=docheck();
-        }
-        if(allok){
-            makeend();
-            return;
-        }else{
-            System.err.println("Error in docheck().");
+            print_usage_help();
             return;
         }
+
+        if(!start_computations()){
+            System.err.println("Error in start_computations().");
+        }
+        return;
     }//end main
     
     static StringBuffer errbuff=new StringBuffer();
@@ -121,7 +114,7 @@ public class Main {
     static int exhaustive=1;//if I add new sequences do the fast version and only look for one way blast hits!
     //--------------------------------------------------------------------------
     
-    static void printinfo(){
+    static void print_usage_help(){
         //print the program arguments to stdout
         System.out.println("USAGE: java -jar clans.jar [options]");
         System.out.println("If a outOfMemoryError occurs, try running it via java -Xmx###m -jar programname options");
@@ -164,7 +157,7 @@ public class Main {
     
     //--------------------------------------------------------------------------
     
-    static void printargs(){
+    static void print_settings(){
         //print the program arguments to stdout
         System.out.println("------------------SETTINGS-------------------");
         System.out.println("conffile="+conffilename);
@@ -209,17 +202,10 @@ public class Main {
     
     //--------------------------------------------------------------------------
     
-    static void makeend(){
-        //finalize the program; print the output to file, clean up, wait for all to finish, etc.
-        
-    }// end makeend
-    
-    //--------------------------------------------------------------------------
-    
-    static boolean docheck(){
+    static boolean start_computations(){
         //does the actual computational parts of the program
         if(verbose>0){
-            printargs();
+            print_settings();
         }
         if(docalc){
             //System.out.println("in docalc");
@@ -430,19 +416,19 @@ public class Main {
     //-------------------------setup stuff--------------------------------------
     //--------------------------------------------------------------------------
     
-    static boolean readargs(String[] args){
+    static boolean parse_arguments(String[] args){
         //read the arguments from the command line and those that are passed from the readconf method
         int i=0;
         while(i < args.length){
             if(args[i].equals("?")||args[i].equals("-?")){
-                printinfo();
+                print_usage_help();
                 System.exit(0);
             }
             if(args[i].equalsIgnoreCase("-conf")||args[i].equalsIgnoreCase("-c")){
                 //this shopuld have been read in checkargs, so here just skip it
                 i++;
                 if(i < args.length){
-                    //do nothing and increase i
+                    // skip -conf/-c as we parsed this already using a dedicated method
                 }else{
                     System.err.println("Error reading -conf, missing argument.");
                     return false;
@@ -943,7 +929,7 @@ public class Main {
     
     //--------------------------------------------------------------------------
     
-    static boolean readconf(String filename){
+    static boolean parse_configuration_file(String filename){
         //read the configuration file
         try{
             BufferedReader infile=new BufferedReader(new FileReader(filename));
@@ -954,7 +940,7 @@ public class Main {
                 if((enddata=inline.indexOf("#"))>-1){//if this is a line with a comment on it
                     if(enddata>1){//if I have some data on this line
                         inline=inline.substring(0,enddata);
-                        if((readargs(inline.split("\\s",0)))==false){
+                        if((parse_arguments(inline.split("\\s",0)))==false){
                             System.err.println("Error reading on line "+inline);
                             return false;
                         }
@@ -963,7 +949,7 @@ public class Main {
                     }
                 }else{//if this line has no comment on it
                     if(inline.length()>0){
-                        if((readargs(inline.split("\\s",0)))==false){
+                        if((parse_arguments(inline.split("\\s",0)))==false){
                             System.err.println("Error reading on line "+inline);
                             return false;
                         }
@@ -979,7 +965,7 @@ public class Main {
     
     //--------------------------------------------------------------------------
     
-    static boolean checkargs(String [] args){
+    static boolean get_configuration_file_argument(String [] args){
         //look for any pre-conffile settings
         for(int i=0;i<args.length;i++){
         
@@ -990,19 +976,7 @@ public class Main {
                     return false;
                 }
             }// end in -conf || -c
-            
-        	if((args[i].equalsIgnoreCase("-verbose"))||(args[i].equalsIgnoreCase("-v"))){
-                if((i+1)<args.length){
-                    try{
-                        verbose=Integer.parseInt(args[i+1]);
-                    }catch (NumberFormatException e){
-                        System.err.println("unable to parse int from "+args[i+1]+" in -verbose.");
-                        return false;
-                    }
-                }else{
-                    return false;
-                }
-            }// end in -verbose||-v
+  
         }// end for i
         return true;
     }//end checkargs
