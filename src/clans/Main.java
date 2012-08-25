@@ -34,9 +34,11 @@ public class Main {
             //printinfo();
             //System.exit(1);
         }else if(java.lang.reflect.Array.getLength(args)==1){
-            loadsaved=args[0];
-            docalc=false;
-            args=new String[0];
+        	if (args[0].charAt(0) != '-') {
+        		loadsaved=args[0];
+                docalc=false;
+                args=new String[0];	
+        	}
         }
         String[] inargs=args;
         boolean allok=true;
