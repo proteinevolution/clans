@@ -2621,7 +2621,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             updatevals();
             repaint();
         }
-        clustermethods.initgraph(data);
+        clustermethods.setup_attraction_values_and_initialize(data);
         //currcool=1;
         //mythread.stop=true;
         //myposarr=null;

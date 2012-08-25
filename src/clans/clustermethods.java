@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package clans;
 
 /**
@@ -13,69 +8,54 @@ public class clustermethods {
     
 	static final java.util.Random rand=new java.util.Random(System.currentTimeMillis());
     
-	static void initgraph(clusterdata data){
-    	data.myposarr=setup_attraction_values_and_initialize(data);
-        data.posarr=data.myposarr;
-        
-        data.mymovearr=null;
-        data.lastmovearr=null;       
+	static void setup_attraction_values_and_initialize(clusterdata data){
+	    // compute "attraction" values for all sequence pairs from the hsp objects
+		// and initialize the positions randomly
+		
+        data.rounds=0;
         data.currcool=1;
 
-        data.rounds=0;
-    }//end initgraph
+		data.mymovearr = null;
+        data.lastmovearr = null;       
 
-
-
-
-    //--------------------------------------------------------------------------
-	
-	static float[][] setup_attraction_values_and_initialize(clusterdata data){//minhsp[] indata,int maxiter,data){
-	    //take the hsp objects from indata and compute "attraction" values for all sequence pairs
-	    //once you have those try to cluster the data in 2d by "energy minimization" approach.
-	    //iterative approch, might want to specify maximum number of iterations
-	    data.elements=java.lang.reflect.Array.getLength(data.namearr);
-	    if(data.elements==0){
-	        return new float[0][0];
+        data.elements = data.namearr.length;
+	    
+        if(data.elements == 0){ // no elements means nothing to do
+	    	data.myposarr = new float[0][0];
+	    	data.posarr=data.myposarr;
+	    	return;
 	    }
+	    
 	    data.myposarr=new float[data.elements][data.dimentions];
 	    data.posarrtmp=new float[data.elements][data.dimentions];
 	    data.drawarrtmp=new int[data.elements][data.dimentions];
 	    data.mymovearr=new float[data.elements][data.dimentions];
 	    data.lastmovearr=new float[data.elements][data.dimentions];
-	    for(int i=data.elements;--i>=0;){
+	    for(int i = 0; i < data.elements; i++){
+	        data.mymovearr[i][0]=0;
+	        data.mymovearr[i][1]=0;
+	        data.mymovearr[i][2]=0;
+	    	
 	        data.lastmovearr[i][0]=0;
 	        data.lastmovearr[i][1]=0;
 	        data.lastmovearr[i][2]=0;
 	    }
-	    //compute the "attraction values
-	    minhsp[] indata=data.blasthits;
-	    if(indata!=null){
-	        if(data.myattvals==null){
+	    
+	    // compute the "attraction values"
+	    minhsp[] indata = data.blasthits;
+	    if(indata != null){
+	        if(data.myattvals == null){
 	            //synchronized(myattvals){//myattvals is null here; cannot sync on it
-	            data.myattvals=compute_attraction_values(indata,data.minpval,data);
+	            data.myattvals=compute_attraction_values(indata, data.minpval, data);
 	            //}
 	        }
 	    }
-	    //now i have the matrix with the attraction values for each seqpair
-	    //next: seed the 2d environment randomly with the starting points for the sequences
+
 	    data.myposarr=initialize_positions_randomly(data.myposarr);
-	    //then iterate
-	    data.mymovearr=new float[data.elements][data.dimentions];
-	    for(int i=data.elements;--i>=0;){
-	        data.mymovearr[i][0]=0;
-	        data.mymovearr[i][1]=0;
-	        data.mymovearr[i][2]=0;
-	    }
-	    return data.myposarr;
-	}// end cluster3d
+	    data.posarr=data.myposarr;
+	}
 
 
-
-
-	//--------------------------------------------------------------------------
-
-    //--------------------------------------------------------------------------
-	
 	static minattvals[] compute_attraction_values(minhsp[] indata,double minpval,clusterdata data){
 	    if(indata==null){//possible (if alternate data source was loaded)
 	        System.out.println("indata is null");

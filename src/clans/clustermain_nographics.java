@@ -32,7 +32,7 @@ public class clustermain_nographics {
         }else{
             data.usescval=false;
         }
-        clustermethods.initgraph(data);
+        clustermethods.setup_attraction_values_and_initialize(data);
         
     }//end initgraph
 
