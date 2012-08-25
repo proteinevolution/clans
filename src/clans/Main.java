@@ -386,7 +386,11 @@ public class Main {
                 myclusterdata.nographics=true;
                 myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                 clustermain_nographics myclusterer=new clustermain_nographics(myclusterdata);
-                myclusterer.initgraph();//initialize the clustering
+                if(myclusterer.data.loadsaved!=null){
+                    System.out.println("loading data from "+myclusterer.data.loadsaved);
+                    clustermethods.loaddata(myclusterer.data);
+                }
+//                myclusterer.initgraph();//initialize the clustering
                 myclusterer.startstopthread();//start the thread
                 int waittime=15000;//15 seconds
                 synchronized(myclusterer){

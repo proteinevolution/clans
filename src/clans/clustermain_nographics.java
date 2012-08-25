@@ -19,10 +19,10 @@ public class clustermain_nographics {
     //the methods I want to use
 
     void initgraph(){
-        if(data.loadsaved!=null){
-            System.out.println("loading data from "+data.loadsaved);
-            clustermethods.loaddata(data);
-        }
+//        if(data.loadsaved!=null){
+//            System.out.println("loading data from "+data.loadsaved);
+//            clustermethods.loaddata(data);
+//        }
         data.minpval=data.pval;
         data.mineval=data.eval;
         if(data.scval>=0){//in that case use a score cutoff
@@ -95,6 +95,7 @@ public class clustermain_nographics {
             this.didrun=true;
             data.roundsdone=0;
             while (stop==false){
+                data.rounds++;
                 if(data.roundslimit!=-1){
                     data.roundsdone++;
                     //stopbutton.setText("STOP ("+roundsdone+"/"+roundslimit+")");
