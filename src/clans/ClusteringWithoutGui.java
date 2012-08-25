@@ -11,10 +11,10 @@ package clans;
  */
 public class ClusteringWithoutGui {
 
-	public clusterdata data=null;
+	public ClusterData data=null;
     computethread mythread=new computethread(this);
 
-	public ClusteringWithoutGui(clusterdata data){
+	public ClusteringWithoutGui(ClusterData data){
         this.data=data;
         this.data.nographics = true;
     }

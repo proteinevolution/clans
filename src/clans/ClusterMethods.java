@@ -8,7 +8,7 @@ public class ClusterMethods {
     
 	static final java.util.Random rand=new java.util.Random(System.currentTimeMillis());
     
-	static void setup_attraction_values_and_initialize(clusterdata data){
+	static void setup_attraction_values_and_initialize(ClusterData data){
 	    // compute "attraction" values for all sequence pairs from the hsp objects
 		// and initialize the positions randomly
 		
@@ -26,11 +26,11 @@ public class ClusterMethods {
 	    	return;
 	    }
 	    
-	    data.myposarr=new float[data.elements][clusterdata.dimensions];
-	    data.posarrtmp=new float[data.elements][clusterdata.dimensions];
-	    data.drawarrtmp=new int[data.elements][clusterdata.dimensions];
-	    data.mymovearr=new float[data.elements][clusterdata.dimensions];
-	    data.lastmovearr=new float[data.elements][clusterdata.dimensions];
+	    data.myposarr=new float[data.elements][ClusterData.dimensions];
+	    data.posarrtmp=new float[data.elements][ClusterData.dimensions];
+	    data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
+	    data.mymovearr=new float[data.elements][ClusterData.dimensions];
+	    data.lastmovearr=new float[data.elements][ClusterData.dimensions];
 	    for(int i = 0; i < data.elements; i++){
 	        data.mymovearr[i][0]=0;
 	        data.mymovearr[i][1]=0;
@@ -56,7 +56,7 @@ public class ClusterMethods {
 	}
 
 
-	static minattvals[] compute_attraction_values(minhsp[] indata,double minpval,clusterdata data){
+	static minattvals[] compute_attraction_values(minhsp[] indata,double minpval,ClusterData data){
 	    if(indata==null){//possible (if alternate data source was loaded)
 	        System.out.println("indata is null");
 	        return data.myattvals;
@@ -318,7 +318,7 @@ public class ClusterMethods {
 
 
 
-	static void savetofile(java.io.File savetofile,clusterdata data){
+	static void savetofile(java.io.File savetofile,ClusterData data){
         saverunobject myrun=new saverunobject();
         myrun.file=savetofile;
         myrun.inaln=data.sequences;
@@ -371,7 +371,7 @@ public class ClusterMethods {
 
     //--------------------------------------------------------------------------
 
-     static void recluster3d(clusterdata data){
+     static void recluster3d(ClusterData data){
         //take the hsp objects from indata and compute "attraction" values for all sequence pairs
         //once you have those try to cluster the data in 2d by "energy minimization" approach.
         //iterative approch, might want to specify maximum number of iterations
@@ -457,7 +457,7 @@ public class ClusterMethods {
 
     //--------------------------------------------------------------------------
 
-    static void getmovement(float[][] posarr, minattvals[] attvals, float[][] movement,int[] selectnames, clusterdata data){
+    static void getmovement(float[][] posarr, minattvals[] attvals, float[][] movement,int[] selectnames, ClusterData data){
         //use the positions of all elements and their attraction/repulsion values to
         //calculate a movement vector for each (take into account the last movement).
         //repulsion doesn't have a specific value as all evalues below a certain point
@@ -870,7 +870,7 @@ public class ClusterMethods {
 
     //--------------------------------------------------------------------------
 
-    static void domove(float[][] posarr, float[][] movearr,int[] selectnames,clusterdata data){
+    static void domove(float[][] posarr, float[][] movearr,int[] selectnames,ClusterData data){
         //move all objects according to their movement vector.
         data.currcool=data.currcool*data.cooling;
         //float totalpos;
@@ -1057,7 +1057,7 @@ public class ClusterMethods {
 
     //--------------------------------------------------------------------------
 
-    static void loaddata(clusterdata data){
+    static void loaddata(ClusterData data){
         saverunobject saveddata = CustomUtils.loadrun(new java.io.File(data.input_filename));
         
         if(saveddata.file == null){
@@ -1120,10 +1120,10 @@ public class ClusterMethods {
         data.elements=data.namearr.length;
         data.selectednames=new int[0];
         data.posarr=data.myposarr;
-        data.lastmovearr=new float[data.elements][clusterdata.dimensions];
-        data.mymovearr=new float[data.elements][clusterdata.dimensions];
-        data.posarrtmp=new float[data.elements][clusterdata.dimensions];
-        data.drawarrtmp=new int[data.elements][clusterdata.dimensions];
+        data.lastmovearr=new float[data.elements][ClusterData.dimensions];
+        data.mymovearr=new float[data.elements][ClusterData.dimensions];
+        data.posarrtmp=new float[data.elements][ClusterData.dimensions];
+        data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
         data.draworder=new java.util.ArrayList[0];
         
         data.myrotmtx=saveddata.rotmtx;
@@ -1191,7 +1191,7 @@ public class ClusterMethods {
 
     //--------------------------------------------------------------------------
 
-    static float getattvalsimple(double[] invec,int dbsize,double minpval,clusterdata data){
+    static float getattvalsimple(double[] invec,int dbsize,double minpval,ClusterData data){
         //System.out.println("simple");
         //this actually takes all data from vector and makes ONE number out of it
         //just use the BEST value!
@@ -1243,7 +1243,7 @@ public class ClusterMethods {
 
     //--------------------------------------------------------------------------
 
-    static float getattvalmult(double[] invec,int dbsize,double minpval,clusterdata data){
+    static float getattvalmult(double[] invec,int dbsize,double minpval,ClusterData data){
         //System.out.println("complex");
         //this actually takes all data from vector and makes ONE number out of it
         //new: multiply the pvalues of different hsp's

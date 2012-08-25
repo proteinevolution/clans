@@ -20,7 +20,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         initComponents();
     }
     
-    public ClusteringWithGui(clusterdata data){//minhsp[] blasthits,aaseq[] inaln, String[] namearr,HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
+    public ClusteringWithGui(ClusterData data){//minhsp[] blasthits,aaseq[] inaln, String[] namearr,HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
     	draw1=new drawpanel();
         //System.out.println("started clustertest");
         initComponents();
@@ -2402,7 +2402,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     boolean dotsfirst=false;
     //boolean nographics=false;
 
-    clusterdata data=null;
+    ClusterData data=null;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu menu_misc;

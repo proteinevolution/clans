@@ -10,7 +10,7 @@ package clans;
  */
 public class getmovethread extends java.lang.Thread {
 
-    public getmovethread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int myi, int cpu, java.util.HashMap selectnamehash, int[] selectnames, String syncon, clusterdata parent) {
+    public getmovethread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int myi, int cpu, java.util.HashMap selectnamehash, int[] selectnames, String syncon, ClusterData parent) {
         this.done = false;
         this.posarr = myposarr;
         this.attvals = myattvals;
@@ -24,7 +24,7 @@ public class getmovethread extends java.lang.Thread {
         this.selectnames = selectnames;
     }
 
-    public getmovethread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int myi, int cpu, String syncon, clusterdata parent) {
+    public getmovethread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int myi, int cpu, String syncon, ClusterData parent) {
         this.done = false;
         this.posarr = myposarr;
         this.attvals = myattvals;
@@ -45,7 +45,7 @@ public class getmovethread extends java.lang.Thread {
     int myi;
     int cpu;
     java.util.HashMap tmphash = null;
-    clusterdata parent;
+    ClusterData parent;
     String syncon;
     int[] selectnames;//a local copy of parent.selectednames, as that may change during a calculation
 

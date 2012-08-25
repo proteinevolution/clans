@@ -1,38 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package clans;
 
 /**
  *
  * @author tancred
  */
-public class clusterdata {
+public class ClusterData {
 
-    public clusterdata(minhsp[] blasthits,AminoAcidSequence[] inaln, String[] namearr,java.util.HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
-        //just a data carrier for all of the stuff I need during clustering
-        this.blasthits=blasthits;
-        this.sequences=ClusterMethods.remove_gaps_from_sequences(inaln);
-        this.namearr=namearr;
-        this.nameshash=nameshash;
-        this.eval=eval;
-        this.pval=pval;
-        this.scval=scval;
-        this.verbose=verbose;
-        this.cpu=cpu;
-        this.savepos=savepos;
-        this.cmd=cmd;
-        this.blastpath=blastpath;
-        this.addblastvbparam=addblastvbparam;
-        this.formatdbpath=formatdbpath;
-        this.referencedb=referencedb;
-        this.errbuff=errbuff;
-        this.input_filename=loadsaved;
-        this.seqnum=java.lang.reflect.Array.getLength(namearr);
-        this.movethreads=new getmovethread[cpu];
-    }
     //variables initialized on creation
     minhsp[] blasthits=null;
     AminoAcidSequence[] sequences=null;
@@ -51,6 +24,7 @@ public class clusterdata {
     String[] referencedb=null;
     StringBuffer errbuff=null;
     String input_filename=null;
+
     //variables initialized later on
     boolean nographics=false;
     boolean complexatt=true;
@@ -59,6 +33,7 @@ public class clusterdata {
     getmovethread[] movethreads=null;
     boolean usescval=false;
     minattvals[] myattvals=null;
+    
     //variables I use as part of the clustering
     int rounds=0;
     float[][] myposarr=null;
@@ -119,10 +94,25 @@ public class clusterdata {
     int roundslimit=-1;
     boolean moveselectedonly=false;
 
-    //--------------------------------------------------------------------------
-    //------------------------THREADS-------------------------------------------
-    //--------------------------------------------------------------------------
-
-    
-
+    public ClusterData(minhsp[] blasthits,AminoAcidSequence[] inaln, String[] namearr,java.util.HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
+        this.blasthits=blasthits;
+        this.sequences=ClusterMethods.remove_gaps_from_sequences(inaln);
+        this.namearr=namearr;
+        this.nameshash=nameshash;
+        this.eval=eval;
+        this.pval=pval;
+        this.scval=scval;
+        this.verbose=verbose;
+        this.cpu=cpu;
+        this.savepos=savepos;
+        this.cmd=cmd;
+        this.blastpath=blastpath;
+        this.addblastvbparam=addblastvbparam;
+        this.formatdbpath=formatdbpath;
+        this.referencedb=referencedb;
+        this.errbuff=errbuff;
+        this.input_filename=loadsaved;
+        this.seqnum=java.lang.reflect.Array.getLength(namearr);
+        this.movethreads=new getmovethread[cpu];
+    }
 }
