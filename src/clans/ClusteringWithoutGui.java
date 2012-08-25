@@ -82,10 +82,8 @@ public class ClusteringWithoutGui {
 
         boolean stop=true;
         boolean didrun=false;
-        String tmpstr="";
         float tmpcool=1;
         ClusteringWithoutGui parent;
-        int roundsdone=0;
 
 @Override
         public void run(){
