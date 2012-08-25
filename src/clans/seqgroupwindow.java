@@ -17,7 +17,7 @@ public class seqgroupwindow extends javax.swing.JFrame {
     //    initComponents();
     //}
     
-    public seqgroupwindow(clustermain_graphics parent){
+    public seqgroupwindow(ClusteringWithGui parent){
         //super(new javax.swing.JFrame(),false);
         this.parent=parent;
         this.setTitle("Sequence groups");
@@ -763,7 +763,7 @@ public class seqgroupwindow extends javax.swing.JFrame {
     
     javax.swing.JColorChooser colorchooser=new javax.swing.JColorChooser();
     String[] groupnames;
-    clustermain_graphics parent;
+    ClusteringWithGui parent;
     java.awt.Font myfont;
     java.awt.Color mybackground;
     java.awt.Color myforeground;

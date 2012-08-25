@@ -15,7 +15,7 @@ import java.util.*;
 public class shownamedialog extends javax.swing.JFrame {
 
     /** Creates new form shownamedialog */
-    public shownamedialog(String[] namesarr, clustermain_graphics parent) {
+    public shownamedialog(String[] namesarr, ClusteringWithGui parent) {
         this.parent = parent;
         this.namesarr = numberarr(namesarr);
         initComponents();
@@ -287,7 +287,7 @@ public class shownamedialog extends javax.swing.JFrame {
 
 
     String[] namesarr;
-    clustermain_graphics parent;
+    ClusteringWithGui parent;
     boolean showall = true;
     String[] selectednames;
     int[] globalselected = new int[0];

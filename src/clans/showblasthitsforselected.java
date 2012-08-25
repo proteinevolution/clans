@@ -12,7 +12,7 @@ import java.util.*;
 public class showblasthitsforselected extends javax.swing.JFrame {
     
     /** Creates new form shownamedialog */
-    public showblasthitsforselected(clustermain_graphics parent, int[] blasthits,int[] selectednames) {
+    public showblasthitsforselected(ClusteringWithGui parent, int[] blasthits,int[] selectednames) {
         this.parent=parent;
         this.blasthits=blasthits;
         this.selectednames=selectednames;
@@ -196,7 +196,7 @@ public class showblasthitsforselected extends javax.swing.JFrame {
     
     String[] namesarr;
     String[] blastnamesarr;
-    clustermain_graphics parent;
+    ClusteringWithGui parent;
     boolean showall=true;
     int[] selectednames;
     int[] globalselected=new int[0];

@@ -11,7 +11,7 @@ package clans;
 public class optionsdialog extends javax.swing.JFrame {
     
     /** Creates new form optionsdialog */
-    public optionsdialog(clustermain_graphics parent) {
+    public optionsdialog(ClusteringWithGui parent) {
         this.parent=parent;
         this.setTitle("CLANS options");
         initComponents();
@@ -289,7 +289,7 @@ public class optionsdialog extends javax.swing.JFrame {
     //    new optionsdialog(new javax.swing.JFrame(), true).show();
     //}
     
-    clustermain_graphics parent=null;
+    ClusteringWithGui parent=null;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JTextField attfield;

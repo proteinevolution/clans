@@ -18,7 +18,7 @@ public class viewblasthits extends javax.swing.JDialog {
         initComponents();
     }
     
-    public viewblasthits(clustermain_graphics parent,hsp[] hsparr,int referenceseqnum,String[] namearr,AminoAcidSequence refseq,HashMap nameshash) {
+    public viewblasthits(ClusteringWithGui parent,hsp[] hsparr,int referenceseqnum,String[] namearr,AminoAcidSequence refseq,HashMap nameshash) {
         //super(parent, false);
         this.parent=parent;
         this.hsparr=hsparr;
@@ -151,7 +151,7 @@ public class viewblasthits extends javax.swing.JDialog {
     //    new viewblasthits(new javax.swing.JFrame(), true).show();
     //}
     
-    clustermain_graphics parent;
+    ClusteringWithGui parent;
     hsp[] hsparr;
     int referenceseqnum;
     AminoAcidSequence referenceseq;

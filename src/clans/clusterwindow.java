@@ -17,7 +17,7 @@ public class clusterwindow extends javax.swing.JDialog {
     //    initComponents();
     //}
     
-    public clusterwindow(clustermain_graphics parent, Vector clustervec,String label,boolean didbootstrap){
+    public clusterwindow(ClusteringWithGui parent, Vector clustervec,String label,boolean didbootstrap){
         //super(parent, false);
         this.parent=parent;
         this.clustervec=clustervec;
@@ -216,7 +216,7 @@ public class clusterwindow extends javax.swing.JDialog {
     //    new clusterwindow(new javax.swing.JFrame(), true).show();
     //}
     
-    clustermain_graphics parent;
+    ClusteringWithGui parent;
     Vector clustervec;
     String[] clusternames;
     boolean didbootstrap=false;

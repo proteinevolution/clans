@@ -245,7 +245,7 @@ public class Main {
                         System.out.println("...reading data");
                         clusterdata myclusterdata=new clusterdata(blasthits,inaln,namearr,nameshash,eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                         myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
-                        clustermain_graphics myclusterer=new clustermain_graphics(myclusterdata);
+                        ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                         myclusterer.setVisible(true);
                         //clustertest myclustertest=new clustertest(blasthits,inaln,namearr,nameshash,eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                         //myclustertest.setVisible(true);
@@ -323,7 +323,7 @@ public class Main {
                     System.out.println("...reading data");
                     clusterdata myclusterdata=new clusterdata(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
-                    clustermain_graphics myclusterer=new clustermain_graphics(myclusterdata);
+                    ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.initaddedseqs(blasthits,allaln,allnamearr,allnameshash,newnumarr,allposarr,mymaxmove,mypval,true);
                     readdata=null;
                     myclusterer.setVisible(true);
@@ -350,7 +350,7 @@ public class Main {
                     System.out.println("...reading data");
                     clusterdata myclusterdata=new clusterdata(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
-                    clustermain_graphics myclusterer=new clustermain_graphics(myclusterdata);
+                    ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.initaddedseqs(readdata.blasthits,readdata.inaln,namearr,nameshash,new int[0],readdata.posarr,readdata.maxmove,readdata.pval,false);
                     readdata=null;
                     myclusterer.setVisible(true);
@@ -399,7 +399,7 @@ public class Main {
                     System.out.println("LOADING data from '"+loadsaved+"'");
                     clusterdata myclusterdata=new clusterdata(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
-                    clustermain_graphics myclusterer=new clustermain_graphics(myclusterdata);
+                    ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.setVisible(true);
 
                 }else{

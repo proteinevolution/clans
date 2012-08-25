@@ -12,7 +12,7 @@ import java.util.*;
 public class affygetgraphcorrdialog extends javax.swing.JFrame {
     
     /** Creates new form affygetgraphcorrdialog */
-    public affygetgraphcorrdialog(clustermain_graphics map, affydialog parent) {
+    public affygetgraphcorrdialog(ClusteringWithGui map, affydialog parent) {
         initComponents();
         this.map=map;
         this.parent=parent;
@@ -225,7 +225,7 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
     //    new affygetgraphcorrdialog().show();
     //}
     
-    clustermain_graphics map=null;
+    ClusteringWithGui map=null;
     affydialog parent=null;
     drawpanel draw1=new drawpanel();
     Vector datavec=null;

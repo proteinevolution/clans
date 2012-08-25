@@ -20,7 +20,7 @@ import java.util.*;
 public class ncbitaxonomydialog extends javax.swing.JFrame {
 
     /** Creates new form ncbitaxonomydialog */
-    public ncbitaxonomydialog(clustermain_graphics parent) {
+    public ncbitaxonomydialog(ClusteringWithGui parent) {
         this.parent=parent;
         initComponents();
         if(parent.namesdmp_file!=null){
@@ -599,7 +599,7 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
     //    });
     //}
 
-    clustermain_graphics parent=null;
+    ClusteringWithGui parent=null;
     static final javax.swing.JFileChooser fc=new javax.swing.JFileChooser(new File("."));
     HashMap <String,String[]> nameshash=new HashMap<String,String[]>();//lookup names--> nodes and nodes--> nodes and nodes--> names
     boolean didload=false;

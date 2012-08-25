@@ -13,14 +13,14 @@ import java.io.*;
  *
  * @author  tancred
  */
-public class clustermain_graphics extends javax.swing.JFrame {
+public class ClusteringWithGui extends javax.swing.JFrame {
     
     /** Creates new form clustertest */
-    public clustermain_graphics() {
+    public ClusteringWithGui() {
         initComponents();
     }
     
-    public clustermain_graphics(clusterdata data){//minhsp[] blasthits,aaseq[] inaln, String[] namearr,HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
+    public ClusteringWithGui(clusterdata data){//minhsp[] blasthits,aaseq[] inaln, String[] namearr,HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
     	draw1=new drawpanel();
         //System.out.println("started clustertest");
         initComponents();
@@ -5318,7 +5318,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
     
     class computethread extends java.lang.Thread{
         
-        public computethread(clustermain_graphics parent){
+        public computethread(ClusteringWithGui parent){
             this.parent=parent;
             this.didrun=false;
             this.stop=false;
@@ -5328,7 +5328,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         boolean didrun=false;
         String tmpstr="";
         float tmpcool=1;
-        clustermain_graphics parent;
+        ClusteringWithGui parent;
         
 @Override
         public void run(){

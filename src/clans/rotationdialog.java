@@ -11,7 +11,7 @@ package clans;
 public class rotationdialog extends javax.swing.JFrame {
     
     /** Creates new form optionsdialog */
-    public rotationdialog(clustermain_graphics parent) {
+    public rotationdialog(ClusteringWithGui parent) {
         this.parent=parent;
         this.setTitle("Rotation");
         initComponents();
@@ -178,7 +178,7 @@ public class rotationdialog extends javax.swing.JFrame {
     //    new optionsdialog(new javax.swing.JFrame(), true).show();
     //}
     
-    clustermain_graphics parent=null;
+    ClusteringWithGui parent=null;
     float xrot=0;
     float yrot=0;
     long minms=0;

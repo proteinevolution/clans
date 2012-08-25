@@ -17,7 +17,7 @@ import java.io.*;
 public class mapfunctiondialog_tab extends javax.swing.JFrame {
     
     /** Creates new form mapfunctiondialog */
-    public mapfunctiondialog_tab(clustermain_graphics parent) {
+    public mapfunctiondialog_tab(ClusteringWithGui parent) {
         this.parent=parent;
         initComponents();
         makenameshash();
@@ -448,7 +448,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     
-    clustermain_graphics parent=null;
+    ClusteringWithGui parent=null;
     JFileChooser fc=new JFileChooser(new File("."));
     //mapnode map=new mapnode();
     ArrayList maplist=new ArrayList();

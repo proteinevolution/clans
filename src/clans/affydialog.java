@@ -14,7 +14,7 @@ import java.io.*;
 public class affydialog extends javax.swing.JFrame {
     
     /** Creates new form affydialog */
-    public affydialog(clustermain_graphics parent) {
+    public affydialog(ClusteringWithGui parent) {
         this.parent=parent;
         initComponents();
         if(parent.avgfoldchange==true){
@@ -605,7 +605,7 @@ public class affydialog extends javax.swing.JFrame {
     //    new affydialog().show();
     //}
     
-    clustermain_graphics parent;
+    ClusteringWithGui parent;
     JFileChooser fc=new JFileChooser(new File("."));
     File[] wtfiles=null;
     Vector datanamesvec=new Vector();//names for the data elements

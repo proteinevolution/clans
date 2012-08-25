@@ -12,7 +12,7 @@ package clans;
 public class changecolordialog extends javax.swing.JDialog {
 
     /** Creates new form changecolordialog */
-    public changecolordialog(clustermain_graphics parent, boolean modal) {
+    public changecolordialog(ClusteringWithGui parent, boolean modal) {
         super(parent, modal);
         this.parent = parent;
         this.colornum = java.lang.reflect.Array.getLength(colorarr);
@@ -598,12 +598,12 @@ public class changecolordialog extends javax.swing.JDialog {
     static java.awt.Color[] colorarr = new java.awt.Color[2];
     drawpanel draw1;
     javax.swing.JColorChooser colorchooser = new javax.swing.JColorChooser();
-    clustermain_graphics parent;
+    ClusteringWithGui parent;
     int colornum;
     static double ln10 = java.lang.Math.log(10);
     boolean data2d = false;//has parent loaded in 2d
 
-    public static void changecolor(clustermain_graphics parent, java.awt.Color[] incolorarr) {
+    public static void changecolor(ClusteringWithGui parent, java.awt.Color[] incolorarr) {
         //this should replace the colors in colorarr with new ones
         colorarr = incolorarr;
         new changecolordialog(parent, false).setVisible(true);
