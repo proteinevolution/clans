@@ -61,7 +61,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.seqlengths=new float[data.seqnum];
         float maxlength=0;
         for(int i=0;i<data.seqnum;i++){
-            data.seqlengths[i]=data.inaln[i].seq.length();
+            data.seqlengths[i]=data.sequences[i].seq.length();
             if(data.seqlengths[i]>maxlength){
                 maxlength=data.seqlengths[i];
             }
@@ -135,9 +135,9 @@ public class clustermain_graphics extends javax.swing.JFrame {
             //If I have had errors up to this point
             new errwindow(this,true,data.errbuff.toString()).setVisible(true);
         }
-        if(data.loadsaved!=null){
-            System.out.println("loading data from "+data.loadsaved);
-            loaddata(data.loadsaved);
+        if(data.input_filename!=null){
+            System.out.println("loading data from "+data.input_filename);
+            loaddata(data.input_filename);
         }
     }// end init
     
@@ -976,7 +976,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             StringBuffer outbuff=new StringBuffer();
             for(int i=0;i<seqnum;i++){
                 outbuff.append(">"+data.namearr[data.selectednames[i]]+" "+data.selectednames[i]+"\n");
-                outbuff.append(data.inaln[data.selectednames[i]].seq+"\n");
+                outbuff.append(data.sequences[data.selectednames[i]].seq+"\n");
             }//end for i
             new showsequences(new javax.swing.JFrame(),outbuff).setVisible(true);
         }
@@ -1153,16 +1153,16 @@ public class clustermain_graphics extends javax.swing.JFrame {
             saverunobject saveddata=customutils.loadrunalternate(fc.getSelectedFile());
             if(saveddata.file!=null){//if the data was read all right
                 repaint="Error Loading Data";
-                data.inaln=ClusterMethods.rmgaps(saveddata.inaln);
-                int seqs=java.lang.reflect.Array.getLength(data.inaln);
+                data.sequences=ClusterMethods.remove_gaps_from_sequences(saveddata.inaln);
+                int seqs=java.lang.reflect.Array.getLength(data.sequences);
                 data.nameshash=new HashMap((int)(seqs/0.75)+1,(float)0.75);//holds info about which name is which array number
                 data.namearr=new String[seqs];
                 data.myposarr=new float[seqs][3];
                 Random rand=ClusterMethods.rand;
                 for(int i=0;i<seqs;i++){
-                    data.namearr[i]=data.inaln[i].name.trim();
-                    data.inaln[i].name=new String("sequence"+i);
-                    data.nameshash.put(data.inaln[i].name,new Integer(i));
+                    data.namearr[i]=data.sequences[i].name.trim();
+                    data.sequences[i].name=new String("sequence"+i);
+                    data.nameshash.put(data.sequences[i].name,new Integer(i));
                     data.myposarr[i][0]=rand.nextFloat();
                     data.myposarr[i][1]=rand.nextFloat();
                     data.myposarr[i][2]=rand.nextFloat();
@@ -1215,7 +1215,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.seqlengths=new float[seqnum];
         float maxlength=0;
         for(int i=0;i<seqnum;i++){
-            data.seqlengths[i]=data.inaln[i].seq.replaceAll("-","").length();
+            data.seqlengths[i]=data.sequences[i].seq.replaceAll("-","").length();
             if(data.seqlengths[i]>maxlength){
                 maxlength=data.seqlengths[i];
             }
@@ -1511,9 +1511,9 @@ public class clustermain_graphics extends javax.swing.JFrame {
             return;
         }
         //get the blast hits to this sequence
-        hsp[] thishsp=(new viewblasthitsutils()).gethsps(referenceseqnum,data.inaln,data.cmd,data.formatdbpath,data.blastpath,data.addblastvbparam,data.referencedb,data.mineval,data.minpval);
+        hsp[] thishsp=(new viewblasthitsutils()).gethsps(referenceseqnum,data.sequences,data.cmd,data.formatdbpath,data.blastpath,data.addblastvbparam,data.referencedb,data.mineval,data.minpval);
         //plot these blast hits on to the sequence
-        viewblasthits myview=new viewblasthits(this,thishsp,referenceseqnum,data.namearr,data.inaln[referenceseqnum],data.nameshash);
+        viewblasthits myview=new viewblasthits(this,thishsp,referenceseqnum,data.namearr,data.sequences[referenceseqnum],data.nameshash);
         viewblasthitsvec.addElement(myview);
         myview.setVisible(true);
     }//GEN-LAST:event_getblasthitsmenuitemActionPerformed
@@ -1659,7 +1659,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         parentnameshash.addElement(data.nameshash);
         data.nameshash=new HashMap((int)(selectednum/0.75)+1,(float)0.75);//holds info about which name is which array number
         for(int i=0;i<selectednum;i++){
-            data.nameshash.put(data.inaln[data.selectednames[i]].name,new Integer(i));
+            data.nameshash.put(data.sequences[data.selectednames[i]].name,new Integer(i));
         }
         if(data.blasthits!=null){
             parentblasthits.addElement(data.blasthits);
@@ -1679,8 +1679,8 @@ public class clustermain_graphics extends javax.swing.JFrame {
         }
         parentposarr.addElement(data.myposarr);
         data.myposarr=zoomdata.getmyposarrsubset(data.myposarr,data.selectednames);
-        parentaln.addElement(data.inaln);
-        data.inaln=zoomdata.getinalnsubset(data.inaln,data.selectednames);
+        parentaln.addElement(data.sequences);
+        data.sequences=zoomdata.getinalnsubset(data.sequences,data.selectednames);
         parentnamearr.addElement(data.namearr);
         data.namearr=zoomdata.getnamearrsubset(data.namearr,data.selectednames);
         data.selectednames=new int[0];
@@ -1741,7 +1741,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         parentmovearr.removeElementAt(level);
         data.myposarr=(float[][])parentposarr.elementAt(level);
         parentposarr.removeElementAt(level);
-        data.inaln=(aaseq[])parentaln.elementAt(level);
+        data.sequences=(AminoAcidSequence[])parentaln.elementAt(level);
         parentaln.removeElementAt(level);
         data.namearr=(String[])parentnamearr.elementAt(level);
         parentnamearr.removeElementAt(level);
@@ -1813,7 +1813,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         parentnameshash.addElement(data.nameshash);
         data.nameshash=new HashMap((int)(selectednum/0.75)+1,(float)0.75);//holds info about which name is which array number
         for(int i=0;i<selectednum;i++){
-            data.nameshash.put(data.inaln[data.selectednames[i]].name,new Integer(i));
+            data.nameshash.put(data.sequences[data.selectednames[i]].name,new Integer(i));
         }
         if(data.blasthits!=null){
             parentblasthits.addElement(data.blasthits);
@@ -1823,8 +1823,8 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.mymovearr=zoomdata.getmymovearrsubset(data.mymovearr,data.selectednames);
         parentposarr.addElement(data.myposarr);
         data.myposarr=zoomdata.getmyposarrsubset(data.myposarr,data.selectednames);
-        parentaln.addElement(data.inaln);
-        data.inaln=zoomdata.getinalnsubset(data.inaln,data.selectednames);
+        parentaln.addElement(data.sequences);
+        data.sequences=zoomdata.getinalnsubset(data.sequences,data.selectednames);
         parentnamearr.addElement(data.namearr);
         data.namearr=zoomdata.getnamearrsubset(data.namearr,data.selectednames);
         parentweights.addElement(data.weights);
@@ -1888,7 +1888,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         }
         int returnVal = fc.showSaveDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
-            aaseq[] selectedseqs=getselectedseqs();
+            AminoAcidSequence[] selectedseqs=getselectedseqs();
             if(java.lang.reflect.Array.getLength(selectedseqs)==0){
                 javax.swing.JOptionPane.showMessageDialog(this,"Please select some sequences");
                 return;
@@ -1926,7 +1926,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             }
             button_select_all_or_clear.setText("Select All");
         }else{//if nothing is selected, select all
-            int alnseqs=java.lang.reflect.Array.getLength(data.inaln);
+            int alnseqs=java.lang.reflect.Array.getLength(data.sequences);
             data.selectednames=new int[alnseqs];
             for(int i=0;i<alnseqs;i++){
                 data.selectednames[i]=i;
@@ -2304,7 +2304,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
     int level=0;
     Vector <float[][]> parentmovearr=new Vector<float[][]>();
     Vector <float[][]> parentposarr=new Vector<float[][]>();
-    Vector <aaseq[]> parentaln=new Vector<aaseq[]>();
+    Vector <AminoAcidSequence[]> parentaln=new Vector<AminoAcidSequence[]>();
     Vector <String[]> parentnamearr=new Vector<String[]>();
     Vector <HashMap> parentnameshash=new Vector<HashMap>();
     //don't define parentblasthits as once I add minhsp's and once I add minattvals
@@ -2647,7 +2647,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             System.err.println("Warning, you should stop the clustering thread before loading another file; stopping thread now");
             mythread.stop=true;
         }//else everything is OK
-        data.loadsaved=inname;
+        data.input_filename=inname;
         ClusterMethods.loaddata(data);
         textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
         if(data.blasthits==null){
@@ -2955,9 +2955,9 @@ public class clustermain_graphics extends javax.swing.JFrame {
     */
     //--------------------------------------------------------------------------
     
-    void initaddedseqs(minhsp[] blastvec,aaseq[]allaln,String[]allnamearr,HashMap allnameshash,int[]newnumarr,float[][]allposarr,float maxmove,double pval,boolean useselectedonly){
+    void initaddedseqs(minhsp[] blastvec,AminoAcidSequence[]allaln,String[]allnamearr,HashMap allnameshash,int[]newnumarr,float[][]allposarr,float maxmove,double pval,boolean useselectedonly){
         //initialize the necessary variable for the case where new sequences are added to an existing run.
-        data.inaln=allaln;
+        data.sequences=allaln;
         data.myposarr=allposarr;
         data.blasthits=blastvec;
         data.maxmove=maxmove;
@@ -2965,7 +2965,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         textfield_cutoff_value.setText(String.valueOf(data.minpval));
         textfield_info_min_blast_evalue.setText(String.valueOf(data.minpval));
         data.selectednames=newnumarr;
-        int seqs=java.lang.reflect.Array.getLength(data.inaln);
+        int seqs=java.lang.reflect.Array.getLength(data.sequences);
         data.nameshash=allnameshash;
         data.namearr=allnamearr;
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
@@ -2978,12 +2978,12 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.draworder=new ArrayList[0];
         data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
         moveselectedonly.setSelected(useselectedonly);
-        int seqnum=java.lang.reflect.Array.getLength(data.inaln);
+        int seqnum=java.lang.reflect.Array.getLength(data.sequences);
         System.out.println("seqnum="+seqnum);
         data.seqlengths=new float[seqnum];
         float maxlength=0;
         for(int i=0;i<seqnum;i++){
-            data.seqlengths[i]=data.inaln[i].seq.replaceAll("-","").length();
+            data.seqlengths[i]=data.sequences[i].seq.replaceAll("-","").length();
             if(data.seqlengths[i]>maxlength){
                 maxlength=data.seqlengths[i];
             }
@@ -2997,18 +2997,18 @@ public class clustermain_graphics extends javax.swing.JFrame {
     
     //--------------------------------------------------------------------------
     
-    aaseq[] getselectedseqs(){
+    AminoAcidSequence[] getselectedseqs(){
         //get the currently selected sequences
-        ArrayList <aaseq>tmpvec=new ArrayList<aaseq>();
+        ArrayList <AminoAcidSequence>tmpvec=new ArrayList<AminoAcidSequence>();
         int sequences=java.lang.reflect.Array.getLength(data.selectednames);
-        aaseq curraaseq;
+        AminoAcidSequence curraaseq;
         for(int i=0;i<sequences;i++){
-            curraaseq=new aaseq();
+            curraaseq=new AminoAcidSequence();
             curraaseq.name=data.namearr[data.selectednames[i]];
-            curraaseq.seq=data.inaln[data.selectednames[i]].seq;
+            curraaseq.seq=data.sequences[data.selectednames[i]].seq;
             tmpvec.add(curraaseq);
         }
-        aaseq[] retarr=(aaseq[]) tmpvec.toArray(new aaseq[0]);
+        AminoAcidSequence[] retarr=(AminoAcidSequence[]) tmpvec.toArray(new AminoAcidSequence[0]);
         return retarr;
     }//end getselectedseqs
     

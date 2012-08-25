@@ -11,10 +11,10 @@ package clans;
  */
 public class clusterdata {
 
-    public clusterdata(minhsp[] blasthits,aaseq[] inaln, String[] namearr,java.util.HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
+    public clusterdata(minhsp[] blasthits,AminoAcidSequence[] inaln, String[] namearr,java.util.HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
         //just a data carrier for all of the stuff I need during clustering
         this.blasthits=blasthits;
-        this.inaln=ClusterMethods.rmgaps(inaln);
+        this.sequences=ClusterMethods.remove_gaps_from_sequences(inaln);
         this.namearr=namearr;
         this.nameshash=nameshash;
         this.eval=eval;
@@ -29,13 +29,13 @@ public class clusterdata {
         this.formatdbpath=formatdbpath;
         this.referencedb=referencedb;
         this.errbuff=errbuff;
-        this.loadsaved=loadsaved;
+        this.input_filename=loadsaved;
         this.seqnum=java.lang.reflect.Array.getLength(namearr);
         this.movethreads=new getmovethread[cpu];
     }
     //variables initialized on creation
     minhsp[] blasthits=null;
-    aaseq[] inaln=null;
+    AminoAcidSequence[] sequences=null;
     String[] namearr=null;
     java.util.HashMap nameshash=null;
     double eval=-1;
@@ -50,7 +50,7 @@ public class clusterdata {
     String formatdbpath=null;
     String[] referencedb=null;
     StringBuffer errbuff=null;
-    String loadsaved=null;
+    String input_filename=null;
     //variables initialized later on
     boolean nographics=false;
     boolean complexatt=true;

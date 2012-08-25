@@ -321,7 +321,7 @@ public class ClusterMethods {
 	static void savetofile(java.io.File savetofile,clusterdata data){
         saverunobject myrun=new saverunobject();
         myrun.file=savetofile;
-        myrun.inaln=data.inaln;
+        myrun.inaln=data.sequences;
         myrun.blasthits=data.blasthits;
         myrun.attvals=data.myattvals;
         myrun.posarr=data.myposarr;
@@ -1058,125 +1058,127 @@ public class ClusterMethods {
     //--------------------------------------------------------------------------
 
     static void loaddata(clusterdata data){
-        String inname=data.loadsaved;
-        saverunobject saveddata=customutils.loadrun(new java.io.File(inname));
-        if(saveddata.file!=null){//if the data was read all right
-            System.out.println("File loaded:"+inname);
-            //repaint="Error loading data;";
-            data.inaln=rmgaps(saveddata.inaln);
-            data.myposarr=saveddata.posarr;
-            data.blasthits=saveddata.blasthits;
-            data.usescval=saveddata.usescval;
-            if(data.blasthits==null){
-                //first time I load myattvals; cannot be anything else; don't need to sync
-                data.myattvals=saveddata.attvals;
+        saverunobject saveddata = customutils.loadrun(new java.io.File(data.input_filename));
+        
+        if(saveddata.file == null){
+            System.err.println("ERROR reading saved data from '" + data.input_filename + "'; aborting read");
+            return;
+        }
+      
+        System.out.println("File loaded:"+data.input_filename);
+
+        data.sequences=remove_gaps_from_sequences(saveddata.inaln);
+
+        data.myposarr=saveddata.posarr;
+        data.blasthits=saveddata.blasthits;
+        data.usescval=saveddata.usescval;
+
+        if(data.blasthits==null){
+            //first time I load myattvals; cannot be anything else; don't need to sync
+            data.myattvals=saveddata.attvals;
+        }
+        
+        data.complexatt=saveddata.complexatt;
+        data.maxmove=saveddata.maxmove;
+        data.minpval=saveddata.pval;
+        data.cooling=saveddata.cooling;
+        data.currcool=saveddata.currcool;
+        data.attfactor=saveddata.attfactor;
+        data.repfactor=saveddata.repfactor;
+        data.attvalpow=saveddata.attvalpow;
+        data.repvalpow=saveddata.repvalpow;
+        data.dampening=saveddata.dampening;
+        data.minattract=saveddata.minattract;
+        data.weights=saveddata.weights;
+        data.mapfiles=saveddata.mapfiles;
+        data.lookupfiles=saveddata.lookupfiles;
+        data.affyfiles=saveddata.affyfiles;
+        data.usefoldchange=saveddata.usefoldchange;
+        data.avgfoldchange=saveddata.avgfoldchange;
+        data.namesdmp_file=saveddata.namesdmp_file;
+        data.nodesdmp_file=saveddata.nodesdmp_file;
+
+        //be careful not to overwrite any blastpath and formatdbpath setting passed via command line
+        if(data.blastpath.equals("blastall -p blastp")){//if it was not changed via command line
+            data.blastpath=saveddata.blastpath;
+        }
+        if(data.formatdbpath.equals("formatdb -p T")){//if it was not changed via command line
+            data.formatdbpath=saveddata.formatdbpath;
+        }
+        
+        data.zoomfactor=saveddata.zoom;
+        data.cluster2d=saveddata.cluster2d;
+        data.showinfo=saveddata.showinfo;
+        int number_of_sequences = data.sequences.length;
+        data.nameshash=new java.util.HashMap((int)(number_of_sequences/0.75)+1,(float)0.75);//holds info about which name is which array number
+        data.namearr=new String[number_of_sequences];
+        for(int i=0;i<number_of_sequences;i++){
+            data.namearr[i]=data.sequences[i].name.trim();
+            data.sequences[i].name = "sequence"+i;
+            data.nameshash.put(data.sequences[i].name,new Integer(i));
+        }
+        data.elements=data.namearr.length;
+        data.selectednames=new int[0];
+        data.posarr=data.myposarr;
+        data.lastmovearr=new float[data.elements][clusterdata.dimensions];
+        data.mymovearr=new float[data.elements][clusterdata.dimensions];
+        data.posarrtmp=new float[data.elements][clusterdata.dimensions];
+        data.drawarrtmp=new int[data.elements][clusterdata.dimensions];
+        data.draworder=new java.util.ArrayList[0];
+        
+        data.myrotmtx=saveddata.rotmtx;
+        for (int i = 0; i < 3; i ++){
+        	for (int j = 0; j < 3; j ++){
+        		data.rotmtx[i][j]=data.myrotmtx[i][j];
             }
-            data.complexatt=saveddata.complexatt;
-            //now set the graph values
-            data.maxmove=saveddata.maxmove;
-            data.minpval=saveddata.pval;
-            data.cooling=saveddata.cooling;
-            data.currcool=saveddata.currcool;
-            data.attfactor=saveddata.attfactor;
-            data.repfactor=saveddata.repfactor;
-            data.attvalpow=saveddata.attvalpow;
-            data.repvalpow=saveddata.repvalpow;
-            data.dampening=saveddata.dampening;
-            data.minattract=saveddata.minattract;
-            data.weights=saveddata.weights;
-            data.mapfiles=saveddata.mapfiles;
-            data.lookupfiles=saveddata.lookupfiles;
-            data.affyfiles=saveddata.affyfiles;
-            data.usefoldchange=saveddata.usefoldchange;
-            data.avgfoldchange=saveddata.avgfoldchange;
-            data.namesdmp_file=saveddata.namesdmp_file;
-            data.nodesdmp_file=saveddata.nodesdmp_file;
-            //be careful not to overwrite any blastpath and formatdbpath setting passed via command line
-            if(data.blastpath.equals("blastall -p blastp")){//if it was not changed via command line
-                data.blastpath=saveddata.blastpath;
+        }
+        
+        data.orgattvals=null;
+        //first time I load myattvals; don't need to sync as nothing else can be using this yet
+        data.myattvals=compute_attraction_values(data.blasthits,data.minpval,data);
+        data.dotsize=saveddata.dotsize;
+        data.ovalsize=saveddata.ovalsize;
+        data.groupsize=saveddata.groupsize;
+        data.polygons=makepolygons.get(data.groupsize);
+        data.seqgroupsvec=saveddata.seqgroupsvec;
+        if(data.seqgroupsvec.size()>0){
+            data.showseqgroups=true;
+        }
+        data.changedvals=true;
+
+        if(saveddata.colorarr!=null){
+            System.out.println("setting colorarr");
+            data.colorarr=saveddata.colorarr;
+        }
+        if(saveddata.colorcutoffs!=null){
+            System.out.println("setting colorcutoffs");
+            data.colorcutoffs=saveddata.colorcutoffs;
+        }
+        
+        data.rounds = saveddata.rounds;
+        
+        System.out.println("seqnum="+number_of_sequences);
+        data.seqlengths=new float[number_of_sequences];
+        float maxlength=0;
+        for(int i=0;i<number_of_sequences;i++){
+            data.seqlengths[i]=data.sequences[i].seq.length();
+            if(data.seqlengths[i]>maxlength){
+                maxlength=data.seqlengths[i];
             }
-            if(data.formatdbpath.equals("formatdb -p T")){//if it was not changed via command line
-                data.formatdbpath=saveddata.formatdbpath;
-            }
-            data.zoomfactor=saveddata.zoom;
-            data.cluster2d=saveddata.cluster2d;
-            data.showinfo=saveddata.showinfo;
-            int seqs=java.lang.reflect.Array.getLength(data.inaln);
-            data.nameshash=new java.util.HashMap((int)(seqs/0.75)+1,(float)0.75);//holds info about which name is which array number
-            data.namearr=new String[seqs];
-            for(int i=0;i<seqs;i++){
-                data.namearr[i]=data.inaln[i].name.trim();
-                data.inaln[i].name = "sequence"+i;
-                data.nameshash.put(data.inaln[i].name,new Integer(i));
-            }
-            data.elements=java.lang.reflect.Array.getLength(data.namearr);
-            data.selectednames=new int[0];
-            data.posarr=data.myposarr;
-            data.lastmovearr=new float[data.elements][clusterdata.dimensions];
-            data.mymovearr=new float[data.elements][clusterdata.dimensions];
-            data.posarrtmp=new float[data.elements][clusterdata.dimensions];
-            data.drawarrtmp=new int[data.elements][clusterdata.dimensions];
-            data.draworder=new java.util.ArrayList[0];
-            data.myrotmtx=saveddata.rotmtx;
-            data.rotmtx[0][0]=data.myrotmtx[0][0];
-            data.rotmtx[0][1]=data.myrotmtx[0][1];
-            data.rotmtx[0][2]=data.myrotmtx[0][2];
-            data.rotmtx[1][0]=data.myrotmtx[1][0];
-            data.rotmtx[1][1]=data.myrotmtx[1][1];
-            data.rotmtx[1][2]=data.myrotmtx[1][2];
-            data.rotmtx[2][0]=data.myrotmtx[2][0];
-            data.rotmtx[2][1]=data.myrotmtx[2][1];
-            data.rotmtx[2][2]=data.myrotmtx[2][2];
-            data.orgattvals=null;
-            //first time I load myattvals; don't need to sync as nothing else can be using this yet
-            data.myattvals=compute_attraction_values(data.blasthits,data.minpval,data);
-            data.dotsize=saveddata.dotsize;
-            data.ovalsize=saveddata.ovalsize;
-            data.groupsize=saveddata.groupsize;
-            data.polygons=makepolygons.get(data.groupsize);
-            data.seqgroupsvec=saveddata.seqgroupsvec;
-            if(data.seqgroupsvec.size()>0){
-                data.showseqgroups=true;
-            }
-            data.changedvals=true;
-            if(saveddata.colorarr!=null){
-                System.out.println("setting colorarr");
-                data.colorarr=saveddata.colorarr;
-            }
-            if(saveddata.colorcutoffs!=null){
-                System.out.println("setting colorcutoffs");
-                data.colorcutoffs=saveddata.colorcutoffs;
-            }
-            data.rounds = saveddata.rounds;
-            
-            int seqnum;
-            seqnum=java.lang.reflect.Array.getLength(data.inaln);
-            System.out.println("seqnum="+seqnum);
-            data.seqlengths=new float[seqnum];
-            float maxlength=0;
-            for(int i=0;i<seqnum;i++){
-                data.seqlengths[i]=data.inaln[i].seq.length();
-                if(data.seqlengths[i]>maxlength){
-                    maxlength=data.seqlengths[i];
-                }
-            }//end for i
-            for(int i=0;i<seqnum;i++){
-                data.seqlengths[i]/=maxlength;
-            }//end for i
-        }else{//if the data had errors
-            System.err.println("ERROR reading saved data from '"+inname+"'; aborting read");
-        }  
-    }//end loaddata
+        }
+        for(int i=0;i<number_of_sequences;i++){
+            data.seqlengths[i]/=maxlength;
+        }
+    }
 
     //--------------------------------------------------------------------------
 
-    static minattvals[] getattvals(minattvals[] inattvals,double minpval){
+    static minattvals[] getattvals(minattvals[] attractions, double minpval){
         //use for filtering attraction values [-1<0<1]; -1 and 1 are max repulse/attract
-        int attnum=java.lang.reflect.Array.getLength(inattvals);
         java.util.ArrayList <minattvals>retvec=new java.util.ArrayList<minattvals>();
-        for(int i=0;i<attnum;i++){
-            if((inattvals[i].att>=minpval) || (inattvals[i].att<=-minpval)){
-                retvec.add(inattvals[i]);
+        for(int i = 0; i < attractions.length; i++){
+            if((attractions[i].att >= minpval) || (attractions[i].att <= -minpval)){
+                retvec.add(attractions[i]);
             }
         }//end for i
         minattvals[] retarr=(minattvals[])retvec.toArray(new minattvals[0]);
@@ -1285,16 +1287,10 @@ public class ClusterMethods {
 
     //--------------------------------------------------------------------------
 
-    static aaseq[] rmgaps(aaseq[] inseqs){
-        int seqnum=java.lang.reflect.Array.getLength(inseqs);
-        for(int i=0;i<seqnum;i++){
+    static AminoAcidSequence[] remove_gaps_from_sequences(AminoAcidSequence[] inseqs){
+        for(int i=0; i < inseqs.length; i++){
             inseqs[i].seq=inseqs[i].seq.replaceAll("-","");
-        }//end for i
+        }
         return inseqs;
-    }//end rmgaps
-
-    //--------------------------------------------------------------------------
-    //-------------------------THREADS------------------------------------------
-    //--------------------------------------------------------------------------
-       
+    }
 }

@@ -24,7 +24,7 @@ public class searchblast {
     
     //--------------------------------------------------------------------------
     
-    public minhsp[] gethits(aaseq[] oldaln,minhsp[] oldblasthits,aaseq[] newaln,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,int exhaustive,boolean readblast,boolean newblast){
+    public minhsp[] gethits(AminoAcidSequence[] oldaln,minhsp[] oldblasthits,AminoAcidSequence[] newaln,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,int exhaustive,boolean readblast,boolean newblast){
         //get the blast hits for the new sequences (newaln) agains a concatenated database of old and new seqs
         System.out.println("doing searchblast for new sequences");
         int oldelements=java.lang.reflect.Array.getLength(oldaln);
@@ -34,7 +34,7 @@ public class searchblast {
         if(scval>=0){
             cutoff=scval;
         }
-        aaseq[] allaln=new aaseq[allelements];
+        AminoAcidSequence[] allaln=new AminoAcidSequence[allelements];
         for(int i=0;i<oldelements;i++){
             allaln[i]=oldaln[i];
         }//end for i
@@ -480,7 +480,7 @@ public class searchblast {
     
     //--------------------------------------------------------------------------
     
-    public minhsp[] gethits(aaseq[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval, float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,boolean readblast, boolean newblast){
+    public minhsp[] gethits(AminoAcidSequence[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval, float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,boolean readblast, boolean newblast){
         //run an all against all blast search and save the hsp's in vector[][]
         System.out.println("doing searchblast");
         File tmpfile=new File("tmpblasthsp.txt");
@@ -745,7 +745,7 @@ public class searchblast {
     
     //--------------------------------------------------------------------------
     
-    public minhsp[] gethits(minhsp[] blasthits,aaseq[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,int[] seqstodo,boolean readblast,boolean newblast){
+    public minhsp[] gethits(minhsp[] blasthits,AminoAcidSequence[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,int[] seqstodo,boolean readblast,boolean newblast){
         //do all blast runs for sequences present in seqstodo NOT FOR THE OTHERS (should only happen for interrupted runs)
         System.out.println("continuing searchblast");
         File tmpfile=new File("tmpblasthsp.txt");
@@ -989,7 +989,7 @@ public class searchblast {
 class blastthread extends java.lang.Thread{
     //this class should perform the blast run and filter the output according to coverage,scval,ident,etc.
     
-    public blastthread(searchblast parent,int allseqnum,String cmd,String blastpath,String blastdbname,aaseq query,double eval,double pval,float coverage,float scval,float ident,Vector[] retvecarr,HashMap nameshash,int verbose,Runtime rt,int threadnum,boolean useallrounds,String[] referencedb,boolean lowmem){
+    public blastthread(searchblast parent,int allseqnum,String cmd,String blastpath,String blastdbname,AminoAcidSequence query,double eval,double pval,float coverage,float scval,float ident,Vector[] retvecarr,HashMap nameshash,int verbose,Runtime rt,int threadnum,boolean useallrounds,String[] referencedb,boolean lowmem){
         this.parent=parent;
         this.allseqnum=allseqnum;
         this.cmd=cmd;
@@ -1044,7 +1044,7 @@ class blastthread extends java.lang.Thread{
     String blastpath;
     String blastdbname;
     String[] referencedb;
-    aaseq query;
+    AminoAcidSequence query;
     double eval;
     double pval;
     float coverage;

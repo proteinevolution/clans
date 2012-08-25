@@ -41,7 +41,7 @@ public class searchblastv2 {
     boolean addblastvbparam;
     boolean isblastplus;
     boolean readblast = true;//check for old blast results
-    final Vector<aaseq> queryvec = new Vector<aaseq>();//will synchronize over this, hence final!
+    final Vector<AminoAcidSequence> queryvec = new Vector<AminoAcidSequence>();//will synchronize over this, hence final!
     final Integer syncdone = new Integer(1);//synchronize the "thread done" checks on this one
     final Integer filesync = new Integer(1);//synchronize writing to a file on this one
     int cpu = 1;
@@ -60,7 +60,7 @@ public class searchblastv2 {
     HashMap<String, Integer> nameshash;
 
     //I need a method to get hits for a full set of sequences
-    public minhsp[] gethits(aaseq[] queryseqs) {
+    public minhsp[] gethits(AminoAcidSequence[] queryseqs) {
         int allseqnum = java.lang.reflect.Array.getLength(queryseqs);
         //first set up the queryvec with the sequences to search for
         for (int i = java.lang.reflect.Array.getLength(queryseqs); --i >= 0;) {
@@ -402,7 +402,7 @@ public class searchblastv2 {
         public void run() {
             //check to see if there is sth assigned to the query
             //now get all of the queries you want to run the blast for in this block
-            aaseq[] myqueries;
+            AminoAcidSequence[] myqueries;
             synchronized (syncdone) {
                 done = false;
                 synchronized (queryvec) {
@@ -413,12 +413,12 @@ public class searchblastv2 {
                         return;
                     }
                     if (queryvec.size() > blastblock) {
-                        myqueries = new aaseq[blastblock];
+                        myqueries = new AminoAcidSequence[blastblock];
                         for (int i = blastblock; --i >= 0;) {
                             myqueries[i] = queryvec.remove(0);
                         }//end for i
                     } else {
-                        myqueries = new aaseq[queryvec.size()];
+                        myqueries = new AminoAcidSequence[queryvec.size()];
                         for (int i = queryvec.size(); --i >= 0;) {
                             myqueries[i] = queryvec.remove(0);
                         }//end for i
@@ -494,7 +494,7 @@ public class searchblastv2 {
                 //write the query to a file instead of using stdin; !stdin gives problems!
                 PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(tmpfilestring)));
                 synchronized (queryvec) {
-                    aaseq currquery;
+                    AminoAcidSequence currquery;
                     for (int i = java.lang.reflect.Array.getLength(myqueries); --i >= 0;) {
                         currquery = myqueries[i];
                         outwrite.println(">" + currquery.name);

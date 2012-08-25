@@ -18,12 +18,12 @@ public class viewblasthits extends javax.swing.JDialog {
         initComponents();
     }
     
-    public viewblasthits(clustermain_graphics parent,hsp[] hsparr,int referenceseqnum,String[] namearr,aaseq refseq,HashMap nameshash) {
+    public viewblasthits(clustermain_graphics parent,hsp[] hsparr,int referenceseqnum,String[] namearr,AminoAcidSequence refseq,HashMap nameshash) {
         //super(parent, false);
         this.parent=parent;
         this.hsparr=hsparr;
         this.referenceseqnum=referenceseqnum;
-        this.referenceseq=parent.data.inaln[referenceseqnum];
+        this.referenceseq=parent.data.sequences[referenceseqnum];
         this.namearr=namearr;
         this.refseq=refseq;
         this.charseq=refseq.seq.toCharArray();
@@ -154,12 +154,12 @@ public class viewblasthits extends javax.swing.JDialog {
     clustermain_graphics parent;
     hsp[] hsparr;
     int referenceseqnum;
-    aaseq referenceseq;
+    AminoAcidSequence referenceseq;
     String[] namearr;
     HashMap nameshash;
     drawdetail draw1;
     drawoverview draw2;
-    aaseq refseq;
+    AminoAcidSequence refseq;
     int seqlength;
     char[] charseq;
     int[] hitsarr=new int[0];

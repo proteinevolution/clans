@@ -16,7 +16,7 @@ public class viewblasthitsutils {
     public viewblasthitsutils() {
     }
     
-    hsp[] gethsps(int referenceseqnum,aaseq[] inaln,String cmd,String formatdbpath,String blastpath,boolean addblastvbparam,String[] referencedb,double mineval,double minpval){
+    hsp[] gethsps(int referenceseqnum,AminoAcidSequence[] inaln,String cmd,String formatdbpath,String blastpath,boolean addblastvbparam,String[] referencedb,double mineval,double minpval){
         //get all the blast hits to this sequence.
         Vector retvec=new Vector();
         String basename=String.valueOf(System.currentTimeMillis());

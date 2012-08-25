@@ -1,11 +1,11 @@
 
 package clans;
 
-public class aaseq{
+public class AminoAcidSequence{
         
-    public aaseq(){}
+    public AminoAcidSequence(){}
     
-    public aaseq(String name, String seq){
+    public AminoAcidSequence(String name, String seq){
         this.name=name;
         this.seq=seq;
     }

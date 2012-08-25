@@ -575,7 +575,7 @@ public class customutils {
                     } catch (NumberFormatException ne) {
                         System.err.println("Error parsing int from '" + inline.substring(10) + "'");
                     }
-                    myrun.inaln = new aaseq[seqs];
+                    myrun.inaln = new AminoAcidSequence[seqs];
                     myrun.posarr = new float[seqs][3];
                     myrun.blasthits = new minhsp[0];
                     continue;
@@ -926,7 +926,7 @@ public class customutils {
                             //read the sequence data
                             if (inline.startsWith(">")) {
                                 if (currname.length() > 0) {
-                                    myrun.inaln[counter] = new aaseq();
+                                    myrun.inaln[counter] = new AminoAcidSequence();
                                     myrun.inaln[counter].name = currname;
                                     myrun.inaln[counter].seq = currseq;
                                     counter++;
@@ -937,7 +937,7 @@ public class customutils {
                                 currseq += inline;
                             }
                         }//end seq part
-                        myrun.inaln[counter] = new aaseq();
+                        myrun.inaln[counter] = new AminoAcidSequence();
                         myrun.inaln[counter].name = currname;
                         myrun.inaln[counter].seq = currseq;
                         counter++;
@@ -1439,10 +1439,10 @@ public class customutils {
         //now make an array out of the arrayList
         myrun.attvals = (minattvals[]) datlist.toArray(new minattvals[0]);
         java.util.Random rand = new java.util.Random(System.currentTimeMillis());
-        myrun.inaln = new aaseq[namelist.size()];
+        myrun.inaln = new AminoAcidSequence[namelist.size()];
         myrun.posarr = new float[namelist.size()][3];
         for (int i = namelist.size(); --i >= 0;) {
-            myrun.inaln[i] = new aaseq(((String) namelist.get(i)), "");
+            myrun.inaln[i] = new AminoAcidSequence(((String) namelist.get(i)), "");
             myrun.posarr[i][0] = rand.nextFloat();
             myrun.posarr[i][1] = rand.nextFloat();
             myrun.posarr[i][2] = rand.nextFloat();
@@ -1484,7 +1484,7 @@ public class customutils {
                     } catch (NumberFormatException ne) {
                         System.err.println("Error parsing int from '" + inline.substring(10) + "'");
                     }
-                    myrun.inaln = new aaseq[seqs];
+                    myrun.inaln = new AminoAcidSequence[seqs];
                     myrun.posarr = new float[seqs][3];
                     myrun.blasthits = null;
                     continue;
@@ -1504,7 +1504,7 @@ public class customutils {
                             //read the sequence data
                             if (inline.startsWith(">")) {
                                 if (currname.length() > 0) {
-                                    myrun.inaln[counter] = new aaseq();
+                                    myrun.inaln[counter] = new AminoAcidSequence();
                                     myrun.inaln[counter].name = currname;
                                     myrun.inaln[counter].seq = currseq;
                                     counter++;
@@ -1515,7 +1515,7 @@ public class customutils {
                                 currseq += inline;
                             }
                         }//end seq part
-                        myrun.inaln[counter] = new aaseq();
+                        myrun.inaln[counter] = new AminoAcidSequence();
                         myrun.inaln[counter].name = currname;
                         myrun.inaln[counter].seq = currseq;
                         counter++;

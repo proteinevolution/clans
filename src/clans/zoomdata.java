@@ -87,9 +87,9 @@ public class zoomdata {
     
     //--------------------------------------------------------------------------
     
-    static aaseq[] getinalnsubset(aaseq[] inaln,int[] selectednames){
+    static AminoAcidSequence[] getinalnsubset(AminoAcidSequence[] inaln,int[] selectednames){
         int elements=java.lang.reflect.Array.getLength(selectednames);
-        aaseq[] retarr=new aaseq[elements];
+        AminoAcidSequence[] retarr=new AminoAcidSequence[elements];
         for(int i=0;i<elements;i++){
             retarr[i]=inaln[selectednames[i]];
         }//end for i

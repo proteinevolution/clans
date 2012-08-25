@@ -16,7 +16,7 @@ public class printout {
     public printout() {
     }
     
-    static void printaln(aaseq[] inaln,String outfilename, String oformat, int blocksize){
+    static void printaln(AminoAcidSequence[] inaln,String outfilename, String oformat, int blocksize){
         //print the working alignment to file outfilename in the specified format
         if(oformat.equalsIgnoreCase("clustal")){
             printclustal(inaln,outfilename,blocksize);
@@ -27,7 +27,7 @@ public class printout {
     
     //--------------------------------------------------------------------------
     
-    static void printconf(aaseq[] inaln, double[][] confarr, String outfilename, String oformat, int blocksize){
+    static void printconf(AminoAcidSequence[] inaln, double[][] confarr, String outfilename, String oformat, int blocksize){
         //print the position specific confidences for each sequence
         if(oformat.equalsIgnoreCase("clustal")){
             printclustal(inaln,confarr,outfilename,blocksize);
@@ -38,14 +38,14 @@ public class printout {
     
     //--------------------------------------------------------------------------
     
-    static void printfiltered(aaseq[] inaln, double[][] confarr, String outfilename, String oformat, int blocksize, float filtercutoff){
+    static void printfiltered(AminoAcidSequence[] inaln, double[][] confarr, String outfilename, String oformat, int blocksize, float filtercutoff){
         //print the input alignment filtered for confidence.
         //replace low confidence residues by dashes
         int elements=java.lang.reflect.Array.getLength(inaln);
         int seqlength=inaln[0].seq.length();
-        aaseq[] tmpaln=new aaseq[elements];
+        AminoAcidSequence[] tmpaln=new AminoAcidSequence[elements];
         for(int i=0;i<elements;i++){
-            tmpaln[i]=new aaseq();
+            tmpaln[i]=new AminoAcidSequence();
             tmpaln[i].name=inaln[i].name;
             tmpaln[i].seq=inaln[i].seq;
         }//end for i
@@ -75,7 +75,7 @@ public class printout {
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
     
-    static void printfasta(aaseq[] inaln, String outfilename){
+    static void printfasta(AminoAcidSequence[] inaln, String outfilename){
         //print the alignment in fasta format
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfilename)));
@@ -91,7 +91,7 @@ public class printout {
         }
     }//end printfasta
     
-    static void printfasta(aaseq[] inaln, File outfile){
+    static void printfasta(AminoAcidSequence[] inaln, File outfile){
         //print the alignment in fasta format
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfile)));
@@ -107,7 +107,7 @@ public class printout {
         }
     }//end printfasta
     
-    static void printfasta(aaseq[] inaln, double[][] confarr, String outfilename){
+    static void printfasta(AminoAcidSequence[] inaln, double[][] confarr, String outfilename){
         //print the confarr in fasta format
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfilename)));
@@ -135,7 +135,7 @@ public class printout {
     
     //--------------------------------------------------------------------------
     
-    static void printclustal(aaseq[] inaln, String outfilename, int blocksize){
+    static void printclustal(AminoAcidSequence[] inaln, String outfilename, int blocksize){
         //print the alignment in clustal format
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfilename)));
@@ -189,7 +189,7 @@ public class printout {
         }
     }//end printclustal
     
-    static void printclustal(aaseq[] inaln, double[][] confarr, String outfilename, int blocksize){
+    static void printclustal(AminoAcidSequence[] inaln, double[][] confarr, String outfilename, int blocksize){
         //print the confarr in clustal format
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfilename)));

@@ -43,7 +43,7 @@ public class ClusteringWithoutGui {
             System.err.println("Warning, you should stop the clustering thread before loading another file; stopping thread now");
             mythread.stop=true;
         }//else everything is OK
-        data.loadsaved=inname;
+        data.input_filename=inname;
         ClusterMethods.loaddata(data);
     }//end loaddata
 

@@ -18,7 +18,7 @@ public class enrichutils {
     
     //--------------------------------------------------------------------------
     
-    aaseq[] enrich(aaseq[] inseqs, String cmd, String blastpath, String formatdbpath, String[] referencedb, int cpu, double findeval, double rmsimeval, int maxseqs){
+    AminoAcidSequence[] enrich(AminoAcidSequence[] inseqs, String cmd, String blastpath, String formatdbpath, String[] referencedb, int cpu, double findeval, double rmsimeval, int maxseqs){
         //This "enriches" an input seq of sequences with similar but not too similar sequences from referencedb.
         //take each sequence in inseqs, do a blast/psiblast against the reference databases, and get all hits
         //better than findeval. NxN blast on this dataset should then give pairwise similarities. use these to
@@ -36,13 +36,13 @@ public class enrichutils {
         //now I have all sequences I want to reblast.
         //now get the full length sequences
         System.out.println("extracting sequences:");
-        aaseq[] tmpseqs=getsequences(hitnames,referencedb);
+        AminoAcidSequence[] tmpseqs=getsequences(hitnames,referencedb);
         System.out.println("done extracting; sequences="+java.lang.reflect.Array.getLength(tmpseqs));
         //add the inseqs to the tmpseqs
         for(int i=java.lang.reflect.Array.getLength(tmpseqs)-1;i>=0;i--){
             seqvec.add(tmpseqs[i]);
         }//end for i
-        tmpseqs=new aaseq[seqvec.size()];
+        tmpseqs=new AminoAcidSequence[seqvec.size()];
         seqvec.copyInto(tmpseqs);
         seqvec.clear();
         //and then get the blast hit similarities matrix
@@ -105,7 +105,7 @@ public class enrichutils {
     
     //--------------------------------------------------------------------------
     
-    aaseq[] filterseqs(aaseq[] inseqs, aaseq[] tmpseqs, double rmsimeval, int maxseqnum,double[][] simmtx,HashMap seqshash){
+    AminoAcidSequence[] filterseqs(AminoAcidSequence[] inseqs, AminoAcidSequence[] tmpseqs, double rmsimeval, int maxseqnum,double[][] simmtx,HashMap seqshash){
         //filter the sequences by maximum permissible similarity
         //however I want to keep the original input sequences!
         /*loop through the inseqs and remove all sequences from tmpseqs with similarities > rmsimeval.
@@ -189,7 +189,7 @@ public class enrichutils {
                 tmpvec.addElement(tmpseqs[i]);
             }
         }//end for i
-        aaseq[] retarr=new aaseq[tmpvec.size()];
+        AminoAcidSequence[] retarr=new AminoAcidSequence[tmpvec.size()];
         tmpvec.copyInto(retarr);
         return retarr;
     }//end fileterseqs
@@ -401,7 +401,7 @@ public class enrichutils {
     
     //--------------------------------------------------------------------------
     
-    String[] getblasthits(aaseq[] inseqs,String cmd, String blastpath, String[] referencedb, int cpu, double findeval, double rmsimeval){
+    String[] getblasthits(AminoAcidSequence[] inseqs,String cmd, String blastpath, String[] referencedb, int cpu, double findeval, double rmsimeval){
         //search the databases in referencedb for all sequences with blast hits between rmsimeval and findeval.
         //extract those names and return them as an array.
         int seqnum=java.lang.reflect.Array.getLength(inseqs);
@@ -577,7 +577,7 @@ public class enrichutils {
     
     //--------------------------------------------------------------------------
     
-    static aaseq[] getsequences(String[] seqnames, String[] databases){
+    static AminoAcidSequence[] getsequences(String[] seqnames, String[] databases){
         //find the full length sequences from seqnames in databases and extract to aaseq array
         //databases are in fasta format, names are everything between > and first space char
         int seqnamesize=java.lang.reflect.Array.getLength(seqnames);
@@ -591,7 +591,7 @@ public class enrichutils {
         int dbnum=java.lang.reflect.Array.getLength(databases);
         String instring;
         String tmpstr;
-        aaseq curraaseq;
+        AminoAcidSequence curraaseq;
         Vector tmpvec=new Vector();
         int counter=0;
         for(int i=0;i<dbnum;i++){
@@ -605,7 +605,7 @@ public class enrichutils {
                             System.out.println("found "+tmpstr);
                             seqnameshash.remove(tmpstr);//change the mapping to null, don't re-extract again
                             counter++;
-                            curraaseq=new aaseq();
+                            curraaseq=new AminoAcidSequence();
                             curraaseq.name=instring.substring(1);
                             curraaseq.seq="";
                             instring=inread.readLine();
@@ -620,10 +620,10 @@ public class enrichutils {
                 inread.close();
             }catch (IOException e){
                 System.err.println("IOERROR reading from "+databases[i]);
-                return new aaseq[0];
+                return new AminoAcidSequence[0];
             }
         }//end for i
-        aaseq[] retarr=new aaseq[tmpvec.size()];
+        AminoAcidSequence[] retarr=new AminoAcidSequence[tmpvec.size()];
         tmpvec.copyInto(retarr);
         return retarr;
     }//end getsequences

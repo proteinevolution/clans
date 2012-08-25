@@ -16,7 +16,7 @@ public class saverunobject {
     
     java.io.File file=null;
     minhsp[] blasthits=null;
-    aaseq[] inaln=null;
+    AminoAcidSequence[] inaln=null;
     minattvals[] attvals=null;
     float[][] posarr=null;
     float[] weights=null;

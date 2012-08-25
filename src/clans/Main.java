@@ -210,7 +210,7 @@ public class Main {
         if(docalc){
             //System.out.println("in docalc");
             if(olddata.length()==0){//if no olddata was defined
-                aaseq[] inaln=readaln.fastaread(infilename);
+                AminoAcidSequence[] inaln=readaln.fastaread(infilename);
                 if(verbose>3){
                     System.out.println("sequences read:");
                     for(int i=0;i<java.lang.reflect.Array.getLength(inaln);i++){
@@ -258,7 +258,7 @@ public class Main {
                 System.out.println("reading old data");
                 saverunobject readdata=customutils.loadrun(new java.io.File(olddata));
                 System.out.println("reading new sequences");
-                aaseq[] newaln=readaln.read(newseqs);
+                AminoAcidSequence[] newaln=readaln.read(newseqs);
                 if(enrichseqs){
                     if(java.lang.reflect.Array.getLength(referencedb)==0){
                         System.err.println("ERROR, no referencedb specified, unable to enrich dataset, skipping.");
@@ -274,7 +274,7 @@ public class Main {
                 int readelements=java.lang.reflect.Array.getLength(readdata.inaln);
                 int allelements=newelements+readelements;
                 String[] allnamearr=new String[allelements];
-                aaseq[] allaln=new aaseq[allelements];
+                AminoAcidSequence[] allaln=new AminoAcidSequence[allelements];
                 HashMap allnameshash=new HashMap();
                 float[][] allposarr=new float[allelements][3];
                 for(int i=0;i<readelements;i++){
@@ -321,7 +321,7 @@ public class Main {
                 readdata=null;
                 if(nographics==false){
                     System.out.println("...reading data");
-                    clusterdata myclusterdata=new clusterdata(new minhsp[0],new aaseq[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
+                    clusterdata myclusterdata=new clusterdata(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     clustermain_graphics myclusterer=new clustermain_graphics(myclusterdata);
                     myclusterer.initaddedseqs(blasthits,allaln,allnamearr,allnameshash,newnumarr,allposarr,mymaxmove,mypval,true);
@@ -348,7 +348,7 @@ public class Main {
                 }
                 if(nographics==false){
                     System.out.println("...reading data");
-                    clusterdata myclusterdata=new clusterdata(new minhsp[0],new aaseq[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
+                    clusterdata myclusterdata=new clusterdata(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     clustermain_graphics myclusterer=new clustermain_graphics(myclusterdata);
                     myclusterer.initaddedseqs(readdata.blasthits,readdata.inaln,namearr,nameshash,new int[0],readdata.posarr,readdata.maxmove,readdata.pval,false);
@@ -367,11 +367,11 @@ public class Main {
             if(dorounds>=0 && savetoname!=null){
                 // run CLANS in command line mode. No gui will be started. Results will be saved to a file.
                 System.out.println("LOADING data from '"+loadsaved+"' and running in non-graphical mode");
-                clusterdata myclusterdata=new clusterdata(new minhsp[0],new aaseq[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
+                clusterdata myclusterdata=new clusterdata(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                 myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                 ClusteringWithoutGui myclusterer=new ClusteringWithoutGui(myclusterdata);
-                if(myclusterer.data.loadsaved!=null){
-                    System.out.println("loading data from "+myclusterer.data.loadsaved);
+                if(myclusterer.data.input_filename!=null){
+                    System.out.println("loading data from "+myclusterer.data.input_filename);
                     ClusterMethods.loaddata(myclusterer.data);
                 }
 //                myclusterer.initgraph();//initialize the clustering
@@ -397,7 +397,7 @@ public class Main {
                     //clustertest myclustertest=new clustertest(new minhsp[0],new aaseq[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                     //myclustertest.setVisible(true);
                     System.out.println("LOADING data from '"+loadsaved+"'");
-                    clusterdata myclusterdata=new clusterdata(new minhsp[0],new aaseq[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
+                    clusterdata myclusterdata=new clusterdata(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     clustermain_graphics myclusterer=new clustermain_graphics(myclusterdata);
                     myclusterer.setVisible(true);

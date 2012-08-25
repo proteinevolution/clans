@@ -463,7 +463,7 @@ public class seqgroupwindow extends javax.swing.JFrame {
                             //now write each of the sequences to the file
                             for(int j=java.lang.reflect.Array.getLength(sequences);--j>=0;){
                                 outwrite.println(">"+parent.data.namearr[sequences[j]]+" "+sequences[j]);
-                                outwrite.println(parent.data.inaln[sequences[j]].seq);
+                                outwrite.println(parent.data.sequences[sequences[j]].seq);
                             }//end for j
                             outwrite.close();
                         }catch (java.io.IOException ioe){

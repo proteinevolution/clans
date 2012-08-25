@@ -791,7 +791,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
                 System.err.println("Warning: '"+key+"' already defined by "+nameshash.get(key));
             }else{
                 //now figure out what the corresponding name should be
-                nameshash.put(key,parent.data.inaln[i].name);
+                nameshash.put(key,parent.data.sequences[i].name);
             }
         }//end for i
     }//end makenameshash
