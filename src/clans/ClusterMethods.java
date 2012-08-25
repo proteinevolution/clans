@@ -1173,7 +1173,7 @@ public class ClusterMethods {
 
     //--------------------------------------------------------------------------
 
-    static minattvals[] getattvals(minattvals[] attractions, double minpval){
+    static minattvals[] filter_attraction_values(minattvals[] attractions, double minpval){
         //use for filtering attraction values [-1<0<1]; -1 and 1 are max repulse/attract
         java.util.ArrayList <minattvals>retvec=new java.util.ArrayList<minattvals>();
         for(int i = 0; i < attractions.length; i++){

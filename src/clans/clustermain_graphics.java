@@ -1380,7 +1380,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             if(data.orgattvals==null){
                 data.orgattvals=data.myattvals;
             }
-            data.myattvals=ClusterMethods.getattvals(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.minpval);
         }
         data.draworder=new ArrayList[0];
         repaint();
@@ -1670,7 +1670,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             }
             parentblasthits.addElement(data.orgattvals);
             data.orgattvals=zoomdata.getmyattvalssubset(data.orgattvals,data.selectednames);
-            data.myattvals=ClusterMethods.getattvals(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.minpval);
         }
         parentmovearr.addElement(data.mymovearr);
         data.mymovearr=zoomdata.getmymovearrsubset(data.mymovearr,data.selectednames);
@@ -1732,7 +1732,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         }else{
             data.orgattvals=(minattvals[]) parentblasthits.elementAt(level);
             parentblasthits.removeElementAt(level);
-            data.myattvals=ClusterMethods.getattvals(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.minpval);
         }
         data.mymovearr=(float[][])parentmovearr.elementAt(level);
         if(java.lang.reflect.Array.getLength(data.mymovearr)>0){
@@ -1836,7 +1836,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             }
             parentblasthits.addElement(data.orgattvals);
             data.orgattvals=zoomdata.getmyattvalssubset(data.orgattvals,data.selectednames);
-            data.myattvals=ClusterMethods.getattvals(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.minpval);
         }
         parentseqgroups.addElement(data.seqgroupsvec);
         data.seqgroupsvec=new Vector();
@@ -1985,7 +1985,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 System.out.println("setting orgattval=myattvals");
                 data.orgattvals=data.myattvals;
             }
-            data.myattvals=ClusterMethods.getattvals(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.minpval);
         }
         data.draworder=new ArrayList[0];
         repaint();
