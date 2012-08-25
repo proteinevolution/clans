@@ -21,11 +21,12 @@ public class clustermain_graphics extends javax.swing.JFrame {
     }
     
     public clustermain_graphics(clusterdata data){//minhsp[] blasthits,aaseq[] inaln, String[] namearr,HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
-        draw1=new drawpanel();
+    	draw1=new drawpanel();
         //System.out.println("started clustertest");
         initComponents();
         System.out.println("done init");
         this.data=data;
+        data.nographics = false;
         //this.blasthits=blasthits;
         //this.namearr=namearr;
         //this.nameshash=nameshash;
