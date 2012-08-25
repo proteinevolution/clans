@@ -4,7 +4,7 @@ package clans;
  *
  * @author tancred
  */
-public class clustermethods {
+public class ClusterMethods {
     
 	static final java.util.Random rand=new java.util.Random(System.currentTimeMillis());
     
@@ -26,11 +26,11 @@ public class clustermethods {
 	    	return;
 	    }
 	    
-	    data.myposarr=new float[data.elements][data.dimentions];
-	    data.posarrtmp=new float[data.elements][data.dimentions];
-	    data.drawarrtmp=new int[data.elements][data.dimentions];
-	    data.mymovearr=new float[data.elements][data.dimentions];
-	    data.lastmovearr=new float[data.elements][data.dimentions];
+	    data.myposarr=new float[data.elements][clusterdata.dimensions];
+	    data.posarrtmp=new float[data.elements][clusterdata.dimensions];
+	    data.drawarrtmp=new int[data.elements][clusterdata.dimensions];
+	    data.mymovearr=new float[data.elements][clusterdata.dimensions];
+	    data.lastmovearr=new float[data.elements][clusterdata.dimensions];
 	    for(int i = 0; i < data.elements; i++){
 	        data.mymovearr[i][0]=0;
 	        data.mymovearr[i][1]=0;
@@ -62,11 +62,6 @@ public class clustermethods {
 	        return data.myattvals;
 	    }
 	    System.out.println("indata is size:"+java.lang.reflect.Array.getLength(indata));
-	    //compute the attraction values for all sequence pairs
-	    //values range from 0(no attraction) to 1(max); -1 denotes identity
-	    //indata is composed of one array of hsp objects
-	    //NOTE: possible multiple pvalues per hsp object (multiple hsp's for same sequence pair)
-	    int j;
 	    java.util.ArrayList<minattvals> tmpvec=new java.util.ArrayList<minattvals>();
 	    int datanum=java.lang.reflect.Array.getLength(indata);
 	    java.util.HashMap myhash=new java.util.HashMap(datanum);
@@ -415,7 +410,7 @@ public class clustermethods {
                         if(tmpval>data.cpu-1){
                             tmpval=data.cpu-1;
                         }
-                        tmphash.put(String.valueOf(selectnames[i]),new Integer(tmpval));
+                        tmphash.put(String.valueOf(selectnames[i]), Integer.valueOf(tmpval));
                     }//end for i
                     for(int i=0;i<data.cpu;i++){
                         //movethreads[i]=new getmovethread(myposarr,myattvals,mymovearr,i,cpu,tmphash,selectnames,this);//start cpu threads to write the attraction values to mymovearr
@@ -497,7 +492,7 @@ public class clustermethods {
             //hashkey[] hashkeys=new hashkey[elements];
             for(i=elements;--i>=0;){
                 //hashkeys[i]=new hashkey(i);
-                hashkeys[i]=new Integer(i);
+                hashkeys[i] = Integer.valueOf(i);
             }
             if(data.cluster2d){
                 //no point in inlining this bit; I have very few selected sequences and therefore the gain should be marginal
@@ -1111,16 +1106,16 @@ public class clustermethods {
             data.namearr=new String[seqs];
             for(int i=0;i<seqs;i++){
                 data.namearr[i]=data.inaln[i].name.trim();
-                data.inaln[i].name=new String("sequence"+i);
+                data.inaln[i].name = "sequence"+i;
                 data.nameshash.put(data.inaln[i].name,new Integer(i));
             }
             data.elements=java.lang.reflect.Array.getLength(data.namearr);
             data.selectednames=new int[0];
             data.posarr=data.myposarr;
-            data.lastmovearr=new float[data.elements][data.dimentions];
-            data.mymovearr=new float[data.elements][data.dimentions];
-            data.posarrtmp=new float[data.elements][data.dimentions];
-            data.drawarrtmp=new int[data.elements][data.dimentions];
+            data.lastmovearr=new float[data.elements][clusterdata.dimensions];
+            data.mymovearr=new float[data.elements][clusterdata.dimensions];
+            data.posarrtmp=new float[data.elements][clusterdata.dimensions];
+            data.drawarrtmp=new int[data.elements][clusterdata.dimensions];
             data.draworder=new java.util.ArrayList[0];
             data.myrotmtx=saveddata.rotmtx;
             data.rotmtx[0][0]=data.myrotmtx[0][0];

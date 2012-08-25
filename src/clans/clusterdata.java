@@ -14,7 +14,7 @@ public class clusterdata {
     public clusterdata(minhsp[] blasthits,aaseq[] inaln, String[] namearr,java.util.HashMap nameshash,double eval,double pval,float scval,int verbose,int cpu,boolean savepos, String cmd, String blastpath,boolean addblastvbparam, String formatdbpath,String[] referencedb,StringBuffer errbuff,String loadsaved) {
         //just a data carrier for all of the stuff I need during clustering
         this.blasthits=blasthits;
-        this.inaln=clustermethods.rmgaps(inaln);
+        this.inaln=ClusterMethods.rmgaps(inaln);
         this.namearr=namearr;
         this.nameshash=nameshash;
         this.eval=eval;
@@ -96,7 +96,7 @@ public class clusterdata {
     float[][] posarrtmp=null;
     int[][] drawarrtmp=null;
     java.util.ArrayList[] draworder=null;
-    static int dimentions=3;
+    static int dimensions=3;
     int elements=-1;
     double[][] rotmtx={{1,0,0},{0,1,0},{0,0,1}};//the performed rotations
     double[][] myrotmtx={{1,0,0},{0,1,0},{0,0,1}};//new double[3][3];//both of the above together

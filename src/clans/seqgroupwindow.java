@@ -414,7 +414,7 @@ public class seqgroupwindow extends javax.swing.JFrame {
             for(int i=java.lang.reflect.Array.getLength(currsel)-1;i>=0;i--){
                 if((currsel[i]>-1) && (currsel[i]<=parent.data.seqgroupsvec.size())){
                     mygroup=(seqgroup)parent.data.seqgroupsvec.elementAt(currsel[i]);
-                    mygroup.color=new java.awt.Color(clustermethods.rand.nextInt(16777216));
+                    mygroup.color=new java.awt.Color(ClusterMethods.rand.nextInt(16777216));
                 }
             }
             repaint();

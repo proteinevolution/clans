@@ -1153,12 +1153,12 @@ public class clustermain_graphics extends javax.swing.JFrame {
             saverunobject saveddata=customutils.loadrunalternate(fc.getSelectedFile());
             if(saveddata.file!=null){//if the data was read all right
                 repaint="Error Loading Data";
-                data.inaln=clustermethods.rmgaps(saveddata.inaln);
+                data.inaln=ClusterMethods.rmgaps(saveddata.inaln);
                 int seqs=java.lang.reflect.Array.getLength(data.inaln);
                 data.nameshash=new HashMap((int)(seqs/0.75)+1,(float)0.75);//holds info about which name is which array number
                 data.namearr=new String[seqs];
                 data.myposarr=new float[seqs][3];
-                Random rand=clustermethods.rand;
+                Random rand=ClusterMethods.rand;
                 for(int i=0;i<seqs;i++){
                     data.namearr[i]=data.inaln[i].name.trim();
                     data.inaln[i].name=new String("sequence"+i);
@@ -1195,10 +1195,10 @@ public class clustermain_graphics extends javax.swing.JFrame {
                 data.selectednames=new int[0];
                 data.seqgroupsvec=saveddata.seqgroupsvec;
                 data.posarr=data.myposarr;
-                data.lastmovearr=new float[data.elements][data.dimentions];
-                data.mymovearr=new float[data.elements][data.dimentions];
-                data.posarrtmp=new float[data.elements][data.dimentions];
-                data.drawarrtmp=new int[data.elements][data.dimentions];
+                data.lastmovearr=new float[data.elements][data.dimensions];
+                data.mymovearr=new float[data.elements][data.dimensions];
+                data.posarrtmp=new float[data.elements][data.dimensions];
+                data.drawarrtmp=new int[data.elements][data.dimensions];
                 data.draworder=new ArrayList[0];
                 data.attvalsimple=true;
                 repaint=null;
@@ -1374,13 +1374,13 @@ public class clustermain_graphics extends javax.swing.JFrame {
         //if I have a valid number update the attvals data
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
+                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
             }
         }else if(data.myattvals!=null){//remove all attvals below the specified value
             if(data.orgattvals==null){
                 data.orgattvals=data.myattvals;
             }
-            data.myattvals=clustermethods.getattvals(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.getattvals(data.orgattvals,data.minpval);
         }
         data.draworder=new ArrayList[0];
         repaint();
@@ -1670,7 +1670,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             }
             parentblasthits.addElement(data.orgattvals);
             data.orgattvals=zoomdata.getmyattvalssubset(data.orgattvals,data.selectednames);
-            data.myattvals=clustermethods.getattvals(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.getattvals(data.orgattvals,data.minpval);
         }
         parentmovearr.addElement(data.mymovearr);
         data.mymovearr=zoomdata.getmymovearrsubset(data.mymovearr,data.selectednames);
@@ -1686,13 +1686,13 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.selectednames=new int[0];
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
+                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
             }
         }
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
         data.posarr=data.myposarr;
-        data.posarrtmp=new float[data.elements][data.dimentions];
-        data.drawarrtmp=new int[data.elements][data.dimentions];
+        data.posarrtmp=new float[data.elements][data.dimensions];
+        data.drawarrtmp=new int[data.elements][data.dimensions];
         data.draworder=new ArrayList[0];
         repaint();
     }//GEN-LAST:event_hidesingletonsmenuitemActionPerformed
@@ -1732,7 +1732,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         }else{
             data.orgattvals=(minattvals[]) parentblasthits.elementAt(level);
             parentblasthits.removeElementAt(level);
-            data.myattvals=clustermethods.getattvals(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.getattvals(data.orgattvals,data.minpval);
         }
         data.mymovearr=(float[][])parentmovearr.elementAt(level);
         if(java.lang.reflect.Array.getLength(data.mymovearr)>0){
@@ -1753,7 +1753,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
+                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
             }
         }
         if(myseqgroupwindow!=null){
@@ -1767,8 +1767,8 @@ public class clustermain_graphics extends javax.swing.JFrame {
             mymapfunctiondialog.makenameshash();
         }
         data.posarr=data.myposarr;
-        data.posarrtmp=new float[data.elements][data.dimentions];
-        data.drawarrtmp=new int[data.elements][data.dimentions];
+        data.posarrtmp=new float[data.elements][data.dimensions];
+        data.drawarrtmp=new int[data.elements][data.dimensions];
         data.draworder=new ArrayList[0];
         repaint();
     }//GEN-LAST:event_getparentmenuitemActionPerformed
@@ -1836,17 +1836,17 @@ public class clustermain_graphics extends javax.swing.JFrame {
             }
             parentblasthits.addElement(data.orgattvals);
             data.orgattvals=zoomdata.getmyattvalssubset(data.orgattvals,data.selectednames);
-            data.myattvals=clustermethods.getattvals(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.getattvals(data.orgattvals,data.minpval);
         }
         parentseqgroups.addElement(data.seqgroupsvec);
         data.seqgroupsvec=new Vector();
         data.selectednames=new int[0];
         synchronized(data.myattvals){
-            data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
+            data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
         }
         data.posarr=data.myposarr;
-        data.posarrtmp=new float[data.elements][data.dimentions];
-        data.drawarrtmp=new int[data.elements][data.dimentions];
+        data.posarrtmp=new float[data.elements][data.dimensions];
+        data.drawarrtmp=new int[data.elements][data.dimensions];
         data.draworder=new ArrayList[0];
         if(mymapfunctiondialog!=null){
             mymapfunctiondialog.makenameshash();
@@ -1978,14 +1978,14 @@ public class clustermain_graphics extends javax.swing.JFrame {
         //if I have a valid number update the attvals data
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
+                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
             }
         }else if(data.myattvals!=null){//remove all attvals below the specified value
             if(data.orgattvals==null){
                 System.out.println("setting orgattval=myattvals");
                 data.orgattvals=data.myattvals;
             }
-            data.myattvals=clustermethods.getattvals(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.getattvals(data.orgattvals,data.minpval);
         }
         data.draworder=new ArrayList[0];
         repaint();
@@ -2483,7 +2483,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     void savetofile(File savetofile){
-        clustermethods.savetofile(savetofile,data);
+        ClusterMethods.savetofile(savetofile,data);
         /*
         saverunobject myrun=new saverunobject();
         myrun.file=savetofile;
@@ -2621,7 +2621,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             updatevals();
             repaint();
         }
-        clustermethods.setup_attraction_values_and_initialize(data);
+        ClusterMethods.setup_attraction_values_and_initialize(data);
         //currcool=1;
         //mythread.stop=true;
         //myposarr=null;
@@ -2648,7 +2648,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
             mythread.stop=true;
         }//else everything is OK
         data.loadsaved=inname;
-        clustermethods.loaddata(data);
+        ClusterMethods.loaddata(data);
         textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
         if(data.blasthits==null){
             button_cutoff_value.setText("Use Attraction values better than");
@@ -2970,13 +2970,13 @@ public class clustermain_graphics extends javax.swing.JFrame {
         data.namearr=allnamearr;
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
         data.posarr=data.myposarr;
-        data.lastmovearr=new float[data.elements][data.dimentions];
-        data.mymovearr=new float[data.elements][data.dimentions];
-        data.posarrtmp=new float[data.elements][data.dimentions];
-        data.drawarrtmp=new int[data.elements][data.dimentions];
+        data.lastmovearr=new float[data.elements][data.dimensions];
+        data.mymovearr=new float[data.elements][data.dimensions];
+        data.posarrtmp=new float[data.elements][data.dimensions];
+        data.drawarrtmp=new int[data.elements][data.dimensions];
         //draw1.draworder=new Vector[0];
         data.draworder=new ArrayList[0];
-        data.myattvals=clustermethods.compute_attraction_values(data.blasthits,data.minpval,data);
+        data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
         moveselectedonly.setSelected(useselectedonly);
         int seqnum=java.lang.reflect.Array.getLength(data.inaln);
         System.out.println("seqnum="+seqnum);
@@ -5368,7 +5368,7 @@ public class clustermain_graphics extends javax.swing.JFrame {
                     }
                     data.changedvals=false;
                 }//end if changedvals
-                clustermethods.recluster3d(parent.data);
+                ClusterMethods.recluster3d(parent.data);
                 if((level==0)&&(savepos)){
                     try{
                         PrintWriter outwriter=new PrintWriter(new BufferedWriter(new FileWriter("positionfile.dat")));

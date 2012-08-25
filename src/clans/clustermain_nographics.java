@@ -32,7 +32,7 @@ public class clustermain_nographics {
         }else{
             data.usescval=false;
         }
-        clustermethods.setup_attraction_values_and_initialize(data);
+        ClusterMethods.setup_attraction_values_and_initialize(data);
         
     }//end initgraph
 
@@ -48,7 +48,7 @@ public class clustermain_nographics {
             mythread.stop=true;
         }//else everything is OK
         data.loadsaved=inname;
-        clustermethods.loaddata(data);
+        ClusterMethods.loaddata(data);
     }//end loaddata
 
 
@@ -108,7 +108,7 @@ public class clustermain_nographics {
                     }
                 }
                 //parent.data.myposarr=clustermethods.recluster3d(parent.data);
-                clustermethods.recluster3d(data);
+                ClusterMethods.recluster3d(data);
                 data.posarr=data.myposarr;
                 tmpcool=(((float)((int)(data.currcool*100000)))/100000);
                 if(tmpcool<=1e-5){

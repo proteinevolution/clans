@@ -372,7 +372,7 @@ public class Main {
                 clustermain_nographics myclusterer=new clustermain_nographics(myclusterdata);
                 if(myclusterer.data.loadsaved!=null){
                     System.out.println("loading data from "+myclusterer.data.loadsaved);
-                    clustermethods.loaddata(myclusterer.data);
+                    ClusterMethods.loaddata(myclusterer.data);
                 }
 //                myclusterer.initgraph();//initialize the clustering
                 myclusterer.startstopthread();//start the thread
@@ -389,7 +389,7 @@ public class Main {
                     }
                 }
                 File savefile=new File(savetoname);
-                clustermethods.savetofile(savefile,myclusterer.data);
+                ClusterMethods.savetofile(savefile,myclusterer.data);
                 System.out.println("done clustering, saving results to file '"+savefile.getAbsolutePath()+"'");
                 //myclusterer.dispose();
             }else{//if the reclustering is NOT the case
