@@ -12,10 +12,10 @@ import java.util.*;
  *
  * @author  tancred
  */
-public class customutils {
+public class CustomUtils {
 
     /** Creates a new instance of customutils */
-    public customutils() {
+    public CustomUtils() {
     }
     //--------------------------------------------------------------------------
 
@@ -349,7 +349,7 @@ public class customutils {
     //--------------------------------------------------------------------------
     static void saverun(saverunobject in, String[] namesarr,boolean nographics) {
         //save tha data to the selected file
-        int i, j, k;
+        int i, j;
         try {
             PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(in.file)));
             int seqs = java.lang.reflect.Array.getLength(in.inaln);

@@ -256,7 +256,7 @@ public class Main {
             }else if(newseqs.length()>0){
                 java.util.Random rand=new java.util.Random(System.currentTimeMillis());
                 System.out.println("reading old data");
-                saverunobject readdata=customutils.loadrun(new java.io.File(olddata));
+                saverunobject readdata=CustomUtils.loadrun(new java.io.File(olddata));
                 System.out.println("reading new sequences");
                 AminoAcidSequence[] newaln=readaln.read(newseqs);
                 if(enrichseqs){
@@ -336,7 +336,7 @@ public class Main {
                 }
             }else{
                 System.out.println("Reading old data from "+olddata);
-                saverunobject readdata=customutils.loadrun(new java.io.File(olddata));
+                saverunobject readdata=CustomUtils.loadrun(new java.io.File(olddata));
                 int seqnum=java.lang.reflect.Array.getLength(readdata.inaln);
                 HashMap nameshash=new HashMap((int)(seqnum/0.74),(float)0.75);//holds info about which name is which array number
                 String[] namearr=new String[seqnum];

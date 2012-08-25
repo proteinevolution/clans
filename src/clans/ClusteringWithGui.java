@@ -913,7 +913,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         // load additional sequence groups from a file
         int returnVal = fc.showOpenDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
-            data.seqgroupsvec=customutils.loadgroups(data.seqgroupsvec,data.namearr,fc.getSelectedFile());
+            data.seqgroupsvec=CustomUtils.loadgroups(data.seqgroupsvec,data.namearr,fc.getSelectedFile());
             if(myseqgroupwindow!=null){
                 myseqgroupwindow.setVisible(false);
                 myseqgroupwindow.dispose();
@@ -1150,7 +1150,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         groupseqs=null;
         int returnVal = fc.showOpenDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
-            saverunobject saveddata=customutils.loadrunalternate(fc.getSelectedFile());
+            saverunobject saveddata=CustomUtils.loadrunalternate(fc.getSelectedFile());
             if(saveddata.file!=null){//if the data was read all right
                 repaint="Error Loading Data";
                 data.sequences=ClusterMethods.remove_gaps_from_sequences(saveddata.inaln);
@@ -2293,7 +2293,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         int returnVal = fc.showSaveDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
             this.setTitle("Clustering of "+fc.getSelectedFile().getName());
-            customutils.saveattvalstofile(fc.getSelectedFile(),data.myattvals,data.nographics);
+            CustomUtils.saveattvalstofile(fc.getSelectedFile(),data.myattvals,data.nographics);
         }
     }//GEN-LAST:event_saveattvalsmenuitemActionPerformed
     

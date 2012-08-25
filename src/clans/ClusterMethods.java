@@ -365,7 +365,7 @@ public class ClusterMethods {
         
         myrun.rounds = data.rounds;
         
-        customutils.saverun(myrun,data.namearr,data.nographics);
+        CustomUtils.saverun(myrun,data.namearr,data.nographics);
         myrun=null;
     }
 
@@ -1058,7 +1058,7 @@ public class ClusterMethods {
     //--------------------------------------------------------------------------
 
     static void loaddata(clusterdata data){
-        saverunobject saveddata = customutils.loadrun(new java.io.File(data.input_filename));
+        saverunobject saveddata = CustomUtils.loadrun(new java.io.File(data.input_filename));
         
         if(saveddata.file == null){
             System.err.println("ERROR reading saved data from '" + data.input_filename + "'; aborting read");
