@@ -9,32 +9,28 @@ package clans;
  *
  * @author tancred
  */
-public class clustermain_nographics {
-    public clustermain_nographics(clusterdata data){
+public class ClusteringWithoutGui {
+    public ClusteringWithoutGui(clusterdata data){
         this.data=data;
         this.data.nographics = true;
     }
 
     public clusterdata data=null;
 
-    //the methods I want to use
+    void setup_attraction_values_and_initialize(){
 
-    void initgraph(){
-//        if(data.loadsaved!=null){
-//            System.out.println("loading data from "+data.loadsaved);
-//            clustermethods.loaddata(data);
-//        }
-        data.minpval=data.pval;
+    	data.minpval=data.pval;
         data.mineval=data.eval;
+        
         if(data.scval>=0){//in that case use a score cutoff
             data.minpval=data.scval;
             data.usescval=true;
         }else{
             data.usescval=false;
         }
-        ClusterMethods.setup_attraction_values_and_initialize(data);
         
-    }//end initgraph
+        ClusterMethods.setup_attraction_values_and_initialize(data);
+    }
 
     
     computethread mythread=new computethread(this);
@@ -78,7 +74,7 @@ public class clustermain_nographics {
 
     class computethread extends java.lang.Thread{
 
-        public computethread(clustermain_nographics parent){
+        public computethread(ClusteringWithoutGui parent){
             this.parent=parent;
             this.stop=false;
             this.didrun=false;
@@ -88,7 +84,7 @@ public class clustermain_nographics {
         boolean didrun=false;
         String tmpstr="";
         float tmpcool=1;
-        clustermain_nographics parent;
+        ClusteringWithoutGui parent;
         int roundsdone=0;
 
 @Override

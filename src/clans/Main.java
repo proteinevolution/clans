@@ -369,7 +369,7 @@ public class Main {
                 System.out.println("LOADING data from '"+loadsaved+"' and running in non-graphical mode");
                 clusterdata myclusterdata=new clusterdata(new minhsp[0],new aaseq[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                 myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
-                clustermain_nographics myclusterer=new clustermain_nographics(myclusterdata);
+                ClusteringWithoutGui myclusterer=new ClusteringWithoutGui(myclusterdata);
                 if(myclusterer.data.loadsaved!=null){
                     System.out.println("loading data from "+myclusterer.data.loadsaved);
                     ClusterMethods.loaddata(myclusterer.data);
