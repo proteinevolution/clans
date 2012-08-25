@@ -12,6 +12,7 @@ package clans;
 public class clustermain_nographics {
     public clustermain_nographics(clusterdata data){
         this.data=data;
+        this.data.nographics = true;
     }
 
     public clusterdata data=null;
