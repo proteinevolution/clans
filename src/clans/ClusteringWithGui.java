@@ -1526,7 +1526,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         int returnVal = fc.showSaveDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
             this.setTitle("Clustering of "+fc.getSelectedFile().getName());
-            savetofile(fc.getSelectedFile());
+            
+            data.save_to_file(fc.getSelectedFile());
+            
             //saverunobject myrun=new saverunobject();
             //myrun.file=fc.getSelectedFile();
             //myrun.inaln=inaln;
@@ -2481,59 +2483,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     private javax.swing.JButton button_zoom_on_selected;
     private javax.swing.JMenuItem zoommenuitem;
     // End of variables declaration//GEN-END:variables
-
-    void savetofile(File savetofile){
-        ClusterMethods.savetofile(savetofile,data);
-        /*
-        saverunobject myrun=new saverunobject();
-        myrun.file=savetofile;
-        myrun.inaln=inaln;
-        myrun.blasthits=blasthits;
-        myrun.attvals=myattvals;
-        myrun.posarr=myposarr;
-        myrun.maxmove=maxmove;
-        myrun.pval=minpval;
-        myrun.usescval=usescval;
-        if(attvalcompcheckbox.isSelected()){
-            myrun.complexatt=true;
-        }else{
-            myrun.complexatt=false;
-        }
-        myrun.rotmtx=draw1.rotmtx;
-        myrun.seqgroupsvec=seqgroupsvec;
-        myrun.cooling=cooling;
-        myrun.currcool=currcool;
-        myrun.attfactor=attfactor;
-        myrun.attvalpow=attvalpow;
-        myrun.repfactor=repfactor;
-        myrun.repvalpow=repvalpow;
-        myrun.dampening=dampening;
-        myrun.minattract=minattract;
-        myrun.blastpath=blastpath;
-        myrun.formatdbpath=formatdbpath;
-        myrun.dotsize=draw1.dotsize;
-        myrun.ovalsize=draw1.ovalsize;
-        myrun.groupsize=draw1.groupsize;
-        myrun.mapfiles=mapfiles;
-        myrun.lookupfiles=lookupfiles;
-        myrun.usefoldchange=usefoldchange;
-        myrun.avgfoldchange=avgfoldchange;
-        myrun.affyfiles=affyfiles;
-        myrun.namesdmp_file=namesdmp_file;
-        myrun.nodesdmp_file=nodesdmp_file;
-        if(cluster2dbutton.isSelected()){
-            myrun.cluster2d=true;
-        }else{
-            myrun.cluster2d=false;
-        }
-        myrun.colorarr=draw1.colorarr;
-        myrun.colorcutoffs=draw1.colorcutoffs;
-        customutils.saverun(myrun,namearr);
-        myrun=null;
-         */
-    }
-
-    //--------------------------------------------------------------------------
 
     void startstopthread(){
         //does the iteration and the stop for a thread

@@ -315,60 +315,6 @@ public class ClusterMethods {
 	    return positions;
 	}
 
-
-
-
-	static void savetofile(java.io.File savetofile,ClusterData data){
-        saverunobject myrun=new saverunobject();
-        myrun.file=savetofile;
-        myrun.inaln=data.sequences;
-        myrun.blasthits=data.blasthits;
-        myrun.attvals=data.myattvals;
-        myrun.posarr=data.myposarr;
-        myrun.maxmove=data.maxmove;
-        myrun.pval=data.minpval;
-        myrun.usescval=data.usescval;
-        if(data.attvalsimple){
-            myrun.complexatt=false;
-        }else{
-            myrun.complexatt=true;
-        }
-        myrun.rotmtx=data.rotmtx;
-        myrun.seqgroupsvec=data.seqgroupsvec;
-        myrun.cooling=data.cooling;
-        myrun.currcool=data.currcool;
-        myrun.attfactor=data.attfactor;
-        myrun.attvalpow=data.attvalpow;
-        myrun.repfactor=data.repfactor;
-        myrun.repvalpow=data.repvalpow;
-        myrun.dampening=data.dampening;
-        myrun.minattract=data.minattract;
-        myrun.blastpath=data.blastpath;
-        myrun.formatdbpath=data.formatdbpath;
-        myrun.dotsize=data.dotsize;
-        myrun.ovalsize=data.ovalsize;
-        myrun.groupsize=data.groupsize;
-        myrun.mapfiles=data.mapfiles;
-        myrun.lookupfiles=data.lookupfiles;
-        myrun.usefoldchange=data.usefoldchange;
-        myrun.avgfoldchange=data.avgfoldchange;
-        myrun.affyfiles=data.affyfiles;
-        myrun.namesdmp_file=data.namesdmp_file;
-        myrun.nodesdmp_file=data.nodesdmp_file;
-        if(data.cluster2d){
-            myrun.cluster2d=true;
-        }else{
-            myrun.cluster2d=false;
-        }
-        myrun.colorarr=data.colorarr;
-        myrun.colorcutoffs=data.colorcutoffs;
-        
-        myrun.rounds = data.rounds;
-        
-        CustomUtils.saverun(myrun,data.namearr,data.nographics);
-        myrun=null;
-    }
-
     //--------------------------------------------------------------------------
 
      static void recluster3d(ClusterData data){

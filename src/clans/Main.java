@@ -388,8 +388,10 @@ public class Main {
                         }
                     }
                 }
+                
                 File savefile=new File(savetoname);
-                ClusterMethods.savetofile(savefile,myclusterer.data);
+                myclusterer.data.save_to_file(savefile);
+                
                 System.out.println("done clustering, saving results to file '"+savefile.getAbsolutePath()+"'");
                 //myclusterer.dispose();
             }else{//if the reclustering is NOT the case

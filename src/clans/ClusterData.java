@@ -115,4 +115,56 @@ public class ClusterData {
         this.seqnum=java.lang.reflect.Array.getLength(namearr);
         this.movethreads=new getmovethread[cpu];
     }
+    
+    public void save_to_file(java.io.File output_file){
+    	saverunobject myrun=new saverunobject();
+        myrun.file=output_file;
+        myrun.inaln=sequences;
+        myrun.blasthits=blasthits;
+        myrun.attvals=myattvals;
+        myrun.posarr=myposarr;
+        myrun.maxmove=maxmove;
+        myrun.pval=minpval;
+        myrun.usescval=usescval;
+        if(attvalsimple){
+            myrun.complexatt=false;
+        }else{
+            myrun.complexatt=true;
+        }
+        myrun.rotmtx=rotmtx;
+        myrun.seqgroupsvec=seqgroupsvec;
+        myrun.cooling=cooling;
+        myrun.currcool=currcool;
+        myrun.attfactor=attfactor;
+        myrun.attvalpow=attvalpow;
+        myrun.repfactor=repfactor;
+        myrun.repvalpow=repvalpow;
+        myrun.dampening=dampening;
+        myrun.minattract=minattract;
+        myrun.blastpath=blastpath;
+        myrun.formatdbpath=formatdbpath;
+        myrun.dotsize=dotsize;
+        myrun.ovalsize=ovalsize;
+        myrun.groupsize=groupsize;
+        myrun.mapfiles=mapfiles;
+        myrun.lookupfiles=lookupfiles;
+        myrun.usefoldchange=usefoldchange;
+        myrun.avgfoldchange=avgfoldchange;
+        myrun.affyfiles=affyfiles;
+        myrun.namesdmp_file=namesdmp_file;
+        myrun.nodesdmp_file=nodesdmp_file;
+        if(cluster2d){
+            myrun.cluster2d=true;
+        }else{
+            myrun.cluster2d=false;
+        }
+        myrun.colorarr=colorarr;
+        myrun.colorcutoffs=colorcutoffs;
+        
+        myrun.rounds = rounds;
+        
+        CustomUtils.saverun(myrun, namearr, nographics);
+        myrun=null;
+    }
+    
 }
