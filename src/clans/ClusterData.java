@@ -147,11 +147,11 @@ public class ClusterData {
 	    saverunobject myrun = new saverunobject();
 	    myrun.file = null;//if myrun has a filename all was read ok
 	    try {
-	        BufferedReader inread = new BufferedReader(new FileReader(infile));
+	        BufferedReader buffered_file_handle = new BufferedReader(new FileReader(infile));
 	        System.out.println("loading data from '" + infile.getAbsolutePath() + "'");
 	        String inline;
-	        int seqs = -1;
-	        while ((inline = inread.readLine()) != null) {
+	        int expected_sequences = -1;
+	        while ((inline = buffered_file_handle.readLine()) != null) {
 	            inline = inline.trim();
 	            if (inline.length() == 0) {
 	                continue;
@@ -160,754 +160,102 @@ public class ClusterData {
 	            }
 	            if (inline.startsWith("sequences=")) {
 	                try {
-	                    seqs = Integer.parseInt(inline.substring(10));
-	                    System.out.println("sequences=" + seqs);
+	                    expected_sequences = Integer.parseInt(inline.substring(10));
+	                    System.out.println("sequences=" + expected_sequences);
 	                } catch (NumberFormatException ne) {
 	                    System.err.println("Error parsing int from '" + inline.substring(10) + "'");
 	                }
-	                myrun.inaln = new AminoAcidSequence[seqs];
-	                myrun.posarr = new float[seqs][3];
+	                myrun.inaln = new AminoAcidSequence[expected_sequences];
+	                myrun.posarr = new float[expected_sequences][3];
 	                myrun.blasthits = new minhsp[0];
 	                continue;
-	            } else if (seqs != -1) {
-	                if (inline.equalsIgnoreCase("<param>")) {
-	                    String[] tmparr;
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</param>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        tmparr = inline.split("=");
-	                        if (java.lang.reflect.Array.getLength(tmparr) != 2) {
-	                            System.err.println("ERROR reading savefile for line '" + inline + "'");
-	                            return myrun;
-	                        }
-	                        if (tmparr[0].equalsIgnoreCase("pval")) {
-	                            try {
-	                                myrun.pval = Double.parseDouble(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing double from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("usescval")) {
-	                            if (tmparr[1].startsWith("t") || tmparr[1].startsWith("T")) {
-	                                myrun.usescval = true;
-	                            } else {
-	                                myrun.usescval = false;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("complexatt")) {
-	                            if (tmparr[1].startsWith("t") || tmparr[1].startsWith("T")) {
-	                                myrun.complexatt = true;
-	                            } else {
-	                                myrun.complexatt = false;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("cooling")) {
-	                            try {
-	                                myrun.cooling = Double.parseDouble(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing double from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("currcool")) {
-	                            try {
-	                                myrun.currcool = Double.parseDouble(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing double from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("maxmove")) {
-	                            try {
-	                                myrun.maxmove = Float.parseFloat(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing float from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("cluster2d")) {
-	                            if (tmparr[1].equalsIgnoreCase("true") || tmparr[1].startsWith("t") || tmparr[1].startsWith("T")) {
-	                                myrun.cluster2d = true;
-	                            } else {
-	                                myrun.cluster2d = false;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("usefoldchange")) {
-	                            if (tmparr[1].equalsIgnoreCase("true") || tmparr[1].startsWith("t") || tmparr[1].startsWith("T")) {
-	                                myrun.usefoldchange = true;
-	                            } else {
-	                                myrun.usefoldchange = false;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("avgfoldchange")) {
-	                            if (tmparr[1].equalsIgnoreCase("true") || tmparr[1].startsWith("t") || tmparr[1].startsWith("T")) {
-	                                myrun.avgfoldchange = true;
-	                            } else {
-	                                myrun.avgfoldchange = false;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("showinfo")) {
-	                            if (tmparr[1].equalsIgnoreCase("true") || tmparr[1].startsWith("t") || tmparr[1].startsWith("T")) {
-	                                myrun.showinfo = true;
-	                            } else {
-	                                myrun.showinfo = false;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("attfactor")) {
-	                            try {
-	                                myrun.attfactor = Float.parseFloat(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing float from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("repfactor")) {
-	                            try {
-	                                myrun.repfactor = Float.parseFloat(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing float from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("attvalpow")) {
-	                            try {
-	                                myrun.attvalpow = (int) Float.parseFloat(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing float from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("repvalpow")) {
-	                            try {
-	                                myrun.repvalpow = (int) Float.parseFloat(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing float from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("dampening")) {
-	                            try {
-	                                myrun.dampening = Float.parseFloat(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing float from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("zoom")) {
-	                            try {
-	                                myrun.zoom = Float.parseFloat(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing float from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("minattract")) {
-	                            try {
-	                                myrun.minattract = Double.parseDouble(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing double from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("dotsize")) {
-	                            try {
-	                                myrun.dotsize = (int) Float.parseFloat(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing float from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("ovalsize")) {
-	                            try {
-	                                myrun.ovalsize = (int) Float.parseFloat(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing float from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("groupsize")) {
-	                            try {
-	                                myrun.groupsize = (int) Float.parseFloat(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing float from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("blastpath")) {
-	                            myrun.blastpath = tmparr[1];
-	                        } else if (tmparr[0].equalsIgnoreCase("formatdbpath")) {
-	                            myrun.formatdbpath = tmparr[1];
-	                        } else if (tmparr[0].equalsIgnoreCase("functionmapfile")) {
-	                            //old version: only one file should be present in these save-files
-	                            java.io.File tmpfile = new java.io.File(tmparr[1]);
-	                            if (tmpfile.canRead()) {
-	                                myrun.mapfiles.add(tmpfile);
-	                                myrun.lookupfiles.add(null);
-	                            } else {
-	                                System.err.println("Warning: cannot read from '" + tmparr[1] + "' setting mapfile to null");
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("functionlookupfile")) {
-	                            java.io.File tmpfile = new java.io.File(tmparr[1]);
-	                            if (tmpfile.canRead()) {
-	                                myrun.lookupfiles.add(tmpfile);
-	                            } else {
-	                                System.err.println("Warning: cannot read from '" + tmparr[1] + "' setting lookupfile to null");
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("colorarr")) {
-	                            tmparr = tmparr[1].split("\\):");
-	                            java.awt.Color[] colorarr = new java.awt.Color[java.lang.reflect.Array.getLength(tmparr)];
-	                            try {
-	                                String[] tmptmp;
-	                                int red, green, blue;
-	                                for (int i = 0; i < java.lang.reflect.Array.getLength(tmparr); i++) {
-	                                    tmptmp = tmparr[i].substring(1).split(";");//remove the "(" and split the numbers
-	                                    red = Integer.parseInt(tmptmp[0]);
-	                                    green = Integer.parseInt(tmptmp[1]);
-	                                    blue = Integer.parseInt(tmptmp[2]);
-	                                    colorarr[i] = new java.awt.Color(red, green, blue);
-	                                }//end for i
-	                                myrun.colorarr = colorarr;
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("Warning: unable to parse color array from '" + inline + "'");
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("colorcutoffs")) {
-	                            tmparr = tmparr[1].split(";");
-	                            float[] cutoffs = new float[java.lang.reflect.Array.getLength(tmparr)];
-	                            try {
-	                                for (int i = 0; i < java.lang.reflect.Array.getLength(tmparr); i++) {
-	                                    cutoffs[i] = Float.parseFloat(tmparr[i]);
-	                                }//end for i
-	                                myrun.colorcutoffs = cutoffs;
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("Warning: unable to parse float[] from '" + inline + "'");
-	                            }
-	                        }else if (tmparr[0].equalsIgnoreCase("namesdmp_file")) {
-	                            myrun.namesdmp_file = tmparr[1];
-	                        } else if (tmparr[0].equalsIgnoreCase("nodesdmp_file")) {
-	                            myrun.nodesdmp_file = tmparr[1];
-	                        } else if (tmparr[0].equalsIgnoreCase("rounds_done")) {
-	                            try {
-	                                myrun.rounds = Integer.parseInt(tmparr[1]);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing int from " + tmparr[1]);
-	                                return myrun;
-	                            }
-	                        }
-	                    }//end while </param>
+	            } else if (expected_sequences != -1) {
+
+	            	if (inline.equalsIgnoreCase("<param>")) {
+	                	if (!myrun.parse_params_block(buffered_file_handle)) {
+	                		System.err.println("WARNING: could not parse <param> block");
+	                		return myrun;
+	                	}
+	                	
 	                } else if (inline.equalsIgnoreCase("<function>")) {
-	                    File mapfile = null;
-	                    File lookupfile = null;
-	                    String[] tmp;
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</function>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        tmp = inline.split("';'");
-	                        if (java.lang.reflect.Array.getLength(tmp) != 2) {
-	                            System.err.println("ERROR readung mapping data on line '" + inline + "'");
-	                        } else {
-	                            java.io.File tmpfile = new java.io.File(tmp[0]);
-	                            if (tmpfile.canRead()) {
-	                                myrun.mapfiles.add(tmpfile);
-	                            } else {
-	                                System.err.println("WARNING: cannot read from '" + tmp[0] + "' skipping entry");
-	                            }
-	                            if (tmp[1].equalsIgnoreCase("NONE")) {
-	                                myrun.lookupfiles.add(null);
-	                            } else {
-	                                tmpfile = new java.io.File(tmp[1]);
-	                                if (tmpfile.canRead()) {
-	                                    myrun.lookupfiles.add(tmpfile);
-	                                } else {
-	                                    System.err.println("WARNING: cannot read from '" + tmp[1] + "' skipping entry");
-	                                }
-	                            }
-	                        }
-	                    }//end while reading
+	                	if (!myrun.parse_function_block(buffered_file_handle)) {
+	                		System.err.println("WARNING: could not parse <function> block");
+	                		return myrun;
+	                	}
+                
 	                } else if (inline.equalsIgnoreCase("<affyfiles>")) {
-	                    myrun.affyfiles = new Vector();
-	                    replicates rep = null;
-	                    String[] tmparr;
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</affyfiles>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        inline = inline.trim();
-	                        if (inline.equalsIgnoreCase("<")) {
-	                            rep = new replicates();
-	                        } else if (inline.equalsIgnoreCase(">")) {
-	                            myrun.affyfiles.add(rep);
-	                        } else {
-	                            tmparr = inline.split("=");
-	                            if (tmparr[0].equalsIgnoreCase("replicates")) {
-	                                try {
-	                                    rep.replicates = Integer.parseInt(tmparr[1]);
-	                                } catch (NumberFormatException ne) {
-	                                    System.err.println("ERROR: unable to parse int from '" + tmparr[1] + "'");
-	                                    return myrun;
-	                                }
-	                            } else if (tmparr[0].equalsIgnoreCase("wtreplicates")) {
-	                                try {
-	                                    rep.wtreplicates = Integer.parseInt(tmparr[1]);
-	                                } catch (NumberFormatException ne) {
-	                                    System.err.println("ERROR: unable to parse int from '" + tmparr[1] + "'");
-	                                    return myrun;
-	                                }
-	                            } else if (tmparr[0].equalsIgnoreCase("name")) {
-	                                rep.name = tmparr[1];
-	                            } else if (tmparr[0].equalsIgnoreCase("wtname")) {
-	                                rep.wtname = tmparr[1];
-	                            } else if (tmparr[0].equalsIgnoreCase("abbreviation")) {
-	                                rep.abbreviation = tmparr[1];
-	                            } else if (tmparr[0].equalsIgnoreCase("replicate")) {
-	                                tmparr = tmparr[1].split("';'");
-	                                int repnum = java.lang.reflect.Array.getLength(tmparr);
-	                                if (repnum != rep.replicates) {
-	                                    System.err.println("unequal number of elements found in replicate; found:" + repnum + " expected:" + rep.replicates);
-	                                }
-	                                rep.replicate = new File[repnum];
-	                                for (int i = 0; i < repnum; i++) {
-	                                    rep.replicate[i] = new File(tmparr[i]);
-	                                    if (rep.replicate[i].canRead() == false) {
-	                                        System.err.println("WARNING: cannot read file '" + tmparr[i] + "'");
-	                                    }
-	                                }//end for i
-	                            } else if (tmparr[0].equalsIgnoreCase("wtreplicate")) {
-	                                tmparr = tmparr[1].split("';'");
-	                                int repnum = java.lang.reflect.Array.getLength(tmparr);
-	                                if (repnum != rep.wtreplicates) {
-	                                    System.err.println("unequal number of elements found in wtreplicate; found:" + repnum + " expected:" + rep.wtreplicates);
-	                                }
-	                                rep.wtreplicate = new File[repnum];
-	                                for (int i = 0; i < repnum; i++) {
-	                                    rep.wtreplicate[i] = new File(tmparr[i]);
-	                                    if (rep.wtreplicate[i].canRead() == false) {
-	                                        System.err.println("WARNING: cannot read file '" + tmparr[i] + "'");
-	                                    }
-	                                }//end for i
-	                            }
-	                        }
+	                    if (!myrun.parse_affyfiles_block(buffered_file_handle)) {
+	                    	System.err.println("WARNING: could not parse <affyfiles> block");
+	                    	return myrun;
 	                    }
+	                	
 	                } else if (inline.equalsIgnoreCase("<rotmtx>")) {
-	                    String tmpstr = "";
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</rotmtx>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        tmpstr += inline;
+	                    if (!myrun.parse_rotmtx_block(buffered_file_handle)) {
+	                    	System.err.println("WARNING: could not parse <rotmtx> block");
+	                    	return myrun;
 	                    }
-	                    String[] tmparr = tmpstr.split(";", 0);
-	                    if (java.lang.reflect.Array.getLength(tmparr) != 9) {
-	                        System.err.println("ERROR reading rotation matrix values from '" + tmpstr + "'");
-	                    } else {
-	                        double[][] retmtx = new double[3][3];
-	                        boolean error = false;
-	                        for (int i = 0; i < 3; i++) {
-	                            for (int j = 0; j < 3; j++) {
-	                                try {
-	                                    retmtx[i][j] = Double.parseDouble(tmparr[(i * 3) + j]);
-	                                } catch (NumberFormatException ne) {
-	                                    System.err.println("unable to parse double from '" + tmparr[(i * 3) + j] + "'");
-	                                    i = 4;
-	                                    error = true;
-	                                }
-	                            }
-	                        }
-	                        if (error == false) {
-	                            myrun.rotmtx = retmtx;
-	                        }
-	                    }
+	                	
 	                } else if (inline.equalsIgnoreCase("<seq>")) {
-	                    int counter = 0;
-	                    String currname = "";
-	                    String currseq = "";
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</seq>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        //read the sequence data
-	                        if (inline.startsWith(">")) {
-	                            if (currname.length() > 0) {
-	                                myrun.inaln[counter] = new AminoAcidSequence();
-	                                myrun.inaln[counter].name = currname;
-	                                myrun.inaln[counter].seq = currseq;
-	                                counter++;
-	                            }
-	                            currname = inline.substring(1).trim();
-	                            currseq = "";
-	                        } else {
-	                            currseq += inline;
-	                        }
-	                    }//end seq part
-	                    myrun.inaln[counter] = new AminoAcidSequence();
-	                    myrun.inaln[counter].name = currname;
-	                    myrun.inaln[counter].seq = currseq;
-	                    counter++;
-	                    if (counter != seqs) {
-	                        System.err.println("ERROR, not found the number of specified sequences, expected:" + seqs + " found:" + counter);
-	                        return myrun;
-	                    }
+	                	if (!myrun.parse_seq_block(buffered_file_handle, expected_sequences)) {
+	                		System.err.println("WARNING: could not parse <seq> block");
+	                    	return myrun;
+	                	}
+	                    
 	                } else if (inline.equalsIgnoreCase("<weight>")) {
-	                    int counter = 0;
-	                    String currname = "";
-	                    String currseq = "";
-	                    if (seqs < 1) {
-	                        System.err.println("ERROR; <weight>...</weight> statements have to come AFTER <seq>...</seq> statement");
-	                        javax.swing.JOptionPane.showMessageDialog(new javax.swing.JFrame(), "ERROR; <weight>...</weight> statements have to come AFTER <seq>...</seq> statement");
-	                        return myrun;
-	                    }
-	                    myrun.weights = new float[seqs];
-	                    //now make a Hash that links the weights values to the sequence names
-	                    HashMap tmphash = new HashMap();
-	                    //and now read the data
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</weight>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        //read the sequence data
-	                        if (inline.startsWith(">")) {
-	                            if (currname.length() > 0) {
-	                                if (tmphash.containsKey(currname)) {
-	                                    try {
-	                                        tmphash.put(currname, new Float(Float.parseFloat(currseq.trim())));
-	                                    } catch (NumberFormatException ne) {
-	                                        System.err.println("unable to parse number from '" + currseq + "'");
-	                                        return myrun;
-	                                    }
-	                                } else {//if this name is unknown
-	                                    System.err.println("WARNING: name '" + currname + "' is not a sequence name.");
-	                                }
-	                            }
-	                            currname = inline.substring(1).trim();
-	                            currseq = "";
-	                        } else {
-	                            currseq += inline;
-	                        }
-	                    }//end seq part
-	                    if (currname.length() > 0) {
-	                        if (tmphash.containsKey(currname)) {
-	                            try {
-	                                tmphash.put(currname, new Float(Float.parseFloat(currseq.trim())));
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("unable to parse number from '" + currseq + "'");
-	                                return myrun;
-	                            }
-	                        } else {//if this name is unknown
-	                            System.err.println("WARNING: name '" + currname + "' is not a sequence name.");
-	                        }
-	                    }
-	                    //and now convert the tmphash data to a weights array
-	                    //for that loop through the sequence names and assign the corresponding weights
-	                    for (int i = 0; i < seqs; i++) {
-	                        if (tmphash.containsKey(myrun.inaln[i].name)) {
-	                            myrun.weights[i] = ((Float) tmphash.get(myrun.inaln[i].name)).floatValue();
-	                        } else {//default weight of 1
-	                            myrun.weights[i] = 1;
-	                        }
-	                    }//end for i
+	                	if (!myrun.parse_weight_block(buffered_file_handle, expected_sequences)) {
+	                		System.err.println("WARNING: could not parse <weight> block");
+	                    	return myrun;
+	                	}
+	                	
 	                } else if (inline.equalsIgnoreCase("<pos>")) {
-	                    int counter = 0;
-	                    int mypos;
-	                    String[] tmparr;
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</pos>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        tmparr = inline.trim().split("\\s+");
-	                        if (java.lang.reflect.Array.getLength(tmparr) != 4) {
-	                            System.err.println("ERROR reading positions from " + inline);
-	                            return myrun;
-	                        }
-	                        //else
-	                        try {
-	                            mypos = Integer.parseInt(tmparr[0]);
-	                            myrun.posarr[mypos][0] = Float.parseFloat(tmparr[1]);
-	                            myrun.posarr[mypos][1] = Float.parseFloat(tmparr[2]);
-	                            myrun.posarr[mypos][2] = Float.parseFloat(tmparr[3]);
-	                            counter++;
-	                        } catch (NumberFormatException ne) {
-	                            System.err.println("ERROR, unable to parse int,double,double,double from " + inline);
-	                            return myrun;
-	                        }
-	                    }//end while pos
-	                    if (counter != seqs) {
-	                        System.err.println("ERROR, not found the necessary number of positions");
-	                        return myrun;
-	                    }
+	                	if (!myrun.parse_pos_block(buffered_file_handle, expected_sequences)) {
+	                		System.err.println("WARNING: could not parse <pos> block");
+	                    	return myrun;
+	                	}
+	                    
 	                } else if (inline.equalsIgnoreCase("<hsp>")) {
-	                    //Vector tmpvec=new Vector();
-	                    String[] tmparr;
-	                    String tmpstr;
-	                    minhsp currhsp;
-	                    HashMap hsphash = new HashMap();
-	                    String hspkey = "";
-	                    boolean addvals = false;
-	                    if (myrun.pval < 0) {
-	                        myrun.pval = 1;
-	                    }
-	                    int count = 0;
-	                    String lastline = "";
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</hsp>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        if (count % 1000 == 0) {
-	                            System.out.print(".");
-	                            if (count % 100000 == 0) {
-	                                System.out.print(count);
-	                            }
-	                        }
-	                        count++;
-	                        tmparr = inline.split(":");
-	                        int myi, myj;
-	                        if (inline.equalsIgnoreCase("DONE")) {
-	                            System.err.println("manually truncated file, returning results so far");
-	                            return myrun;
-	                        }
-	                        if (java.lang.reflect.Array.getLength(tmparr) != 2) {
-	                            System.err.println("ERROR parsing HSP data from " + inline + " right after line '" + lastline + "'");
-	                            return myrun;
-	                        }
-	                        //else
-	                        try {
-	                            tmpstr = tmparr[1];
-	                            tmparr = tmparr[0].split("\\s+");
-	                            if (java.lang.reflect.Array.getLength(tmparr) != 2) {
-	                                System.err.println("ERROR, wrong hsp line " + inline);
-	                                return myrun;
-	                            }
-	                            myi = Integer.parseInt(tmparr[0]);
-	                            myj = Integer.parseInt(tmparr[1]);
-	                            if (myi == myj) {
-	                                continue;
-	                            }
-	                            //if(myi>myj){
-	                            //    int tmp=myi;
-	                            //    myi=myj;
-	                            //    myj=tmp;
-	                            //}
-	                            tmparr = tmpstr.split("\\s+");
-	                            if (java.lang.reflect.Array.getLength(tmparr) > 0) {
-	                                hspkey = myi + "_" + myj;
-	                                if (hsphash.containsKey(hspkey)) {
-	                                    currhsp = (minhsp) hsphash.get(hspkey);
-	                                    for (int i = 0; i < java.lang.reflect.Array.getLength(tmparr); i++) {
-	                                        currhsp.addpval(Double.parseDouble(tmparr[i]));
-	                                    }//end for i
-	                                } else {
-	                                    currhsp = new minhsp();
-	                                    currhsp.query = myi;
-	                                    currhsp.hit = myj;
-	                                    currhsp.val = new double[java.lang.reflect.Array.getLength(tmparr)];
-	                                    for (int i = 0; i < java.lang.reflect.Array.getLength(tmparr); i++) {
-	                                        currhsp.val[i] = Double.parseDouble(tmparr[i]);
-	                                    }//end for i
-	                                }
-	                            } else {
-	                                continue;
-	                            }
-	                            hsphash.put(hspkey, currhsp);
-	                        } catch (NumberFormatException Ne) {
-	                            System.err.println("ERROR, unable to parse int int: double ... from " + inline);
-	                            return myrun;
-	                        }
-	                        lastline = inline;
-	                    }//end while hsp
-	                    if (inline.equalsIgnoreCase("</hsp>")) {
-	                        myrun.blasthits = (minhsp[]) hsphash.values().toArray(new minhsp[0]);
-	                    } else {
-	                        System.err.println("ERROR reading truncated file; <hsp> tag not closed by </hsp>");
-	                    }
+	                	if (!myrun.parse_hsp_block(buffered_file_handle)) {
+	                		System.err.println("WARNING: could not parse <hsp> block");
+	                    	return myrun;
+	                	}
+	                	
 	                } else if (inline.equalsIgnoreCase("<att>")) {
-	                    myrun.blasthits = null;
-	                    Vector tmpvec = new Vector();
-	                    //read in the attvals
-	                    System.out.println("reading attraction value data");
-	                    String[] tmparr;
-	                    String tmpstr = "";
-	                    if (myrun.pval < 0) {
-	                        myrun.pval = 0;
-	                    }
-	                    int elements, firstelements = -1, counter = 0;
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</att>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        inline = inline.trim();
-	                        tmparr = inline.split("[\\s+]");
-	                        if (counter % 1000 == 0) {
-	                            System.out.print(counter);
-	                        } else if (counter % 10 == 0) {
-	                            System.out.print(".");
-	                        }
-	                        elements = java.lang.reflect.Array.getLength(tmparr);
-	                        if (elements != 3) {
-	                            System.err.println("unable to parse attraction value information from '" + inline + "'");
-	                        }
-	                        minattvals curratt = new minattvals();
-	                        try {
-	                            curratt.query = Integer.parseInt(tmparr[0]);
-	                            curratt.hit = Integer.parseInt(tmparr[1]);
-	                            curratt.att = Float.parseFloat(tmparr[2]);
-	                        } catch (NumberFormatException ne) {
-	                            System.err.println("unable to parse float for " + tmpstr + " in " + inline);
-	                        }
-	                        tmpvec.addElement(curratt);
-	                        counter++;
-	                    }
-	                    myrun.attvals = new minattvals[tmpvec.size()];
-	                    tmpvec.copyInto(myrun.attvals);
-	                    System.out.println("done reading matrix data");
+	                  	if (!myrun.parse_att_block(buffered_file_handle)) {
+	                		System.err.println("WARNING: could not parse <att> block");
+	                    	return myrun;
+	                	}
+	                  	
 	                } else if (inline.equalsIgnoreCase("<seqgroups>")) {
-	                    //while I am reading the sequence groups
-	                    String[] tmparr;
-	                    String tmpstr = "";
-	                    seqgroup currgroup = null;
-	                    int tmpval;
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</seqgroups>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        tmparr = inline.split("=");
-	                        if (java.lang.reflect.Array.getLength(tmparr) != 2) {
-	                            System.err.println("ERROR reading from savefile on line '" + inline + "'");
-	                            return myrun;
-	                        }
-	                        if (tmparr[0].equalsIgnoreCase("name")) {
-	                            if (currgroup != null) {
-	                                myrun.seqgroupsvec.addElement(currgroup);
-	                            }
-	                            currgroup = new seqgroup();
-	                            currgroup.name = tmparr[1];
-	                            currgroup.type = 0;
-	                        } else if (inline.startsWith("type=")) {
-	                            try {
-	                                tmpstr = inline.substring(5).trim();
-	                                currgroup.type = Integer.parseInt(tmpstr);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR, unable to parse int from '" + tmpstr + "'");
-	                            }
-	                        } else if (inline.startsWith("size=")) {
-	                            try {
-	                                tmpstr = inline.substring(5).trim();
-	                                currgroup.size = Integer.parseInt(tmpstr);
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR, unable to parse int from '" + tmpstr + "'");
-	                            }
-	                        } else if (inline.startsWith("hide=")) {
-	                            try {
-	                                tmpstr = inline.substring(5).trim();
-	                                tmpval = Integer.parseInt(tmpstr);
-	                                if (tmpval == 1) {
-	                                    currgroup.hide = true;
-	                                } else {
-	                                    currgroup.hide = false;
-	                                }
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR, unable to parse int from '" + tmpstr + "'");
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("color")) {
-	                            tmparr = tmparr[1].split(";");
-	                            try {
-	                                int red = Integer.parseInt(tmparr[0]);
-	                                int green = Integer.parseInt(tmparr[1]);
-	                                int blue = Integer.parseInt(tmparr[2]);
-	                                if(java.lang.reflect.Array.getLength(tmparr)<4){
-	                                    currgroup.color = new java.awt.Color(red, green, blue);
-	                                }else{
-	                                    int alpha=Integer.parseInt(tmparr[3]);
-	                                    currgroup.color = new java.awt.Color(red, green, blue,alpha);
-	                                }
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing numbers from '" + inline + "'");
-	                                return myrun;
-	                            }
-	                        } else if (tmparr[0].equalsIgnoreCase("numbers")) {
-	                            tmparr = tmparr[1].split(";");
-	                            int num = java.lang.reflect.Array.getLength(tmparr);
-	                            int[] retarr = new int[num];
-	                            currgroup.polygon = makepolygons.get(currgroup.type, currgroup.size);
-	                            try {
-	                                for (int i = 0; i < num; i++) {
-	                                    retarr[i] = Integer.parseInt(tmparr[i]);
-	                                }//end for i
-	                            } catch (NumberFormatException ne) {
-	                                System.err.println("ERROR parsing numbers from '" + inline + "'");
-	                                return myrun;
-	                            }
-	                            currgroup.sequences = retarr;
-	                        } else {
-	                            System.err.println("Error reading savefile in line" + inline);
-	                            return myrun;
-	                        }
-	                    }//end while !=/seqgroups
-	                    if (currgroup != null) {
-	                        myrun.seqgroupsvec.addElement(currgroup);
-	                    }
+	                  	if (!myrun.parse_seqgroups_block(buffered_file_handle)) {
+	                		System.err.println("WARNING: could not parse <seqgroups> block");
+	                    	return myrun;
+	                	}
+	                  	
 	                } else if (inline.equalsIgnoreCase("<mtx>")) {
-	                    //load a matrix of attraction values
-	                    myrun.blasthits = null;
-	                    System.out.println("reading matrix");
-	                    int counter = 0;
-	                    int mypos;
-	                    String[] tmparr;
-	                    HashMap tmphash = new HashMap();
-	                    String key;
-	                    minattvals curratt;
-	                    float tmpval;
-	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</mtx>") == false)) {
-	                        //skip empty lines
-	                        if (inline.length() == 0) {
-	                            continue;
-	                        }
-	                        tmparr = inline.trim().split(";");
-	                        if (java.lang.reflect.Array.getLength(tmparr) != seqs) {
-	                            System.err.println("ERROR reading positions from " + inline + "; expecting " + seqs + " values");
-	                            return myrun;
-	                        }
-	                        try {
-	                            for (int i = 0; i < seqs; i++) {
-	                                tmpval = Float.parseFloat(tmparr[i]);
-	                                if (tmpval != 0) {
-	                                    if (counter < i) {
-	                                        key = counter + "_" + i;
-	                                    } else {
-	                                        key = i + "_" + counter;
-	                                    }
-	                                    if (tmphash.containsKey(key)) {
-	                                        curratt = (minattvals) tmphash.get(key);
-	                                        curratt.att += tmpval / 2;
-	                                    } else {
-	                                        curratt = new minattvals();
-	                                        curratt.query = counter;
-	                                        curratt.hit = i;
-	                                        curratt.att = tmpval / 2;
-	                                        tmphash.put(key, curratt);
-	                                    }
-	                                }
-	                            }//end for i
-	                        } catch (NumberFormatException ne) {
-	                            System.err.println("ERROR, unable to parse float array from " + inline);
-	                            return myrun;
-	                        }
-	                        counter++;
-	                    }//end while pos
-	                    myrun.attvals = (minattvals[]) (tmphash.values().toArray(new minattvals[0]));
-	                    System.out.println("done reading matrix:" + counter);
-	                    if (counter != seqs) {
-	                        System.err.println("ERROR, not found the necessary number of positions");
-	                        return myrun;
-	                    }
+	                	if (!myrun.parse_mtx_block(buffered_file_handle, expected_sequences)) {
+	                		System.err.println("WARNING: could not parse <mtx> block");
+	                    	return myrun;
+	                	}
+	                	
 	                } else {
 	                    System.err.println("ERROR, wrong format! unknown specs on line " + inline);
 	                    return myrun;
 	                }
 	            } else {
 	                System.out.println("assuming BioLayout format");
-	                inread.close();
+	                buffered_file_handle.close();
 	                myrun = load_biolayout_file(infile);
 	                return myrun;
-	                //System.err.println("currently not implemented");
-	                //return null;
 	            }
-	        }//end while reading from file
-	        inread.close();
+	        }
+
+	        buffered_file_handle.close();
+
 	    } catch (IOException e) {
 	        System.err.println("IOError unable to read from " + infile.getAbsolutePath());
 	        return myrun;
 	    }
+	    
 	    if (myrun.posarr == null) {
 	        //give it random values
 	        int num = java.lang.reflect.Array.getLength(myrun.inaln);
@@ -917,12 +265,13 @@ public class ClusterData {
 	            myrun.posarr[i][0] = rand.nextFloat();
 	            myrun.posarr[i][1] = rand.nextFloat();
 	            myrun.posarr[i][2] = rand.nextFloat();
-	        }//end for i
+	        }
 	    }
-	    myrun.file = infile;//marker for successful read
+	    
+	    myrun.file = infile; //marker for successful read
 	    return myrun;
-	}//end loadrun
-
+	}
+	
 	public void load_clans_file(String input_filename){
     	
         saverunobject loaded_data = ClusterData.load_run_from_file(new java.io.File(input_filename));
@@ -978,7 +327,7 @@ public class ClusterData {
        zoomfactor=loaded_data.zoom;
        cluster2d=loaded_data.cluster2d;
        showinfo=loaded_data.showinfo;
-        int number_of_sequences =sequences.length;
+       int number_of_sequences =sequences.length;
        nameshash=new java.util.HashMap((int)(number_of_sequences/0.75)+1,(float)0.75);//holds info about which name is which array number
        namearr=new String[number_of_sequences];
         for(int i=0;i<number_of_sequences;i++){
