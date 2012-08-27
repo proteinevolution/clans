@@ -549,7 +549,7 @@ public class CustomUtils {
     }
 
     //--------------------------------------------------------------------------
-    static saverunobject loadrun(File infile) {
+    static saverunobject load_run_from_file(File infile) {
         //load stuff from a savefile
         //!!!NOTE!!!: this was edited so as to combine hsp's with the same query-hit combination irrespective of which sequence is the query and which the hit
         //this is a valid approach in this case, as I later on anyways symmetrize the sequence interactions

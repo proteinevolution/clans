@@ -79,13 +79,15 @@ public class ClusteringWithoutGui {
     }
 
     void loaddata(String input_filename){
-        if(mythread != null && !mythread.stop){
+        
+    	if(mythread != null && !mythread.stop){
             System.err.println("Warning, you should stop the clustering thread before loading another file; stopping thread now");
             mythread.stop = true;
-        }//else everything is OK
-        data.input_filename = input_filename;
-        ClusterMethods.loaddata(data);
-    }//end loaddata
+        }
+
+        data.load_from_file(input_filename);
+    
+    }
 
 
     void startstopthread(){

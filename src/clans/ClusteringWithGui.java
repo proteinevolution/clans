@@ -2596,8 +2596,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             System.err.println("Warning, you should stop the clustering thread before loading another file; stopping thread now");
             mythread.stop=true;
         }//else everything is OK
-        data.input_filename=inname;
-        ClusterMethods.loaddata(data);
+        data.load_from_file(inname);
         textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
         if(data.blasthits==null){
             button_cutoff_value.setText("Use Attraction values better than");
