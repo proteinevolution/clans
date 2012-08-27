@@ -17,7 +17,21 @@ public class ClusteringWithoutGui {
 	public ClusteringWithoutGui(ClusterData data){
         this.data=data;
         this.data.nographics = true;
-    }
+        
+        this.setup_cutoffs();
+	}
+	
+	public void setup_cutoffs() {
+		data.minpval = data.pval;
+        data.mineval = data.eval;
+        
+        if (data.scval >= 0) {//in that case use a score cutoff
+            data.minpval = data.scval;
+            data.usescval = true;
+        } else {
+            data.usescval = false;
+        }
+	}
 
     class computethread extends java.lang.Thread{
         //--------------------------------------------------------------------------
@@ -64,17 +78,6 @@ public class ClusteringWithoutGui {
     }
 
     void setup_attraction_values_and_initialize(){
-
-    	data.minpval=data.pval;
-        data.mineval=data.eval;
-        
-        if(data.scval>=0){//in that case use a score cutoff
-            data.minpval=data.scval;
-            data.usescval=true;
-        }else{
-            data.usescval=false;
-        }
-        
         ClusterMethods.setup_attraction_values_and_initialize(data);
     }
 
