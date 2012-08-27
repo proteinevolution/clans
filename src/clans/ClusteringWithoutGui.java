@@ -31,6 +31,8 @@ public class ClusteringWithoutGui {
         } else {
             data.usescval = false;
         }
+        
+        data.compute_attraction_values();
 	}
 
     class computethread extends java.lang.Thread{
@@ -89,7 +91,6 @@ public class ClusteringWithoutGui {
         }
 
         data.load_clans_file(input_filename);
-    
     }
 
 
