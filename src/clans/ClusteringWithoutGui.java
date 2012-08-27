@@ -85,7 +85,7 @@ public class ClusteringWithoutGui {
             mythread.stop = true;
         }
 
-        data.load_from_file(input_filename);
+        data.load_clans_file(input_filename);
     
     }
 

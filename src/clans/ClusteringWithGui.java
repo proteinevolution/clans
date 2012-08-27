@@ -913,7 +913,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         // load additional sequence groups from a file
         int returnVal = fc.showOpenDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
-            data.seqgroupsvec=CustomUtils.loadgroups(data.seqgroupsvec,data.namearr,fc.getSelectedFile());
+            data.append_groups_or_clusters_from_file(fc.getSelectedFile());
             if(myseqgroupwindow!=null){
                 myseqgroupwindow.setVisible(false);
                 myseqgroupwindow.dispose();
@@ -1150,7 +1150,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         groupseqs=null;
         int returnVal = fc.showOpenDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
-            saverunobject saveddata=CustomUtils.loadrunalternate(fc.getSelectedFile());
+            saverunobject saveddata=ClusterData.load_matrix_file(fc.getSelectedFile());
             if(saveddata.file!=null){//if the data was read all right
                 repaint="Error Loading Data";
                 data.sequences=ClusterMethods.remove_gaps_from_sequences(saveddata.inaln);
@@ -2295,7 +2295,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         int returnVal = fc.showSaveDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
             this.setTitle("Clustering of "+fc.getSelectedFile().getName());
-            CustomUtils.saveattvalstofile(fc.getSelectedFile(),data.myattvals,data.nographics);
+            data.save_attraction_values_to_file(fc.getSelectedFile());
         }
     }//GEN-LAST:event_saveattvalsmenuitemActionPerformed
     
@@ -2596,7 +2596,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             System.err.println("Warning, you should stop the clustering thread before loading another file; stopping thread now");
             mythread.stop=true;
         }//else everything is OK
-        data.load_from_file(inname);
+        data.load_clans_file(inname);
         textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
         if(data.blasthits==null){
             button_cutoff_value.setText("Use Attraction values better than");
