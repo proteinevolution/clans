@@ -555,7 +555,6 @@ public class CustomUtils {
         //this is a valid approach in this case, as I later on anyways symmetrize the sequence interactions
         saverunobject myrun = new saverunobject();
         myrun.file = null;//if myrun has a filename all was read ok
-        Vector nullvector = new Vector();
         try {
             BufferedReader inread = new BufferedReader(new FileReader(infile));
             System.out.println("loading data from '" + infile.getAbsolutePath() + "'");
