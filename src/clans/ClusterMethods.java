@@ -7,66 +7,6 @@ package clans;
 public class ClusterMethods {
     
 	static final java.util.Random rand=new java.util.Random(System.currentTimeMillis());
-    
-	static void setup_attraction_values_and_initialize(ClusterData data){
-	    // compute "attraction" values for all sequence pairs from the hsp objects
-		// and initialize the positions randomly
-		
-        data.rounds=0;
-        data.currcool=1;
-
-		data.mymovearr = null;
-        data.lastmovearr = null;       
-
-        data.elements = data.namearr.length;
-	    
-        if(data.elements == 0){ // no elements means nothing to do
-	    	data.myposarr = new float[0][0];
-	    	data.posarr=data.myposarr;
-	    	return;
-	    }
-	    
-	    data.myposarr=new float[data.elements][ClusterData.dimensions];
-	    data.posarrtmp=new float[data.elements][ClusterData.dimensions];
-	    data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
-	    data.mymovearr=new float[data.elements][ClusterData.dimensions];
-	    data.lastmovearr=new float[data.elements][ClusterData.dimensions];
-	    for(int i = 0; i < data.elements; i++){
-	        data.mymovearr[i][0]=0;
-	        data.mymovearr[i][1]=0;
-	        data.mymovearr[i][2]=0;
-	    	
-	        data.lastmovearr[i][0]=0;
-	        data.lastmovearr[i][1]=0;
-	        data.lastmovearr[i][2]=0;
-	    }
-	    
-	    // compute the "attraction values"
-	    if(data.blasthits != null){
-	        if(data.myattvals == null){
-	            //synchronized(myattvals){//myattvals is null here; cannot sync on it
-	            data.compute_attraction_values();
-	            //}
-	        }
-	    }
-
-	    data.myposarr=initialize_positions_randomly(data.myposarr);
-	    data.posarr=data.myposarr;
-	}
-
-	static float[][] initialize_positions_randomly(float[][] positions){
-	    //seed the positions array with random numbers([-1 to 1[)
-	
-	    for(int i = 0; i < positions.length; i++){
-	    	for(int j = 0; j < positions[j].length; j++){
-	    		positions[i][j] = rand.nextFloat() * 2 - 1;
-	        }
-	    }
-	    
-	    return positions;
-	}
-
-    //--------------------------------------------------------------------------
 
      static void recluster3d(ClusterData data){
         //take the hsp objects from indata and compute "attraction" values for all sequence pairs

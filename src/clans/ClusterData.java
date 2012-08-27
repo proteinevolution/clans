@@ -57,7 +57,7 @@ public class ClusterData {
     float[][] posarr=null;
     boolean cluster2d=false;
     float maxmove=0.1f;
-    double minpval=1;
+    double pvalue_threshold=1;
     double mineval=1;
     float hidebelow=0;
     float hidebelowold=0;
@@ -124,7 +124,11 @@ public class ClusterData {
     	this.namearr=namearr;
         this.nameshash=nameshash;
         this.eval=eval;
-        this.pval=pval;
+        
+        if (pval != -1) {
+        	this.pval = pval;	
+        }
+        
         this.scval=scval;
         this.verbose=verbose;
         this.cpu=cpu;
@@ -298,7 +302,7 @@ public class ClusterData {
         
        complexatt=loaded_data.complexatt;
        maxmove=loaded_data.maxmove;
-       minpval=loaded_data.pval;
+       pvalue_threshold=loaded_data.pval;
        cooling=loaded_data.cooling;
        currcool=loaded_data.currcool;
        attfactor=loaded_data.attfactor;
@@ -711,7 +715,7 @@ public class ClusterData {
 	    myrun.attvals=myattvals;
 	    myrun.posarr=myposarr;
 	    myrun.maxmove=maxmove;
-	    myrun.pval=minpval;
+	    myrun.pval=pvalue_threshold;
 	    myrun.usescval=usescval;
 	    if(attvalsimple){
 	        myrun.complexatt=false;
@@ -1314,7 +1318,7 @@ public class ClusterData {
 	                    if(curratt.att==-1){
 	                        //in this case keep the -1
 	                    }else{
-	                        newatt=ClusterMethods.getattvalsimple(blasthits[i].val,elements,minpval,this);
+	                        newatt=ClusterMethods.getattvalsimple(blasthits[i].val,elements,pvalue_threshold,this);
 	                        if(newatt==-1){
 	                            curratt.att=-1;
 	                        }else{
@@ -1332,7 +1336,7 @@ public class ClusterData {
 	                        curratt.hit=blasthits[i].query;
 	                        curratt.query=blasthits[i].hit;
 	                    }
-	                    curratt.att=ClusterMethods.getattvalsimple(blasthits[i].val,elements,minpval,this);
+	                    curratt.att=ClusterMethods.getattvalsimple(blasthits[i].val,elements,pvalue_threshold,this);
 	                    if(curratt.att!=-1){
 	                        curratt.att/=2;
 	                    }
@@ -1357,7 +1361,7 @@ public class ClusterData {
 	                    if(curratt.att==-1){
 	                        //in this case keep the -1
 	                    }else{
-	                        newatt=ClusterMethods.getattvalmult(blasthits[i].val,elements,minpval,this);
+	                        newatt=ClusterMethods.getattvalmult(blasthits[i].val,elements,pvalue_threshold,this);
 	                        if(newatt==-1){
 	                            curratt.att=-1;
 	                        }else{
@@ -1375,7 +1379,7 @@ public class ClusterData {
 	                        curratt.hit=blasthits[i].query;
 	                        curratt.query=blasthits[i].hit;
 	                    }
-	                    curratt.att=ClusterMethods.getattvalmult(blasthits[i].val,elements,minpval,this);
+	                    curratt.att=ClusterMethods.getattvalmult(blasthits[i].val,elements,pvalue_threshold,this);
 	                    if(curratt.att !=-1){
 	                        curratt.att/=2;
 	                    }
@@ -1424,7 +1428,7 @@ public class ClusterData {
 	                    if(curratt.att==-1){
 	                        //in this case keep the -1
 	                    }else{
-	                        newatt=ClusterMethods.getattvalsimple(blasthits[i].val, elements, minpval, this);
+	                        newatt=ClusterMethods.getattvalsimple(blasthits[i].val, elements, pvalue_threshold, this);
 	                        if(newatt==-1){
 	                            curratt.att=-1;
 	                        }else{
@@ -1442,7 +1446,7 @@ public class ClusterData {
 	                        curratt.hit=blasthits[i].query;
 	                        curratt.query=blasthits[i].hit;
 	                    }
-	                    curratt.att=ClusterMethods.getattvalsimple(blasthits[i].val, elements, minpval, this);
+	                    curratt.att=ClusterMethods.getattvalsimple(blasthits[i].val, elements, pvalue_threshold, this);
 	                    if(curratt.att!=-1){
 	                        curratt.att/=2;
 	                    }
@@ -1470,7 +1474,7 @@ public class ClusterData {
 	                    if(curratt.att==-1){
 	                        //in this case keep the -1
 	                    }else{
-	                        newatt=ClusterMethods.getattvalmult(blasthits[i].val, elements, minpval, this);
+	                        newatt=ClusterMethods.getattvalmult(blasthits[i].val, elements, pvalue_threshold, this);
 	                        if(newatt==-1){
 	                            curratt.att=-1;
 	                        }else{
@@ -1489,7 +1493,7 @@ public class ClusterData {
 	                        curratt.hit=blasthits[i].query;
 	                        curratt.query=blasthits[i].hit;
 	                    }
-	                    curratt.att = ClusterMethods.getattvalmult(blasthits[i].val, elements, minpval, this);
+	                    curratt.att = ClusterMethods.getattvalmult(blasthits[i].val, elements, pvalue_threshold, this);
 	                    if(curratt.att!=-1){
 	                        curratt.att/=2;
 	                    }
@@ -1523,5 +1527,56 @@ public class ClusterData {
 	    myattvals = (minattvals[])tmpvec.toArray(new minattvals[0]);
 	    System.out.println("attvals size=" + myattvals.length);
 	}// end getattvals
+
+	public void initialize(){
+	    // compute "attraction" values for all sequence pairs from the hsp objects
+		// and initialize the positions randomly
+		
+	    rounds=0;
+	    currcool=1;
+	
+		mymovearr = null;
+	    lastmovearr = null;       
+	
+	    elements = namearr.length;
+	    
+	    if(elements == 0){ // no elements means nothing to do
+	    	myposarr = new float[0][0];
+	    	posarr=myposarr;
+	    	return;
+	    }
+	    
+	    myposarr=new float[elements][dimensions];
+	    posarrtmp=new float[elements][dimensions];
+	    drawarrtmp=new int[elements][dimensions];
+	    mymovearr=new float[elements][dimensions];
+	    lastmovearr=new float[elements][dimensions];
+	    for(int i = 0; i < elements; i++){
+	        mymovearr[i][0]=0;
+	        mymovearr[i][1]=0;
+	        mymovearr[i][2]=0;
+	    	
+	        lastmovearr[i][0]=0;
+	        lastmovearr[i][1]=0;
+	        lastmovearr[i][2]=0;
+	    }
+	    
+	    // compute the "attraction values"
+	    if(blasthits != null){
+	        if(myattvals == null){
+	            //synchronized(myattvals){//myattvals is null here; cannot sync on it
+	            compute_attraction_values();
+	            //}
+	        }
+	    }
+	    
+	    for(int i = 0; i < myposarr.length; i++){
+	    	for(int j = 0; j < myposarr[j].length; j++){
+	    		myposarr[i][j] = ClusterMethods.rand.nextFloat() * 2 - 1;
+	        }
+	    }
+
+	    posarr=myposarr;
+	}
 
 }

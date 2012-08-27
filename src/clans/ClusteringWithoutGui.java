@@ -22,11 +22,11 @@ public class ClusteringWithoutGui {
 	}
 	
 	public void setup_cutoffs() {
-		data.minpval = data.pval;
+		data.pvalue_threshold = data.pval;
         data.mineval = data.eval;
         
         if (data.scval >= 0) {//in that case use a score cutoff
-            data.minpval = data.scval;
+            data.pvalue_threshold = data.scval;
             data.usescval = true;
         } else {
             data.usescval = false;
@@ -79,8 +79,9 @@ public class ClusteringWithoutGui {
 
     }
 
-    void setup_attraction_values_and_initialize(){
-        ClusterMethods.setup_attraction_values_and_initialize(data);
+    void initialize(){
+    	data.initialize();
+    	setup_cutoffs();
     }
 
     void loaddata(String input_filename){
