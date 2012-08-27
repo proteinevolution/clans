@@ -581,7 +581,6 @@ public class CustomUtils {
                 } else if (seqs != -1) {
                     if (inline.equalsIgnoreCase("<param>")) {
                         String[] tmparr;
-                        String tmpstr;
                         while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</param>") == false)) {
                             //skip empty lines
                             if (inline.length() == 0) {
