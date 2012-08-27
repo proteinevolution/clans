@@ -36,7 +36,7 @@ public class aboutwindow extends javax.swing.JDialog {
         getContentPane().add(textarea, java.awt.BorderLayout.CENTER);
 
         topfield.setEditable(false);
-        topfield.setText("CLANS (29.05.2012)");
+        topfield.setText("CLANS (27.08.2012)");
         getContentPane().add(topfield, java.awt.BorderLayout.NORTH);
 
         pack();
