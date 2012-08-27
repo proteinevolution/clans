@@ -1374,7 +1374,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         //if I have a valid number update the attvals data
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+                data.compute_attraction_values();
             }
         }else if(data.myattvals!=null){//remove all attvals below the specified value
             if(data.orgattvals==null){
@@ -1688,7 +1688,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.selectednames=new int[0];
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+            	data.compute_attraction_values();
             }
         }
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
@@ -1755,7 +1755,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+            	data.compute_attraction_values();
             }
         }
         if(myseqgroupwindow!=null){
@@ -1843,9 +1843,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         parentseqgroups.addElement(data.seqgroupsvec);
         data.seqgroupsvec=new Vector();
         data.selectednames=new int[0];
+
         synchronized(data.myattvals){
-            data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+        	data.compute_attraction_values();
         }
+        
         data.posarr=data.myposarr;
         data.posarrtmp=new float[data.elements][data.dimensions];
         data.drawarrtmp=new int[data.elements][data.dimensions];
@@ -1980,7 +1982,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         //if I have a valid number update the attvals data
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+            	data.compute_attraction_values();
             }
         }else if(data.myattvals!=null){//remove all attvals below the specified value
             if(data.orgattvals==null){
@@ -2712,7 +2714,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.drawarrtmp=new int[data.elements][data.dimensions];
         //draw1.draworder=new Vector[0];
         data.draworder=new ArrayList[0];
-        data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+        
+        data.compute_attraction_values();
+        
         moveselectedonly.setSelected(useselectedonly);
         int seqnum=java.lang.reflect.Array.getLength(data.sequences);
         System.out.println("seqnum="+seqnum);
