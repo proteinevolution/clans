@@ -42,11 +42,10 @@ public class ClusterMethods {
 	    }
 	    
 	    // compute the "attraction values"
-	    minhsp[] indata = data.blasthits;
-	    if(indata != null){
+	    if(data.blasthits != null){
 	        if(data.myattvals == null){
 	            //synchronized(myattvals){//myattvals is null here; cannot sync on it
-	            data.myattvals=compute_attraction_values(indata, data.minpval, data);
+	            data.myattvals=compute_attraction_values(data.blasthits, data.minpval, data);
 	            //}
 	        }
 	    }
