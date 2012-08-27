@@ -242,7 +242,7 @@ public class saverunobject {
                         blue = Integer.parseInt(tmptmp[2]);
                         colorarr[i] = new java.awt.Color(red, green, blue);
                     }//end for i
-                    colorarr = colorarr;
+                    this.colorarr = colorarr;
                 } catch (NumberFormatException ne) {
                     System.err.println("Warning: unable to parse color array from '" + inline + "'");
                 }
