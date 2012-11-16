@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
@@ -1229,7 +1230,9 @@ public class ClusterData {
 	                }
 	                outwrite.println("color=" + mygroup.color.getRed() + ";" + mygroup.color.getGreen() + ";" + mygroup.color.getBlue()+ ";" + mygroup.color.getAlpha());
 	                outwrite.print("numbers=");
-	                for (j = java.lang.reflect.Array.getLength(mygroup.sequences) - 1; j >= 0; j--) {
+	                
+	                Arrays.sort(mygroup.sequences);
+	                for (j=0; j < mygroup.sequences.length; j++) {
 	                    outwrite.print(mygroup.sequences[j] + ";");
 	                }//end for j
 	                outwrite.println();
