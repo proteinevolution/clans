@@ -1089,8 +1089,8 @@ public class ClusterData {
 	    int i, j;
 	    try {
 	        PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(in.file)));
-	        int seqs = java.lang.reflect.Array.getLength(in.inaln);
-	        outwrite.println("sequences=" + seqs);
+
+	        outwrite.println("sequences=" + in.inaln.length);
 	        
 	        outwrite.println("<param>");
 	        
@@ -1199,7 +1199,7 @@ public class ClusterData {
 	        outwrite.println("</rotmtx>");
 	        //first write the sequences to file
 	        outwrite.println("<seq>");
-	        for (i = 0; i < seqs; i++) {
+	        for (i = 0; i < in.inaln.length; i++) {
 	            outwrite.println(">" + namesarr[i]);
 	            outwrite.println(in.inaln[i].seq);
 	        }
@@ -1243,7 +1243,7 @@ public class ClusterData {
 	        }
 	        //next write the sequence positions
 	        outwrite.println("<pos>");
-	        for (i = 0; i < seqs; i++) {
+	        for (i = 0; i < in.inaln.length; i++) {
 	            outwrite.println(i + " " + in.posarr[i][0] + " " + in.posarr[i][1] + " " + in.posarr[i][2]);
 	        }//end for i
 	        outwrite.println("</pos>");
