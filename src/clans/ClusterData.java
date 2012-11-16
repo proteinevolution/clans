@@ -583,6 +583,7 @@ public class ClusterData {
 	                } else if (inline.equalsIgnoreCase("<mtx>")) {
 	                    System.out.println("reading matrix");
 	                    int counter = 0;
+	                    int mypos;
 	                    String[] tmparr;
 	                    HashMap tmphash = new HashMap();
 	                    String key;
@@ -634,6 +635,7 @@ public class ClusterData {
 	                } else if (inline.equalsIgnoreCase("<seqgroups>")) {
 	                    //while I am reading the sequence groups
 	                    String[] tmparr;
+	                    String tmpstr;
 	                    seqgroup currgroup = null;
 	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</seqgroups>") == false)) {
 	                        //skip empty lines
