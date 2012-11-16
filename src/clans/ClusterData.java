@@ -1091,40 +1091,16 @@ public class ClusterData {
 	        PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(in.file)));
 	        int seqs = java.lang.reflect.Array.getLength(in.inaln);
 	        outwrite.println("sequences=" + seqs);
+	        
 	        outwrite.println("<param>");
-	        outwrite.println("maxmove=" + in.maxmove);
-	        outwrite.println("pval=" + in.pval);
-	        outwrite.println("usescval=" + in.usescval);
-	        outwrite.println("complexatt=" + in.complexatt);
-	        outwrite.println("cooling=" + in.cooling);
-	        outwrite.println("currcool=" + in.currcool);
+	        
 	        outwrite.println("attfactor=" + in.attfactor);
 	        outwrite.println("attvalpow=" + in.attvalpow);
-	        outwrite.println("repfactor=" + in.repfactor);
-	        outwrite.println("repvalpow=" + in.repvalpow);
-	        outwrite.println("dampening=" + in.dampening);
-	        outwrite.println("minattract=" + in.minattract);
-	        outwrite.println("cluster2d=" + in.cluster2d);
-	        outwrite.println("blastpath=" + in.blastpath);
-	        outwrite.println("formatdbpath=" + in.formatdbpath);
-	        outwrite.println("showinfo=" + in.showinfo);
-	        outwrite.println("zoom=" + in.zoom);
-	        outwrite.println("dotsize=" + in.dotsize);
-	        outwrite.println("ovalsize=" + in.ovalsize);
-	        outwrite.println("groupsize=" + in.groupsize);
-	        outwrite.println("usefoldchange=" + in.usefoldchange);
 	        outwrite.println("avgfoldchange=" + in.avgfoldchange);
 	        
-	        if(in.namesdmp_file!=null && in.nodesdmp_file!=null){
-	            outwrite.println("namesdmp_file="+in.namesdmp_file);
-	            outwrite.println("nodesdmp_file="+in.nodesdmp_file);
-	        }
+	        outwrite.println("blastpath=" + in.blastpath);
 	        
-	        outwrite.print("colorcutoffs=");
-	        for (i = 0; i < java.lang.reflect.Array.getLength(in.colorcutoffs); i++) {
-	            outwrite.print(in.colorcutoffs[i] + ";");
-	        }//end for i
-	        outwrite.println();
+	        outwrite.println("cluster2d=" + in.cluster2d);
 	        
 	        outwrite.print("colorarr=");
 	        for (i = 0; i < java.lang.reflect.Array.getLength(in.colorarr); i++) {
@@ -1133,7 +1109,46 @@ public class ClusterData {
 	        }//end for i
 	        outwrite.println();
 	        
+	        outwrite.print("colorcutoffs=");
+	        for (i = 0; i < java.lang.reflect.Array.getLength(in.colorcutoffs); i++) {
+	            outwrite.print(in.colorcutoffs[i] + ";");
+	        }//end for i
+	        outwrite.println();
+
+	        outwrite.println("complexatt=" + in.complexatt);
+	        outwrite.println("cooling=" + in.cooling);
+	        outwrite.println("currcool=" + in.currcool);
+	        
+	        outwrite.println("dampening=" + in.dampening);
+	        outwrite.println("dotsize=" + in.dotsize);
+	        
+	        outwrite.println("formatdbpath=" + in.formatdbpath);
+	        
+	        outwrite.println("groupsize=" + in.groupsize);
+	        
+	        outwrite.println("maxmove=" + in.maxmove);
+	        outwrite.println("minattract=" + in.minattract);
+	        
+	        if(in.namesdmp_file!=null && in.nodesdmp_file!=null){
+	            outwrite.println("namesdmp_file="+in.namesdmp_file);
+	            outwrite.println("nodesdmp_file="+in.nodesdmp_file);
+	        }
+
+	        outwrite.println("ovalsize=" + in.ovalsize);
+	        
+	        outwrite.println("pval=" + in.pval);
+	        	        
+	        outwrite.println("repfactor=" + in.repfactor);
+	        outwrite.println("repvalpow=" + in.repvalpow);
 	        outwrite.println("rounds_done=" + in.rounds);
+
+	        outwrite.println("showinfo=" + in.showinfo);
+
+	        outwrite.println("usefoldchange=" + in.usefoldchange);
+	        outwrite.println("usescval=" + in.usescval);
+
+	        outwrite.println("zoom=" + in.zoom);
+	        
 	        outwrite.println("</param>");
 	        
 	        if ((in.mapfiles!=null) && (in.mapfiles.size() > 0)) {
