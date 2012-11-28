@@ -2488,7 +2488,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         //does the iteration and the stop for a thread
         mousemove[0]=0;
         mousemove[1]=0;
-        if(mythread.didrun==false || mythread.stop==true){//if this thread was never started or stopped
+        if(mythread.didrun==false || mythread.stop==true){//if this thread was never started or is stopped
             String tmpstr="";
             if(data.mymovearr==null){
                 javax.swing.JOptionPane.showMessageDialog(this,"WARNING: No data currently available; please load some data!");
@@ -2525,8 +2525,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             mythread.start();
             button_start_stop_resume.setText("Stop");
         }else{//if this thread is running
-            mythread.stop=true;
-            button_start_stop_resume.setEnabled(false);
+        	synchronized(mythread.syncon){
+        		mythread.stop=true;
+        		button_start_stop_resume.setEnabled(false);
+        	}
             //is unavailable until the thread has stopped running
             //the thread then sets the text to "resume" and re-enables the button.
         }
@@ -5065,6 +5067,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         String tmpstr="";
         float tmpcool=1;
         ClusteringWithGui parent;
+        String syncon="syncon";
         
 @Override
         public void run(){
@@ -5145,8 +5148,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                     repaint();
                 }
             }// end while
-            button_start_stop_resume.setText("Resume");
-            button_start_stop_resume.setEnabled(true);
+            synchronized(syncon){
+            	button_start_stop_resume.setText("Resume");
+            	button_start_stop_resume.setEnabled(true);
+            }
             parent.repaint();
         }// end run
         
