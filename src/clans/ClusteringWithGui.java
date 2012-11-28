@@ -983,12 +983,36 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         
     }//GEN-LAST:event_showseqsmenuitemActionPerformed
     
-    private void centermenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_centermenuitemActionPerformed
-        draw1.xtranslate=(int)(((graphpanel.getWidth()-2*draw1.xadd)-draw1.drawwidth)/2);
-        draw1.ytranslate=(int)(((graphpanel.getHeight()-2*draw1.yadd)-draw1.drawheight)/2);
-        repaint();
-    }//GEN-LAST:event_centermenuitemActionPerformed
+    private void center_graph(float old_zoom) {
+    	/**
+    	 * center the graph
+    	 * 
+    	 * @param old_zoom: if -1: reset to center the complete graph, else computes the view for the current zoom 
+    	 * showing the same part of the graph as with old_zoom. 
+    	 * @type old_zoom: float
+    	 */
+		int panelwidth = graphpanel.getWidth() - 2 * draw1.xadd;
+		int panelheight = graphpanel.getHeight() - 2 * draw1.yadd;
+
+		if (old_zoom == -1) {
+			draw1.xtranslate = 0;
+			draw1.ytranslate = 0;
+
+		} else {
+			int imagecenterx = (int) ((panelwidth / 2 - draw1.xtranslate) / old_zoom);
+			int imagecentery = (int) ((panelheight / 2 - draw1.ytranslate) / old_zoom);
+			
+			draw1.xtranslate = (int) (-(imagecenterx * data.zoomfactor) + panelwidth / 2);
+			draw1.ytranslate = (int) (-(imagecentery * data.zoomfactor) + panelheight / 2);
+		}
+
+		repaint();
+    }
     
+    private void centermenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_centermenuitemActionPerformed
+    	this.center_graph(-1);
+    }//GEN-LAST:event_centermenuitemActionPerformed
+
     private void zoommenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoommenuitemActionPerformed
         String tmpstr="";
         float oldzoom=data.zoomfactor;
@@ -1002,14 +1026,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             //System.err.println("ERROR parsing number from "+tmpstr);
             return;
         }
-        //now keep the center of the screen in focus
-        int panelwidth=graphpanel.getWidth()-2*draw1.xadd;
-        int panelheight=graphpanel.getHeight()-2*draw1.yadd;
-        int imagecenterx=(int)((panelwidth/2-draw1.xtranslate)/oldzoom);
-        int imagecentery=(int)((panelheight/2-draw1.ytranslate)/oldzoom);
-        draw1.xtranslate=(int)(-(imagecenterx*data.zoomfactor)+panelwidth/2);
-        draw1.ytranslate=(int)(-(imagecentery*data.zoomfactor)+panelheight/2);
-        repaint();
+        
+        this.center_graph(oldzoom);
     }//GEN-LAST:event_zoommenuitemActionPerformed
     
     private void changefontmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changefontmenuitemActionPerformed
@@ -1961,9 +1979,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             }
         }
         data.zoomfactor=1;
-        draw1.xtranslate=0;
-        draw1.ytranslate=0;
-        repaint();
+        this.center_graph(-1);
     }//GEN-LAST:event_zoombuttonActionPerformed
     
     private void textfield_cutoff_valueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minpvaltextfieldActionPerformed
