@@ -2456,7 +2456,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     	 * 
     	 * @return: true if the clustering is running, false else
     	 */
-        return is_stopped(false);
+        return !is_stopped(false);
     }
     
     void initaddedseqs(minhsp[] blastvec,AminoAcidSequence[]allaln,String[]allnamearr,HashMap allnameshash,int[]newnumarr,float[][]allposarr,float maxmove,double pval,boolean useselectedonly){
