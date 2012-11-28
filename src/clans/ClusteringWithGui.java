@@ -2350,6 +2350,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.rounds=0;
         mousemove[0]=0;
         mousemove[1]=0;
+        
+        this.center_graph(-1);
     }//end initgraph
 
     //--------------------------------------------------------------------------
