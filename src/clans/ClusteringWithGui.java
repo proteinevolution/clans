@@ -934,17 +934,17 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		int panelheight = graphpanel.getHeight() - 2 * draw1.yadd;
 
 		if (old_zoom == -1) {
-			draw1.xtranslate = 0;
-			draw1.ytranslate = 0;
-
+			draw1.xtranslate = (int) (panelwidth / 2 * (1 - data.zoomfactor));
+			draw1.ytranslate = (int) (panelheight / 2 * (1 - data.zoomfactor));
 		} else {
+
 			int imagecenterx = (int) ((panelwidth / 2 - draw1.xtranslate) / old_zoom);
 			int imagecentery = (int) ((panelheight / 2 - draw1.ytranslate) / old_zoom);
 			
 			draw1.xtranslate = (int) (-(imagecenterx * data.zoomfactor) + panelwidth / 2);
 			draw1.ytranslate = (int) (-(imagecentery * data.zoomfactor) + panelheight / 2);
 		}
-
+	
 		repaint();
     }
     
@@ -2362,7 +2362,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             mythread.stop=true;
         }//else everything is OK
         data.load_clans_file(inname);
-        this.center_graph(1);
         textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
         if(data.blasthits==null){
             button_cutoff_value.setText("Use Attraction values better than");
@@ -2410,6 +2409,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }
         textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
         this.setTitle("Clustering of "+inname);
+        
+        this.center_graph(-1);
     }//end loaddata
 
 	boolean contains_data() {
