@@ -2610,6 +2610,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             mythread.stop=true;
         }//else everything is OK
         data.load_clans_file(inname);
+        this.center_graph(1);
         textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
         if(data.blasthits==null){
             button_cutoff_value.setText("Use Attraction values better than");
