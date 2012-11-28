@@ -830,7 +830,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     }//GEN-END:initComponents
     
     private void loadtabsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadtabsmenuitemActionPerformed
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         groupseqs=null;
@@ -1144,7 +1144,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void loadalternatemenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadalternatemenuitemActionPerformed
         // load data from a file with matrix info (oly one value per pair)
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         groupseqs=null;
@@ -1274,7 +1274,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void printmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printmenuitemActionPerformed
         // print the current view
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         java.awt.print.PrinterJob printJob = java.awt.print.PrinterJob.getPrinterJob();
@@ -1327,7 +1327,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void save2dmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_save2dmenuitemActionPerformed
         // save the 2d coordinates of the graph points to a file
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         int returnVal = fc.showSaveDialog(this);
@@ -1362,7 +1362,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     	if (!this.contains_data(true)) {
 			return;
 		}
-    	if(checkstop()==false){//check for stop of run
+    	if(is_running()){//check for stop of run
             return;
         }
         try{
@@ -1388,7 +1388,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void savemtxmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_savemtxmenuitemActionPerformed
         // save the blast matrix to file
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         int returnVal = fc.showSaveDialog(this);
@@ -1520,7 +1520,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void savemenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_savemenuitemActionPerformed
         // save the current run to file
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         int returnVal = fc.showSaveDialog(this);
@@ -1579,7 +1579,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void loadmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadmenuitemActionPerformed
         // load my custom format for a run from disk
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         groupseqs=null;
@@ -1600,7 +1600,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void hidesingletonsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hidesingletonsmenuitemActionPerformed
         // hide sequences that have no hit whatsoever to others in the dataset
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         groupseqs=null;
@@ -1701,7 +1701,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void getparentmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getparentmenuitemActionPerformed
         // zoom out one level (use all sequences from the level before for further computation
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         groupseqs=null;
@@ -1777,7 +1777,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void getchildmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getchildmenuitemActionPerformed
         // for further computation use only the selected sequences.(zoom in one level)
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         groupseqs=null;
@@ -1887,7 +1887,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     private void getseqsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getseqsmenuitemActionPerformed
         // Add your handling code here:
         //save the currently selected sequences to file
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         int returnVal = fc.showSaveDialog(this);
@@ -1970,7 +1970,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     	if (!this.contains_data(true)) {
 			return;
 		}
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         try{
@@ -2291,7 +2291,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
     private void saveattvalsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveattvalsmenuitemActionPerformed
         // save the similarity matrix data to a file
-        if(checkstop()==false){//check for stop of run
+        if(is_running()){//check for stop of run
             return;
         }
         int returnVal = fc.showSaveDialog(this);
@@ -2568,7 +2568,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             data.hidebelowold=data.hidebelow;
         }
         data.changedvals=false;
-        if(checkstop(false)==true){//if thread is stopped
+        if(is_stopped(false)==true){//if thread is stopped
             updatevals();
             repaint();
         }
@@ -2660,7 +2660,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		return false;
 	}
 
-    boolean checkstop(boolean showinfo){
+    boolean is_stopped(boolean showinfo){
+    	/**
+    	 * check if the clustering is currently stopped
+    	 * 
+    	 * @param showinfo: if true, an alert message dialog will be shown if the run is not stopped 
+    	 * @type showinfo: boolean
+    	 * 
+    	 * @return: true if the clustering is stopped, false else
+    	 */
         //check to see if the clustering is running
         //if so, output an error message
         if(mythread.didrun==true && mythread.stop==false){//if the thread is running
@@ -2672,9 +2680,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         return true;
     }
     
-    boolean checkstop(){
-        return checkstop(true);
-    }//end checkstop
+    boolean is_running(){
+    	/**
+    	 * check if the clustering is currently running
+    	 * 
+    	 * @return: true if the clustering is running, false else
+    	 */
+        return is_stopped(false);
+    }
     
     //--------------------------------------------------------------------------
     /*
