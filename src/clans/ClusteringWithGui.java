@@ -2293,10 +2293,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             mythread.start();
             button_start_stop_resume.setText("Stop");
         }else{//if this thread is running
-            mythread.stop=true;
-            button_start_stop_resume.setEnabled(false);
-            //is unavailable until the thread has stopped running
-            //the thread then sets the text to "resume" and re-enables the button.
+        	synchronized(mythread.syncon){
+        		//first re-check under sync whether stop is set
+        		if(mythread.stop==false){
+                    mythread.stop=true;
+                    button_start_stop_resume.setEnabled(false);
+                    //is unavailable until the thread has stopped running
+                    //the thread then sets the text to "resume" and re-enables the button.
+        		}
+        	}
         }
     }//end startstopthread
 
@@ -3601,6 +3606,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         boolean didrun=false;
         String tmpstr="";
         float tmpcool=1;
+        String syncon="syncme";//dummy object to sync on
         ClusteringWithGui parent;
         
 @Override
@@ -3679,8 +3685,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                     repaint();
                 }
             }// end while
-            button_start_stop_resume.setText("Resume");
-            button_start_stop_resume.setEnabled(true);
+            synchronized(syncon){
+            	button_start_stop_resume.setText("Resume");
+            	button_start_stop_resume.setEnabled(true);
+            }
             parent.repaint();
         }// end run
         
