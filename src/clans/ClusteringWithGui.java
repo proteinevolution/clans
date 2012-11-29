@@ -31,9 +31,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         //this.namearr=namearr;
         //this.nameshash=nameshash;
         data.mineval=data.eval;
-        data.minpval=data.pval;
+        data.pvalue_threshold=data.pval;
         if(data.scval>=0){//in that case use a score cutoff
-            data.minpval=data.scval;
+            data.pvalue_threshold=data.scval;
             data.usescval=true;
             button_cutoff_value.setText("Use SC-vals better than");
             textfield_cutoff_value.setText("0");
@@ -71,8 +71,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }//end for i
         //now all my sequences have a value assigned between 0 and 1 reflecting their length
         //data.movethreads=new getmovethread[cpu];
-        textfield_cutoff_value.setText(String.valueOf(data.minpval));
-        textfield_info_min_blast_evalue.setText(String.valueOf(data.minpval));
+        textfield_cutoff_value.setText(String.valueOf(data.pvalue_threshold));
+        textfield_info_min_blast_evalue.setText(String.valueOf(data.pvalue_threshold));
         System.out.println("initializing, please wait");
         //now initialize the stuff
         mousestart[0]=0;
@@ -1202,7 +1202,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 data.draworder=new ArrayList[0];
                 data.attvalsimple=true;
                 repaint=null;
-                data.minpval=1;
+                data.pvalue_threshold=1;
                 textfield_cutoff_value.setText("1");
                 textfield_info_min_blast_evalue.setText("1");
             }else{//if the data had errors
@@ -1366,7 +1366,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             return;
         }
         try{
-            data.minpval=java.lang.Double.parseDouble(textfield_cutoff_value.getText());
+            data.pvalue_threshold=java.lang.Double.parseDouble(textfield_cutoff_value.getText());
         }catch (NumberFormatException e){
             javax.swing.JOptionPane.showMessageDialog(this,"ERROR; unable to parse double from '"+textfield_cutoff_value.getText()+"'");
             return;
@@ -1374,13 +1374,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         //if I have a valid number update the attvals data
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+                data.compute_attraction_values();
             }
         }else if(data.myattvals!=null){//remove all attvals below the specified value
             if(data.orgattvals==null){
                 data.orgattvals=data.myattvals;
             }
-            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
         data.draworder=new ArrayList[0];
         repaint();
@@ -1511,7 +1511,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             return;
         }
         //get the blast hits to this sequence
-        hsp[] thishsp=(new viewblasthitsutils()).gethsps(referenceseqnum,data.sequences,data.cmd,data.formatdbpath,data.blastpath,data.addblastvbparam,data.referencedb,data.mineval,data.minpval);
+        hsp[] thishsp=(new viewblasthitsutils()).gethsps(referenceseqnum,data.sequences,data.cmd,data.formatdbpath,data.blastpath,data.addblastvbparam,data.referencedb,data.mineval,data.pvalue_threshold);
         //plot these blast hits on to the sequence
         viewblasthits myview=new viewblasthits(this,thishsp,referenceseqnum,data.namearr,data.sequences[referenceseqnum],data.nameshash);
         viewblasthitsvec.addElement(myview);
@@ -1672,7 +1672,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             }
             parentblasthits.addElement(data.orgattvals);
             data.orgattvals=zoomdata.getmyattvalssubset(data.orgattvals,data.selectednames);
-            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
         parentmovearr.addElement(data.mymovearr);
         data.mymovearr=zoomdata.getmymovearrsubset(data.mymovearr,data.selectednames);
@@ -1688,7 +1688,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.selectednames=new int[0];
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+            	data.compute_attraction_values();
             }
         }
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
@@ -1734,7 +1734,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }else{
             data.orgattvals=(minattvals[]) parentblasthits.elementAt(level);
             parentblasthits.removeElementAt(level);
-            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
         data.mymovearr=(float[][])parentmovearr.elementAt(level);
         if(java.lang.reflect.Array.getLength(data.mymovearr)>0){
@@ -1755,7 +1755,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+            	data.compute_attraction_values();
             }
         }
         if(myseqgroupwindow!=null){
@@ -1838,14 +1838,16 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             }
             parentblasthits.addElement(data.orgattvals);
             data.orgattvals=zoomdata.getmyattvalssubset(data.orgattvals,data.selectednames);
-            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
         parentseqgroups.addElement(data.seqgroupsvec);
         data.seqgroupsvec=new Vector();
         data.selectednames=new int[0];
+
         synchronized(data.myattvals){
-            data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+        	data.compute_attraction_values();
         }
+        
         data.posarr=data.myposarr;
         data.posarrtmp=new float[data.elements][data.dimensions];
         data.drawarrtmp=new int[data.elements][data.dimensions];
@@ -1860,14 +1862,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         // Add your handling code here:
         if(data.blasthits!=null){
             if(data.usescval){//remember I'm in score mode
-                eplotdialog eplot=new eplotdialog(data.blasthits,data.minpval,true);
+                eplotdialog eplot=new eplotdialog(data.blasthits,data.pvalue_threshold,true);
                 eplot.setVisible(true);
             }else{//i'm in P-value mode
-                eplotdialog eplot=new eplotdialog(data.blasthits,data.minpval,false);
+                eplotdialog eplot=new eplotdialog(data.blasthits,data.pvalue_threshold,false);
                 eplot.setVisible(true);
             }
         }else{
-            attplotdialog attplot=new attplotdialog(data.myattvals,data.minpval);
+            attplotdialog attplot=new attplotdialog(data.myattvals,data.pvalue_threshold);
             attplot.setVisible(true);
         }
     }//GEN-LAST:event_evalueitemActionPerformed
@@ -1972,7 +1974,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             return;
         }
         try{
-            data.minpval=java.lang.Double.parseDouble(textfield_cutoff_value.getText());
+            data.pvalue_threshold=java.lang.Double.parseDouble(textfield_cutoff_value.getText());
         }catch (NumberFormatException e){
             javax.swing.JOptionPane.showMessageDialog(this,"ERROR, unable to parse double from '"+textfield_cutoff_value.getText()+"'");
             return;
@@ -1980,14 +1982,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         //if I have a valid number update the attvals data
         if(data.blasthits!=null){
             synchronized(data.myattvals){
-                data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+            	data.compute_attraction_values();
             }
         }else if(data.myattvals!=null){//remove all attvals below the specified value
             if(data.orgattvals==null){
                 System.out.println("setting orgattval=myattvals");
                 data.orgattvals=data.myattvals;
             }
-            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.minpval);
+            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
         data.draworder=new ArrayList[0];
         repaint();
@@ -2572,14 +2574,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             updatevals();
             repaint();
         }
-        ClusterMethods.setup_attraction_values_and_initialize(data);
-        //currcool=1;
-        //mythread.stop=true;
-        //myposarr=null;
-        //mymovearr=null;
-        //lastmovearr=null;
-        //myposarr=cluster3d(blasthits,3);
-        //draw1.posarr=myposarr;
+        
+        data.initialize();
+        
         if(myoptionswindow!=null){
             myoptionswindow.currcoolfield.setText(String.valueOf(data.currcool));
         }
@@ -2632,7 +2629,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }else{
             showinfocheckbox.setSelected(false);
         }
-        textfield_cutoff_value.setText(String.valueOf(data.minpval));
+        textfield_cutoff_value.setText(String.valueOf(data.pvalue_threshold));
         if(myoptionswindow!=null){
             myoptionswindow.coolfield.setText(String.valueOf(data.cooling));
             myoptionswindow.currcoolfield.setText(String.valueOf(data.currcool));
@@ -2699,9 +2696,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.myposarr=allposarr;
         data.blasthits=blastvec;
         data.maxmove=maxmove;
-        data.minpval=pval;
-        textfield_cutoff_value.setText(String.valueOf(data.minpval));
-        textfield_info_min_blast_evalue.setText(String.valueOf(data.minpval));
+        data.pvalue_threshold=pval;
+        textfield_cutoff_value.setText(String.valueOf(data.pvalue_threshold));
+        textfield_info_min_blast_evalue.setText(String.valueOf(data.pvalue_threshold));
         data.selectednames=newnumarr;
         int seqs=java.lang.reflect.Array.getLength(data.sequences);
         data.nameshash=allnameshash;
@@ -2714,7 +2711,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.drawarrtmp=new int[data.elements][data.dimensions];
         //draw1.draworder=new Vector[0];
         data.draworder=new ArrayList[0];
-        data.myattvals=ClusterMethods.compute_attraction_values(data.blasthits,data.minpval,data);
+        
+        data.compute_attraction_values();
+        
         moveselectedonly.setSelected(useselectedonly);
         int seqnum=java.lang.reflect.Array.getLength(data.sequences);
         System.out.println("seqnum="+seqnum);
@@ -5119,7 +5118,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                         outwriter.println("cooling "+data.cooling);
                         outwriter.println("currcool "+data.currcool);
                         outwriter.println("mineval "+data.mineval);
-                        outwriter.println("minpval "+data.minpval);
+                        outwriter.println("minpval "+data.pvalue_threshold);
                         outwriter.println("repfactor "+data.repfactor);
                         outwriter.println("attfactor "+data.attfactor);
                         outwriter.println("hidebelow "+data.hidebelow);
