@@ -2528,8 +2528,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             button_start_stop_resume.setText("Stop");
         }else{//if this thread is running
         	synchronized(mythread.syncon){
-        		mythread.stop=true;
-        		button_start_stop_resume.setEnabled(false);
+        		//first check whether under sync it is still running 
+        		if(mythread.stop==false){
+        			mythread.stop=true;
+        			button_start_stop_resume.setEnabled(false);
+        		}
         	}
             //is unavailable until the thread has stopped running
             //the thread then sets the text to "resume" and re-enables the button.

@@ -35,7 +35,7 @@ public class Main {
             //System.exit(1);
         }else if(args.length==1){
         	if (args[0].charAt(0) != '-') {
-        		loadsaved=args[0];
+        		input_filename=args[0];
                 docalc=false;
                 args=new String[0];	
         	}
@@ -86,7 +86,7 @@ public class Main {
     static String[] referencedb=new String[0];//holds the databases to blast against to generate psiblast profiles
     static boolean skipcheckdone=true; //check for a DONE in tmpblasthsp and then skip all further checks (if false)
     static double eval=10;//default maximum evalue to accept for hsp
-    static double pval=0.1;//default maximum pvalue to accept for hsp
+    static double pval = -1;//default maximum pvalue to accept for hsp
     static float coverage=(float)0;//necessary minimal coverage for blast hsp
     static float scval=(float)-1;//necessary minimal blast score/collumn for blast hsp
     static float ident=(float)0;//necessary minimal identity to query for blast hsp
@@ -107,7 +107,7 @@ public class Main {
     //variables used for adding new sequences to an already present dataset
     static String olddata="";
     static String newseqs="";
-    static String loadsaved=null;
+    static String input_filename=null;
     static boolean enrichseqs=false;
     static double gatherseqseval=1e-10;
     static double rmseqseval=1e-25;
@@ -164,8 +164,8 @@ public class Main {
         System.out.println("------------------SETTINGS-------------------");
         System.out.println("conffile="+conffilename);
         System.out.println("infilename="+infilename);
-        System.out.println("loadname="+loadsaved);
-        if(loadsaved!=null && dorounds>=0){
+        System.out.println("loadname="+input_filename);
+        if(input_filename!=null && dorounds>=0){
             System.out.println("rounds="+dorounds);
             System.out.println("saveto="+savetoname);
         }
@@ -245,7 +245,7 @@ public class Main {
                     if(nographics==false){
                         //System.out.println("starting clustertest");
                         System.out.println("...reading data");
-                        ClusterData myclusterdata=new ClusterData(blasthits,inaln,namearr,nameshash,eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
+                        ClusterData myclusterdata=new ClusterData(blasthits,inaln,namearr,nameshash,eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                         myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                         ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                         myclusterer.setVisible(true);
@@ -323,7 +323,7 @@ public class Main {
                 readdata=null;
                 if(nographics==false){
                     System.out.println("...reading data");
-                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
+                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.initaddedseqs(blasthits,allaln,allnamearr,allnameshash,newnumarr,allposarr,mymaxmove,mypval,true);
@@ -350,7 +350,7 @@ public class Main {
                 }
                 if(nographics==false){
                     System.out.println("...reading data");
-                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
+                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.initaddedseqs(readdata.blasthits,readdata.inaln,namearr,nameshash,new int[0],readdata.posarr,readdata.maxmove,readdata.pval,false);
@@ -366,52 +366,18 @@ public class Main {
             }
         }else{//if docalc=false; i.e. the -load option was set
 
-        	// if dorounds and savetoname are set, we run in non-GUI mode
-            if(dorounds>=0 && savetoname!=null){
-                // run CLANS in command line mode. No gui will be started. Results will be saved to a file.
-                System.out.println("LOADING data from '"+loadsaved+"' and running in non-graphical mode");
+        	if(dorounds>=0 && savetoname!=null){
+            	// if dorounds and savetoname are set, we run in non-GUI mode
+            	if (!run_clans_without_gui()) {
+            		
+            	}
                 
-                ClusterData myclusterdata=new ClusterData(new minhsp[0], new AminoAcidSequence[0], new String[0], 
-                		new HashMap(), eval, pval, scval, verbose, cpu, savepos, cmd, blastpath, addblastvbparam, 
-                		formatdbpath, referencedb, errbuff, loadsaved);
-                myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
-                
-                ClusteringWithoutGui myclusterer=new ClusteringWithoutGui(myclusterdata);
-                
-                if(myclusterer.data.input_filename != null){
-                    System.out.println("loading data from "+myclusterer.data.input_filename);
-                    myclusterer.data.load_clans_file(myclusterer.data.input_filename);
-                }
-                
-                if(initialize){
-                	myclusterer.setup_attraction_values_and_initialize();
-                }
-                	
-                myclusterer.startstopthread();//start the thread
-                int waittime=15000;//15 seconds
-                synchronized(myclusterer){
-                    while(myclusterer.mythread.stop==false){
-                        System.out.println("done clustering round "+myclusterer.data.roundsdone);
-                        try{
-                            myclusterer.wait(waittime);
-                        }catch(InterruptedException ie){
-                            System.err.println("ERROR, interrupted wait in Main\n");
-                            System.exit(-5);
-                        }
-                    }
-                }
-                
-                File savefile=new File(savetoname);
-                myclusterer.data.save_to_file(savefile);
-                
-                System.out.println("done clustering, saving results to file '"+savefile.getAbsolutePath()+"'");
-                //myclusterer.dispose();
             }else{//if the reclustering is NOT the case
                 if(nographics==false){//just load the file as usual and display the results
                     //clustertest myclustertest=new clustertest(new minhsp[0],new aaseq[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                     //myclustertest.setVisible(true);
-                    System.out.println("LOADING data from '"+loadsaved+"'");
-                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
+                    System.out.println("LOADING data from '"+input_filename+"'");
+                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.setVisible(true);
@@ -424,8 +390,55 @@ public class Main {
         return true;
     }//end docheck
     
-    //--------------------------------------------------------------------------
-    
+    private static boolean run_clans_without_gui() {
+    	// run CLANS in command line mode. No gui will be started. Results will be saved to a file.
+        System.out.println("LOADING data from '" + input_filename + "' and running in non-graphical mode");
+        
+        if (input_filename == null) {
+        	System.err.println("input file is not set");
+        	return false;
+        }        
+        
+        ClusterData myclusterdata = new ClusterData(new minhsp[0], new AminoAcidSequence[0], new String[0], 
+        		new HashMap<String, Integer>(), eval, pval, scval, verbose, cpu, savepos, cmd, blastpath, addblastvbparam, 
+        		formatdbpath, referencedb, errbuff, input_filename);
+        myclusterdata.roundslimit = dorounds; //set the limit of how often to run this
+        
+        ClusteringWithoutGui myclusterer=new ClusteringWithoutGui(myclusterdata);
+        
+        System.out.println("loading data from "+myclusterer.data.input_filename);
+        myclusterer.data.load_clans_file(myclusterer.data.input_filename);
+        if (pval != -1) {
+        	myclusterer.data.pvalue_threshold = myclusterer.data.pval;
+        }
+        
+        if(initialize){
+        	myclusterer.initialize();
+        } else {
+        	myclusterer.data.compute_attraction_values();
+        }
+        	
+        myclusterer.startstopthread();//start the thread
+        int waittime=15000;//15 seconds
+        synchronized(myclusterer){
+            while(myclusterer.mythread.stop==false){
+                System.out.println("done clustering round "+myclusterer.data.roundsdone);
+                try{
+                    myclusterer.wait(waittime);
+                }catch(InterruptedException ie){
+                    System.err.println("ERROR, interrupted wait in Main\n");
+                    System.exit(-5);
+                }
+            }
+        }
+        
+        File savefile=new File(savetoname);
+        myclusterer.data.save_to_file(savefile);
+        
+        System.out.println("done clustering, saving results to file '"+savefile.getAbsolutePath()+"'");
+        return true;	
+    }
+
     //--------------------------------------------------------------------------
     //-------------------------setup stuff--------------------------------------
     //--------------------------------------------------------------------------
@@ -465,7 +478,7 @@ public class Main {
             if((args[i].equalsIgnoreCase("-load"))||(args[i].equalsIgnoreCase("-l"))){
                 i++;
                 if(i < args.length){
-                    loadsaved=args[i];
+                    input_filename=args[i];
                     docalc=false;
                 }else{
                     System.err.println("Error reading -load, missing argument.");

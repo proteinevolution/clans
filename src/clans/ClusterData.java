@@ -1,6 +1,5 @@
 package clans;
 
-import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,14 +7,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -57,7 +53,7 @@ public class ClusterData {
     float[][] posarr=null;
     boolean cluster2d=false;
     float maxmove=0.1f;
-    double minpval=1;
+    double pvalue_threshold=1;
     double mineval=1;
     float hidebelow=0;
     float hidebelowold=0;
@@ -124,7 +120,11 @@ public class ClusterData {
     	this.namearr=namearr;
         this.nameshash=nameshash;
         this.eval=eval;
-        this.pval=pval;
+        
+        if (pval != -1) {
+        	this.pval = pval;	
+        }
+        
         this.scval=scval;
         this.verbose=verbose;
         this.cpu=cpu;
@@ -298,7 +298,7 @@ public class ClusterData {
         
        complexatt=loaded_data.complexatt;
        maxmove=loaded_data.maxmove;
-       minpval=loaded_data.pval;
+       pvalue_threshold=loaded_data.pval;
        cooling=loaded_data.cooling;
        currcool=loaded_data.currcool;
        attfactor=loaded_data.attfactor;
@@ -353,7 +353,9 @@ public class ClusterData {
         
        orgattvals=null;
         //first time I load myattvals; don't need to sync as nothing else can be using this yet
-       myattvals=ClusterMethods.compute_attraction_values(blasthits,minpval,this);
+       
+       compute_attraction_values();
+       
        dotsize=loaded_data.dotsize;
        ovalsize=loaded_data.ovalsize;
        groupsize=loaded_data.groupsize;
@@ -581,7 +583,6 @@ public class ClusterData {
 	                } else if (inline.equalsIgnoreCase("<mtx>")) {
 	                    System.out.println("reading matrix");
 	                    int counter = 0;
-	                    int mypos;
 	                    String[] tmparr;
 	                    HashMap tmphash = new HashMap();
 	                    String key;
@@ -633,7 +634,6 @@ public class ClusterData {
 	                } else if (inline.equalsIgnoreCase("<seqgroups>")) {
 	                    //while I am reading the sequence groups
 	                    String[] tmparr;
-	                    String tmpstr;
 	                    seqgroup currgroup = null;
 	                    while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</seqgroups>") == false)) {
 	                        //skip empty lines
@@ -709,7 +709,7 @@ public class ClusterData {
 	    myrun.attvals=myattvals;
 	    myrun.posarr=myposarr;
 	    myrun.maxmove=maxmove;
-	    myrun.pval=minpval;
+	    myrun.pval=pvalue_threshold;
 	    myrun.usescval=usescval;
 	    if(attvalsimple){
 	        myrun.complexatt=false;
@@ -1083,42 +1083,18 @@ public class ClusterData {
 	    int i, j;
 	    try {
 	        PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(in.file)));
-	        int seqs = java.lang.reflect.Array.getLength(in.inaln);
-	        outwrite.println("sequences=" + seqs);
+
+	        outwrite.println("sequences=" + in.inaln.length);
+	        
 	        outwrite.println("<param>");
-	        outwrite.println("maxmove=" + in.maxmove);
-	        outwrite.println("pval=" + in.pval);
-	        outwrite.println("usescval=" + in.usescval);
-	        outwrite.println("complexatt=" + in.complexatt);
-	        outwrite.println("cooling=" + in.cooling);
-	        outwrite.println("currcool=" + in.currcool);
+	        
 	        outwrite.println("attfactor=" + in.attfactor);
 	        outwrite.println("attvalpow=" + in.attvalpow);
-	        outwrite.println("repfactor=" + in.repfactor);
-	        outwrite.println("repvalpow=" + in.repvalpow);
-	        outwrite.println("dampening=" + in.dampening);
-	        outwrite.println("minattract=" + in.minattract);
-	        outwrite.println("cluster2d=" + in.cluster2d);
-	        outwrite.println("blastpath=" + in.blastpath);
-	        outwrite.println("formatdbpath=" + in.formatdbpath);
-	        outwrite.println("showinfo=" + in.showinfo);
-	        outwrite.println("zoom=" + in.zoom);
-	        outwrite.println("dotsize=" + in.dotsize);
-	        outwrite.println("ovalsize=" + in.ovalsize);
-	        outwrite.println("groupsize=" + in.groupsize);
-	        outwrite.println("usefoldchange=" + in.usefoldchange);
 	        outwrite.println("avgfoldchange=" + in.avgfoldchange);
 	        
-	        if(in.namesdmp_file!=null && in.nodesdmp_file!=null){
-	            outwrite.println("namesdmp_file="+in.namesdmp_file);
-	            outwrite.println("nodesdmp_file="+in.nodesdmp_file);
-	        }
+	        outwrite.println("blastpath=" + in.blastpath);
 	        
-	        outwrite.print("colorcutoffs=");
-	        for (i = 0; i < java.lang.reflect.Array.getLength(in.colorcutoffs); i++) {
-	            outwrite.print(in.colorcutoffs[i] + ";");
-	        }//end for i
-	        outwrite.println();
+	        outwrite.println("cluster2d=" + in.cluster2d);
 	        
 	        outwrite.print("colorarr=");
 	        for (i = 0; i < java.lang.reflect.Array.getLength(in.colorarr); i++) {
@@ -1127,7 +1103,46 @@ public class ClusterData {
 	        }//end for i
 	        outwrite.println();
 	        
+	        outwrite.print("colorcutoffs=");
+	        for (i = 0; i < java.lang.reflect.Array.getLength(in.colorcutoffs); i++) {
+	            outwrite.print(in.colorcutoffs[i] + ";");
+	        }//end for i
+	        outwrite.println();
+
+	        outwrite.println("complexatt=" + in.complexatt);
+	        outwrite.println("cooling=" + in.cooling);
+	        outwrite.println("currcool=" + in.currcool);
+	        
+	        outwrite.println("dampening=" + in.dampening);
+	        outwrite.println("dotsize=" + in.dotsize);
+	        
+	        outwrite.println("formatdbpath=" + in.formatdbpath);
+	        
+	        outwrite.println("groupsize=" + in.groupsize);
+	        
+	        outwrite.println("maxmove=" + in.maxmove);
+	        outwrite.println("minattract=" + in.minattract);
+	        
+	        if(in.namesdmp_file!=null && in.nodesdmp_file!=null){
+	            outwrite.println("namesdmp_file="+in.namesdmp_file);
+	            outwrite.println("nodesdmp_file="+in.nodesdmp_file);
+	        }
+
+	        outwrite.println("ovalsize=" + in.ovalsize);
+	        
+	        outwrite.println("pval=" + in.pval);
+	        	        
+	        outwrite.println("repfactor=" + in.repfactor);
+	        outwrite.println("repvalpow=" + in.repvalpow);
 	        outwrite.println("rounds_done=" + in.rounds);
+
+	        outwrite.println("showinfo=" + in.showinfo);
+
+	        outwrite.println("usefoldchange=" + in.usefoldchange);
+	        outwrite.println("usescval=" + in.usescval);
+
+	        outwrite.println("zoom=" + in.zoom);
+	        
 	        outwrite.println("</param>");
 	        
 	        if ((in.mapfiles!=null) && (in.mapfiles.size() > 0)) {
@@ -1178,7 +1193,7 @@ public class ClusterData {
 	        outwrite.println("</rotmtx>");
 	        //first write the sequences to file
 	        outwrite.println("<seq>");
-	        for (i = 0; i < seqs; i++) {
+	        for (i = 0; i < in.inaln.length; i++) {
 	            outwrite.println(">" + namesarr[i]);
 	            outwrite.println(in.inaln[i].seq);
 	        }
@@ -1213,7 +1228,9 @@ public class ClusterData {
 	                }
 	                outwrite.println("color=" + mygroup.color.getRed() + ";" + mygroup.color.getGreen() + ";" + mygroup.color.getBlue()+ ";" + mygroup.color.getAlpha());
 	                outwrite.print("numbers=");
-	                for (j = java.lang.reflect.Array.getLength(mygroup.sequences) - 1; j >= 0; j--) {
+	                
+	                Arrays.sort(mygroup.sequences);
+	                for (j=0; j < mygroup.sequences.length; j++) {
 	                    outwrite.print(mygroup.sequences[j] + ";");
 	                }//end for j
 	                outwrite.println();
@@ -1222,7 +1239,7 @@ public class ClusterData {
 	        }
 	        //next write the sequence positions
 	        outwrite.println("<pos>");
-	        for (i = 0; i < seqs; i++) {
+	        for (i = 0; i < in.inaln.length; i++) {
 	            outwrite.println(i + " " + in.posarr[i][0] + " " + in.posarr[i][1] + " " + in.posarr[i][2]);
 	        }//end for i
 	        outwrite.println("</pos>");
@@ -1277,5 +1294,300 @@ public class ClusterData {
 	            javax.swing.JOptionPane.showMessageDialog(new javax.swing.JFrame(), "IOERROR writing to '" + savefile.getName() + "'");
 	        }
 	    }
-	}    
+	}
+	
+	public void compute_attraction_values(){
+	
+		if(blasthits==null){//possible (if alternate data source was loaded)
+	        System.out.println("blasthits is null");
+	        return;
+	    }
+		
+	    System.out.println("blasthits is size:"+java.lang.reflect.Array.getLength(blasthits));
+	    java.util.ArrayList<minattvals> tmpvec=new java.util.ArrayList<minattvals>();
+	    int datanum=java.lang.reflect.Array.getLength(blasthits);
+	    java.util.HashMap myhash=new java.util.HashMap(datanum);
+	    float newatt;
+	    String key;
+	    float maxattval=0;
+	    minattvals curratt=null;
+	    maxvalfound=0;//init to zero, is assigned value in getattvalsimple or mult
+	    //NOTE: this is not necessarily a symmetrical array. compute all values
+	    //and then symmetrize computing the average values
+
+	    if(rescalepvalues==false){
+	        //make the attraction values
+	        if(attvalsimple){
+	            for(int i=datanum;--i>=0;){
+	                if(blasthits[i].query<blasthits[i].hit){
+	                    key=blasthits[i].query+"_"+blasthits[i].hit;
+	                }else{
+	                    key=blasthits[i].hit+"_"+blasthits[i].query;
+	                }
+	                if(myhash.containsKey(key)){
+	                    curratt=(minattvals)myhash.get(key);
+	                    if(curratt.att==-1){
+	                        //in this case keep the -1
+	                    }else{
+	                        newatt=ClusterMethods.getattvalsimple(blasthits[i].val,elements,pvalue_threshold,this);
+	                        if(newatt==-1){
+	                            curratt.att=-1;
+	                        }else{
+	                            newatt/=2;
+	                            curratt.att+=newatt;
+	                        }
+	                    }
+	                }else{
+	                    //if I've never encountered this query-hit pair before
+	                    curratt=new minattvals();
+	                    if(blasthits[i].query<blasthits[i].hit){
+	                        curratt.query=blasthits[i].query;
+	                        curratt.hit=blasthits[i].hit;
+	                    }else{
+	                        curratt.hit=blasthits[i].query;
+	                        curratt.query=blasthits[i].hit;
+	                    }
+	                    curratt.att=ClusterMethods.getattvalsimple(blasthits[i].val,elements,pvalue_threshold,this);
+	                    if(curratt.att!=-1){
+	                        curratt.att/=2;
+	                    }
+	                    if(curratt.att!=0){
+	                        myhash.put(key,curratt);
+	                        tmpvec.add(curratt);
+	                    }
+	                }
+	                if(curratt.att>maxattval){
+	                    maxattval=curratt.att;
+	                }
+	            }//end for i
+	        }else{
+	            for(int i=0;i<datanum;i++){
+	                if(blasthits[i].query<blasthits[i].hit){
+	                    key=blasthits[i].query+"_"+blasthits[i].hit;
+	                }else{
+	                    key=blasthits[i].hit+"_"+blasthits[i].query;
+	                }
+	                if(myhash.containsKey(key)){
+	                    curratt=(minattvals)myhash.get(key);
+	                    if(curratt.att==-1){
+	                        //in this case keep the -1
+	                    }else{
+	                        newatt=ClusterMethods.getattvalmult(blasthits[i].val,elements,pvalue_threshold,this);
+	                        if(newatt==-1){
+	                            curratt.att=-1;
+	                        }else{
+	                            newatt/=2;
+	                            curratt.att+=newatt;
+	                        }
+	                    }
+	                }else{
+	                    //if I've never encountered this query-hit pair before
+	                    curratt=new minattvals();
+	                    if(blasthits[i].query<blasthits[i].hit){
+	                        curratt.query=blasthits[i].query;
+	                        curratt.hit=blasthits[i].hit;
+	                    }else{
+	                        curratt.hit=blasthits[i].query;
+	                        curratt.query=blasthits[i].hit;
+	                    }
+	                    curratt.att=ClusterMethods.getattvalmult(blasthits[i].val,elements,pvalue_threshold,this);
+	                    if(curratt.att !=-1){
+	                        curratt.att/=2;
+	                    }
+	                    if(curratt.att!=0){
+	                        tmpvec.add(curratt);
+	                        myhash.put(key,curratt);
+	                    }
+	                }
+	                if(curratt.att>maxattval){
+	                    maxattval=curratt.att;
+	                }
+	            }//end for i
+	        }
+	        //divide all vals by maxattval (-->range: 0-1)
+	        //standard, just divide all values by the maximum value
+	        //note, this does NOT symmetrize the attractions
+	        if(usescval==false){
+	            for(int i=tmpvec.size()-1;i>=0;i--){
+	                if(((minattvals)tmpvec.get(i)).att==-1){
+	                    ((minattvals)tmpvec.get(i)).att=1;
+	                    //System.out.println(((minattvals)tmpvec.elementAt(i)).query+" "+((minattvals)tmpvec.elementAt(i)).hit+" :"+((minattvals)tmpvec.elementAt(i)).att);
+	                }else{
+	                    ((minattvals)tmpvec.get(i)).att/=maxattval;
+	                    //System.out.println(((minattvals)tmpvec.elementAt(i)).query+" "+((minattvals)tmpvec.elementAt(i)).hit+" :"+((minattvals)tmpvec.elementAt(i)).att);
+	                }
+	            }// end for i
+	            //System.out.println("maxattval"+maxattval+" offset="+0);
+	            p2attfactor=maxattval;
+	            p2attoffset=0;
+	        }else{//if using scval
+	            p2attfactor=1;
+	            p2attoffset=0;
+	        }
+	    }else{//if rescalepvaluecheckbox==true
+	        float minattval=java.lang.Float.MAX_VALUE;
+	        //rescale the attraction values to range from 0 to 1 (with the smallest positive non-zero value as zero.
+	        if(attvalsimple){
+	            for(int i=0;i<datanum;i++){
+	                if(blasthits[i].query<blasthits[i].hit){
+	                    key=blasthits[i].query+"_"+blasthits[i].hit;
+	                }else{
+	                    key=blasthits[i].hit+"_"+blasthits[i].query;
+	                }
+	                if(myhash.containsKey(key)){
+	                    curratt=(minattvals)myhash.get(key);
+	                    if(curratt.att==-1){
+	                        //in this case keep the -1
+	                    }else{
+	                        newatt=ClusterMethods.getattvalsimple(blasthits[i].val, elements, pvalue_threshold, this);
+	                        if(newatt==-1){
+	                            curratt.att=-1;
+	                        }else{
+	                            newatt/=2;
+	                            curratt.att+=newatt;
+	                        }
+	                    }
+	                }else{
+	                    //if I've never encountered this query-hit pair before
+	                    curratt=new minattvals();
+	                    if(blasthits[i].query<blasthits[i].hit){
+	                        curratt.query=blasthits[i].query;
+	                        curratt.hit=blasthits[i].hit;
+	                    }else{
+	                        curratt.hit=blasthits[i].query;
+	                        curratt.query=blasthits[i].hit;
+	                    }
+	                    curratt.att=ClusterMethods.getattvalsimple(blasthits[i].val, elements, pvalue_threshold, this);
+	                    if(curratt.att!=-1){
+	                        curratt.att/=2;
+	                    }
+	                    if(curratt.att!=0){
+	                        myhash.put(key,curratt);
+	                        tmpvec.add(curratt);
+	                    }
+	                }
+	                if(curratt.att>maxattval){
+	                    maxattval=curratt.att;
+	                }
+	                if((curratt.att>0)&&(curratt.att<minattval)){
+	                    minattval=curratt.att;
+	                }
+	            }//end for i
+	        }else{
+	            for(int i=0;i<datanum;i++){
+	                if(blasthits[i].query<blasthits[i].hit){
+	                    key=blasthits[i].query+"_"+blasthits[i].hit;
+	                }else{
+	                    key=blasthits[i].hit+"_"+blasthits[i].query;
+	                }
+	                if(myhash.containsKey(key)){
+	                    curratt=(minattvals)myhash.get(key);
+	                    if(curratt.att==-1){
+	                        //in this case keep the -1
+	                    }else{
+	                        newatt=ClusterMethods.getattvalmult(blasthits[i].val, elements, pvalue_threshold, this);
+	                        if(newatt==-1){
+	                            curratt.att=-1;
+	                        }else{
+	                            newatt/=2;
+	                            curratt.att+=newatt;
+	                        }
+	                    }
+	
+	                }else{
+	                    //if I've never encountered this query-hit pair before
+	                    curratt=new minattvals();
+	                    if(blasthits[i].query<blasthits[i].hit){
+	                        curratt.query=blasthits[i].query;
+	                        curratt.hit=blasthits[i].hit;
+	                    }else{
+	                        curratt.hit=blasthits[i].query;
+	                        curratt.query=blasthits[i].hit;
+	                    }
+	                    curratt.att = ClusterMethods.getattvalmult(blasthits[i].val, elements, pvalue_threshold, this);
+	                    if(curratt.att!=-1){
+	                        curratt.att/=2;
+	                    }
+	                    if(curratt.att!=0){
+	                        myhash.put(key,curratt);
+	                        tmpvec.add(curratt);
+	                    }
+	
+	                }
+	                if(curratt.att>maxattval){
+	                    maxattval=curratt.att;
+	                }
+	                if((curratt.att>0)&&(curratt.att<minattval)){
+	                    minattval=curratt.att;
+	                }
+	            }//end for i
+	        }
+	        //and divide all vals by maxattval and offset by minattval(-->range: 0-1)
+	        float divval=maxattval-minattval;
+	        for(int i=tmpvec.size()-1;i>=0;i--){
+	            if(((minattvals)tmpvec.get(i)).att==-1){
+	                ((minattvals)tmpvec.get(i)).att=1;
+	            }else{
+	                ((minattvals)tmpvec.get(i)).att=(((minattvals)tmpvec.get(i)).att-minattval)/divval;
+	            }
+	        }// end for i
+	        //System.out.println("maxattval"+maxattval+" offset="+minattval);
+	        p2attfactor=divval;
+	        p2attoffset=minattval;
+	    }
+	    myattvals = (minattvals[])tmpvec.toArray(new minattvals[0]);
+	    System.out.println("attvals size=" + myattvals.length);
+	}// end getattvals
+
+	public void initialize(){
+	    // compute "attraction" values for all sequence pairs from the hsp objects
+		// and initialize the positions randomly
+		
+	    rounds=0;
+	    currcool=1;
+	
+		mymovearr = null;
+	    lastmovearr = null;       
+	
+	    elements = namearr.length;
+	    
+	    if(elements == 0){ // no elements means nothing to do
+	    	myposarr = new float[0][0];
+	    	posarr=myposarr;
+	    	return;
+	    }
+	    
+	    myposarr=new float[elements][dimensions];
+	    posarrtmp=new float[elements][dimensions];
+	    drawarrtmp=new int[elements][dimensions];
+	    mymovearr=new float[elements][dimensions];
+	    lastmovearr=new float[elements][dimensions];
+	    for(int i = 0; i < elements; i++){
+	        mymovearr[i][0]=0;
+	        mymovearr[i][1]=0;
+	        mymovearr[i][2]=0;
+	    	
+	        lastmovearr[i][0]=0;
+	        lastmovearr[i][1]=0;
+	        lastmovearr[i][2]=0;
+	    }
+	    
+	    // compute the "attraction values"
+	    if(blasthits != null){
+	        if(myattvals == null){
+	            //synchronized(myattvals){//myattvals is null here; cannot sync on it
+	            compute_attraction_values();
+	            //}
+	        }
+	    }
+	    
+	    for(int i = 0; i < myposarr.length; i++){
+	    	for(int j = 0; j < myposarr[j].length; j++){
+	    		myposarr[i][j] = ClusterMethods.rand.nextFloat() * 2 - 1;
+	        }
+	    }
+
+	    posarr=myposarr;
+	}
+
 }
