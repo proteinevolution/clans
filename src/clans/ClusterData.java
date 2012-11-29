@@ -1545,7 +1545,10 @@ public class ClusterData {
 		
 	    rounds=0;
 	    currcool=1;
-	
+	    
+	    zoomfactor = 1;
+	    this.reset_rotmtx();
+	    
 		mymovearr = null;
 	    lastmovearr = null;       
 	
@@ -1590,4 +1593,17 @@ public class ClusterData {
 	    posarr=myposarr;
 	}
 
+	private void reset_rotmtx() {
+		for (int i=0; i<3; i++) {
+			for (int j=0; j<3; j++) {
+				if (i == j) {
+					rotmtx[i][j] = 1; 
+					myrotmtx[i][j] = 1;
+				} else {
+					rotmtx[i][j] = 0;
+					myrotmtx[i][j] = 0;
+				}
+			}
+		}
+	}
 }
