@@ -427,16 +427,15 @@ public class searchblastv2 {
                 }//end synchronized queryvec
             }
             boolean allgood = true;
-
             stopthread = false;
             //String blastcommand="";
             String tmpfilestring = "tmp" + threadnum + ".query";
-            String tmpcheckfile = "tmp" + threadnum + ".chkpnt";
+            //String tmpcheckfile = "tmp" + threadnum + ".chkpnt";
             String tmpoutfile = "tmp" + threadnum + ".outfile";
-            String dbstring;
+            //String dbstring;
             String[] cmdarr;
             //convert the String commands to a array of Strings (resolves some runtime.exec problems)
-            Vector tmpvec = new Vector();
+            Vector<String> tmpvec = new Vector<String>();
             if (isblastplus) {
                 cmdarr = blastpath.split("\\s+");
                 tmpvec.addElement("-outfmt");
@@ -489,7 +488,7 @@ public class searchblastv2 {
                 }//end for i
                 System.out.println();
             }
-            String myblast = "";
+            //String myblast = "";
             try {
                 //write the query to a file instead of using stdin; !stdin gives problems!
                 PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(tmpfilestring)));
@@ -512,7 +511,7 @@ public class searchblastv2 {
                 try {
                     BufferedReader perr;
                     BufferedReader pin;
-                    PrintWriter pout;
+                    //PrintWriter pout;
                     threadstreamreader perrread;
                     threadstreamreader pinread;
                     Process p = rt.exec(cmdarr);
@@ -568,7 +567,7 @@ public class searchblastv2 {
                         stopthread = true;
                         allgood = false;
                     }
-                    myblast = inout.toString();
+                    //myblast = inout.toString();
                     perrread = null;//.clear();
                     pinread = null;//.clear();
                 } catch (IOException ioe) {
@@ -664,6 +663,8 @@ public class searchblastv2 {
                         }//end for i
                         outwrite.flush();
                     }//end synchronized filesync
+                }else{
+                	System.err.println("ERROR, NOT ALL GOOD in reading from BLAST");                	
                 }
                 //all done, notify parent to get the data
                 if (verbose > 2) {

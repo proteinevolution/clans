@@ -14,6 +14,7 @@ public class hspgetv2 {
 
     public static ArrayList<hsp> get(String tmpoutfile,double eval,double pval,float coverage,float scval,float ident,int verbose){
         ArrayList<hsp> retlist=new ArrayList<hsp>();
+        //System.out.println("reading hsp data for file '"+tmpoutfile+"'");
         //this should open a BLAST xml output file and read the results
         try{
             BufferedReader inread=new BufferedReader(new FileReader(tmpoutfile));
@@ -44,6 +45,7 @@ public class hspgetv2 {
             //System.out.println("effspace="+effspace);
             if(effspace<0){
                 System.err.println("WARNING: could not retrieve effective sequence space from blast file: effspace="+effspace);
+                inread.close();
                 return null;
             }else if(effspace==0){
                 //sometimes happens with the legacy blast
@@ -52,6 +54,11 @@ public class hspgetv2 {
                 if(effspace<0){
                     effspace=-effspace;
                 }
+            }
+            double checkpval=pval;
+            if(pval<0){
+            	//if pval was not set
+            	checkpval=eval/effspace;
             }
             inread.close();
             inread=new BufferedReader(new FileReader(tmpoutfile));
@@ -71,7 +78,7 @@ public class hspgetv2 {
             int hlength=-1;
             int qstart=-1,qend=-1;
             double evalue=-1;
-            int identities;
+            //int identities;
             float score=-1;
             while((inline=inread.readLine())!=null){
                 if(inline.contains("<Iteration_query-def>")){
@@ -122,10 +129,10 @@ public class hspgetv2 {
                         System.err.println("ERROR, unable to parse int from '"+inline.substring(inline.indexOf(">")+1,inline.indexOf("</"))+"'");
                         qend=-1;
                     }
-                }else if(inline.contains("</Hit>")){
+                }else if(inline.contains("</Hsp>")){
                     //System.out.println("reached end of HSP: qlength="+qlength+" evalue="+evalue+" score="+score+" qstart="+qstart+" qend="+qend);
                     if(qlength>0 && evalue>=0 && score>0 && qstart>=0 && qend>0){
-                        //System.out.println("\tpassing filter1; pval="+pval+" effspace="+effspace+" scval="+scval);
+                        //System.out.println("\tpassing filter1; evalue="+evalue+" effspace="+effspace+" scval="+scval);
                         hsp newhsp=new hsp();
                         int uselength=qlength;
                         if(hlength<qlength){
@@ -144,7 +151,7 @@ public class hspgetv2 {
                             }//else{//else don't add it
                                 //System.out.println(myscval+" is smaller than "+scval+" not adding!");
                             //}
-                        }else if(pval>=0 && mypval<=pval){
+                        }else if(checkpval>=0 && mypval<=checkpval){//only look at this if the scval was NOT selected
                             //System.out.println("\tpassing filter 2 mypval="+mypval);
                             newhsp.qname=qname;
                             newhsp.hname=hname;

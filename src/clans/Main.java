@@ -86,7 +86,7 @@ public class Main {
     static String[] referencedb=new String[0];//holds the databases to blast against to generate psiblast profiles
     static boolean skipcheckdone=true; //check for a DONE in tmpblasthsp and then skip all further checks (if false)
     static double eval=10;//default maximum evalue to accept for hsp
-    static double pval = -1;//default maximum pvalue to accept for hsp
+    static double pval = 0.1;//default maximum pvalue to accept for hsp
     static float coverage=(float)0;//necessary minimal coverage for blast hsp
     static float scval=(float)-1;//necessary minimal blast score/collumn for blast hsp
     static float ident=(float)0;//necessary minimal identity to query for blast hsp
