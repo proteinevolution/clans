@@ -17,7 +17,7 @@ public class searchblastv2 {
     //1. allow block searches (i.e. run multiple queries per search)
     //2. always use a thread
     //3. allow use of blast+ as well as legacy blast
-    public searchblastv2(StringBuffer errbuff, boolean addblastvbparam, boolean isblastplus, int cpu, int blastblocksize, String cmd, String blastpath, String formatdbpath, double eval, double pval, float coverage, float scval, float ident, int verbose, String saveblastname, boolean readblast, HashMap nameshash) {
+    public searchblastv2(StringBuffer errbuff, boolean addblastvbparam, boolean isblastplus, int cpu, int blastblocksize, String cmd, String blastpath, String formatdbpath, double eval, double pval, float coverage, float scval, float ident, int verbose, String saveblastname, boolean readblast, HashMap<String,Integer> nameshash) {
         this.errbuff = errbuff;
         this.addblastvbparam = addblastvbparam;
         this.isblastplus = isblastplus;

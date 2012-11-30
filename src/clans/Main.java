@@ -226,7 +226,7 @@ public class Main {
                     return true;
                 }else{//if I have at least two seqs
                     //now set up a vector array that will hold the blast hsp's
-                    HashMap nameshash=new HashMap((int)(seqnum/0.84),(float)0.85);//holds info about which name is which array number
+                    HashMap<String,Integer> nameshash=new HashMap<String,Integer>((int)(seqnum/0.84),(float)0.85);//holds info about which name is which array number
                     String[] namearr=new String[seqnum];
                     for(int i=0;i<seqnum;i++){
                         namearr[i]=inaln[i].name;
@@ -277,7 +277,7 @@ public class Main {
                 int allelements=newelements+readelements;
                 String[] allnamearr=new String[allelements];
                 AminoAcidSequence[] allaln=new AminoAcidSequence[allelements];
-                HashMap allnameshash=new HashMap();
+                HashMap<String,Integer> allnameshash=new HashMap<String,Integer>();
                 float[][] allposarr=new float[allelements][3];
                 for(int i=0;i<readelements;i++){
                     allnamearr[i]=readdata.inaln[i].name;
