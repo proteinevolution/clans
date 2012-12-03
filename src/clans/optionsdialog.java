@@ -194,7 +194,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private void roundstextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_roundstextfieldActionPerformed
         // set the number of rounds to cluster at a time
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
@@ -202,7 +202,7 @@ public class optionsdialog extends javax.swing.JFrame {
 
     private void currcoolfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currcoolfieldActionPerformed
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
@@ -212,7 +212,7 @@ public class optionsdialog extends javax.swing.JFrame {
         //for X-forwarding; solaris has problems recognizing returns; for this
         //I therefore use this button to re-read the values entered in the various fields
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
@@ -220,7 +220,7 @@ public class optionsdialog extends javax.swing.JFrame {
 
     private void maxmovefieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxmovefieldActionPerformed
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
@@ -228,7 +228,7 @@ public class optionsdialog extends javax.swing.JFrame {
 
     private void minattfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minattfieldActionPerformed
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
@@ -236,7 +236,7 @@ public class optionsdialog extends javax.swing.JFrame {
 
     private void dampfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dampfieldActionPerformed
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
@@ -244,7 +244,7 @@ public class optionsdialog extends javax.swing.JFrame {
 
     private void repvalpowtextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_repvalpowtextfieldActionPerformed
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
@@ -252,7 +252,7 @@ public class optionsdialog extends javax.swing.JFrame {
 
     private void repfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_repfieldActionPerformed
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
@@ -260,7 +260,7 @@ public class optionsdialog extends javax.swing.JFrame {
 
     private void attvalpowtextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attvalpowtextfieldActionPerformed
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
@@ -268,7 +268,7 @@ public class optionsdialog extends javax.swing.JFrame {
 
     private void attfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attfieldActionPerformed
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
@@ -276,7 +276,7 @@ public class optionsdialog extends javax.swing.JFrame {
 
     private void coolfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_coolfieldActionPerformed
         parent.data.changedvals=true;
-        if(parent.checkstop(false)==true){//if thread is stopped
+        if(parent.is_stopped(false)){//if thread is stopped
             parent.updatevals();
             parent.repaint();
         }
