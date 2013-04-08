@@ -582,7 +582,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         showorigcheckbox.setText("Show origin");
         menu_draw.add(showorigcheckbox);
 
-        showinfocheckbox.setSelected(true);
+        
+        if (data == null){
+        	showinfocheckbox.setSelected(false);
+        } else {
+        	showinfocheckbox.setSelected(data.showinfo);
+        }
         showinfocheckbox.setText("Show info");
         showinfocheckbox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

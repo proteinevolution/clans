@@ -75,7 +75,7 @@ public class ClusterData {
     String namesdmp_file="not_spcified";
     String nodesdmp_file="not_specified";
     float zoomfactor=1;
-    boolean showinfo=true;
+    boolean showinfo=false;
     int[] selectednames=new int[0];
     int[] selectnames=new int[0];
     int selnamenum=0;

@@ -44,7 +44,7 @@ public class saverunobject {
     double pval=-1;
     double[][] rotmtx={{1,0,0},{0,1,0},{0,0,1}};//default
     boolean cluster2d=false;
-    boolean showinfo=true;
+    boolean showinfo=false;
     boolean usescval=false;
     boolean complexatt=true;
     java.util.Vector seqgroupsvec=new java.util.Vector();
