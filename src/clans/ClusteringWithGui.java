@@ -1490,9 +1490,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         int returnVal = jFileChooser.showSaveDialog(this);
         
         if(returnVal == JFileChooser.APPROVE_OPTION) {
-            this.setTitle("Clustering of "+fc.getSelectedFile().getName());
+        	
+            this.setTitle("Clustering of " + jFileChooser.getSelectedFile().getName());
             
-            data.save_to_file(fc.getSelectedFile());
+            data.save_to_file(jFileChooser.getSelectedFile());
+            
+            data.input_filename = jFileChooser.getSelectedFile().getPath(); // in case the output filename is not the one the file was loaded from 
         }
     }//GEN-LAST:event_savemenuitemActionPerformed
     
