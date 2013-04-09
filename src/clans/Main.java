@@ -376,11 +376,16 @@ public class Main {
                 if(nographics==false){//just load the file as usual and display the results
                     //clustertest myclustertest=new clustertest(new minhsp[0],new aaseq[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                     //myclustertest.setVisible(true);
-                    System.out.println("LOADING data from '"+input_filename+"'");
-                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
-                    myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
-                    ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
-                    myclusterer.setVisible(true);
+                	
+                	ClusterData myclusterdata = new ClusterData(new minhsp[0],
+							new AminoAcidSequence[0], new String[0],
+							new HashMap(), eval, pval, scval, verbose, cpu,
+							savepos, cmd, blastpath, addblastvbparam,
+							formatdbpath, referencedb, errbuff, input_filename);
+					myclusterdata.roundslimit = dorounds; // set the limit of how often to run this
+					
+					ClusteringWithGui myclusterer = new ClusteringWithGui(myclusterdata);
+					myclusterer.setVisible(true);
 
                 }else{
                     System.out.println("Nothing to do!, try starting the program with the -nographics option set to false");
@@ -392,12 +397,12 @@ public class Main {
     
     private static boolean run_clans_without_gui() {
     	// run CLANS in command line mode. No gui will be started. Results will be saved to a file.
-        System.out.println("LOADING data from '" + input_filename + "' and running in non-graphical mode");
+    	System.out.println("non-graphical mode");
         
         if (input_filename == null) {
         	System.err.println("input file is not set");
         	return false;
-        }        
+        }
         
         ClusterData myclusterdata = new ClusterData(new minhsp[0], new AminoAcidSequence[0], new String[0], 
         		new HashMap<String, Integer>(), eval, pval, scval, verbose, cpu, savepos, cmd, blastpath, addblastvbparam, 
@@ -406,7 +411,7 @@ public class Main {
         
         ClusteringWithoutGui myclusterer=new ClusteringWithoutGui(myclusterdata);
         
-        System.out.println("loading data from "+myclusterer.data.input_filename);
+
         myclusterer.data.load_clans_file(myclusterer.data.input_filename);
         if (pval != -1) {
         	myclusterer.data.pvalue_threshold = myclusterer.data.pval;

@@ -75,7 +75,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             new errwindow(this,true,data.errbuff.toString()).setVisible(true);
         }
         if(data.input_filename!=null){
-            System.out.println("loading data from "+data.input_filename);
             loaddata(data.input_filename);
         }
     }// end init

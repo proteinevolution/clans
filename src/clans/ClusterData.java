@@ -148,7 +148,9 @@ public class ClusterData {
 	    myrun.file = null;//if myrun has a filename all was read ok
 	    try {
 	        BufferedReader buffered_file_handle = new BufferedReader(new FileReader(infile));
-	        System.out.println("loading data from '" + infile.getAbsolutePath() + "'");
+	        
+	        System.out.println("LOADING data from '" + infile.getAbsolutePath() + "'");
+	        
 	        String inline;
 	        int expected_sequences = -1;
 	        while ((inline = buffered_file_handle.readLine()) != null) {
