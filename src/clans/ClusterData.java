@@ -98,7 +98,7 @@ public class ClusterData {
     int ovalsize=4;
     int dotsize=2;
     int groupsize=4;
-    java.util.Vector seqgroupsvec=new java.util.Vector();
+    java.util.Vector<seqgroup> seqgroupsvec=new java.util.Vector<seqgroup>();
     java.util.ArrayList <int[][]>polygons=null;
     boolean showseqgroups=false;
     boolean changedvals=false;

@@ -5,10 +5,12 @@
  */
 package clans;
 import java.util.*;
+
 import javax.swing.*;
 
 import java.awt.event.KeyEvent;
 import java.io.*;
+import java.lang.reflect.Array;
 /**
  *
  * @author  tancred
@@ -116,6 +118,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         menu_misc = new javax.swing.JMenu();
         getseqsmenuitem = new javax.swing.JMenuItem();
         hidesingletonsmenuitem = new javax.swing.JMenuItem();
+    	remove_selected_sequences_menu_item = new javax.swing.JMenuItem();
         getchildmenuitem = new javax.swing.JMenuItem();
         getparentmenuitem = new javax.swing.JMenuItem();
         setrotmenuitem = new javax.swing.JMenuItem();
@@ -415,10 +418,18 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         });
         menu_misc.add(getseqsmenuitem);
 
+		remove_selected_sequences_menu_item.setText("Remove selected sequences");
+		remove_selected_sequences_menu_item.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				removeSelectedSequencesMenuItemActionPerformed(evt);
+			}
+		});
+		menu_misc.add(remove_selected_sequences_menu_item);
+        
         hidesingletonsmenuitem.setText("Hide singletons");
         hidesingletonsmenuitem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                hidesingletonsmenuitemActionPerformed(evt);
+                hideSingletonsMenuItemActionPerformed(evt);
             }
         });
         menu_misc.add(hidesingletonsmenuitem);
@@ -1524,106 +1535,305 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_loadmenuitemActionPerformed
     
-    private void hidesingletonsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hidesingletonsmenuitemActionPerformed
-        // hide sequences that have no hit whatsoever to others in the dataset
-        if(is_running()){
-            return;
-        }
-        groupseqs=null;
-        int sequences=java.lang.reflect.Array.getLength(data.namearr);
-        int j;
-        //look through all sequences to see if they have an attraction value to some other sequence
-        boolean[] keepseqs=new boolean[sequences];
-        for(int i=0;i<sequences;i++){
-            keepseqs[i]=false;
-        }
-        minattvals[] myattvals=data.myattvals;
-        int attnum=java.lang.reflect.Array.getLength(myattvals);
-        for(int i=0;i<attnum;i++){
-            if(myattvals[i].att!=0){
-                keepseqs[myattvals[i].query]=true;
-                keepseqs[myattvals[i].hit]=true;
-            }
-        }//end for i
-        int counter=0;
-        for(int i=0;i<sequences;i++){
-            if(keepseqs[i]==true){
-                counter++;
-            }
-        }
-        data.selectednames=new int[counter];
-        counter=0;
-        for(int i=0;i<sequences;i++){
-            if(keepseqs[i]==true){
-                data.selectednames[counter]=i;
-                counter++;
-            }
-        }
-        int selectednum=java.lang.reflect.Array.getLength(data.selectednames);
-        if(selectednum<2){
-            return;
-        }
-        if(shownames!=null){
-            shownames.setVisible(false);
-            shownames.dispose();
-            shownames=null;
-        }
-        if(myseqgroupwindow!=null){
-            myseqgroupwindow.setVisible(false);
-            myseqgroupwindow.dispose();
-            myseqgroupwindow=null;
-        }
-        if(viewblasthitsvec.size()>0){
-            for(int i=0;i<viewblasthitsvec.size();i++){
-                blastselectseqs=new int[0];
-                ((viewblasthits)viewblasthitsvec.elementAt(i)).setVisible(false);
-                ((viewblasthits)viewblasthitsvec.elementAt(i)).dispose();
-            }
-            viewblasthitsvec.setSize(0);
-        }
-        level++;
-        getparentmenuitem.setEnabled(true);
-        getparentmenuitem.setText("use parent group ("+level+")");
-        parentnameshash.addElement(data.nameshash);
-        data.nameshash=new HashMap((int)(selectednum/0.75)+1,(float)0.75);//holds info about which name is which array number
-        for(int i=0;i<selectednum;i++){
-            data.nameshash.put(data.sequences[data.selectednames[i]].name,new Integer(i));
-        }
-        if(data.blasthits!=null){
-            parentblasthits.addElement(data.blasthits);
-            data.blasthits=zoomdata.getblasthitsubset(data.blasthits,data.selectednames);
-        }else{
-            if(data.orgattvals==null){
-                data.orgattvals=data.myattvals;
-            }
-            parentblasthits.addElement(data.orgattvals);
-            data.orgattvals=zoomdata.getmyattvalssubset(data.orgattvals,data.selectednames);
-            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
-        }
-        parentmovearr.addElement(data.mymovearr);
-        data.mymovearr=zoomdata.getmymovearrsubset(data.mymovearr,data.selectednames);
-        if(java.lang.reflect.Array.getLength(data.mymovearr)>0){
-            data.lastmovearr=new float[java.lang.reflect.Array.getLength(data.mymovearr)][java.lang.reflect.Array.getLength(data.mymovearr[0])];
-        }
-        parentposarr.addElement(data.myposarr);
-        data.myposarr=zoomdata.getmyposarrsubset(data.myposarr,data.selectednames);
-        parentaln.addElement(data.sequences);
-        data.sequences=zoomdata.getinalnsubset(data.sequences,data.selectednames);
-        parentnamearr.addElement(data.namearr);
-        data.namearr=zoomdata.getnamearrsubset(data.namearr,data.selectednames);
-        data.selectednames=new int[0];
-        if(data.blasthits!=null){
-            synchronized(data.myattvals){
-            	data.compute_attraction_values();
-            }
-        }
-        data.elements=java.lang.reflect.Array.getLength(data.namearr);
-        data.posarr=data.myposarr;
-        data.posarrtmp=new float[data.elements][data.dimensions];
-        data.drawarrtmp=new int[data.elements][data.dimensions];
-        data.draworder=new ArrayList[0];
-        repaint();
-    }//GEN-LAST:event_hidesingletonsmenuitemActionPerformed
+	private void restrictToSelectedSequences(boolean[] sequences_to_keep) {
+		int counter = 0;
+		// shift for sequence ids in groups
+		int[] sequence_index_shift = new int[sequences_to_keep.length];
+		for (int i = 0; i < sequences_to_keep.length; i++) {
+			sequence_index_shift[i] = i - counter;
+			if (sequences_to_keep[i]) {
+				counter++;
+			}
+		}
+
+		if (data.selectednames.length < 2) {
+			return;
+		}
+
+		if (shownames != null) {
+			shownames.setVisible(false);
+			shownames.dispose();
+			shownames = null;
+		}
+
+		if (myseqgroupwindow != null) {
+			myseqgroupwindow.setVisible(false);
+			myseqgroupwindow.dispose();
+			myseqgroupwindow = null;
+		}
+
+		if (viewblasthitsvec.size() > 0) {
+			for (int i = 0; i < viewblasthitsvec.size(); i++) {
+				blastselectseqs = new int[0];
+				viewblasthitsvec.elementAt(i).setVisible(false);
+				viewblasthitsvec.elementAt(i).dispose();
+			}
+			viewblasthitsvec.setSize(0);
+		}
+
+		level++;
+		getparentmenuitem.setEnabled(true);
+		getparentmenuitem.setText("use parent group (" + level + ")");
+		parentnameshash.addElement(data.nameshash);
+
+		// holds info about which name is which array number
+		data.nameshash = new HashMap<String, Integer>(
+				(int) (data.selectednames.length / 0.75) + 1, (float) 0.75);
+		for (int i = 0; i < data.selectednames.length; i++) {
+			data.nameshash.put(data.sequences[data.selectednames[i]].name, new Integer(i));
+		}
+
+		if (data.blasthits != null) {
+			parentblasthits.addElement(data.blasthits);
+			data.blasthits = zoomdata.getblasthitsubset(data.blasthits,
+					data.selectednames);
+		} else {
+			if (data.orgattvals == null) {
+				// System.out.println("setting orgattval=myattvals");
+				data.orgattvals = data.myattvals;
+			}
+			// System.out.println("rmsingletons: newattvals calculation");
+			parentblasthits.addElement(data.orgattvals);
+			data.orgattvals = zoomdata.getmyattvalssubset(data.orgattvals,
+					data.selectednames);
+			data.compute_attraction_values();
+		}
+
+		parentmovearr.addElement(data.mymovearr);
+		data.mymovearr = zoomdata.getmymovearrsubset(data.mymovearr,
+				data.selectednames);
+		if (data.mymovearr.length > 0) {
+			//lastmovearr == previous_movements
+			data.lastmovearr = new float[data.mymovearr.length][data.mymovearr[0].length];
+		}
+
+		//myposarr == positions
+		parentposarr.addElement(data.myposarr);
+		data.myposarr = zoomdata.getmyposarrsubset(data.myposarr,
+				data.selectednames);
+		parentaln.addElement(data.sequences);
+		data.sequences = zoomdata.getinalnsubset(data.sequences, data.selectednames);
+		parentnamearr.addElement(data.namearr);
+		data.namearr = zoomdata.getnamearrsubset(data.namearr,
+				data.selectednames);
+		data.selectednames = new int[0];
+		if (data.blasthits != null) {
+			synchronized (data.myattvals) {
+				data.compute_attraction_values();
+			}
+		}
+
+		// fix the sequence ids stored in groups
+		seqgroup current_seqgroup;
+		Vector<Integer> keep_group_sequences;
+		for (int i = 0; i < data.seqgroupsvec.size(); i++) {
+			current_seqgroup = data.seqgroupsvec.elementAt(i);
+
+			// collect and fix the sequence ids to keep for this group
+			keep_group_sequences = new Vector<Integer>();
+			for (int j = 0; j < current_seqgroup.sequences.length; j++) {
+				if (sequences_to_keep[current_seqgroup.sequences[j]]) {
+					keep_group_sequences
+							.add(current_seqgroup.sequences[j]
+									- sequence_index_shift[current_seqgroup.sequences[j]]);
+				}
+			}
+
+			// copy the ids over to the seqgroup
+			current_seqgroup.sequences = new int[keep_group_sequences.size()];
+			for (int j = 0; j < keep_group_sequences.size(); j++) {
+				current_seqgroup.sequences[j] = keep_group_sequences
+						.elementAt(j);
+			}
+
+		}
+
+		data.elements = Array.getLength(data.namearr);
+		data.posarr = data.myposarr;
+		data.posarrtmp = new float[data.elements][data.dimensions];
+		data.drawarrtmp = new int[data.elements][data.dimensions];
+
+		data.draworder = new ArrayList[0];
+		repaint();
+	}
+
+	private void removeSelectedSequencesMenuItemActionPerformed(
+			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_hidesingletonsmenuitemActionPerformed
+		/**
+		 * Hide sequences that have no connections at the currently selected
+		 * P-value cutoff.
+		 */
+		if (! is_stopped(true)) {// check for stop of run
+			return;
+		}
+		//selected_group_sequences == groupseqs 
+		groupseqs = null;
+
+		int sequences = data.namearr.length;
+		int[] sequences_to_remove = data.selectednames.clone();
+		data.selectednames = new int[sequences - data.selectednames.length];
+		boolean[] sequences_to_keep = new boolean[sequences];
+		for (int i = 0; i < sequences; i++) {
+			sequences_to_keep[i] = true;
+		}
+
+		for (int i = 0; i < sequences_to_remove.length; i++) {
+			sequences_to_keep[sequences_to_remove[i]] = false;
+		}
+
+		int counter = 0;
+		for (int i = 0; i < sequences; i++) {
+			if (sequences_to_keep[i]) {
+				data.selectednames[counter] = i;
+				counter++;
+			}
+		}
+		restrictToSelectedSequences(sequences_to_keep);
+	}// GEN-LAST:event_hidesingletonsmenuitemActionPerformed
+
+	private void hideSingletonsMenuItemActionPerformed(
+			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_hidesingletonsmenuitemActionPerformed
+		/**
+		 * Hide sequences that have no connections at the currently selected
+		 * P-value cutoff.
+		 */
+		if (! is_stopped(true)) {// check for stop of run
+			return;
+		}
+		groupseqs = null;
+		int sequence_number = data.namearr.length;
+		boolean[] sequences_to_keep = new boolean[sequence_number];
+
+		for (int i = 0; i < data.myattvals.length; i++) {
+			if (data.myattvals[i].att != 0) {
+				sequences_to_keep[data.myattvals[i].query] = true;
+				sequences_to_keep[data.myattvals[i].hit] = true;
+			}
+		}
+
+		int counter = 0;
+		// shift for sequence ids in groups
+		int[] sequence_index_shift = new int[sequence_number];
+		for (int i = 0; i < sequence_number; i++) {
+			sequence_index_shift[i] = i - counter;
+			if (sequences_to_keep[i]) {
+				counter++;
+			}
+		}
+
+		data.selectednames = new int[counter];
+		counter = 0;
+		for (int i = 0; i < sequence_number; i++) {
+			if (sequences_to_keep[i]) {
+				data.selectednames[counter] = i;
+				counter++;
+			}
+		}
+
+		restrictToSelectedSequences(sequences_to_keep);
+
+	}// GEN-LAST:event_hidesingletonsmenuitemActionPerformed
+
+//    private void hidesingletonsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hidesingletonsmenuitemActionPerformed
+//        // hide sequences that have no hit whatsoever to others in the dataset
+//        if(is_running()){
+//            return;
+//        }
+//        groupseqs=null;
+//        int sequences=java.lang.reflect.Array.getLength(data.namearr);
+//        int j;
+//        //look through all sequences to see if they have an attraction value to some other sequence
+//        boolean[] keepseqs=new boolean[sequences];
+//        for(int i=0;i<sequences;i++){
+//            keepseqs[i]=false;
+//        }
+//        minattvals[] myattvals=data.myattvals;
+//        int attnum=java.lang.reflect.Array.getLength(myattvals);
+//        for(int i=0;i<attnum;i++){
+//            if(myattvals[i].att!=0){
+//                keepseqs[myattvals[i].query]=true;
+//                keepseqs[myattvals[i].hit]=true;
+//            }
+//        }//end for i
+//        int counter=0;
+//        for(int i=0;i<sequences;i++){
+//            if(keepseqs[i]==true){
+//                counter++;
+//            }
+//        }
+//        data.selectednames=new int[counter];
+//        counter=0;
+//        for(int i=0;i<sequences;i++){
+//            if(keepseqs[i]==true){
+//                data.selectednames[counter]=i;
+//                counter++;
+//            }
+//        }
+//        int selectednum=java.lang.reflect.Array.getLength(data.selectednames);
+//        if(selectednum<2){
+//            return;
+//        }
+//        if(shownames!=null){
+//            shownames.setVisible(false);
+//            shownames.dispose();
+//            shownames=null;
+//        }
+//        if(myseqgroupwindow!=null){
+//            myseqgroupwindow.setVisible(false);
+//            myseqgroupwindow.dispose();
+//            myseqgroupwindow=null;
+//        }
+//        if(viewblasthitsvec.size()>0){
+//            for(int i=0;i<viewblasthitsvec.size();i++){
+//                blastselectseqs=new int[0];
+//                ((viewblasthits)viewblasthitsvec.elementAt(i)).setVisible(false);
+//                ((viewblasthits)viewblasthitsvec.elementAt(i)).dispose();
+//            }
+//            viewblasthitsvec.setSize(0);
+//        }
+//        level++;
+//        getparentmenuitem.setEnabled(true);
+//        getparentmenuitem.setText("use parent group ("+level+")");
+//        parentnameshash.addElement(data.nameshash);
+//        data.nameshash=new HashMap((int)(selectednum/0.75)+1,(float)0.75);//holds info about which name is which array number
+//        for(int i=0;i<selectednum;i++){
+//            data.nameshash.put(data.sequences[data.selectednames[i]].name,new Integer(i));
+//        }
+//        if(data.blasthits!=null){
+//            parentblasthits.addElement(data.blasthits);
+//            data.blasthits=zoomdata.getblasthitsubset(data.blasthits,data.selectednames);
+//        }else{
+//            if(data.orgattvals==null){
+//                data.orgattvals=data.myattvals;
+//            }
+//            parentblasthits.addElement(data.orgattvals);
+//            data.orgattvals=zoomdata.getmyattvalssubset(data.orgattvals,data.selectednames);
+//            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
+//        }
+//        parentmovearr.addElement(data.mymovearr);
+//        data.mymovearr=zoomdata.getmymovearrsubset(data.mymovearr,data.selectednames);
+//        if(java.lang.reflect.Array.getLength(data.mymovearr)>0){
+//            data.lastmovearr=new float[java.lang.reflect.Array.getLength(data.mymovearr)][java.lang.reflect.Array.getLength(data.mymovearr[0])];
+//        }
+//        parentposarr.addElement(data.myposarr);
+//        data.myposarr=zoomdata.getmyposarrsubset(data.myposarr,data.selectednames);
+//        parentaln.addElement(data.sequences);
+//        data.sequences=zoomdata.getinalnsubset(data.sequences,data.selectednames);
+//        parentnamearr.addElement(data.namearr);
+//        data.namearr=zoomdata.getnamearrsubset(data.namearr,data.selectednames);
+//        data.selectednames=new int[0];
+//        if(data.blasthits!=null){
+//            synchronized(data.myattvals){
+//            	data.compute_attraction_values();
+//            }
+//        }
+//        data.elements=java.lang.reflect.Array.getLength(data.namearr);
+//        data.posarr=data.myposarr;
+//        data.posarrtmp=new float[data.elements][data.dimensions];
+//        data.drawarrtmp=new int[data.elements][data.dimensions];
+//        data.draworder=new ArrayList[0];
+//        repaint();
+//    }//GEN-LAST:event_hidesingletonsmenuitemActionPerformed
     
     private void getparentmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getparentmenuitemActionPerformed
         // zoom out one level (use all sequences from the level before for further computation
@@ -2190,6 +2400,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     ClusterData data=null;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+
+	//TODO rename everything to reasonable names
     private javax.swing.JMenu menu_misc;
     private javax.swing.JMenuItem aboutmenuitem;
     private javax.swing.JMenuItem addseqsmenuitem;
@@ -2223,6 +2435,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     private javax.swing.JPanel graphpanel;
     private javax.swing.JMenu menu_help;
     private javax.swing.JMenuItem helpmenuitem;
+	private javax.swing.JMenuItem remove_selected_sequences_menu_item;
     private javax.swing.JMenuItem hidesingletonsmenuitem;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JCheckBoxMenuItem lengthcolormenuitem;
