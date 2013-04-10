@@ -10,7 +10,12 @@ package clans;
  */
 public class aboutwindow extends javax.swing.JDialog {
     
-    /** Creates new form aboutwindow */
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7085934144448877843L;
+	
+	/** Creates new form aboutwindow */
     public aboutwindow(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();

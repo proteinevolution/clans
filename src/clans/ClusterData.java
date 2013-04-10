@@ -23,7 +23,7 @@ public class ClusterData {
     minhsp[] blasthits=null;
     AminoAcidSequence[] sequences=null;
     String[] namearr=null;
-    java.util.HashMap<String, Integer> nameshash=null;
+    HashMap<String, Integer> nameshash=null;
     double eval=-1;
     double pval=-1;
     float scval=-1;
@@ -68,9 +68,9 @@ public class ClusterData {
     float dampening=0.2f;
     double minattract=1;
     float[] weights=null;
-    java.util.ArrayList<String> mapfiles=null;
-    java.util.ArrayList<String> lookupfiles=null;
-    java.util.Vector<String> affyfiles=null;
+    ArrayList<File> mapfiles=null;
+    ArrayList<File> lookupfiles=null;
+    java.util.Vector<replicates> affyfiles=null;
     boolean usefoldchange=false;
     boolean avgfoldchange=false;
     String namesdmp_file="not_spcified";
@@ -84,7 +84,7 @@ public class ClusterData {
     float[][] mymovearr=null;
     float[][] posarrtmp=null;
     int[][] drawarrtmp=null;
-    java.util.ArrayList[] draworder=null;
+    ArrayList<int[]>[] draworder=null;
     static int dimensions=3;
     int elements=-1;
     double[][] rotmtx={{1,0,0},{0,1,0},{0,0,1}};//the performed rotations
@@ -99,7 +99,7 @@ public class ClusterData {
     int dotsize=2;
     int groupsize=4;
     java.util.Vector<seqgroup> seqgroupsvec=new java.util.Vector<seqgroup>();
-    java.util.ArrayList <int[][]>polygons=null;
+    ArrayList <int[][]>polygons=null;
     boolean showseqgroups=false;
     boolean changedvals=false;
     java.awt.Color[] colorarr=null;
@@ -108,7 +108,7 @@ public class ClusterData {
     int roundslimit=-1;
     boolean moveselectedonly=false;
 
-    public ClusterData(minhsp[] blasthits, AminoAcidSequence[] sequences, String[] namearr, java.util.HashMap nameshash, 
+    public ClusterData(minhsp[] blasthits, AminoAcidSequence[] sequences, String[] namearr, HashMap<String, Integer> nameshash, 
     		double eval, double pval, float scval, int verbose, int cpu, boolean savepos, String cmd, String blastpath,
     		boolean addblastvbparam, String formatdbpath, String[] referencedb, StringBuffer errbuff, 
     		String input_filename) {
@@ -363,7 +363,7 @@ public class ClusterData {
        cluster2d=loaded_data.cluster2d;
        showinfo=loaded_data.showinfo;
        int number_of_sequences =sequences.length;
-       nameshash=new java.util.HashMap((int)(number_of_sequences/0.75)+1,(float)0.75);//holds info about which name is which array number
+       nameshash=new HashMap<String, Integer>((int)(number_of_sequences/0.75)+1,(float)0.75);//holds info about which name is which array number
        namearr=new String[number_of_sequences];
         for(int i=0;i<number_of_sequences;i++){
            namearr[i]=sequences[i].name.trim();
@@ -377,7 +377,7 @@ public class ClusterData {
        mymovearr=new float[elements][ClusterData.dimensions];
        posarrtmp=new float[elements][ClusterData.dimensions];
        drawarrtmp=new int[elements][ClusterData.dimensions];
-       draworder=new java.util.ArrayList[0];
+       draworder=new ArrayList[0];
         
        myrotmtx=loaded_data.rotmtx;
         for (int i = 0; i < 3; i ++){
@@ -433,15 +433,15 @@ public class ClusterData {
 	    float attval;
 	    String name1;
 	    String name2;
-	    ArrayList namelist = new ArrayList();
-	    ArrayList datlist = new ArrayList();
+	    ArrayList<String> namelist = new ArrayList<String>();
+	    ArrayList<minattvals> datlist = new ArrayList<minattvals>();
 	    try {
 	        BufferedReader inread = new BufferedReader(new FileReader(infile));
 	        String inline;
 	        String[] tmparr;
 	        int vals = 0;
 	        int seq1num, seq2num, seqnum = 0;
-	        HashMap nameshash = new HashMap();
+	        HashMap<String, Integer> nameshash = new HashMap<String, Integer>();
 	        while ((inline = inread.readLine()) != null) {
 	            if (inline.length() == 0) {
 	                continue;
@@ -619,7 +619,7 @@ public class ClusterData {
 	                    System.out.println("reading matrix");
 	                    int counter = 0;
 	                    String[] tmparr;
-	                    HashMap tmphash = new HashMap();
+	                    HashMap<String, minattvals> tmphash = new HashMap<String, minattvals>();
 	                    String key;
 	                    minattvals curratt;
 	                    float tmpval;
@@ -803,8 +803,9 @@ public class ClusterData {
 	            append_clusters_from_file(infile);
 	        }//else do the usual read
 	        inread = new BufferedReader(new FileReader(infile));
-	        Vector tmpvec = new Vector();
-	        HashMap mynamehash = new HashMap();
+	        Vector<String> tmpvec_strings = new Vector<String>();
+	        Vector<Integer> tmpvec_integers = new Vector<Integer>();
+	        HashMap<String, Integer> mynamehash = new HashMap<String, Integer>();
 	        String[] tmparr;
 	        String tmpstr = "";
 	        int elements = java.lang.reflect.Array.getLength(namearr);
@@ -835,16 +836,17 @@ public class ClusterData {
 	                    } else if (inline.startsWith(">")) {
 	                        tmpstr = inline.substring(1).trim();
 	                        tmparr = tmpstr.split("\\s+");
-	                        tmpvec.addElement(tmparr[0]);
+	                        tmpvec_strings.addElement(tmparr[0]);
 	                    }
 	                }
-	                maxnum = tmpvec.size();
+	                maxnum = tmpvec_strings.size();
 	                mynamearr = new String[maxnum];
-	                tmpvec.copyInto(mynamearr);
+	                tmpvec_strings.copyInto(mynamearr);
 	            } else if (inline.equalsIgnoreCase("<seqgroups>")) {
 	                //read the groups defined in this file; format is CLANS
 	                if (maxnum == 0) {
 	                    System.err.println("ERROR; missing sequence names");
+	                    inread.close();
 	                    return;
 	                }
 	                int count = 0;
@@ -920,23 +922,23 @@ public class ClusterData {
 	                            System.err.println("Unable to parse int from '" + tmpstr + "' in line '" + inline + "'");
 	                            continue;
 	                        }
-	                        tmpvec.clear();
+	                        tmpvec_strings.clear();
 	                        for (int i = 0; i < elements; i++) {
 	                            tmpstr = mynamearr[tmp[i]];
 	                            //System.out.print(tmpstr+"/");
 	                            if (mynamehash.containsKey(tmpstr)) {
-	                                tmpvec.addElement(mynamehash.get(tmpstr));
+	                                tmpvec_integers.addElement(mynamehash.get(tmpstr));
 	                                //System.out.println("\t"+tmpstr+"-->"+((Integer)mynamehash.get(tmpstr)).intValue()+":"+namearr[((Integer)mynamehash.get(tmpstr)).intValue()]+";");
 	                            } else {
 	                                System.err.println("no correspondence found for '" + tmpstr + "' in current graph; skipping entry " + java.lang.reflect.Array.getLength(namearr));
 	                            }
 	                        }//end for i
 	                        //System.out.println();
-	                        elements = tmpvec.size();
+	                        elements = tmpvec_strings.size();
 	                        mygroup.sequences = new int[elements];
 	                        //System.out.print("out:");
 	                        for (int i = 0; i < elements; i++) {
-	                            mygroup.sequences[i] = ((Integer) tmpvec.elementAt(i)).intValue();
+	                            mygroup.sequences[i] = ((Integer) tmpvec_integers.elementAt(i)).intValue();
 	                            //System.out.print(mygroup.sequences[i]+";");
 	                        }//end for i
 	                        //System.out.println();
@@ -1339,9 +1341,9 @@ public class ClusterData {
 	    }
 		
 	    System.out.println("blasthits is size:"+java.lang.reflect.Array.getLength(blasthits));
-	    java.util.ArrayList<minattvals> tmpvec=new java.util.ArrayList<minattvals>();
+	    ArrayList<minattvals> tmpvec=new ArrayList<minattvals>();
 	    int datanum=java.lang.reflect.Array.getLength(blasthits);
-	    java.util.HashMap myhash=new java.util.HashMap(datanum);
+	    HashMap<String, minattvals> myhash=new HashMap<String, minattvals>(datanum);
 	    float newatt;
 	    String key;
 	    float maxattval=0;

@@ -47,12 +47,12 @@ public class saverunobject {
     boolean showinfo=false;
     boolean usescval=false;
     boolean complexatt=true;
-    java.util.Vector seqgroupsvec=new java.util.Vector();
+    java.util.Vector<seqgroup> seqgroupsvec=new Vector<seqgroup>();
     String blastpath="blastall -p blastp";
     String formatdbpath="formatdb";
-    java.util.ArrayList mapfiles=new java.util.ArrayList();
-    java.util.ArrayList lookupfiles=new java.util.ArrayList();
-    java.util.Vector affyfiles=null;
+    java.util.ArrayList<File> mapfiles=new java.util.ArrayList<File>();
+    java.util.ArrayList<File> lookupfiles=new java.util.ArrayList<File>();
+    java.util.Vector<replicates> affyfiles=null;
     java.awt.Color[] colorarr=null;
     float[] colorcutoffs=null;
     boolean usefoldchange=false;

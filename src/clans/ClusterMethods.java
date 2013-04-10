@@ -124,7 +124,7 @@ public class ClusterMethods {
         int elements=data.elements;
         float[] weights=data.weights;
         if((data.moveselectedonly)&&(selectnamesnum>0)&&(selectnamesnum!=elements)){
-            java.util.HashMap tmphash=new java.util.HashMap<Integer,Integer>((int)(selectnamesnum/0.8)+1,0.8f);
+            java.util.HashMap<Integer,Integer> tmphash=new java.util.HashMap<Integer,Integer>((int)(selectnamesnum/0.8)+1,0.8f);
             Integer[] hashkeys=new Integer[elements];
             //hashkey[] hashkeys=new hashkey[elements];
             for(i=elements;--i>=0;){

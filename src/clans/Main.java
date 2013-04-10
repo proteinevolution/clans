@@ -304,7 +304,7 @@ public class Main {
                 float mymaxmove=readdata.maxmove;
                 minhsp[] newblasthits=mysearchblast.gethits(readdata.inaln,readdata.blasthits,newaln,cmd,formatdbpath,blastpath,cpu,eval,pval,coverage,scval,ident,verbose,allnameshash,useallrounds,lowmem,referencedb,exhaustive,readblast,true);
                 //now keep all of the old data and add the new data
-                ArrayList addblasthits=new ArrayList();
+                ArrayList<minhsp> addblasthits=new ArrayList<minhsp>();
                 for(int i=java.lang.reflect.Array.getLength(newblasthits);--i>=0;){
                     if(newblasthits[i].query>=readelements || newblasthits[i].hit>=readelements){
                         //then I want to add this one
@@ -323,7 +323,7 @@ public class Main {
                 readdata=null;
                 if(nographics==false){
                     System.out.println("...reading data");
-                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
+                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap<String, Integer>(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.initaddedseqs(blasthits,allaln,allnamearr,allnameshash,newnumarr,allposarr,mymaxmove,mypval,true);
@@ -340,7 +340,7 @@ public class Main {
                 System.out.println("Reading old data from "+olddata);
                 saverunobject readdata=ClusterData.load_run_from_file(new java.io.File(olddata));
                 int seqnum=java.lang.reflect.Array.getLength(readdata.inaln);
-                HashMap nameshash=new HashMap((int)(seqnum/0.74),(float)0.75);//holds info about which name is which array number
+                HashMap<String, Integer> nameshash=new HashMap<String, Integer>((int)(seqnum/0.74),(float)0.75);//holds info about which name is which array number
                 String[] namearr=new String[seqnum];
                 for(int i=0;i<seqnum;i++){
                     namearr[i]=readdata.inaln[i].name;
@@ -350,7 +350,7 @@ public class Main {
                 }
                 if(nographics==false){
                     System.out.println("...reading data");
-                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
+                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap<String, Integer>(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.initaddedseqs(readdata.blasthits,readdata.inaln,namearr,nameshash,new int[0],readdata.posarr,readdata.maxmove,readdata.pval,false);
@@ -379,7 +379,7 @@ public class Main {
                 	
                 	ClusterData myclusterdata = new ClusterData(new minhsp[0],
 							new AminoAcidSequence[0], new String[0],
-							new HashMap(), eval, pval, scval, verbose, cpu,
+							new HashMap<String, Integer>(), eval, pval, scval, verbose, cpu,
 							savepos, cmd, blastpath, addblastvbparam,
 							formatdbpath, referencedb, errbuff, input_filename);
 					myclusterdata.roundslimit = dorounds; // set the limit of how often to run this

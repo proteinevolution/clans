@@ -17,7 +17,12 @@ import java.lang.reflect.Array;
  */
 public class ClusteringWithGui extends javax.swing.JFrame {
     
-    /** Creates new form clustertest */
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1310615823184297259L;
+
+	/** Creates new form clustertest */
     public ClusteringWithGui() {
         initComponents();
     }
@@ -1127,7 +1132,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 repaint="Error Loading Data";
                 data.sequences=ClusterMethods.remove_gaps_from_sequences(saveddata.inaln);
                 int seqs=java.lang.reflect.Array.getLength(data.sequences);
-                data.nameshash=new HashMap((int)(seqs/0.75)+1,(float)0.75);//holds info about which name is which array number
+                data.nameshash=new HashMap<String, Integer>((int)(seqs/0.75)+1,(float)0.75);//holds info about which name is which array number
                 data.namearr=new String[seqs];
                 data.myposarr=new float[seqs][3];
                 Random rand=ClusterMethods.rand;
@@ -1167,10 +1172,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 data.selectednames=new int[0];
                 data.seqgroupsvec=saveddata.seqgroupsvec;
                 data.posarr=data.myposarr;
-                data.lastmovearr=new float[data.elements][data.dimensions];
-                data.mymovearr=new float[data.elements][data.dimensions];
-                data.posarrtmp=new float[data.elements][data.dimensions];
-                data.drawarrtmp=new int[data.elements][data.dimensions];
+                data.lastmovearr=new float[data.elements][ClusterData.dimensions];
+                data.mymovearr=new float[data.elements][ClusterData.dimensions];
+                data.posarrtmp=new float[data.elements][ClusterData.dimensions];
+                data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
                 data.draworder=new ArrayList[0];
                 data.attvalsimple=true;
                 repaint=null;
@@ -1829,8 +1834,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 //        }
 //        data.elements=java.lang.reflect.Array.getLength(data.namearr);
 //        data.posarr=data.myposarr;
-//        data.posarrtmp=new float[data.elements][data.dimensions];
-//        data.drawarrtmp=new int[data.elements][data.dimensions];
+//        data.posarrtmp=new float[data.elements][ClusterData.dimensions];
+//        data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
 //        data.draworder=new ArrayList[0];
 //        repaint();
 //    }//GEN-LAST:event_hidesingletonsmenuitemActionPerformed
@@ -1883,7 +1888,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         parentaln.removeElementAt(level);
         data.namearr=(String[])parentnamearr.elementAt(level);
         parentnamearr.removeElementAt(level);
-        data.nameshash=(HashMap)parentnameshash.elementAt(level);
+        data.nameshash=parentnameshash.elementAt(level);
         parentnameshash.removeElementAt(level);
         data.weights=(float[])parentweights.elementAt(level);
         parentweights.removeElementAt(level);
@@ -1899,14 +1904,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             myseqgroupwindow.dispose();
         }
         if(parentseqgroups.size()>level){
-            data.seqgroupsvec=(Vector)parentseqgroups.remove(level);
+            data.seqgroupsvec = parentseqgroups.remove(level);
         }
         if(mymapfunctiondialog!=null){
             mymapfunctiondialog.makenameshash();
         }
         data.posarr=data.myposarr;
-        data.posarrtmp=new float[data.elements][data.dimensions];
-        data.drawarrtmp=new int[data.elements][data.dimensions];
+        data.posarrtmp=new float[data.elements][ClusterData.dimensions];
+        data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
         data.draworder=new ArrayList[0];
         repaint();
     }//GEN-LAST:event_getparentmenuitemActionPerformed
@@ -1949,7 +1954,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         getparentmenuitem.setEnabled(true);
         getparentmenuitem.setText("use parent group ("+level+")");
         parentnameshash.addElement(data.nameshash);
-        data.nameshash=new HashMap((int)(selectednum/0.75)+1,(float)0.75);//holds info about which name is which array number
+        data.nameshash=new HashMap<String, Integer>((int)(selectednum/0.75)+1,(float)0.75);//holds info about which name is which array number
         for(int i=0;i<selectednum;i++){
             data.nameshash.put(data.sequences[data.selectednames[i]].name,new Integer(i));
         }
@@ -1985,8 +1990,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }
         
         data.posarr=data.myposarr;
-        data.posarrtmp=new float[data.elements][data.dimensions];
-        data.drawarrtmp=new int[data.elements][data.dimensions];
+        data.posarrtmp=new float[data.elements][ClusterData.dimensions];
+        data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
         data.draworder=new ArrayList[0];
         if(mymapfunctiondialog!=null){
             mymapfunctiondialog.makenameshash();
@@ -2348,11 +2353,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     Vector <float[][]> parentposarr=new Vector<float[][]>();
     Vector <AminoAcidSequence[]> parentaln=new Vector<AminoAcidSequence[]>();
     Vector <String[]> parentnamearr=new Vector<String[]>();
-    Vector <HashMap> parentnameshash=new Vector<HashMap>();
+    Vector <HashMap<String, Integer>> parentnameshash=new Vector<HashMap<String, Integer>>();
 
     Vector parentblasthits=new Vector();
-    Vector <Vector> parentseqgroups=new Vector<Vector>();
-    Vector <float[]> parentweights=new Vector<float[]>();
+    Vector<Vector<seqgroup>> parentseqgroups=new Vector<Vector<seqgroup>>();
+    Vector<float[]> parentweights=new Vector<float[]>();
  
     Vector <viewblasthits> viewblasthitsvec=new Vector<viewblasthits>();
     Vector <selectclass> selectvec=new Vector<selectclass>();
@@ -2692,7 +2697,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         return !is_stopped(false);
     }
     
-    void initaddedseqs(minhsp[] blastvec,AminoAcidSequence[]allaln,String[]allnamearr,HashMap allnameshash,int[]newnumarr,float[][]allposarr,float maxmove,double pval,boolean useselectedonly){
+    void initaddedseqs(minhsp[] blastvec,AminoAcidSequence[]allaln,String[]allnamearr,HashMap<String, Integer> allnameshash,int[]newnumarr,float[][]allposarr,float maxmove,double pval,boolean useselectedonly){
         //initialize the necessary variable for the case where new sequences are added to an existing run.
         data.sequences=allaln;
         data.myposarr=allposarr;
@@ -2702,15 +2707,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         textfield_cutoff_value.setText(String.valueOf(data.pvalue_threshold));
         textfield_info_min_blast_evalue.setText(String.valueOf(data.pvalue_threshold));
         data.selectednames=newnumarr;
-        int seqs=java.lang.reflect.Array.getLength(data.sequences);
         data.nameshash=allnameshash;
         data.namearr=allnamearr;
         data.elements=java.lang.reflect.Array.getLength(data.namearr);
         data.posarr=data.myposarr;
-        data.lastmovearr=new float[data.elements][data.dimensions];
-        data.mymovearr=new float[data.elements][data.dimensions];
-        data.posarrtmp=new float[data.elements][data.dimensions];
-        data.drawarrtmp=new int[data.elements][data.dimensions];
+        data.lastmovearr=new float[data.elements][ClusterData.dimensions];
+        data.mymovearr=new float[data.elements][ClusterData.dimensions];
+        data.posarrtmp=new float[data.elements][ClusterData.dimensions];
+        data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
         data.draworder=new ArrayList[0];
         
         data.compute_attraction_values();
@@ -3690,11 +3694,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         
         //----------------------------------------------------------------------
         
-        ArrayList[] getdraworder(minattvals[] myattvals,int colornum){
+        ArrayList<int[]>[] getdraworder(minattvals[] myattvals,int colornum){
             //bin the lines connecting datapoints by the color they are assigned (makes subsequent drawing quicker)
             int elements=java.lang.reflect.Array.getLength(myattvals);
             //System.out.println("attvalelements="+elements);
-            ArrayList[] retarr=new ArrayList[colornum];
+            ArrayList<int[]>[] retarr=new ArrayList[colornum];
             for(int i=0;i<colornum;i++){
                 retarr[i]=new ArrayList<int[]>();
             }
@@ -3765,7 +3769,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         HashMap getfrustration(minattvals[] attvals,float[][] posarr){
             //get wether each connection is longer or shorter than expected based on the attraction value
             int seqnum=java.lang.reflect.Array.getLength(attvals);
-            HashMap retarr=new HashMap((int)(seqnum/0.8)+1,0.8f);
+            HashMap<String, minattvals> retarr=new HashMap<String, minattvals>((int)(seqnum/0.8)+1,0.8f);
             minattvals[] minattarr=new minattvals[seqnum];
             int q,h;
             float tmpfloat;

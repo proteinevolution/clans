@@ -286,7 +286,7 @@ public class affydialog extends javax.swing.JFrame {
     private void showbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showbuttonActionPerformed
         // open a new window showing the expression levels for the selected datapoints
         //the currently selected elements are present in selectednames (int[])
-        ArrayList tmplist=new ArrayList();
+        ArrayList<datapoint[]> tmplist=new ArrayList<datapoint[]>();
         String tmpname;
         if(java.lang.reflect.Array.getLength(parent.data.selectednames)<=0){
             javax.swing.JOptionPane.showMessageDialog(this,"No sequences selected");
@@ -612,7 +612,7 @@ public class affydialog extends javax.swing.JFrame {
     Vector datavec=new Vector();//the data+replicates
     Vector replicatevec=new Vector();//temporary replicate element Vector
     Vector wtreplicatevec=new Vector();//temporary vector for wt replicate data
-    HashMap valhash=new HashMap();
+    HashMap<String, datapoint[]> valhash=new HashMap<String, datapoint[]>();
     float globalrelstdev=0;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
