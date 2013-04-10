@@ -29,7 +29,7 @@ public class ClusterData {
     float scval=-1;
     int verbose=-1;
     int cpu=-1;
-    boolean savepos=false;
+    boolean save_intermediate_results=false;
     String cmd=null;
     String blastpath=null;
     boolean addblastvbparam=false;
@@ -108,10 +108,12 @@ public class ClusterData {
     int roundslimit=-1;
     boolean moveselectedonly=false;
 
-    public ClusterData(MinimalHsp[] blasthits, AminoAcidSequence[] sequences, String[] namearr, HashMap<String, Integer> nameshash, 
-    		double eval, double pval, float scval, int verbose, int cpu, boolean savepos, String cmd, String blastpath,
-    		boolean addblastvbparam, String formatdbpath, String[] referencedb, StringBuffer errbuff, 
-    		String input_filename) {
+	public ClusterData(MinimalHsp[] blasthits, AminoAcidSequence[] sequences,
+			String[] namearr, HashMap<String, Integer> nameshash, double eval,
+			double pval, float scval, int verbose, int cpu,
+			boolean save_intermediate_results, String cmd, String blastpath,
+			boolean addblastvbparam, String formatdbpath, String[] referencedb,
+			StringBuffer errbuff, String input_filename) {
         
     	this.sequences=ClusterMethods.remove_gaps_from_sequences(sequences);
     	
@@ -129,7 +131,7 @@ public class ClusterData {
         this.scval=scval;
         this.verbose=verbose;
         this.cpu=cpu;
-        this.savepos=savepos;
+		this.save_intermediate_results = save_intermediate_results;
         this.cmd=cmd;
         this.blastpath=blastpath;
         this.addblastvbparam=addblastvbparam;

@@ -97,7 +97,7 @@ public class Main {
     static String saveblastname="tmpblasthsp.txt";//name of blast savefile
     static boolean readblast=true;//do I want to read blasts from a savefile?
     static boolean lowmem=false;//do I want to temporarily save results to hdd?
-    static boolean savepos=false;//do I want to save my sequence positions in 3d?
+    static boolean save_intermediate_results=false;//do I want to save my sequence positions in 3d?
     static boolean docalc=true;//do I want to do calculations or just open a clustertest window?
     static boolean nographics=false;//do I want to NOT start the graphical interface?
     static String savetoname=null;//define a savefile to save results to (only if used in conjunction with -dorounds and -load)
@@ -143,7 +143,7 @@ public class Main {
         System.out.println("-verbose verbosity of the program (def:1)");
         System.out.println("-cpu number of CPU to use (def: 1)");
         System.out.println("-readblast T/f read former blast results");
-        System.out.println("-savepos t/F do you want to save the positions in 3D of the sequences during clustering");
+        System.out.println("-savepos t/F save position data during each round (in file <INPUT_FILE>.savepos)");
         System.out.println("-docalc T/f do calculation or just load interface");
         System.out.println("-nographics t/F only do the blast runs; no graphical interface, results are saved to tmpblasthsp.txt");
         System.out.println("-olddata name of savefile (def: \"\")");
@@ -186,7 +186,7 @@ public class Main {
         System.out.println("verbose="+String.valueOf(verbose));
         System.out.println("cpu="+String.valueOf(cpu));
         System.out.println("lowmem="+lowmem);
-        System.out.println("savepos="+savepos);
+        System.out.println("savepos="+save_intermediate_results);
         System.out.println("docalc="+docalc);
         System.out.println("nographics="+nographics);
         System.out.println("readblast="+readblast);
@@ -245,7 +245,7 @@ public class Main {
                     if(nographics==false){
                         //System.out.println("starting clustertest");
                         System.out.println("...reading data");
-                        ClusterData myclusterdata=new ClusterData(blasthits,inaln,namearr,nameshash,eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
+                        ClusterData myclusterdata=new ClusterData(blasthits,inaln,namearr,nameshash,eval,pval,scval,verbose,cpu,save_intermediate_results,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                         myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                         ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                         myclusterer.setVisible(true);
@@ -323,7 +323,7 @@ public class Main {
                 readdata=null;
                 if(nographics==false){
                     System.out.println("...reading data");
-                    ClusterData myclusterdata=new ClusterData(new MinimalHsp[0],new AminoAcidSequence[0],new String[0],new HashMap<String, Integer>(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
+                    ClusterData myclusterdata=new ClusterData(new MinimalHsp[0],new AminoAcidSequence[0],new String[0],new HashMap<String, Integer>(),eval,pval,scval,verbose,cpu,save_intermediate_results,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.initaddedseqs(blasthits,allaln,allnamearr,allnameshash,newnumarr,allposarr,mymaxmove,mypval,true);
@@ -350,7 +350,7 @@ public class Main {
                 }
                 if(nographics==false){
                     System.out.println("...reading data");
-                    ClusterData myclusterdata=new ClusterData(new MinimalHsp[0],new AminoAcidSequence[0],new String[0],new HashMap<String, Integer>(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
+                    ClusterData myclusterdata=new ClusterData(new MinimalHsp[0],new AminoAcidSequence[0],new String[0],new HashMap<String, Integer>(),eval,pval,scval,verbose,cpu,save_intermediate_results,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.initaddedseqs(readdata.blasthits,readdata.inaln,namearr,nameshash,new int[0],readdata.posarr,readdata.maxmove,readdata.pval,false);
@@ -380,7 +380,7 @@ public class Main {
                 	ClusterData myclusterdata = new ClusterData(new MinimalHsp[0],
 							new AminoAcidSequence[0], new String[0],
 							new HashMap<String, Integer>(), eval, pval, scval, verbose, cpu,
-							savepos, cmd, blastpath, addblastvbparam,
+							save_intermediate_results, cmd, blastpath, addblastvbparam,
 							formatdbpath, referencedb, errbuff, input_filename);
 					myclusterdata.roundslimit = dorounds; // set the limit of how often to run this
 					
@@ -405,7 +405,7 @@ public class Main {
         }
         
         ClusterData myclusterdata = new ClusterData(new MinimalHsp[0], new AminoAcidSequence[0], new String[0], 
-        		new HashMap<String, Integer>(), eval, pval, scval, verbose, cpu, savepos, cmd, blastpath, addblastvbparam, 
+        		new HashMap<String, Integer>(), eval, pval, scval, verbose, cpu, save_intermediate_results, cmd, blastpath, addblastvbparam, 
         		formatdbpath, referencedb, errbuff, input_filename);
         myclusterdata.roundslimit = dorounds; //set the limit of how often to run this
         
@@ -816,13 +816,14 @@ public class Main {
                 i++;
                 continue;
             }// end lowmem
+            
             if((args[i].equalsIgnoreCase("-savepos"))){
                 i++;
                 if(i<args.length){
                     if(args[i].equalsIgnoreCase("TRUE")||args[i].equalsIgnoreCase("T")){
-                        savepos=true;
+                        save_intermediate_results=true;
                     }else{
-                        savepos=false;//default
+                        save_intermediate_results=false;//default
                     }
                 }else{
                     System.err.println("Error reading -savepos, missing argument.");
@@ -830,7 +831,8 @@ public class Main {
                 }
                 i++;
                 continue;
-            }// end savepos
+            }
+
             if((args[i].equalsIgnoreCase("-docalc"))){
                 i++;
                 if(i<args.length){

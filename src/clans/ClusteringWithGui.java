@@ -2378,7 +2378,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     boolean zoom=false;
     boolean mouse_is_pressed=false;
     boolean moveseqs=false;//flag to set if I want to draw sequences in 3d-space
-    boolean savepos=false;
+    boolean save_intermediate_results=false;
     boolean recalc=true;//synchronize drawing and calculating
     drawpanel draw1;
     shownamedialog shownames;
@@ -3869,8 +3869,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                     }
                     data.changedvals=false;
                 }//end if changedvals
+                
                 ClusterMethods.recluster3d(parent.data);
-                if((level==0)&&(savepos)){
+                
+				if (level == 0 && save_intermediate_results) {
                     try{
                         PrintWriter outwriter=new PrintWriter(new BufferedWriter(new FileWriter("positionfile.dat")));
                         //now save the current variables to file
@@ -3894,7 +3896,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                         System.err.println("unable to save positions to positionfile.dat");
                         e.printStackTrace();
                     }
-                }//end if savepos
+                }
+
                 data.posarr=data.myposarr;
                 tmpcool=(((float)((int)(data.currcool*100000)))/100000);
                 if(myoptionswindow!=null){
