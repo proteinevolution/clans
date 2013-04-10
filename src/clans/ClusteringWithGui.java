@@ -74,8 +74,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             //If I have had errors up to this point
             new errwindow(this,true,data.errbuff.toString()).setVisible(true);
         }
-        if(data.input_filename!=null){
-            loaddata(data.input_filename);
+        if(data.getAbsoluteInputfileName() != null){
+            loaddata(data.getAbsoluteInputfileName());
         }
     }// end init
     
@@ -1487,19 +1487,19 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
         JFileChooser jFileChooser = new JFileChooser();
         
-        if (data.input_filename != null) {
-        	jFileChooser.setSelectedFile(new File(data.input_filename)); // input filename is default output filename
+        if (data.getAbsoluteInputfileName() != null) {
+        	jFileChooser.setSelectedFile(new File(data.getAbsoluteInputfileName())); // input filename is default output filename
         }
 
         int returnVal = jFileChooser.showSaveDialog(this);
         
         if(returnVal == JFileChooser.APPROVE_OPTION) {
         	
-            this.setTitle("Clustering of " + jFileChooser.getSelectedFile().getName());
-            
             data.save_to_file(jFileChooser.getSelectedFile());
             
-            data.input_filename = jFileChooser.getSelectedFile().getPath(); // in case the output filename is not the one the file was loaded from 
+            data.setInputFilename(jFileChooser.getSelectedFile().getPath()); // in case the output filename is not the one the file was loaded from
+            
+            this.setTitle("Clustering of " + data.getBaseInputfileName());
         }
     }//GEN-LAST:event_savemenuitemActionPerformed
     
@@ -2428,7 +2428,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             myoptionswindow.maxmovefield.setText(String.valueOf(data.maxmove));
         }
         textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
-        this.setTitle("Clustering of "+inname);
+        this.setTitle("Clustering of " + data.getBaseInputfileName());
         
         this.center_graph(-1);
     }//end loaddata

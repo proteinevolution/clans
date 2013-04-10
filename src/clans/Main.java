@@ -412,7 +412,7 @@ public class Main {
         ClusteringWithoutGui myclusterer=new ClusteringWithoutGui(myclusterdata);
         
 
-        myclusterer.data.load_clans_file(myclusterer.data.input_filename);
+        myclusterer.data.load_clans_file(myclusterer.data.getAbsoluteInputfileName());
         if (pval != -1) {
         	myclusterer.data.pvalue_threshold = myclusterer.data.pval;
         }

@@ -36,7 +36,8 @@ public class ClusterData {
     String formatdbpath=null;
     String[] referencedb=null;
     StringBuffer errbuff=null;
-    String input_filename=null;
+    
+    private String input_filename=null;
 
     //variables initialized later on
     boolean nographics=false;
@@ -135,8 +136,40 @@ public class ClusterData {
         this.formatdbpath=formatdbpath;
         this.referencedb=referencedb;
         this.errbuff=errbuff;
-        this.input_filename=input_filename;
+        
         this.seqnum=namearr.length;
+        
+        this.setInputFilename(input_filename);
+    }
+    
+    /**
+     * Sets the filename as an absolute one independent of whether the input filename is relative or absolute.
+     * 
+     * @param new_filename a relative or absolute input filename
+     */
+    public void setInputFilename(String new_filename) {
+    	    	
+    	this.input_filename = new_filename;
+        if (!new File(new_filename).isAbsolute()) {
+        	// the directory java was executed from is used as basis for all relative filenames
+        	this.input_filename = System.getProperty("user.dir") + System.getProperty("file.separator") + new_filename;
+        }
+    }
+    
+    /**
+     * 
+     * @return the absolute filename of the file associated with this clustering
+     */
+    public String getAbsoluteInputfileName() {
+    	return this.input_filename;
+    }
+    
+    /**
+     * 
+     * @return the base name of the file associated with this clustering
+     */
+    public String getBaseInputfileName() {
+    	return new File(this.input_filename).getName();
     }
     
     //--------------------------------------------------------------------------
