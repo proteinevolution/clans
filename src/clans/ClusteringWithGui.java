@@ -949,7 +949,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 outbuff.append(">"+data.sequence_names[data.selectednames[i]]+" "+data.selectednames[i]+"\n");
                 outbuff.append(data.sequences[data.selectednames[i]].seq+"\n");
             }//end for i
-            new showsequences(new javax.swing.JFrame(),outbuff).setVisible(true);
+            new ShowCopyPasteableSequences(new javax.swing.JFrame(),outbuff).setVisible(true);
         }
         
     }//GEN-LAST:event_showseqsmenuitemActionPerformed
