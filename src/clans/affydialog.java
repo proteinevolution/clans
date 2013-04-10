@@ -31,7 +31,7 @@ public class affydialog extends javax.swing.JFrame {
             datavec=parent.affyfiles;
             replicates myreplicate;
             for(int i=0;i<datavec.size();i++){
-                myreplicate=(replicates)datavec.elementAt(i);
+                myreplicate=datavec.elementAt(i);
                 if(myreplicate.abbreviation!=null){
                     datanamesvec.addElement(myreplicate.abbreviation+":"+myreplicate.name+"/"+myreplicate.wtname);
                 }else{
@@ -609,7 +609,7 @@ public class affydialog extends javax.swing.JFrame {
     JFileChooser fc=new JFileChooser(new File("."));
     File[] wtfiles=null;
     Vector datanamesvec=new Vector();//names for the data elements
-    Vector datavec=new Vector();//the data+replicates
+    Vector<replicates> datavec = new Vector<replicates>();//the data+replicates
     Vector replicatevec=new Vector();//temporary replicate element Vector
     Vector wtreplicatevec=new Vector();//temporary vector for wt replicate data
     HashMap<String, datapoint[]> valhash=new HashMap<String, datapoint[]>();

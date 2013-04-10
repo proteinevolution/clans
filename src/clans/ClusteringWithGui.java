@@ -1982,7 +1982,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
         parentseqgroups.addElement(data.seqgroupsvec);
-        data.seqgroupsvec=new Vector();
+        data.seqgroupsvec=new Vector<seqgroup>();
         data.selectednames=new int[0];
 
         synchronized(data.myattvals){
@@ -2397,7 +2397,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     String nodesdmp_file=null;//"nodes.dmp";
     ArrayList <java.io.File>mapfiles=new ArrayList<java.io.File>();
     ArrayList <java.io.File>lookupfiles=new ArrayList<java.io.File>();
-    Vector affyfiles=null;
+    Vector<replicates> affyfiles=null;
     boolean usefoldchange=false;
     boolean avgfoldchange=false;
     boolean dotsfirst=false;
@@ -2961,7 +2961,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
     class drawpanel extends JPanel implements java.awt.print.Printable{
         
-        public void drawpanel(){
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -9084230540557021638L;
+
+		public drawpanel(){
             this.setOpaque(true);//should be set by default, but can't hurt to re-set
             this.setDoubleBuffered(true);//should be set by default, but can't hurt to re-set
         }
@@ -3029,7 +3034,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
         boolean drawbox=false;
 
-        HashMap frustration;//color code for the frustration of connections
+        HashMap<String, minattvals> frustration;//color code for the frustration of connections
         java.awt.Color[] frustcolorarr=new java.awt.Color[0];
         java.awt.Color bgcolor=new java.awt.Color(1f,1f,1f);
         java.awt.Color fgcolor=new java.awt.Color(0,0,0);
@@ -3109,7 +3114,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 return java.awt.print.Printable.NO_SUCH_PAGE;
             }
             java.awt.Graphics2D g2d=(java.awt.Graphics2D) g;
-            java.awt.geom.AffineTransform trans=java.awt.geom.AffineTransform.getScaleInstance(xscalel,yscalel);
             g2d.translate(pf.getImageableX(), pf.getImageableY());
             g2d.scale(xscalel,yscalel);
             graphpanel.setDoubleBuffered(false);
@@ -3740,7 +3744,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         
         //----------------------------------------------------------------------
         
-        HashMap getfrustration(minattvals[] attvals,float[][] posarr){
+        HashMap<String, minattvals> getfrustration(minattvals[] attvals,float[][] posarr){
             //get wether each connection is longer or shorter than expected based on the attraction value
             int seqnum=java.lang.reflect.Array.getLength(attvals);
             HashMap<String, minattvals> retarr=new HashMap<String, minattvals>((int)(seqnum/0.8)+1,0.8f);
@@ -3836,7 +3840,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                     //mainwindow has the focus, then see whether I am done drawing
                     try{
                         while(recalc==false){
-                            this.sleep(100);
+                            Thread.sleep(100);
                         }
                     }catch (InterruptedException ie){
                         System.err.println("Interrupted sleep in computethread");

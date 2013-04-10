@@ -499,6 +499,7 @@ public class ClusterData {
 	                        attval = Float.parseFloat(tmparr[2]);
 	                    } catch (NumberFormatException ne) {
 	                        System.err.println("unable to parse float from '" + tmparr[2] + "' in '" + inline + "'");
+	                        inread.close();
 	                        return myrun;
 	                    }
 	                    // now see if the names are already known, else, add as new names
@@ -523,6 +524,7 @@ public class ClusterData {
 	                    datlist.add(new minattvals(seq1num, seq2num, attval));
 	                } else {
 	                    System.err.println("ERROR: line '" + inline + "' does not correspond to known format");
+	                    inread.close();
 	                    return myrun;
 	                }
 	            }//end if not empty or // line
@@ -617,6 +619,7 @@ public class ClusterData {
 	                    counter++;
 	                    if (counter != seqs) {
 	                        System.err.println("ERROR, not found the number of specified sequences");
+	                        inread.close();
 	                        return myrun;
 	                    }
 	                    System.out.println("done reading sequences:" + seqs);
@@ -636,6 +639,7 @@ public class ClusterData {
 	                        tmparr = inline.trim().split("\\s+");
 	                        if (java.lang.reflect.Array.getLength(tmparr) != seqs) {
 	                            System.err.println("ERROR reading positions from " + inline + "; expecting " + seqs + " values");
+	                            inread.close();
 	                            return myrun;
 	                        }
 	                        try {
@@ -661,6 +665,7 @@ public class ClusterData {
 	                            }//end for i
 	                        } catch (NumberFormatException ne) {
 	                            System.err.println("ERROR, unable to parse float array from " + inline);
+	                            inread.close();
 	                            return myrun;
 	                        }
 	                        counter++;
@@ -669,6 +674,7 @@ public class ClusterData {
 	                    System.out.println("done reading matrix:" + counter);
 	                    if (counter != seqs) {
 	                        System.err.println("ERROR, not found the necessary number of positions");
+	                        inread.close();
 	                        return myrun;
 	                    }
 	                } else if (inline.equalsIgnoreCase("<seqgroups>")) {
@@ -683,6 +689,7 @@ public class ClusterData {
 	                        tmparr = inline.split("=");
 	                        if (java.lang.reflect.Array.getLength(tmparr) != 2) {
 	                            System.err.println("ERROR reading from savefile on line '" + inline + "'");
+	                            inread.close();
 	                            return myrun;
 	                        }
 	                        if (tmparr[0].equalsIgnoreCase("name")) {
@@ -700,6 +707,7 @@ public class ClusterData {
 	                                currgroup.color = new java.awt.Color(red, green, blue);
 	                            } catch (NumberFormatException ne) {
 	                                System.err.println("ERROR parsing numbers from '" + inline + "'");
+	                                inread.close();
 	                                return myrun;
 	                            }
 	                        } else if (tmparr[0].equalsIgnoreCase("numbers")) {
@@ -712,11 +720,13 @@ public class ClusterData {
 	                                }//end for i
 	                            } catch (NumberFormatException ne) {
 	                                System.err.println("ERROR parsing numbers from '" + inline + "'");
+	                                inread.close();
 	                                return myrun;
 	                            }
 	                            currgroup.sequences = retarr;
 	                        } else {
 	                            System.err.println("Error reading savefile in line" + inline);
+	                            inread.close();
 	                            return myrun;
 	                        }
 	                    }//end while !=/seqgroups
@@ -725,10 +735,12 @@ public class ClusterData {
 	                    }
 	                } else {
 	                    System.err.println("ERROR, wrong format! unknown keyword on line " + inline);
+	                    inread.close();
 	                    return myrun;
 	                }
 	            } else {
 	                System.err.println("ERROR, wrong format! Fist line has to start with: sequences=number_of_sequences");
+	                inread.close();
 	                return myrun;
 	            }
 	        }//end while reading from file
@@ -1018,6 +1030,7 @@ public class ClusterData {
 	                    inline = inread.readLine();
 	                    if (inline == null) {
 	                        System.err.println("ERROR, reached EOF before end of <ids>");
+	                        inread.close();
 	                        return;
 	                    } else if (inline.equalsIgnoreCase("</ids>")) {
 	                        stopids = true;
@@ -1049,6 +1062,7 @@ public class ClusterData {
 	                    offset = Float.parseFloat(tmpstr);
 	                } catch (NumberFormatException ne) {
 	                    System.err.println("ERROR trying to parse float from '" + tmpstr + "'");
+	                    inread.close();
 	                    return;
 	                }
 	                System.out.println("reading clusters; offset=" + offset);
@@ -1058,6 +1072,7 @@ public class ClusterData {
 	                    //System.out.println("reading clusters line '"+inline+"'");
 	                    if (inline == null) {
 	                        System.err.println("ERROR, reached EOF before end of <clusters>");
+	                        inread.close();
 	                        return;
 	                    } else if (inline.equalsIgnoreCase("</clusters>")) {
 	                        //System.out.println("STOPCLUSTERS");
@@ -1087,6 +1102,7 @@ public class ClusterData {
 	                                clustersize = Integer.parseInt(sizeline.substring(5));
 	                            } catch (NumberFormatException ne) {
 	                                System.err.println("ERROR trying to parse int from line '" + sizeline + "'");
+	                                inread.close();
 	                                return;
 	                            }
 	                            tmparr = elementline.substring(9).split(";");
