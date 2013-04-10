@@ -1602,7 +1602,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		if (data.blasthits != null) {
 			parentblasthits.addElement(data.blasthits);
-			data.blasthits = zoomdata.getblasthitsubset(data.blasthits,
+			data.blasthits = SelectedSubsetHandling.get_blasthits(data.blasthits,
 					data.selectednames);
 		} else {
 			if (data.orgattvals == null) {
@@ -1611,13 +1611,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 			// System.out.println("rmsingletons: newattvals calculation");
 			parent_orgattvals.addElement(data.orgattvals);
-			data.orgattvals = zoomdata.getmyattvalssubset(data.orgattvals,
+			data.orgattvals = SelectedSubsetHandling.get_myattvals(data.orgattvals,
 					data.selectednames);
 			data.compute_attraction_values();
 		}
 
 		parentmovearr.addElement(data.mymovearr);
-		data.mymovearr = zoomdata.getmymovearrsubset(data.mymovearr,
+		data.mymovearr = SelectedSubsetHandling.get_mymovearr(data.mymovearr,
 				data.selectednames);
 		if (data.mymovearr.length > 0) {
 			//lastmovearr == previous_movements
@@ -1626,12 +1626,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		//myposarr == positions
 		parentposarr.addElement(data.myposarr);
-		data.myposarr = zoomdata.getmyposarrsubset(data.myposarr,
+		data.myposarr = SelectedSubsetHandling.get_myposarr(data.myposarr,
 				data.selectednames);
 		parentaln.addElement(data.sequences);
-		data.sequences = zoomdata.getinalnsubset(data.sequences, data.selectednames);
+		data.sequences = SelectedSubsetHandling.get_sequences(data.sequences, data.selectednames);
 		parentnamearr.addElement(data.sequence_names);
-		data.sequence_names = zoomdata.getnamearrsubset(data.sequence_names,
+		data.sequence_names = SelectedSubsetHandling.get_namearr(data.sequence_names,
 				data.selectednames);
 		data.selectednames = new int[0];
 		if (data.blasthits != null) {
@@ -1972,25 +1972,25 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }
         if(data.blasthits!=null){
             parentblasthits.addElement(data.blasthits);
-            data.blasthits=zoomdata.getblasthitsubset(data.blasthits,data.selectednames);
+            data.blasthits=SelectedSubsetHandling.get_blasthits(data.blasthits,data.selectednames);
         }
         parentmovearr.addElement(data.mymovearr);
-        data.mymovearr=zoomdata.getmymovearrsubset(data.mymovearr,data.selectednames);
+        data.mymovearr=SelectedSubsetHandling.get_mymovearr(data.mymovearr,data.selectednames);
         parentposarr.addElement(data.myposarr);
-        data.myposarr=zoomdata.getmyposarrsubset(data.myposarr,data.selectednames);
+        data.myposarr=SelectedSubsetHandling.get_myposarr(data.myposarr,data.selectednames);
         parentaln.addElement(data.sequences);
-        data.sequences=zoomdata.getinalnsubset(data.sequences,data.selectednames);
+        data.sequences=SelectedSubsetHandling.get_sequences(data.sequences,data.selectednames);
         parentnamearr.addElement(data.sequence_names);
-        data.sequence_names=zoomdata.getnamearrsubset(data.sequence_names,data.selectednames);
+        data.sequence_names=SelectedSubsetHandling.get_namearr(data.sequence_names,data.selectednames);
         parentweights.addElement(data.weights);
-        data.weights=zoomdata.getweightssubset(data.weights,data.selectednames);
+        data.weights=SelectedSubsetHandling.get_weights(data.weights,data.selectednames);
         data.elements=java.lang.reflect.Array.getLength(data.sequence_names);
         if(data.blasthits==null){
             if(data.orgattvals==null){
                 data.orgattvals=data.myattvals;
             }
             parent_orgattvals.addElement(data.orgattvals);
-            data.orgattvals=zoomdata.getmyattvalssubset(data.orgattvals,data.selectednames);
+            data.orgattvals=SelectedSubsetHandling.get_myattvals(data.orgattvals,data.selectednames);
             data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
         parentseqgroups.addElement(data.seqgroupsvec);
