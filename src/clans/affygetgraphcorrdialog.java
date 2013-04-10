@@ -272,9 +272,9 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
         datapoint[] invals;
         //now take each of the genes in clans in turn and see which correlate with what I drew
         java.util.ArrayList selected=new java.util.ArrayList();
-        for(int i=java.lang.reflect.Array.getLength(map.data.namearr);--i>=0;){
-            if(parent.valhash.containsKey(map.data.namearr[i])){
-                invals=(datapoint[])(parent.valhash.get(map.data.namearr[i]));
+        for(int i=java.lang.reflect.Array.getLength(map.data.sequence_names);--i>=0;){
+            if(parent.valhash.containsKey(map.data.sequence_names[i])){
+                invals=(datapoint[])(parent.valhash.get(map.data.sequence_names[i]));
                 //now make sure I only compare the same conditions
                 count=0;
                 for(int j=0;j<conditions;j++){
@@ -291,7 +291,7 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
                     selected.add(new Integer(i));
                 }
             }else{
-                System.err.println("ERROR; '"+map.data.namearr[i]+"' is mot present in microarray data");
+                System.err.println("ERROR; '"+map.data.sequence_names[i]+"' is mot present in microarray data");
             }
         }//end for i
         //now I know which I want to select

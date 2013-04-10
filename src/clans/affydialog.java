@@ -293,7 +293,7 @@ public class affydialog extends javax.swing.JFrame {
             return;
         }
         for(int i=java.lang.reflect.Array.getLength(parent.data.selectednames);--i>=0;){
-            tmpname=(parent.data.namearr[parent.data.selectednames[i]]).trim();
+            tmpname=(parent.data.sequence_names[parent.data.selectednames[i]]).trim();
             if(valhash.containsKey(tmpname)){
                 tmplist.add(valhash.get(tmpname));
             }else{

@@ -313,7 +313,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
             //set these as selected in the tree (expand branches as necessary)
             String[] selectednames=new String[selectednum];
             for(int i=selectednum;--i>=0;){
-                selectednames[i]=parent.data.namearr[parent.data.selectednames[i]].toLowerCase();
+                selectednames[i]=parent.data.sequence_names[parent.data.selectednames[i]].toLowerCase();
             }//end for i
             settreeselected(selectednames);
         }else{
@@ -783,10 +783,10 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
         //convert the names in parent.namearr into sth. with faster lookup
         //if I then map back the nameshash object via parent.namshash I should get an Integer object
         nameshash=new HashMap();
-        int num=java.lang.reflect.Array.getLength(parent.data.namearr);
+        int num=java.lang.reflect.Array.getLength(parent.data.sequence_names);
         String key;
         for(int i=num;--i>=0;){
-            key=parent.data.namearr[i];
+            key=parent.data.sequence_names[i];
             if(nameshash.containsKey(key)){
                 System.err.println("Warning: '"+key+"' already defined by "+nameshash.get(key));
             }else{

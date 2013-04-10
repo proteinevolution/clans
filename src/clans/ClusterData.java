@@ -22,7 +22,7 @@ public class ClusterData {
     //variables initialized on creation
     MinimalHsp[] blasthits=null;
     AminoAcidSequence[] sequences=null;
-    String[] namearr=null;
+    String[] sequence_names=null;
     HashMap<String, Integer> nameshash=null;
     double eval=-1;
     double pval=-1;
@@ -118,7 +118,7 @@ public class ClusterData {
         this.movethreads=new getmovethread[cpu];
         
     	this.blasthits=blasthits;
-    	this.namearr=namearr;
+    	this.sequence_names=namearr;
         this.nameshash=nameshash;
         this.eval=eval;
         
@@ -369,13 +369,13 @@ public class ClusterData {
        showinfo=loaded_data.showinfo;
        int number_of_sequences =sequences.length;
        nameshash=new HashMap<String, Integer>((int)(number_of_sequences/0.75)+1,(float)0.75);//holds info about which name is which array number
-       namearr=new String[number_of_sequences];
+       sequence_names=new String[number_of_sequences];
         for(int i=0;i<number_of_sequences;i++){
-           namearr[i]=sequences[i].name.trim();
+           sequence_names[i]=sequences[i].name.trim();
            sequences[i].name = "sequence"+i;
            nameshash.put(sequences[i].name,new Integer(i));
         }
-       elements=namearr.length;
+       elements=sequence_names.length;
        selectednames=new int[0];
        posarr=myposarr;
        lastmovearr=new float[elements][ClusterData.dimensions];
@@ -800,7 +800,7 @@ public class ClusterData {
 	    
 	    myrun.rounds = rounds;
 	    
-	    ClusterData.saverun(myrun, namearr, nographics);
+	    ClusterData.saverun(myrun, sequence_names, nographics);
 	    myrun=null;
 	}
 
@@ -825,10 +825,10 @@ public class ClusterData {
 	        HashMap<String, Integer> mynamehash = new HashMap<String, Integer>();
 	        String[] tmparr;
 	        String tmpstr = "";
-	        int elements = java.lang.reflect.Array.getLength(namearr);
+	        int elements = java.lang.reflect.Array.getLength(sequence_names);
 	        //System.out.println("parentnames="+elements);
 	        for (int i = 0; i < elements; i++) {
-	            tmparr = namearr[i].split("\\s+");
+	            tmparr = sequence_names[i].split("\\s+");
 	            mynamehash.put(tmparr[0], new Integer(i));
 	            //System.out.println("adding '"+tmparr[0]+" as "+i);
 	        }//end for i
@@ -947,7 +947,7 @@ public class ClusterData {
 	                                tmpvec_integers.addElement(mynamehash.get(tmpstr));
 	                                //System.out.println("\t"+tmpstr+"-->"+((Integer)mynamehash.get(tmpstr)).intValue()+":"+namearr[((Integer)mynamehash.get(tmpstr)).intValue()]+";");
 	                            } else {
-	                                System.err.println("no correspondence found for '" + tmpstr + "' in current graph; skipping entry " + java.lang.reflect.Array.getLength(namearr));
+	                                System.err.println("no correspondence found for '" + tmpstr + "' in current graph; skipping entry " + java.lang.reflect.Array.getLength(sequence_names));
 	                            }
 	                        }//end for i
 	                        //System.out.println();
@@ -1004,10 +1004,10 @@ public class ClusterData {
 	    HashMap<String, Integer> mynamehash = new HashMap<String, Integer>();
 	    String[] tmparr;
 	    String tmpstr = "";
-	    int elements = java.lang.reflect.Array.getLength(namearr);
+	    int elements = java.lang.reflect.Array.getLength(sequence_names);
 	    //System.out.println("parentnames="+elements);
 	    for (int i = 0; i < elements; i++) {
-	        tmparr = namearr[i].split("\\s+");
+	        tmparr = sequence_names[i].split("\\s+");
 	        if (mynamehash.containsKey(tmparr[0])) {
 	            System.err.println("ERROR: non unique identifier in parent: name '" + tmparr[0] + "' already defined as -->'" + mynamehash.get(tmparr[0]) + "'");
 	            return;
@@ -1610,7 +1610,7 @@ public class ClusterData {
 		mymovearr = null;
 	    lastmovearr = null;       
 	
-	    elements = namearr.length;
+	    elements = sequence_names.length;
 	    
 	    if(elements == 0){ // no elements means nothing to do
 	    	myposarr = new float[0][0];

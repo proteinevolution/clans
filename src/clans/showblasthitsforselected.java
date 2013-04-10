@@ -221,12 +221,12 @@ public class showblasthitsforselected extends javax.swing.JFrame {
         int tmpnum=java.lang.reflect.Array.getLength(selectednames);
         namesarr=new String[tmpnum];
         for(int i=0;i<tmpnum;i++){
-            namesarr[i]=selectednames[i]+" "+parent.data.namearr[selectednames[i]];
+            namesarr[i]=selectednames[i]+" "+parent.data.sequence_names[selectednames[i]];
         }
         tmpnum=java.lang.reflect.Array.getLength(blasthits);
         blastnamesarr=new String[tmpnum];
         for(int i=0;i<tmpnum;i++){
-            blastnamesarr[i]=blasthits[i]+" "+parent.data.namearr[blasthits[i]];
+            blastnamesarr[i]=blasthits[i]+" "+parent.data.sequence_names[blasthits[i]];
         }//end for i
     }//end makedata
     

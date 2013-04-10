@@ -327,7 +327,7 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
             java.util.regex.Matcher mym=null;
             for(int i=0;i<seqnum;i++){
                 //System.out.println("looking at '"+parent.namearr[parent.selectednames[i]]+"'");
-                mym=patt.matcher(parent.data.namearr[parent.data.selectednames[i]]);
+                mym=patt.matcher(parent.data.sequence_names[parent.data.selectednames[i]]);
                 while(mym.find()){
                     //System.out.println("\tspecname is:'"+mym.group(1)+"'");
                     speclist.add(mym.group(1));
@@ -504,14 +504,14 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
         	useselected=true;
         }else{
         	//if none are selected, use all
-        	seqnum=java.lang.reflect.Array.getLength(parent.data.namearr);
+        	seqnum=java.lang.reflect.Array.getLength(parent.data.sequence_names);
         }
         for(int i=seqnum;--i>=0;){
         	//now get each name and see whether this name matches my given tax identifier
         	if(useselected){
-        		myname=parent.data.namearr[parent.data.selectednames[i]];
+        		myname=parent.data.sequence_names[parent.data.selectednames[i]];
         	}else{
-        		myname=parent.data.namearr[i];
+        		myname=parent.data.sequence_names[i];
         	}
             //now get all of the taxonomic id's from this name
             mym=patt.matcher(myname);

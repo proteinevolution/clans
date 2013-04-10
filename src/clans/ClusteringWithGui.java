@@ -946,7 +946,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }else{
             StringBuffer outbuff=new StringBuffer();
             for(int i=0;i<seqnum;i++){
-                outbuff.append(">"+data.namearr[data.selectednames[i]]+" "+data.selectednames[i]+"\n");
+                outbuff.append(">"+data.sequence_names[data.selectednames[i]]+" "+data.selectednames[i]+"\n");
                 outbuff.append(data.sequences[data.selectednames[i]].seq+"\n");
             }//end for i
             new showsequences(new javax.swing.JFrame(),outbuff).setVisible(true);
@@ -1021,7 +1021,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         // get the sequences with hits to or from the selected set of sequences
         // output in a "sequences" window the currently selected and in a second frame the
         // sequences with hits to the selected.
-        int[] blasthitsarr=showblasthitsforselected.getblasthits(data.myattvals,data.selectednames,data.namearr);//get the blast hits
+        int[] blasthitsarr=showblasthitsforselected.getblasthits(data.myattvals,data.selectednames,data.sequence_names);//get the blast hits
         new showblasthitsforselected(this,blasthitsarr,data.selectednames).setVisible(true);
     }//GEN-LAST:event_getseqsforselectedhitsActionPerformed
     
@@ -1145,11 +1145,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 data.sequences=ClusterMethods.remove_gaps_from_sequences(saveddata.inaln);
                 int seqs=java.lang.reflect.Array.getLength(data.sequences);
                 data.nameshash=new HashMap<String, Integer>((int)(seqs/0.75)+1,(float)0.75);//holds info about which name is which array number
-                data.namearr=new String[seqs];
+                data.sequence_names=new String[seqs];
                 data.myposarr=new float[seqs][3];
                 Random rand=ClusterMethods.rand;
                 for(int i=0;i<seqs;i++){
-                    data.namearr[i]=data.sequences[i].name.trim();
+                    data.sequence_names[i]=data.sequences[i].name.trim();
                     data.sequences[i].name=new String("sequence"+i);
                     data.nameshash.put(data.sequences[i].name,new Integer(i));
                     data.myposarr[i][0]=rand.nextFloat();
@@ -1162,7 +1162,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 data.myattvals=saveddata.attvals;
                 button_cutoff_value.setText("Use Attraction values better than");
                 textfield_cutoff_value.setText("0");
-                data.elements=java.lang.reflect.Array.getLength(data.namearr);
+                data.elements=java.lang.reflect.Array.getLength(data.sequence_names);
                 //now symmetrize and normalize the attvals to range from -1 to +1
                 float minval=0;
                 float maxval=0;
@@ -1199,7 +1199,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 return;
             }
         }
-        int seqnum=java.lang.reflect.Array.getLength(data.namearr);
+        int seqnum=java.lang.reflect.Array.getLength(data.sequence_names);
         System.out.println("seqnum="+seqnum);
         data.seqlengths=new float[seqnum];
         float maxlength=0;
@@ -1298,7 +1298,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             shownames.setVisible(false);
             shownames.dispose();
         }
-        shownames=new shownamedialog(data.namearr,this);
+        shownames=new shownamedialog(data.sequence_names,this);
         shownames.setVisible(true);
     }//GEN-LAST:event_showselectbuttonActionPerformed
     
@@ -1325,10 +1325,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             try{
                 PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(savefile)));
  
-                int namenum=java.lang.reflect.Array.getLength(data.namearr);
+                int namenum=java.lang.reflect.Array.getLength(data.sequence_names);
                 outwrite.println("ID\tNAME\tX\tY");
                 for(int i=0;i<namenum;i++){
-                    outwrite.println(i+"\t"+data.namearr[i]+"\t"+(data.posarrtmp[i][0]-draw1.xadd)/draw1.drawwidth+"\t"+(data.posarrtmp[i][1]-draw1.yadd)/draw1.drawheight);
+                    outwrite.println(i+"\t"+data.sequence_names[i]+"\t"+(data.posarrtmp[i][0]-draw1.xadd)/draw1.drawwidth+"\t"+(data.posarrtmp[i][1]-draw1.yadd)/draw1.drawheight);
                 }//end for i names
                 outwrite.close();
             }catch (IOException ioe){
@@ -1383,13 +1383,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         int returnVal = fc.showSaveDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
             File savefile=fc.getSelectedFile();
-            int elementsl=java.lang.reflect.Array.getLength(data.namearr);
+            int elementsl=java.lang.reflect.Array.getLength(data.sequence_names);
             try{
                 PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(savefile)));
                 outwrite.println("sequences="+elementsl);
                 outwrite.println("<seqs>");
                 for(int i=0;i<elementsl;i++){
-                    outwrite.println(">"+data.namearr[i]);
+                    outwrite.println(">"+data.sequence_names[i]);
                 }//end for i
                 outwrite.println();
                 outwrite.println("</seqs>");
@@ -1494,7 +1494,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         // the present database, extract the hsp's (sequence regions and evalues)
         // and map it on to the selected sequence.
         //i.e. region 1-200 hits cluster A, region 210-300 cluster b, ergo 2 domains.
-        int referenceseqnum=getsinglenamedialog.getrefseq(data.namearr);
+        int referenceseqnum=getsinglenamedialog.getrefseq(data.sequence_names);
         if(referenceseqnum==-1){
             javax.swing.JOptionPane.showMessageDialog(this,"Please select a sequence");
             return;
@@ -1502,7 +1502,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         //get the blast hits to this sequence
         hsp[] thishsp=(new viewblasthitsutils()).gethsps(referenceseqnum,data.sequences,data.cmd,data.formatdbpath,data.blastpath,data.addblastvbparam,data.referencedb,data.mineval,data.pvalue_threshold);
         //plot these blast hits on to the sequence
-        viewblasthits myview=new viewblasthits(this,thishsp,referenceseqnum,data.namearr,data.sequences[referenceseqnum],data.nameshash);
+        viewblasthits myview=new viewblasthits(this,thishsp,referenceseqnum,data.sequence_names,data.sequences[referenceseqnum],data.nameshash);
         viewblasthitsvec.addElement(myview);
         myview.setVisible(true);
     }//GEN-LAST:event_getblasthitsmenuitemActionPerformed
@@ -1630,8 +1630,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				data.selectednames);
 		parentaln.addElement(data.sequences);
 		data.sequences = zoomdata.getinalnsubset(data.sequences, data.selectednames);
-		parentnamearr.addElement(data.namearr);
-		data.namearr = zoomdata.getnamearrsubset(data.namearr,
+		parentnamearr.addElement(data.sequence_names);
+		data.sequence_names = zoomdata.getnamearrsubset(data.sequence_names,
 				data.selectednames);
 		data.selectednames = new int[0];
 		if (data.blasthits != null) {
@@ -1665,7 +1665,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		}
 
-		data.elements = Array.getLength(data.namearr);
+		data.elements = Array.getLength(data.sequence_names);
 		data.posarr = data.myposarr;
 		data.posarrtmp = new float[data.elements][ClusterData.dimensions];
 		data.drawarrtmp = new int[data.elements][ClusterData.dimensions];
@@ -1686,7 +1686,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		//selected_group_sequences == groupseqs 
 		groupseqs = null;
 
-		int sequences = data.namearr.length;
+		int sequences = data.sequence_names.length;
 		int[] sequences_to_remove = data.selectednames.clone();
 		data.selectednames = new int[sequences - data.selectednames.length];
 		boolean[] sequences_to_keep = new boolean[sequences];
@@ -1718,7 +1718,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			return;
 		}
 		groupseqs = null;
-		int sequence_number = data.namearr.length;
+		int sequence_number = data.sequence_names.length;
 		boolean[] sequences_to_keep = new boolean[sequence_number];
 
 		for (int i = 0; i < data.myattvals.length; i++) {
@@ -1898,14 +1898,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         parentposarr.removeElementAt(level);
         data.sequences=(AminoAcidSequence[])parentaln.elementAt(level);
         parentaln.removeElementAt(level);
-        data.namearr=(String[])parentnamearr.elementAt(level);
+        data.sequence_names=(String[])parentnamearr.elementAt(level);
         parentnamearr.removeElementAt(level);
         data.nameshash=parentnameshash.elementAt(level);
         parentnameshash.removeElementAt(level);
         data.weights=(float[])parentweights.elementAt(level);
         parentweights.removeElementAt(level);
         data.selectednames=new int[0];
-        data.elements=java.lang.reflect.Array.getLength(data.namearr);
+        data.elements=java.lang.reflect.Array.getLength(data.sequence_names);
         if(data.blasthits!=null){
             synchronized(data.myattvals){
             	data.compute_attraction_values();
@@ -1980,11 +1980,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.myposarr=zoomdata.getmyposarrsubset(data.myposarr,data.selectednames);
         parentaln.addElement(data.sequences);
         data.sequences=zoomdata.getinalnsubset(data.sequences,data.selectednames);
-        parentnamearr.addElement(data.namearr);
-        data.namearr=zoomdata.getnamearrsubset(data.namearr,data.selectednames);
+        parentnamearr.addElement(data.sequence_names);
+        data.sequence_names=zoomdata.getnamearrsubset(data.sequence_names,data.selectednames);
         parentweights.addElement(data.weights);
         data.weights=zoomdata.getweightssubset(data.weights,data.selectednames);
-        data.elements=java.lang.reflect.Array.getLength(data.namearr);
+        data.elements=java.lang.reflect.Array.getLength(data.sequence_names);
         if(data.blasthits==null){
             if(data.orgattvals==null){
                 data.orgattvals=data.myattvals;
@@ -2033,7 +2033,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             shownames.setVisible(false);
             shownames.dispose();
         }
-        shownames=new shownamedialog(data.namearr,this);
+        shownames=new shownamedialog(data.sequence_names,this);
         shownames.setVisible(true);
     }//GEN-LAST:event_sequencesitemActionPerformed
     
@@ -2254,7 +2254,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }else{
             if(shownamesselectcheckbox.isSelected()){
                 if(shownames==null){
-                    shownames=new shownamedialog(data.namearr,this);
+                    shownames=new shownamedialog(data.sequence_names,this);
                     shownames.setVisible(true);
                 }
                 int[] tmpreg=new int[4];
@@ -2722,8 +2722,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         textfield_info_min_blast_evalue.setText(String.valueOf(data.pvalue_threshold));
         data.selectednames=newnumarr;
         data.nameshash=allnameshash;
-        data.namearr=allnamearr;
-        data.elements=java.lang.reflect.Array.getLength(data.namearr);
+        data.sequence_names=allnamearr;
+        data.elements=java.lang.reflect.Array.getLength(data.sequence_names);
         data.posarr=data.myposarr;
         data.lastmovearr=new float[data.elements][ClusterData.dimensions];
         data.mymovearr=new float[data.elements][ClusterData.dimensions];
@@ -2759,7 +2759,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         AminoAcidSequence curraaseq;
         for(int i=0;i<sequences;i++){
             curraaseq=new AminoAcidSequence();
-            curraaseq.name=data.namearr[data.selectednames[i]];
+            curraaseq.name=data.sequence_names[data.selectednames[i]];
             curraaseq.seq=data.sequences[data.selectednames[i]].seq;
             tmpvec.add(curraaseq);
         }
@@ -3547,7 +3547,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 }
                 if(checkbox_show_names.isSelected()){
                     int selectednamesnum=java.lang.reflect.Array.getLength(data.selectednames);
-                    String[] namearr=data.namearr;
+                    String[] namearr=data.sequence_names;
                     if(selectednamesnum==0){
                         for(int i=0;i<elements;i++){
                             g.drawString(String.valueOf(i)+"-"+namearr[i],(int)tposarrtmp[i][0],(int)tposarrtmp[i][1]);
