@@ -1013,7 +1013,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             myseqgroupwindow.setVisible(false);
             myseqgroupwindow.dispose();
         }
-        myseqgroupwindow=new seqgroupwindow(this);
+        myseqgroupwindow=new WindowEditGroups(this);
         myseqgroupwindow.setVisible(true);
     }//GEN-LAST:event_seqscoloringActionPerformed
     
@@ -2382,7 +2382,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     boolean recalc=true;//synchronize drawing and calculating
     drawpanel draw1;
     shownamedialog shownames;
-    seqgroupwindow myseqgroupwindow;
+    WindowEditGroups myseqgroupwindow;
     computethread mythread=new computethread(this);
 
     int skiprounds=1;

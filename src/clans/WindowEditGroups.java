@@ -1,37 +1,41 @@
-/*
- * seqgroupwindow.java
- *
- * Created on March 31, 2004, 2:33 PM
- */
 package clans;
+import java.awt.event.MouseEvent;
 import java.util.*;
+
+import javax.swing.JColorChooser;
 /**
  *
  * @author  tancred
  */
-public class seqgroupwindow extends javax.swing.JFrame {
-    
-    /** Creates new form seqgroupwindow */
-    //public seqgroupwindow(java.awt.Frame parent, boolean modal) {
-    //    super(parent, modal);
-    //    initComponents();
-    //}
-    
-    public seqgroupwindow(ClusteringWithGui parent){
-        //super(new javax.swing.JFrame(),false);
-        this.parent=parent;
-        this.setTitle("Sequence groups");
-        myfont=parent.draw1.myfont;
-        mybackground=parent.draw1.bgcolor;
-        myforeground=parent.draw1.fgcolor;
-        initComponents();
-        showinparent.setSelected(parent.data.showseqgroups);
-        largerbutton.setText("^ ("+(parent.data.groupsize+1)+")");
-        smallerbutton.setText("v ("+(parent.data.groupsize-1)+")");
-        typepanel.add(draw1);
-        repaint();
-    }
-    
+public class WindowEditGroups extends javax.swing.JFrame {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -408308359066941525L;
+
+	/**
+	 * 
+	 * @param parent
+	 */
+	public WindowEditGroups(ClusteringWithGui parent) {
+		this.parent = parent;
+
+		myfont = parent.draw1.myfont;
+		mybackground = parent.draw1.bgcolor;
+		myforeground = parent.draw1.fgcolor;
+
+		initComponents();
+
+		showinparent.setSelected(parent.data.showseqgroups);
+
+		largerbutton.setText("^ (" + (parent.data.groupsize + 1) + ")");
+		smallerbutton.setText("v (" + (parent.data.groupsize - 1) + ")");
+
+		typepanel.add(draw1);
+		repaint();
+	}
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -409,7 +413,6 @@ public class seqgroupwindow extends javax.swing.JFrame {
         // I want to assign a new random color to all selected groups
         int[] currsel=groupslist.getSelectedIndices();
         if(java.lang.reflect.Array.getLength(currsel)>0){
-            int counter=0;
             seqgroup mygroup;
             for(int i=java.lang.reflect.Array.getLength(currsel)-1;i>=0;i--){
                 if((currsel[i]>-1) && (currsel[i]<=parent.data.seqgroupsvec.size())){
@@ -446,16 +449,14 @@ public class seqgroupwindow extends javax.swing.JFrame {
         //first get the directory to write to
         int[] currsel=groupslist.getSelectedIndices();
         if(java.lang.reflect.Array.getLength(currsel)>0){
-            parent.fc.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
-            int returnVal = parent.fc.showOpenDialog(this);
+            ClusteringWithGui.fc.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+            int returnVal = ClusteringWithGui.fc.showOpenDialog(this);
             if(returnVal == javax.swing.JFileChooser.APPROVE_OPTION) {
-                java.io.File currdir=(parent.fc.getSelectedFile());
-                int counter=0;
+                java.io.File currdir=(ClusteringWithGui.fc.getSelectedFile());
                 seqgroup mygroup;
                 for(int i=java.lang.reflect.Array.getLength(currsel)-1;i>=0;i--){
                     if((currsel[i]>-1) && (currsel[i]<=parent.data.seqgroupsvec.size())){
-                        mygroup=(seqgroup)parent.data.seqgroupsvec.elementAt(currsel[i]);
-                        String myname=mygroup.name;
+						mygroup = parent.data.seqgroupsvec.elementAt(currsel[i]);
                         int[] sequences=mygroup.sequences;
                         String outfile=currdir.getAbsolutePath()+java.io.File.separatorChar+mygroup.name;
                         try{
@@ -472,7 +473,7 @@ public class seqgroupwindow extends javax.swing.JFrame {
                     }
                 }
             }
-            parent.fc.setFileSelectionMode(javax.swing.JFileChooser.FILES_ONLY);
+            ClusteringWithGui.fc.setFileSelectionMode(javax.swing.JFileChooser.FILES_ONLY);
         }else{
             javax.swing.JOptionPane.showMessageDialog(this,"You need to select at least one group");
         }
@@ -537,7 +538,7 @@ public class seqgroupwindow extends javax.swing.JFrame {
     
     private void typepanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_typepanelMouseClicked
         // increase the type counter by one
-        if(evt.getButton()==evt.BUTTON1){
+		if (evt.getButton() == MouseEvent.BUTTON1) {
             //increase counter
             draw1.type++;
             if(draw1.type>=draw1.polygons.size()){
@@ -716,7 +717,7 @@ public class seqgroupwindow extends javax.swing.JFrame {
             if((currsel[0]>-1) && (currsel[0]<=parent.data.seqgroupsvec.size())){
                 java.awt.Color newcolor=((seqgroup)parent.data.seqgroupsvec.elementAt(currsel[0])).color;
                 try{
-                    newcolor=colorchooser.showDialog(this, "Select New Color",newcolor);
+					newcolor = JColorChooser.showDialog(this, "Select New Color", newcolor);
                 }catch (java.awt.HeadlessException e){
                     System.err.println("HeadlessException!");
                 }
@@ -868,7 +869,6 @@ public class seqgroupwindow extends javax.swing.JFrame {
             return 0;
         }
         int j;
-        boolean isseq;
         float sumval=0;
         int counter=0;
         int q,h;
@@ -903,7 +903,6 @@ public class seqgroupwindow extends javax.swing.JFrame {
             return 0;
         }
         int j;
-        boolean isseq;
         float varval=0;
         float diff;
         int counter=0;
@@ -931,34 +930,46 @@ public class seqgroupwindow extends javax.swing.JFrame {
     
     //--------------------------------------------------------------------------
     
-    class seqgroupscolorcomparator implements java.util.Comparator{
-        
-        public int compare(Object o1, Object o2){
-            float h1=gethue(((seqgroup)o1).color);
-            float h2=gethue(((seqgroup)o2).color);
-            return (h1>h2? 1:(h1==h2 ? 0 :-1));
-        }
-        
-        float gethue(java.awt.Color c){
-            return java.awt.Color.RGBtoHSB(c.getRed(),c.getGreen(),c.getBlue(),null)[0];
-        }
-        
-    }//end comparator
+	class seqgroupscolorcomparator implements java.util.Comparator<seqgroup> {
+
+		/**
+		 * compares the colors of two seqgroups
+		 */
+		public int compare(seqgroup o1, seqgroup o2) {
+			float h1 = gethue(o1.color);
+			float h2 = gethue(o2.color);
+			return (h1 > h2 ? 1 : (h1 == h2 ? 0 : -1));
+		}
+
+		float gethue(java.awt.Color c) {
+			return java.awt.Color.RGBtoHSB(c.getRed(), c.getGreen(),
+					c.getBlue(), null)[0];
+		}
+
+	}
     
-    class seqgroupsnamecomparator implements java.util.Comparator{
-        
-        public int compare(Object o1, Object o2){
-            String h1=((seqgroup)o1).name;
-            String h2=((seqgroup)o2).name;
-            return h1.compareTo(h2);
-        }
-        
-    }//end comparator
+	class seqgroupsnamecomparator implements java.util.Comparator<seqgroup> {
+
+		/**
+		 * compares the name of two seqgroups
+		 */
+		public int compare(seqgroup o1, seqgroup o2) {
+			String h1 = o1.name;
+			String h2 = o2.name;
+			return h1.compareTo(h2);
+		}
+
+	}
     
     //set what the JList is supposed to draw
     class MyCellRenderer extends javax.swing.JLabel implements javax.swing.ListCellRenderer {
         
-        public java.awt.Component getListCellRendererComponent(
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4398839558096028331L;
+
+		public java.awt.Component getListCellRendererComponent(
         javax.swing.JList list,
         Object value,            // value to display
         int index,               // cell index
@@ -1011,13 +1022,19 @@ public class seqgroupwindow extends javax.swing.JFrame {
     
     class graphpanel extends javax.swing.JPanel{
         
-        public graphpanel(){}
-        
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -2444671386154267112L;
+
+		public graphpanel() {
+		}
+
         int type=0;
         int framewidth=50;
         int frameheight=50;
         int size=25;
-        ArrayList polygons=makepolygons.get(size);
+        ArrayList<int[][]> polygons=makepolygons.get(size);
         int[][] tmpposarr;
         int[] xposarr,yposarr;
         int posnum;

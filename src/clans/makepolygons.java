@@ -4,6 +4,9 @@
  * Created on June 8, 2005, 5:02 PM
  */
 package clans;
+
+import java.util.ArrayList;
+
 /**
  *
  * @author  tancred
@@ -30,9 +33,9 @@ public class makepolygons {
     static float[][] downY={{0,-0.58f},{0.87f,-1.08f},{1.37f,-0.21f},{0.5f,0.29f},{0.5f,1.29f},{-0.5f,1.29f},{-0.5f,0.29f},{-1.37f,-0.21f},{-0.87f,-1.08f}};
     
     
-    static java.util.ArrayList <int[][]> get(int size){
+    static ArrayList<int[][]> get(int size){
         //get all polygons defined in this method scaled to size
-        java.util.ArrayList <int[][]>retvec=new java.util.ArrayList<int[][]>();
+        ArrayList <int[][]>retvec=new ArrayList<int[][]>();
         //float mysize=((float)size)/2;
         retvec.add(new int[0][0]);//a polygon of type 0 should be an oval (default)
         retvec.add(getpol(square,size));
