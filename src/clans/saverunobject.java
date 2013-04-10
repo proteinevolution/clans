@@ -275,9 +275,7 @@ public class saverunobject {
 	}
 	
 	public boolean parse_function_block(BufferedReader buffered_file_handle) throws IOException {
-    	File mapfile = null;
-        File lookupfile = null;
-        String[] tmp;
+    	String[] tmp;
         String inline;
         while (((inline = buffered_file_handle.readLine()) != null) && (inline.equalsIgnoreCase("</function>") == false)) {
             //skip empty lines
@@ -313,7 +311,7 @@ public class saverunobject {
 	}
 	
 	public boolean parse_affyfiles_block(BufferedReader buffered_file_handle) throws IOException {
-		affyfiles = new Vector();
+		affyfiles = new Vector<replicates>();
         replicates rep = null;
         String[] tmparr;
         String inline;
@@ -453,8 +451,7 @@ public class saverunobject {
 	}
 
 	public boolean parse_weight_block(BufferedReader buffered_file_handle, int expected_sequences) throws IOException {
-		int counter = 0;
-        String currname = "";
+		String currname = "";
         String currseq = "";
         String inline;
         
@@ -465,7 +462,7 @@ public class saverunobject {
         }
         weights = new float[expected_sequences];
         //now make a Hash that links the weights values to the sequence names
-        HashMap tmphash = new HashMap();
+        HashMap<String, Float> tmphash = new HashMap<String, Float>();
         //and now read the data
         while (((inline = buffered_file_handle.readLine()) != null) && (inline.equalsIgnoreCase("</weight>") == false)) {
             //skip empty lines
@@ -556,11 +553,10 @@ public class saverunobject {
         String[] tmparr;
         String tmpstr;
         MinimalHsp currhsp;
-        HashMap hsphash = new HashMap();
+        HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
         String hspkey = "";
         String inline;
         
-        boolean addvals = false;
         if (pval < 0) {
             pval = 1;
         }
@@ -644,7 +640,7 @@ public class saverunobject {
 
 	public boolean parse_att_block(BufferedReader buffered_file_handle) throws IOException {
 		blasthits = null;
-        Vector tmpvec = new Vector();
+        Vector<minattvals> tmpvec = new Vector<minattvals>();
         String[] tmparr;
         String tmpstr = "";
         String inline;
@@ -789,7 +785,7 @@ public class saverunobject {
         System.out.println("reading matrix");
         int counter = 0;
         String[] tmparr;
-        HashMap tmphash = new HashMap();
+        HashMap<String, minattvals> tmphash = new HashMap<String, minattvals>();
         String key;
         minattvals curratt;
         float tmpval;
