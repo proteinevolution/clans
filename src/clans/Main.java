@@ -989,6 +989,7 @@ public class Main {
                         inline=inline.substring(0,enddata);
                         if((parse_arguments(inline.split("\\s",0)))==false){
                             System.err.println("Error reading on line "+inline);
+                            infile.close();
                             return false;
                         }
                     }else{
@@ -998,11 +999,13 @@ public class Main {
                     if(inline.length()>0){
                         if((parse_arguments(inline.split("\\s",0)))==false){
                             System.err.println("Error reading on line "+inline);
+                            infile.close();
                             return false;
                         }
                     }
                 }
             }// end while
+            infile.close();
         }catch (IOException e){
             System.err.println("IOError reading from "+filename);
             return false;
