@@ -3472,7 +3472,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                         int[] currdraw;
                         int vecsize;
                         if(data.draworder==null || java.lang.reflect.Array.getLength(data.draworder)<1){
-                            data.draworder=getdraworder(data.myattvals,colornum);
+                            data.draworder=get_line_draw_order(data.myattvals,colornum);
                         }
                         for(int i=0;i<colornum;i++){
                             vecsize=data.draworder[i].size();
@@ -3498,7 +3498,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                         int[] tmparr;
                         minattvals currfrust;
                         if(java.lang.reflect.Array.getLength(data.draworder)<1){
-                            data.draworder=getdraworder(data.myattvals,colornum);//draw the lines in the same order as before
+                            data.draworder=get_line_draw_order(data.myattvals,colornum);//draw the lines in the same order as before
                         }
                         for(int i=0;i<colornum;i++){
                             vecsize=data.draworder[i].size();
@@ -3692,12 +3692,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             }
         }// end drawdata
         
-        //----------------------------------------------------------------------
         
-        ArrayList<int[]>[] getdraworder(minattvals[] myattvals,int colornum){
-            //bin the lines connecting datapoints by the color they are assigned (makes subsequent drawing quicker)
-            int elements=java.lang.reflect.Array.getLength(myattvals);
-            //System.out.println("attvalelements="+elements);
+        /**
+         * bin the lines connecting datapoints by the color they are assigned (makes subsequent drawing quicker)
+         * @param myattvals
+         * @param colornum
+         * @return
+         */
+        ArrayList<int[]>[] get_line_draw_order(minattvals[] myattvals, int colornum){
+
             ArrayList<int[]>[] retarr=new ArrayList[colornum];
             for(int i=0;i<colornum;i++){
                 retarr[i]=new ArrayList<int[]>();
@@ -3705,62 +3708,33 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             int[] mydraw=new int[2];//connection between sequences i & j
 
             float[] colorcutoffs=data.colorcutoffs;
-            for(int i=elements;--i>=0;){
+            for(int i=myattvals.length;--i>=0;){
 
                 if((myattvals[i].att==0)||(myattvals[i].att<=colorcutoffs[0])){//if I am below the lowest to draw
                     continue;
-                }else if(myattvals[i].att<=colorcutoffs[1]){//from 0 to 1
-                    mydraw=new int[2];
-                    mydraw[0]=myattvals[i].query;
-                    mydraw[1]=myattvals[i].hit;
-                    retarr[0].add(mydraw);
-                }else if(myattvals[i].att<=colorcutoffs[2]){//from 1 to 2
-                    mydraw=new int[2];
-                    mydraw[0]=myattvals[i].query;
-                    mydraw[1]=myattvals[i].hit;
-                    retarr[1].add(mydraw);
-                }else if(myattvals[i].att<=colorcutoffs[3]){//from 2 to 3
-                    mydraw=new int[2];
-                    mydraw[0]=myattvals[i].query;
-                    mydraw[1]=myattvals[i].hit;
-                    retarr[2].add(mydraw);
-                }else if(myattvals[i].att<=colorcutoffs[4]){//from 3 to 4
-                    mydraw=new int[2];
-                    mydraw[0]=myattvals[i].query;
-                    mydraw[1]=myattvals[i].hit;
-                    retarr[3].add(mydraw);
-                }else if(myattvals[i].att<=colorcutoffs[5]){//from 4 to 5
-                    mydraw=new int[2];
-                    mydraw[0]=myattvals[i].query;
-                    mydraw[1]=myattvals[i].hit;
-                    retarr[4].add(mydraw);
-                }else if(myattvals[i].att<=colorcutoffs[6]){//from 5 to 6
-                    mydraw=new int[2];
-                    mydraw[0]=myattvals[i].query;
-                    mydraw[1]=myattvals[i].hit;
-                    retarr[5].add(mydraw);
-                }else if(myattvals[i].att<=colorcutoffs[7]){//from 6 to 7
-                    mydraw=new int[2];
-                    mydraw[0]=myattvals[i].query;
-                    mydraw[1]=myattvals[i].hit;
-                    retarr[6].add(mydraw);
-                }else if(myattvals[i].att<=colorcutoffs[8]){//from 7 to 8
-                    mydraw=new int[2];
-                    mydraw[0]=myattvals[i].query;
-                    mydraw[1]=myattvals[i].hit;
-                    retarr[7].add(mydraw);
-                }else if(myattvals[i].att<=colorcutoffs[9]){//from 8 to 9
-                    mydraw=new int[2];
-                    mydraw[0]=myattvals[i].query;
-                    mydraw[1]=myattvals[i].hit;
-                    retarr[8].add(mydraw);
-                }else if(myattvals[i].att>colorcutoffs[9]){//better than 9
-                    mydraw=new int[2];
-                    mydraw[0]=myattvals[i].query;
-                    mydraw[1]=myattvals[i].hit;
-                    retarr[9].add(mydraw);
                 }
-            }// end for i
+                
+            	for (int j=0; j<10; j++) {
+        			if (j < 9) {
+        				if (myattvals[i].att <= colorcutoffs[j+1]) { // from j to j + 1
+        					mydraw=new int[2];
+                            mydraw[0]=myattvals[i].query;
+                            mydraw[1]=myattvals[i].hit;
+                            retarr[j].add(mydraw);
+                            break;
+        				}
+                    } else { // j == 9
+                    	if (myattvals[i].att > colorcutoffs[j]) { // better than value at j
+                            mydraw=new int[2];
+                            mydraw[0]=myattvals[i].query;
+                            mydraw[1]=myattvals[i].hit;
+                            retarr[j].add(mydraw);
+                            break;
+                    	}
+                    }
+                }
+            }
+            
             return retarr;
         }// end getdraworder
         
