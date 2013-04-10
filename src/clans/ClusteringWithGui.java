@@ -1650,8 +1650,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		data.elements = Array.getLength(data.namearr);
 		data.posarr = data.myposarr;
-		data.posarrtmp = new float[data.elements][data.dimensions];
-		data.drawarrtmp = new int[data.elements][data.dimensions];
+		data.posarrtmp = new float[data.elements][ClusterData.dimensions];
+		data.drawarrtmp = new int[data.elements][ClusterData.dimensions];
 
 		data.draworder = new ArrayList[0];
 		repaint();

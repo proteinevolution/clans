@@ -23,7 +23,7 @@ public class ClusterData {
     minhsp[] blasthits=null;
     AminoAcidSequence[] sequences=null;
     String[] namearr=null;
-    java.util.HashMap nameshash=null;
+    java.util.HashMap<String, Integer> nameshash=null;
     double eval=-1;
     double pval=-1;
     float scval=-1;
