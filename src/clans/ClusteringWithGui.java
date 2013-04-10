@@ -1030,7 +1030,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         //use minpval and the current attraction values to get the clustering
         //don't define optionsvec as it contains both strings and numbers in a defined order
         Vector<String> optionsvec=new Vector<String>();
-        new clusteroptionsdialog(this,optionsvec).setVisible(true);
+        new DialogClusterOptions(this,optionsvec).setVisible(true);
         if(optionsvec.size()==0){//if I canceled
             return;
         }

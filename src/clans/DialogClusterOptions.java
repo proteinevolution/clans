@@ -4,20 +4,66 @@
  * Created on April 26, 2004, 6:38 PM
  */
 package clans;
-import javax.swing.JCheckBox;
+import java.util.Vector;
+
 import javax.swing.JLabel;
 /**
  *
  * @author  tancred
  */
-public class clusteroptionsdialog extends javax.swing.JDialog {
+public class DialogClusterOptions extends javax.swing.JDialog {
     
-    /** Creates new form clusteroptionsdialog */
-    public clusteroptionsdialog(java.awt.Frame parent, java.util.Vector optionsvec){
-        super(parent, true);
-        this.optionsvec=optionsvec;
-        initComponents();
-    }
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 909099523010844962L;
+	
+	java.util.Vector<String> optionsvec;
+
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	public javax.swing.JCheckBox bootstrapcheckbox;
+	private javax.swing.JPanel bootstrappanel;
+	private javax.swing.JPanel buttonspanel;
+	private javax.swing.JButton cancelbutton;
+	private javax.swing.ButtonGroup clustertypebuttonGroup;
+	private javax.swing.JRadioButton convexclusterradiobutton;
+	private javax.swing.JLabel convexlabel;
+	private javax.swing.JPanel convexpanel;
+	private javax.swing.JTextField convextextfield;
+	private javax.swing.JLabel emptylabel2;
+	private javax.swing.JCheckBox globalaveragecheckbox;
+	private javax.swing.JRadioButton linkageclusterradiobutton;
+	private javax.swing.JLabel linkagelabel;
+	private javax.swing.JPanel linkagepanel;
+	private javax.swing.JTextField linkagetextfield;
+	private javax.swing.JLabel maxroundslabel;
+	private javax.swing.JTextField maxroundstextfield;
+	private javax.swing.JLabel minseqlabel;
+	private javax.swing.JLabel minseqslabelconvex;
+	private javax.swing.JLabel minseqslabellinkage;
+	private javax.swing.JTextField minseqstextfieldconvex;
+	private javax.swing.JTextField minseqstextfieldlinkage;
+	private javax.swing.JTextField minseqstextfieldnetwork;
+	private javax.swing.JRadioButton networkclusterradiobutton;
+	private javax.swing.JPanel networkpanel;
+	private javax.swing.JLabel nolabel;
+	private javax.swing.JCheckBox offsetcheckbox;
+	private javax.swing.JButton okbutton;
+	private javax.swing.JPanel optionspanel;
+	private javax.swing.JLabel replicateslabel;
+	private javax.swing.JTextField replicatestextfield;
+	private javax.swing.JLabel rmlabel;
+	private javax.swing.JTextField rmtextfield;
+	private javax.swing.JLabel spacerlabel;
+	private javax.swing.JLabel spacerlabel1;
+	private JLabel lblNewLabel;
+	// End of variables declaration//GEN-END:variables
+    
+    public DialogClusterOptions(java.awt.Frame parent, Vector<String> optionsvec) {
+		super(parent, true);
+		this.optionsvec = optionsvec;
+		initComponents();
+	}
     
     /** This method is called from within the constructor to
      * initialize the form.
@@ -268,50 +314,4 @@ public class clusteroptionsdialog extends javax.swing.JDialog {
         setVisible(false);
         dispose();
     }//GEN-LAST:event_closeDialog
-    
-    /**
-     * @param args the command line arguments
-     */
-    
-    java.util.Vector<String> optionsvec;
-    
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JCheckBox bootstrapcheckbox;
-    private javax.swing.JPanel bootstrappanel;
-    private javax.swing.JPanel buttonspanel;
-    private javax.swing.JButton cancelbutton;
-    private javax.swing.ButtonGroup clustertypebuttonGroup;
-    private javax.swing.JRadioButton convexclusterradiobutton;
-    private javax.swing.JLabel convexlabel;
-    private javax.swing.JPanel convexpanel;
-    private javax.swing.JTextField convextextfield;
-    private javax.swing.JLabel emptylabel2;
-    private javax.swing.JCheckBox globalaveragecheckbox;
-    private javax.swing.JRadioButton linkageclusterradiobutton;
-    private javax.swing.JLabel linkagelabel;
-    private javax.swing.JPanel linkagepanel;
-    private javax.swing.JTextField linkagetextfield;
-    private javax.swing.JLabel maxroundslabel;
-    private javax.swing.JTextField maxroundstextfield;
-    private javax.swing.JLabel minseqlabel;
-    private javax.swing.JLabel minseqslabelconvex;
-    private javax.swing.JLabel minseqslabellinkage;
-    private javax.swing.JTextField minseqstextfieldconvex;
-    private javax.swing.JTextField minseqstextfieldlinkage;
-    private javax.swing.JTextField minseqstextfieldnetwork;
-    private javax.swing.JRadioButton networkclusterradiobutton;
-    private javax.swing.JPanel networkpanel;
-    private javax.swing.JLabel nolabel;
-    private javax.swing.JCheckBox offsetcheckbox;
-    private javax.swing.JButton okbutton;
-    private javax.swing.JPanel optionspanel;
-    private javax.swing.JLabel replicateslabel;
-    private javax.swing.JTextField replicatestextfield;
-    private javax.swing.JLabel rmlabel;
-    private javax.swing.JTextField rmtextfield;
-    private javax.swing.JLabel spacerlabel;
-    private javax.swing.JLabel spacerlabel1;
-    private JLabel lblNewLabel;
-    // End of variables declaration//GEN-END:variables
-    
 }
