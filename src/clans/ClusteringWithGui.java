@@ -1481,7 +1481,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void savemenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_savemenuitemActionPerformed
         // save the current run to file
-        if(is_running()){
+        if (!is_stopped(true)) {
             return;
         }
 
