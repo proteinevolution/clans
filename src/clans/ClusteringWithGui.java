@@ -1017,7 +1017,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         // detect clusters in this dataset
         //use minpval and the current attraction values to get the clustering
         //don't define optionsvec as it contains both strings and numbers in a defined order
-        Vector optionsvec=new Vector();
+        Vector<String> optionsvec=new Vector<String>();
         new clusteroptionsdialog(this,optionsvec).setVisible(true);
         if(optionsvec.size()==0){//if I canceled
             return;
@@ -1092,7 +1092,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 if(tmpstr.equalsIgnoreCase("true")){
                     globalaverage=true;
                 }
-                int maxrounds=((Integer)optionsvec.remove(optionsvec.size()-1)).intValue();
+                int maxrounds = Integer.parseInt(optionsvec.remove(optionsvec.size() - 1));
                 System.out.println("searching for network clusters, maxrounds="+maxrounds);
                 Vector <cluster>clustervec=findclusters.getnetwork(data.myattvals,minseqnum,dooffset,globalaverage,data.elements,maxrounds);
                 System.out.println("done searching for clusters; opening window");
@@ -1598,7 +1598,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				data.orgattvals = data.myattvals;
 			}
 			// System.out.println("rmsingletons: newattvals calculation");
-			parentblasthits.addElement(data.orgattvals);
+			parent_orgattvals.addElement(data.orgattvals);
 			data.orgattvals = zoomdata.getmyattvalssubset(data.orgattvals,
 					data.selectednames);
 			data.compute_attraction_values();
@@ -1873,7 +1873,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             data.blasthits=(minhsp[])parentblasthits.elementAt(level);
             parentblasthits.removeElementAt(level);
         }else{
-            data.orgattvals=(minattvals[]) parentblasthits.elementAt(level);
+            data.orgattvals=(minattvals[]) parent_orgattvals.elementAt(level);
             parentblasthits.removeElementAt(level);
             data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
@@ -1977,7 +1977,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             if(data.orgattvals==null){
                 data.orgattvals=data.myattvals;
             }
-            parentblasthits.addElement(data.orgattvals);
+            parent_orgattvals.addElement(data.orgattvals);
             data.orgattvals=zoomdata.getmyattvalssubset(data.orgattvals,data.selectednames);
             data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
@@ -2355,7 +2355,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     Vector <String[]> parentnamearr=new Vector<String[]>();
     Vector <HashMap<String, Integer>> parentnameshash=new Vector<HashMap<String, Integer>>();
 
-    Vector parentblasthits=new Vector();
+    Vector<minhsp[]> parentblasthits=new Vector<minhsp[]>();
+    Vector<minattvals[]> parent_orgattvals=new Vector<minattvals[]>();
     Vector<Vector<seqgroup>> parentseqgroups=new Vector<Vector<seqgroup>>();
     Vector<float[]> parentweights=new Vector<float[]>();
  

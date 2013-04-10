@@ -246,7 +246,7 @@ public class clusteroptionsdialog extends javax.swing.JDialog {
             }catch(NumberFormatException ne){
                 System.err.println("ERROR; cannot parse int from "+maxroundstextfield.getText());
             }
-            optionsvec.addElement(new Integer(maxrounds));
+            optionsvec.addElement(new Integer(maxrounds).toString());
         }else{
             optionsvec.addElement("linkage");
             optionsvec.addElement(linkagetextfield.getText());
@@ -273,7 +273,7 @@ public class clusteroptionsdialog extends javax.swing.JDialog {
      * @param args the command line arguments
      */
     
-    java.util.Vector optionsvec;
+    java.util.Vector<String> optionsvec;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JCheckBox bootstrapcheckbox;
