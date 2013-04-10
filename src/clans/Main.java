@@ -212,7 +212,7 @@ public class Main {
         if(docalc){
             //System.out.println("in docalc");
             if(olddata.length()==0){//if no olddata was defined
-                AminoAcidSequence[] inaln=readaln.fastaread(infilename);
+                AminoAcidSequence[] inaln=AlignmentHandling.parse_fasta_format(infilename);
                 if(verbose>3){
                     System.out.println("sequences read:");
                     for(int i=0;i<java.lang.reflect.Array.getLength(inaln);i++){
@@ -260,7 +260,7 @@ public class Main {
                 System.out.println("reading old data");
                 saverunobject readdata=ClusterData.load_run_from_file(new java.io.File(olddata));
                 System.out.println("reading new sequences");
-                AminoAcidSequence[] newaln=readaln.read(newseqs);
+                AminoAcidSequence[] newaln=AlignmentHandling.read(newseqs);
                 if(enrichseqs){
                     if(java.lang.reflect.Array.getLength(referencedb)==0){
                         System.err.println("ERROR, no referencedb specified, unable to enrich dataset, skipping.");

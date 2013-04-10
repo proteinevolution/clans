@@ -1,31 +1,21 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package clans;
+
 import java.io.*;
 import java.util.*;
+
 /**
- *
+ * this class should contain everything necessary to read alignment files and
+ * output them as an array of aaseq objects.
+ * 
  * @author tancred
  */
-public class readaln {
-    //this class should contain everything necessary to read alignment files and
-    //output them as an array of aaseq objects.
-    
-    /** Creates a new instance of readaln */
-    public readaln() {
-    }
-    
-    //--------------------------------------------------------------------------
-    
-    public static AminoAcidSequence[] read(String instring){
-        //this converts a string to a filename and tries to read the seq alignment
-        File infile=new File(instring);
-        return read(infile);
-    }//end read string
-    
+public class AlignmentHandling {
+
+	public static AminoAcidSequence[] read(String instring) {
+		File infile = new File(instring);
+		return read(infile);
+	}
+
     public static AminoAcidSequence[] read(File infile){
         try{
             BufferedReader inread;
@@ -41,20 +31,19 @@ public class readaln {
                 if(inline.length()>0){//if there is sth. on this line
                     if(inline.startsWith(">")){//if this is fasta format
                         inread.close();
-                        return fastaread(infile);
+                        return parse_fasta_format(infile);
                     }else if((inline.length()>6)&&(inline.substring(0,7).equalsIgnoreCase("clustal"))){
                         inread.close();
-                        return clustalread(infile);
+                        return parse_clustal_format(infile);
                     }else if((inline.length()>8)&&(inline.toUpperCase().matches(".*STOCKHOLM.*"))){//if this is stockholm format
                         inread.close();
-                        return stockholmread(infile);
+                        return parse_stockholm_format(infile);
                     }else{//see if the line read has one or two numbers (if neither :unknown format)
                         String[] tmparr=inline.split("\\s+",0);
                         int arrsize=java.lang.reflect.Array.getLength(tmparr);
                         boolean didconv=true;
                         try{//try to convert the string to numbers
                             for(int i=0;i<arrsize;i++){
-                                int tmpint=Integer.parseInt(tmparr[i]);
                             }
                         }catch (NumberFormatException e){
                             didconv=false;
@@ -62,10 +51,10 @@ public class readaln {
                         if(didconv){
                             if(arrsize==1){//treecon
                                 inread.close();
-                                return treeconread(infile);
+                                return parse_treecon_format(infile);
                             }else if(arrsize==2){//phylip
                                 inread.close();
-                                return phylipread(infile);
+                                return parse_phylip_format(infile);
                             }
                         }
                         System.err.println("unknown file format for "+infile.getAbsolutePath());
@@ -84,15 +73,15 @@ public class readaln {
     
     //--------------------------------------------------------------------------
     
-    public static AminoAcidSequence[] fastaread(String infilename){
+    public static AminoAcidSequence[] parse_fasta_format(String infilename){
         File tmpfile=new File(infilename);
-        return fastaread(tmpfile);
+        return parse_fasta_format(tmpfile);
     }
     
-    public static AminoAcidSequence[] fastaread(File infile){
+    public static AminoAcidSequence[] parse_fasta_format(File infile){
         //this should read fasta format data from infile and return it as an array
         //of aasseq objects (name,seq)
-        Vector tmpvec=new Vector();
+		Vector<AminoAcidSequence> tmpvec = new Vector<AminoAcidSequence>();
         try{
             BufferedReader inread;
             if(infile.getName().equalsIgnoreCase("STDIN")){
@@ -136,7 +125,7 @@ public class readaln {
     
     //--------------------------------------------------------------------------
     
-    public static AminoAcidSequence[] clustalread(File infile){
+    public static AminoAcidSequence[] parse_clustal_format(File infile){
         //read a clustal alignment and convert to array of aaseq objects
         //this format is: CLUSTAL in the first line
         //name 'space(s)' seq on a line
@@ -145,8 +134,8 @@ public class readaln {
         //maybe an empty line
         //name 'space(s)' seq part 2 on a line
         //etc...
-        HashMap myhash=new HashMap();
-        Vector alnnames=new Vector();
+		HashMap<String, StringBuffer> myhash = new HashMap<String, StringBuffer>();
+		Vector<String> alnnames = new Vector<String>();
         try{
             BufferedReader inread;
             if(infile.getName().equalsIgnoreCase("STDIN")){
@@ -156,7 +145,6 @@ public class readaln {
             }
             String inline;
             String inname;
-            StringBuffer seqbuff=new StringBuffer();
             int namespace;
             while((inline=inread.readLine())!=null){
                 inline=inline.trim();
@@ -196,7 +184,6 @@ public class readaln {
             System.exit(0);
         }
         AminoAcidSequence[] retarr=new AminoAcidSequence[keysnum];
-        String[] keys=(String[])(myhash.keySet().toArray(new String[0]));
         for(int i=0;i<keysnum;i++){
             retarr[i]=new AminoAcidSequence();
             retarr[i].name=(String)alnnames.elementAt(i);
@@ -207,7 +194,7 @@ public class readaln {
     
     //--------------------------------------------------------------------------
     
-    public static AminoAcidSequence[] treeconread(File filenamein)
+    public static AminoAcidSequence[] parse_treecon_format(File filenamein)
     //read in a treecon-format alignment.
     //format: one number on the first line
     //next a line with the name
@@ -216,12 +203,10 @@ public class readaln {
     //next name...
     throws IOException{
         String aaseqname;
-        Vector seqvector = new Vector();
-        AminoAcidSequence seqobj;
+		Vector<AminoAcidSequence> seqvector = new Vector<AminoAcidSequence>();
         int seqlength, iaa;
         int count=0;
         char seqaa;
-        int seqnumber=0;
         BufferedReader alignread;
         if(filenamein.getName().equalsIgnoreCase("STDIN")){
             alignread=new BufferedReader(new InputStreamReader(System.in));
@@ -238,7 +223,6 @@ public class readaln {
         while (((aaseqname=(alignread.readLine()))!=null)){
             if (((aaseqname.length())!=0)){
                 count=0;
-                seqnumber+=1;
                 char [] seqseq = new char[seqlength];
                 while (count<(seqlength)){
                     iaa=(alignread.read());
@@ -275,7 +259,7 @@ public class readaln {
     
     //--------------------------------------------------------------------------
     
-    public static AminoAcidSequence[] phylipread(File infile){
+    public static AminoAcidSequence[] parse_phylip_format(File infile){
         //this needs to decide wether I am reading phylip sequential or interleaved
         //physeq: first line : number of species + sequence length
         //opt. empty lines
@@ -303,8 +287,8 @@ public class readaln {
         boolean phyint=true;
         int specnum=0;
         int seqlength=0;
-        Vector phyintvec=new Vector();
-        Vector physeqvec=new Vector();
+		Vector<AminoAcidSequence> phyintvec = new Vector<AminoAcidSequence>();
+		Vector<AminoAcidSequence> physeqvec = new Vector<AminoAcidSequence>();
         AminoAcidSequence[] retarr=new AminoAcidSequence[0];
         try{
             BufferedReader inread;
@@ -429,9 +413,9 @@ public class readaln {
     
     //--------------------------------------------------------------------------
     
-    public static AminoAcidSequence[] stockholmread(File infile){
+    public static AminoAcidSequence[] parse_stockholm_format(File infile){
         AminoAcidSequence[] retarr=new AminoAcidSequence[0];
-        Vector seqvec=new Vector();
+		Vector<AminoAcidSequence> seqvec = new Vector<AminoAcidSequence>();
         boolean doneall=false;
         try{
             BufferedReader inread;
