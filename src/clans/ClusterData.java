@@ -84,7 +84,7 @@ public class ClusterData {
     float[][] mymovearr=null;
     float[][] posarrtmp=null;
     int[][] drawarrtmp=null;
-    ArrayList<int[]>[] draworder=null;
+    ArrayList<ArrayList<int[]>> draworder=null;
     static int dimensions=3;
     int elements=-1;
     double[][] rotmtx={{1,0,0},{0,1,0},{0,0,1}};//the performed rotations
@@ -170,6 +170,11 @@ public class ClusterData {
      */
     public String getBaseInputfileName() {
     	return new File(this.input_filename).getName();
+    }
+    
+    
+    public void resetDrawOrder() {
+    	draworder = new ArrayList<ArrayList<int[]>>();
     }
     
     //--------------------------------------------------------------------------
@@ -377,7 +382,7 @@ public class ClusterData {
        mymovearr=new float[elements][ClusterData.dimensions];
        posarrtmp=new float[elements][ClusterData.dimensions];
        drawarrtmp=new int[elements][ClusterData.dimensions];
-       draworder=new ArrayList[0];
+       resetDrawOrder();
         
        myrotmtx=loaded_data.rotmtx;
         for (int i = 0; i < 3; i ++){

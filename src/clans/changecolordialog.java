@@ -561,8 +561,8 @@ public class changecolordialog extends javax.swing.JDialog {
                 return;
             }
         }
-        parent.data.draworder = new java.util.ArrayList[0];
-        //System.out.println("P2attfactor="+parent.p2attfactor);
+
+        parent.data.resetDrawOrder();
         parent.repaint();
     }//GEN-LAST:event_updatebuttonActionPerformed
 

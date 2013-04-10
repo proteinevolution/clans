@@ -1176,7 +1176,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 data.mymovearr=new float[data.elements][ClusterData.dimensions];
                 data.posarrtmp=new float[data.elements][ClusterData.dimensions];
                 data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
-                data.draworder=new ArrayList[0];
+                data.resetDrawOrder();
                 data.attvalsimple=true;
                 repaint=null;
                 data.pvalue_threshold=1;
@@ -1359,7 +1359,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             }
             data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
-        data.draworder=new ArrayList[0];
+        data.resetDrawOrder();
         repaint();
     }//GEN-LAST:event_minpvalbuttonActionPerformed
     
@@ -1658,7 +1658,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		data.posarrtmp = new float[data.elements][ClusterData.dimensions];
 		data.drawarrtmp = new int[data.elements][ClusterData.dimensions];
 
-		data.draworder = new ArrayList[0];
+		data.resetDrawOrder();
 		repaint();
 	}
 
@@ -1836,7 +1836,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 //        data.posarr=data.myposarr;
 //        data.posarrtmp=new float[data.elements][ClusterData.dimensions];
 //        data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
-//        data.draworder=new ArrayList[0];
+//        data.resetDrawOrder();
 //        repaint();
 //    }//GEN-LAST:event_hidesingletonsmenuitemActionPerformed
     
@@ -1912,7 +1912,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.posarr=data.myposarr;
         data.posarrtmp=new float[data.elements][ClusterData.dimensions];
         data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
-        data.draworder=new ArrayList[0];
+        data.resetDrawOrder();
         repaint();
     }//GEN-LAST:event_getparentmenuitemActionPerformed
     
@@ -1992,7 +1992,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.posarr=data.myposarr;
         data.posarrtmp=new float[data.elements][ClusterData.dimensions];
         data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
-        data.draworder=new ArrayList[0];
+        data.resetDrawOrder();
         if(mymapfunctiondialog!=null){
             mymapfunctiondialog.makenameshash();
         }
@@ -2130,7 +2130,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             }
             data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
-        data.draworder=new ArrayList[0];
+        data.resetDrawOrder();
         repaint();
     }//GEN-LAST:event_minpvaltextfieldActionPerformed
     
@@ -2518,7 +2518,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 }
             }
             if(data.hidebelowold!=data.hidebelow){
-                data.draworder=new ArrayList[0];
+                data.resetDrawOrder();
                 data.hidebelowold=data.hidebelow;
             }
             mythread.stop=true;
@@ -2568,7 +2568,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             }
         }
         if(data.hidebelowold!=data.hidebelow){
-            data.draworder=new ArrayList[0];
+            data.resetDrawOrder();
             data.hidebelowold=data.hidebelow;
         }
         data.changedvals=false;
@@ -2715,7 +2715,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.mymovearr=new float[data.elements][ClusterData.dimensions];
         data.posarrtmp=new float[data.elements][ClusterData.dimensions];
         data.drawarrtmp=new int[data.elements][ClusterData.dimensions];
-        data.draworder=new ArrayList[0];
+        data.resetDrawOrder();
         
         data.compute_attraction_values();
         
@@ -3471,16 +3471,16 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                         int j;
                         int[] currdraw;
                         int vecsize;
-                        if(data.draworder==null || java.lang.reflect.Array.getLength(data.draworder)<1){
+                        if(data.draworder == null || data.draworder.size() < 1){
                             data.draworder=get_line_draw_order(data.myattvals,colornum);
                         }
                         for(int i=0;i<colornum;i++){
-                            vecsize=data.draworder[i].size();
+                            vecsize=data.draworder.get(i).size();
                             g.setColor(data.colorarr[i]);
                             g.drawString("-",(5+i)*fontwidth-xtranslate,fontsize-ytranslate);
                             //draw all the vector elements
                             for(j=vecsize;--j>=0;){
-                                currdraw=(int[])data.draworder[i].get(j);
+                                currdraw=(int[])data.draworder.get(i).get(j);
                                 //g.drawLine((int)tposarrtmp[currdraw[0]][0],(int)tposarrtmp[currdraw[0]][1],(int)tposarrtmp[currdraw[1]][0],(int)tposarrtmp[currdraw[1]][1]);
                                 g.drawLine(tposarrtmp[currdraw[0]][0],tposarrtmp[currdraw[0]][1],tposarrtmp[currdraw[1]][0],tposarrtmp[currdraw[1]][1]);
                             }// end for j
@@ -3501,10 +3501,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                             data.draworder=get_line_draw_order(data.myattvals,colornum);//draw the lines in the same order as before
                         }
                         for(int i=0;i<colornum;i++){
-                            vecsize=data.draworder[i].size();
+                            vecsize=data.draworder.get(i).size();
                             //draw all the vector elements
                             for(j=0;j<vecsize;j++){
-                                tmparr=(int[])data.draworder[i].get(j);
+                                tmparr=(int[])data.draworder.get(i).get(j);
                                 key=tmparr[0]+"_"+tmparr[1];
 
                                 if(frustration.containsKey(key)){
@@ -3699,11 +3699,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
          * @param colornum
          * @return
          */
-        ArrayList<int[]>[] get_line_draw_order(minattvals[] myattvals, int colornum){
+        ArrayList<ArrayList<int[]>> get_line_draw_order(minattvals[] myattvals, int colornum){
 
-            ArrayList<int[]>[] retarr=new ArrayList[colornum];
+            ArrayList<ArrayList<int[]>> retarr = new ArrayList<ArrayList<int[]>>();
             for(int i=0;i<colornum;i++){
-                retarr[i]=new ArrayList<int[]>();
+                retarr.add(new ArrayList<int[]>());
             }
             int[] mydraw=new int[2];//connection between sequences i & j
 
@@ -3720,7 +3720,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         					mydraw=new int[2];
                             mydraw[0]=myattvals[i].query;
                             mydraw[1]=myattvals[i].hit;
-                            retarr[j].add(mydraw);
+                            retarr.get(j).add(mydraw);
                             break;
         				}
                     } else { // j == 9
@@ -3728,7 +3728,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                             mydraw=new int[2];
                             mydraw[0]=myattvals[i].query;
                             mydraw[1]=myattvals[i].hit;
-                            retarr[j].add(mydraw);
+                            retarr.get(j).add(mydraw);
                             break;
                     	}
                     }
@@ -3846,7 +3846,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 if(data.changedvals){
                     updatevals();
                     if(data.hidebelowold!=data.hidebelow){
-                        data.draworder=new ArrayList[0];
+                        data.resetDrawOrder();
                         data.hidebelowold=data.hidebelow;
                     }
                     data.changedvals=false;
