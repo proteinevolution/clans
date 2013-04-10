@@ -12,7 +12,7 @@ package clans;
 public class eplotdialog extends javax.swing.JDialog {
     
     /** Creates new form eplotdialog */
-    public eplotdialog(minhsp[] vecarr, double maxval, boolean doscores) {
+    public eplotdialog(MinimalHsp[] vecarr, double maxval, boolean doscores) {
         this.vecarr=vecarr;
         this.maxval=maxval;//==minpval in clustertest
         this.doscores=doscores;
@@ -172,7 +172,7 @@ public class eplotdialog extends javax.swing.JDialog {
      * @param args the command line arguments
      */
     
-    minhsp[] vecarr;
+    MinimalHsp[] vecarr;
     double maxval=0;
     double minval=Double.MIN_VALUE;
     double ln10=java.lang.Math.log(10);

@@ -24,7 +24,7 @@ public class searchblast {
     
     //--------------------------------------------------------------------------
     
-    public minhsp[] gethits(AminoAcidSequence[] oldaln,minhsp[] oldblasthits,AminoAcidSequence[] newaln,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,int exhaustive,boolean readblast,boolean newblast){
+    public MinimalHsp[] gethits(AminoAcidSequence[] oldaln,MinimalHsp[] oldblasthits,AminoAcidSequence[] newaln,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,int exhaustive,boolean readblast,boolean newblast){
         //get the blast hits for the new sequences (newaln) agains a concatenated database of old and new seqs
         System.out.println("doing searchblast for new sequences");
         int oldelements=java.lang.reflect.Array.getLength(oldaln);
@@ -46,7 +46,7 @@ public class searchblast {
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter("tmpblasthsp.txt")));
             String blastdbname=new File(String.valueOf(System.currentTimeMillis())).getAbsolutePath();//set the name for the blast database to search against
             int seqnum=allelements;
-            minhsp[] retarr=new minhsp[0];
+            MinimalHsp[] retarr=new MinimalHsp[0];
             //if(lowmem){
             if(newblast==true){
                 outwrite.println(seqnum+" sequences");
@@ -357,7 +357,7 @@ public class searchblast {
                 if(exhaustive==0){
                     //if I want to make a->b == b->a (one way search)
                     for(int i=java.lang.reflect.Array.getLength(retarr)-1;i>=0;i--){
-                        tmpvec.addElement(new minhsp(retarr[i].hit,retarr[i].query,retarr[i].val));//inverted query and hit info
+                        tmpvec.addElement(new MinimalHsp(retarr[i].hit,retarr[i].query,retarr[i].val));//inverted query and hit info
                     }//end for i
                 }//end if exhaustive==0
             }
@@ -426,7 +426,7 @@ public class searchblast {
             System.err.println("IOError writing to tmpblasthsp.txt");
             errbuff.append("-IOERROR writing to tmpblasthsp.txt\n");
             ioe.printStackTrace();
-            return new minhsp[0];
+            return new MinimalHsp[0];
         }
     }//end gethits for new added seqs
     
@@ -480,13 +480,13 @@ public class searchblast {
     
     //--------------------------------------------------------------------------
     
-    public minhsp[] gethits(AminoAcidSequence[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval, float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,boolean readblast, boolean newblast){
+    public MinimalHsp[] gethits(AminoAcidSequence[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval, float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,boolean readblast, boolean newblast){
         //run an all against all blast search and save the hsp's in vector[][]
         System.out.println("doing searchblast");
         File tmpfile=new File("tmpblasthsp.txt");
         if(tmpfile.canRead()&&readblast){
             System.out.println("reading former blastruns from tmpblasthsp.txt");
-            minhsp[] retarr=readsave.blast("tmpblasthsp.txt",pval);
+            MinimalHsp[] retarr=readsave.blast("tmpblasthsp.txt",pval);
             return retarr;
         }else{
             try{
@@ -671,7 +671,7 @@ public class searchblast {
                 }// end while alldone
                 //if(lowmem){
                 System.out.println("re-reading hsp's");
-                minhsp[] retarr=readsave.blast("tmpblasthsp.txt",pval);
+                MinimalHsp[] retarr=readsave.blast("tmpblasthsp.txt",pval);
                 //}
                 //all threads started and done. the values are stored in retarr.
                 try{
@@ -738,14 +738,14 @@ public class searchblast {
                 System.err.println("IOError writing to tmpblasthsp.txt");
                 errbuff.append("-IOERROR writing to tmpblasthsp.txt");
                 ioe.printStackTrace();
-                return new minhsp[0];
+                return new MinimalHsp[0];
             }
         }
     }// end gethits
     
     //--------------------------------------------------------------------------
     
-    public minhsp[] gethits(minhsp[] blasthits,AminoAcidSequence[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,int[] seqstodo,boolean readblast,boolean newblast){
+    public MinimalHsp[] gethits(MinimalHsp[] blasthits,AminoAcidSequence[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,int[] seqstodo,boolean readblast,boolean newblast){
         //do all blast runs for sequences present in seqstodo NOT FOR THE OTHERS (should only happen for interrupted runs)
         System.out.println("continuing searchblast");
         File tmpfile=new File("tmpblasthsp.txt");
@@ -978,7 +978,7 @@ public class searchblast {
             System.err.println("IOError writing to tmpblasthsp.txt");
             errbuff.append("IOERROR writing to tmpblasthsp.txt\n");
             ioe.printStackTrace();
-            return new minhsp[0];
+            return new MinimalHsp[0];
         }
     }// end gethits redoing for missing sequences
     

@@ -1882,7 +1882,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }
         getparentmenuitem.setText("use parent group ("+level+")");
         if(data.blasthits!=null){
-            data.blasthits=(minhsp[])parentblasthits.elementAt(level);
+            data.blasthits=(MinimalHsp[])parentblasthits.elementAt(level);
             parentblasthits.removeElementAt(level);
         }else{
             data.orgattvals=(minattvals[]) parent_orgattvals.elementAt(level);
@@ -2367,7 +2367,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     Vector <String[]> parentnamearr=new Vector<String[]>();
     Vector <HashMap<String, Integer>> parentnameshash=new Vector<HashMap<String, Integer>>();
 
-    Vector<minhsp[]> parentblasthits=new Vector<minhsp[]>();
+    Vector<MinimalHsp[]> parentblasthits=new Vector<MinimalHsp[]>();
     Vector<minattvals[]> parent_orgattvals=new Vector<minattvals[]>();
     Vector<Vector<seqgroup>> parentseqgroups=new Vector<Vector<seqgroup>>();
     Vector<float[]> parentweights=new Vector<float[]>();
@@ -2711,7 +2711,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         return !is_stopped(false);
     }
     
-    void initaddedseqs(minhsp[] blastvec,AminoAcidSequence[]allaln,String[]allnamearr,HashMap<String, Integer> allnameshash,int[]newnumarr,float[][]allposarr,float maxmove,double pval,boolean useselectedonly){
+    void initaddedseqs(MinimalHsp[] blastvec,AminoAcidSequence[]allaln,String[]allnamearr,HashMap<String, Integer> allnameshash,int[]newnumarr,float[][]allposarr,float maxmove,double pval,boolean useselectedonly){
         //initialize the necessary variable for the case where new sequences are added to an existing run.
         data.sequences=allaln;
         data.myposarr=allposarr;

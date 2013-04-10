@@ -60,7 +60,7 @@ public class searchblastv2 {
     HashMap<String, Integer> nameshash;
 
     //I need a method to get hits for a full set of sequences
-    public minhsp[] gethits(AminoAcidSequence[] queryseqs) {
+    public MinimalHsp[] gethits(AminoAcidSequence[] queryseqs) {
         int allseqnum = java.lang.reflect.Array.getLength(queryseqs);
         //first set up the queryvec with the sequences to search for
         for (int i = java.lang.reflect.Array.getLength(queryseqs); --i >= 0;) {
@@ -219,14 +219,14 @@ public class searchblastv2 {
         //now I have written all results to the temporary file.
         //next, read them back from the file and send them to CLANS
         System.out.println("reading all results from temporary file '" + saveblastname + "'");
-        HashMap<String, minhsp> allhash = new HashMap<String, minhsp>();
+        HashMap<String, MinimalHsp> allhash = new HashMap<String, MinimalHsp>();
         try {
             BufferedReader fileread = new BufferedReader(new FileReader(saveblastname));
             String inline = "", idline = "", valline = "", tmpstr = "";
             String[] tmparr;
-            HashMap<String, minhsp> roundhash = new HashMap<String, minhsp>();
+            HashMap<String, MinimalHsp> roundhash = new HashMap<String, MinimalHsp>();
             //read until I hit the "#done for sequence" lines and then pass the current elements to the final hash containing the data
-            minhsp myhsp;
+            MinimalHsp myhsp;
             int queryid = -1;
             boolean passrounds = false;
             HashMap<Integer, Integer> donehash = new HashMap<Integer, Integer>();
@@ -242,7 +242,7 @@ public class searchblastv2 {
                                 tmpstr = valline;
                                 myhsp.addpval(Double.parseDouble(tmpstr));
                             } else {
-                                myhsp = new minhsp();
+                                myhsp = new MinimalHsp();
                                 tmpstr = tmparr[0];
                                 myhsp.query = Integer.parseInt(tmpstr);
                                 tmpstr = tmparr[1];
@@ -265,7 +265,7 @@ public class searchblastv2 {
                             }
                             count++;
                             //then move the data from the roundhash to the allhash for those sequences in donehash
-                            minhsp[] checkarr = roundhash.values().toArray(new minhsp[0]);
+                            MinimalHsp[] checkarr = roundhash.values().toArray(new MinimalHsp[0]);
                             for (int i = java.lang.reflect.Array.getLength(checkarr); --i >= 0;) {
                                 myhsp = checkarr[i];
                                 if (donehash.containsKey(new Integer(myhsp.query))) {
@@ -294,7 +294,7 @@ public class searchblastv2 {
                     }
                     count++;
                     //then move the data from the roundhash to the allhash for those sequences in donehash
-                    minhsp[] checkarr = roundhash.values().toArray(new minhsp[0]);
+                    MinimalHsp[] checkarr = roundhash.values().toArray(new MinimalHsp[0]);
                     for (int i = java.lang.reflect.Array.getLength(checkarr); --i >= 0;) {
                         myhsp = checkarr[i];
                         if (donehash.containsKey(new Integer(myhsp.query))) {
@@ -375,7 +375,7 @@ public class searchblastv2 {
         }
         //now see what values i read
 
-        return allhash.values().toArray(new minhsp[0]);
+        return allhash.values().toArray(new MinimalHsp[0]);
     }//end get
 
     //--------------------------------------------------------------------------
@@ -613,7 +613,7 @@ public class searchblastv2 {
                 hsp myhsp;
                 int qnum, hnum;
                 double val;
-                HashMap<String, minhsp> hsphash = new HashMap<String, minhsp>();
+                HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
                 for (int i = hsplist.size(); --i >= 0;) {
                     myhsp = hsplist.get(i);
                     if (nameshash.containsKey(myhsp.qname)) {
@@ -636,17 +636,17 @@ public class searchblastv2 {
                         if (hsphash.containsKey(qnum + ";" + hnum)) {
                             hsphash.get(qnum + ";" + hnum).addpval(val);
                         } else {
-                            hsphash.put(qnum + ";" + hnum, new minhsp(qnum, hnum, val));
+                            hsphash.put(qnum + ";" + hnum, new MinimalHsp(qnum, hnum, val));
                         }
                     }
                 }//end for i
                 //now I should have converted all of my data to minhsp's containing query, hit and the (possible multiple) hits they had
-                minhsp[] mymins = hsphash.values().toArray(new minhsp[0]);
+                MinimalHsp[] mymins = hsphash.values().toArray(new MinimalHsp[0]);
                 //next synchronize on file output and write the results to file
                 if (allgood) {
                     synchronized (filesync) {
                         outwrite.println("SECTION:");
-                        minhsp mymin;
+                        MinimalHsp mymin;
                         for (int i = java.lang.reflect.Array.getLength(mymins); --i >= 0;) {
                             mymin = mymins[i];
                             for (int j = java.lang.reflect.Array.getLength(mymin.val); --j >= 0;) {

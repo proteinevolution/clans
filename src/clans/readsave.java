@@ -57,9 +57,9 @@ public class readsave {
     
     //--------------------------------------------------------------------------
     
-    public static minhsp[] blast(String filename,double cutoff){
+    public static MinimalHsp[] blast(String filename,double cutoff){
         //read the hsp data from a blast savefile
-        minhsp[] retarr=new minhsp[0];
+        MinimalHsp[] retarr=new MinimalHsp[0];
         try{
             BufferedReader inread=new BufferedReader(new FileReader(filename));
             String inline=inread.readLine();
@@ -75,7 +75,7 @@ public class readsave {
                 System.err.println("NumberFormatError, Wrong Format!");
                 System.exit(0);
             }
-            minhsp currhsp=new minhsp();
+            MinimalHsp currhsp=new MinimalHsp();
             int ival=-1;
             int jval=-1;
             int kval=-1;
@@ -101,7 +101,7 @@ public class readsave {
                                 currhsp.val[0]=pval;
                                 hsphash.put(hspkey,currhsp);
                             }else{
-                                ((minhsp)hsphash.get(hspkey)).addpval(pval);
+                                ((MinimalHsp)hsphash.get(hspkey)).addpval(pval);
                             }
                         }
                     }
@@ -115,11 +115,11 @@ public class readsave {
                             System.err.println("unable to parse correct numbers from "+inline);
                             System.exit(0);
                         }
-                        currhsp=new minhsp();
+                        currhsp=new MinimalHsp();
                         currhsp.query=ival;
                         currhsp.hit=jval;
                     }else{
-                        currhsp=new minhsp();
+                        currhsp=new MinimalHsp();
                         pval=1;
                     }
                 }else if(inline.startsWith("\tqname: ")){
@@ -170,14 +170,14 @@ public class readsave {
                         currhsp.val[0]=pval;
                         hsphash.put(hspkey,currhsp);
                     }else{
-                        ((minhsp)hsphash.get(hspkey)).addpval(pval);
+                        ((MinimalHsp)hsphash.get(hspkey)).addpval(pval);
                     }
                 }
             }
             int elements=hsphash.size();
-            retarr=new minhsp[elements];
+            retarr=new MinimalHsp[elements];
             System.out.println("hsp's="+hsphash.size());
-            retarr=(minhsp[])(hsphash.values().toArray(retarr));
+            retarr=(MinimalHsp[])(hsphash.values().toArray(retarr));
         }catch (IOException e){
             System.out.println("IOerror reading blastfile "+filename);
             System.exit(0);

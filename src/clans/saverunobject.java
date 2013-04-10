@@ -22,7 +22,7 @@ public class saverunobject {
     }
     
     java.io.File file=null;
-    minhsp[] blasthits=null;
+    MinimalHsp[] blasthits=null;
     AminoAcidSequence[] inaln=null;
     minattvals[] attvals=null;
     float[][] posarr=null;
@@ -555,7 +555,7 @@ public class saverunobject {
 	public boolean parse_hsp_block(BufferedReader buffered_file_handle) throws IOException {
         String[] tmparr;
         String tmpstr;
-        minhsp currhsp;
+        MinimalHsp currhsp;
         HashMap hsphash = new HashMap();
         String hspkey = "";
         String inline;
@@ -610,12 +610,12 @@ public class saverunobject {
                 if (java.lang.reflect.Array.getLength(tmparr) > 0) {
                     hspkey = myi + "_" + myj;
                     if (hsphash.containsKey(hspkey)) {
-                        currhsp = (minhsp) hsphash.get(hspkey);
+                        currhsp = (MinimalHsp) hsphash.get(hspkey);
                         for (int i = 0; i < java.lang.reflect.Array.getLength(tmparr); i++) {
                             currhsp.addpval(Double.parseDouble(tmparr[i]));
                         }//end for i
                     } else {
-                        currhsp = new minhsp();
+                        currhsp = new MinimalHsp();
                         currhsp.query = myi;
                         currhsp.hit = myj;
                         currhsp.val = new double[java.lang.reflect.Array.getLength(tmparr)];
@@ -634,7 +634,7 @@ public class saverunobject {
             lastline = inline;
         }//end while hsp
         if (inline.equalsIgnoreCase("</hsp>")) {
-            blasthits = (minhsp[]) hsphash.values().toArray(new minhsp[0]);
+            blasthits = (MinimalHsp[]) hsphash.values().toArray(new MinimalHsp[0]);
         } else {
             System.err.println("ERROR reading truncated file; <hsp> tag not closed by </hsp>");
         }

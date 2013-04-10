@@ -20,7 +20,7 @@ import java.util.Vector;
 public class ClusterData {
 
     //variables initialized on creation
-    minhsp[] blasthits=null;
+    MinimalHsp[] blasthits=null;
     AminoAcidSequence[] sequences=null;
     String[] namearr=null;
     HashMap<String, Integer> nameshash=null;
@@ -108,7 +108,7 @@ public class ClusterData {
     int roundslimit=-1;
     boolean moveselectedonly=false;
 
-    public ClusterData(minhsp[] blasthits, AminoAcidSequence[] sequences, String[] namearr, HashMap<String, Integer> nameshash, 
+    public ClusterData(MinimalHsp[] blasthits, AminoAcidSequence[] sequences, String[] namearr, HashMap<String, Integer> nameshash, 
     		double eval, double pval, float scval, int verbose, int cpu, boolean savepos, String cmd, String blastpath,
     		boolean addblastvbparam, String formatdbpath, String[] referencedb, StringBuffer errbuff, 
     		String input_filename) {
@@ -207,7 +207,7 @@ public class ClusterData {
 	                }
 	                myrun.inaln = new AminoAcidSequence[expected_sequences];
 	                myrun.posarr = new float[expected_sequences][3];
-	                myrun.blasthits = new minhsp[0];
+	                myrun.blasthits = new MinimalHsp[0];
 	                continue;
 	            } else if (expected_sequences != -1) {
 

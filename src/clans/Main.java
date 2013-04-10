@@ -240,7 +240,7 @@ public class Main {
                         isblastplus=false;
                     }
                     searchblastv2 mysearchblast=new searchblastv2(errbuff,addblastvbparam,isblastplus,cpu,blastblocks,cmd,blastpath,formatdbpath,eval,pval,coverage,scval,ident,verbose,saveblastname,readblast,nameshash);
-                    minhsp[] blasthits=mysearchblast.gethits(inaln);
+                    MinimalHsp[] blasthits=mysearchblast.gethits(inaln);
                     mysearchblast=null;
                     if(nographics==false){
                         //System.out.println("starting clustertest");
@@ -302,9 +302,9 @@ public class Main {
                 searchblast mysearchblast=new searchblast(errbuff,addblastvbparam);
                 double mypval=readdata.pval;
                 float mymaxmove=readdata.maxmove;
-                minhsp[] newblasthits=mysearchblast.gethits(readdata.inaln,readdata.blasthits,newaln,cmd,formatdbpath,blastpath,cpu,eval,pval,coverage,scval,ident,verbose,allnameshash,useallrounds,lowmem,referencedb,exhaustive,readblast,true);
+                MinimalHsp[] newblasthits=mysearchblast.gethits(readdata.inaln,readdata.blasthits,newaln,cmd,formatdbpath,blastpath,cpu,eval,pval,coverage,scval,ident,verbose,allnameshash,useallrounds,lowmem,referencedb,exhaustive,readblast,true);
                 //now keep all of the old data and add the new data
-                ArrayList<minhsp> addblasthits=new ArrayList<minhsp>();
+                ArrayList<MinimalHsp> addblasthits=new ArrayList<MinimalHsp>();
                 for(int i=java.lang.reflect.Array.getLength(newblasthits);--i>=0;){
                     if(newblasthits[i].query>=readelements || newblasthits[i].hit>=readelements){
                         //then I want to add this one
@@ -313,17 +313,17 @@ public class Main {
                 }//end for i
                 //now I know which of the "new" blast hits to add
                 int oldnum=java.lang.reflect.Array.getLength(readdata.blasthits);
-                minhsp[] blasthits=new minhsp[oldnum+addblasthits.size()];
+                MinimalHsp[] blasthits=new MinimalHsp[oldnum+addblasthits.size()];
                 System.arraycopy(readdata.blasthits,0,blasthits,0,oldnum);
                 for(int i=addblasthits.size();--i>=0;){
-                    blasthits[oldnum+i]=(minhsp)addblasthits.get(i);
+                    blasthits[oldnum+i]=(MinimalHsp)addblasthits.get(i);
                 }//end for i
                 //doen adding the blast hit data
                 newaln=null;
                 readdata=null;
                 if(nographics==false){
                     System.out.println("...reading data");
-                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap<String, Integer>(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
+                    ClusterData myclusterdata=new ClusterData(new MinimalHsp[0],new AminoAcidSequence[0],new String[0],new HashMap<String, Integer>(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.initaddedseqs(blasthits,allaln,allnamearr,allnameshash,newnumarr,allposarr,mymaxmove,mypval,true);
@@ -350,7 +350,7 @@ public class Main {
                 }
                 if(nographics==false){
                     System.out.println("...reading data");
-                    ClusterData myclusterdata=new ClusterData(new minhsp[0],new AminoAcidSequence[0],new String[0],new HashMap<String, Integer>(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
+                    ClusterData myclusterdata=new ClusterData(new MinimalHsp[0],new AminoAcidSequence[0],new String[0],new HashMap<String, Integer>(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,input_filename);
                     myclusterdata.roundslimit=dorounds;//set the limit of how often to run this
                     ClusteringWithGui myclusterer=new ClusteringWithGui(myclusterdata);
                     myclusterer.initaddedseqs(readdata.blasthits,readdata.inaln,namearr,nameshash,new int[0],readdata.posarr,readdata.maxmove,readdata.pval,false);
@@ -377,7 +377,7 @@ public class Main {
                     //clustertest myclustertest=new clustertest(new minhsp[0],new aaseq[0],new String[0],new HashMap(),eval,pval,scval,verbose,cpu,savepos,cmd,blastpath,addblastvbparam,formatdbpath,referencedb,errbuff,loadsaved);
                     //myclustertest.setVisible(true);
                 	
-                	ClusterData myclusterdata = new ClusterData(new minhsp[0],
+                	ClusterData myclusterdata = new ClusterData(new MinimalHsp[0],
 							new AminoAcidSequence[0], new String[0],
 							new HashMap<String, Integer>(), eval, pval, scval, verbose, cpu,
 							savepos, cmd, blastpath, addblastvbparam,
@@ -404,7 +404,7 @@ public class Main {
         	return false;
         }
         
-        ClusterData myclusterdata = new ClusterData(new minhsp[0], new AminoAcidSequence[0], new String[0], 
+        ClusterData myclusterdata = new ClusterData(new MinimalHsp[0], new AminoAcidSequence[0], new String[0], 
         		new HashMap<String, Integer>(), eval, pval, scval, verbose, cpu, savepos, cmd, blastpath, addblastvbparam, 
         		formatdbpath, referencedb, errbuff, input_filename);
         myclusterdata.roundslimit = dorounds; //set the limit of how often to run this

@@ -17,7 +17,7 @@ public class zoomdata {
     
     //--------------------------------------------------------------------------
     
-    static minhsp[] getblasthitsubset(minhsp[] blasthits,int[]selectednames){
+    static MinimalHsp[] getblasthitsubset(MinimalHsp[] blasthits,int[]selectednames){
         //convert the old sequence numbering to the new and remove all non-relevant blast hsp's
         int elements=java.lang.reflect.Array.getLength(selectednames);
         Vector tmpvec=new Vector();
@@ -31,10 +31,10 @@ public class zoomdata {
             qnum=String.valueOf(blasthits[i].query);
             hnum=String.valueOf(blasthits[i].hit);
             if(tmphash.containsKey(qnum)&&tmphash.containsKey(hnum)){
-                tmpvec.addElement(new minhsp(((Integer)tmphash.get(qnum)).intValue(),((Integer)tmphash.get(hnum)).intValue(),blasthits[i].val));
+                tmpvec.addElement(new MinimalHsp(((Integer)tmphash.get(qnum)).intValue(),((Integer)tmphash.get(hnum)).intValue(),blasthits[i].val));
             }
         }//end for i
-        minhsp[] retarr=new minhsp[tmpvec.size()];
+        MinimalHsp[] retarr=new MinimalHsp[tmpvec.size()];
         tmpvec.copyInto(retarr);
         return retarr;
     }//end getblasthitsubset
