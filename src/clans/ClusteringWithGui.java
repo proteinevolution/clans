@@ -926,7 +926,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void helpmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpmenuitemActionPerformed
         // "help" was clicked
-        new helpwindow(this,true).setVisible(true);
+        new WindowHelp(this,true).setVisible(true);
     }//GEN-LAST:event_helpmenuitemActionPerformed
     
     private void aboutmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutmenuitemActionPerformed
