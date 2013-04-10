@@ -931,7 +931,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void aboutmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutmenuitemActionPerformed
         // the about clans menu was selected
-        new aboutwindow(this,true).setVisible(true);
+        new WindowAbout(this,true).setVisible(true);
     }//GEN-LAST:event_aboutmenuitemActionPerformed
     
     private void antialiasingcheckboxmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_antialiasingcheckboxmenuitemActionPerformed
