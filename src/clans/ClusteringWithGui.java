@@ -22,16 +22,25 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 */
 	private static final long serialVersionUID = -1310615823184297259L;
 
-	/** Creates new form clustertest */
+	
+	/**
+	 * 
+	 */
     public ClusteringWithGui() {
         initComponents();
     }
     
+    
+    /**
+     *     
+     * @param data contains information about the command-line parameters
+     */
     public ClusteringWithGui(ClusterData data){
     	draw1=new drawpanel();
         initComponents();
-        System.out.println("done init");
+
         this.data=data;
+        
         data.nographics = false;
         data.mineval=data.eval;
         data.pvalue_threshold=data.pval;
@@ -45,7 +54,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }else{
             data.usescval=false;
         }
-        System.out.println("seqnum="+data.seqnum);
+        
         data.seqlengths=new float[data.seqnum];
         float maxlength=0;
         for(int i=0;i<data.seqnum;i++){
@@ -57,30 +66,33 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         for(int i=0;i<data.seqnum;i++){
             data.seqlengths[i]/=maxlength;
         }//end for i
+        
         textfield_cutoff_value.setText(String.valueOf(data.pvalue_threshold));
         textfield_info_min_blast_evalue.setText(String.valueOf(data.pvalue_threshold));
-        System.out.println("initializing, please wait");
+
         //now initialize the stuff
         mousestart[0]=0;
         mousestart[1]=0;
         mousemove[0]=0;
         mousemove[1]=0;
         draw1.init();
+        
         //and now initialize a run
         initgraph();
 
         button_select_all_or_clear.setText("Select All");
-        //System.out.println("done all; displaying now");
+
         if(new File("positionfile.dat").canRead()){
             System.out.println("reading former data");
             data.myposarr=readsave.readpos();
             data.posarr=data.myposarr;
         }
-        System.out.println("done init.");
+        
         if(data.errbuff.length()>0){
             //If I have had errors up to this point
             new errwindow(this,true,data.errbuff.toString()).setVisible(true);
         }
+        
         if(data.getAbsoluteInputfileName() != null){
             loaddata(data.getAbsoluteInputfileName());
         }
@@ -323,6 +335,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
         getContentPane().add(buttonpanel, java.awt.BorderLayout.SOUTH);
 
+        
         menu_file.setText("File");
         menu_file.setMnemonic(KeyEvent.VK_F);
 
@@ -408,7 +421,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         });
         menu_file.add(loadgroupsmenuitem);
 
-        
         jMenuBar1.add(menu_file);
 
         
@@ -2491,11 +2503,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         mousemove[0]=0;
         mousemove[1]=0;
         if(mythread.didrun==false || mythread.stop==true){//if this thread was never started or stopped
-            String tmpstr="";
-            if(data.mymovearr==null){
-                javax.swing.JOptionPane.showMessageDialog(this,"WARNING: No data currently available; please load some data!");
+            
+            if (! contains_data(true)) {
                 return;
             }
+            
+            String tmpstr="";
             if(myoptionswindow!=null){
                 try{
                     tmpstr=myoptionswindow.coolfield.getText();
