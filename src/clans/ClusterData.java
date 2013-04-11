@@ -13,10 +13,6 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
 
-/**
- * 
- * @author tancred
- */
 public class ClusterData {
 
     // variables initialized on creation
@@ -146,30 +142,40 @@ public class ClusterData {
      * Sets the filename as an absolute one independent of whether the input filename is relative or absolute.
      * 
      * @param new_filename
-     *            a relative or absolute input filename
+     *            a relative or absolute input filename or null
      */
     public void setInputFilename(String new_filename) {
 
         this.input_filename = new_filename;
+
+        if (new_filename == null) {
+            return;
+        }
+
         if (!new File(new_filename).isAbsolute()) {
             // the directory java was executed from is used as basis for all relative filenames
-            this.input_filename = System.getProperty("user.dir") + System.getProperty("file.separator") + new_filename;
+            input_filename = System.getProperty("user.dir") + System.getProperty("file.separator") + new_filename;
         }
     }
 
     /**
      * 
-     * @return the absolute filename of the file associated with this clustering
+     * @return the absolute filename of the file associated with this clustering or null if the filename is not set
      */
     public String getAbsoluteInputfileName() {
-        return this.input_filename;
+        return input_filename;
     }
 
     /**
      * 
-     * @return the base name of the file associated with this clustering
+     * @return the base name of the file associated with this clustering or null if the filename is not set
      */
     public String getBaseInputfileName() {
+        
+        if (input_filename == null) {
+            return null;
+        }
+        
         return new File(this.input_filename).getName();
     }
 
