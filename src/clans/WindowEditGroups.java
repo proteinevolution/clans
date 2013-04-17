@@ -719,19 +719,24 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private void colorbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_colorbuttonActionPerformed
 		// change color for the currently selected sequence groups
 		int[] currsel = groupslist.getSelectedIndices();
-		if (java.lang.reflect.Array.getLength(currsel) > 0) {
+		if (currsel.length > 0) {
 			if ((currsel[0] > -1) && (currsel[0] <= parent.data.seqgroupsvec.size())) {
-				java.awt.Color newcolor = parent.data.seqgroupsvec.elementAt(currsel[0]).color;
+				java.awt.Color oldcolor = parent.data.seqgroupsvec.elementAt(currsel[0]).color;
+				java.awt.Color newcolor = null;
 				try {
-					newcolor = JColorChooser.showDialog(this, "Select New Color", newcolor);
+					newcolor = JColorChooser.showDialog(this, "Select New Color", oldcolor);
 				} catch (java.awt.HeadlessException e) {
 					System.err.println("HeadlessException!");
 				}
-				colorbutton.setBackground(newcolor);
-				for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
-					parent.data.seqgroupsvec.elementAt(currsel[i]).color = newcolor;
+				
+				if (newcolor != null) {
+				    colorbutton.setBackground(newcolor);
+	                for (int i = currsel.length - 1; i >= 0; i--) {
+	                    parent.data.seqgroupsvec.elementAt(currsel[i]).color = newcolor;
+	                }
 				}
 			}
+			
 			this.repaint();
 			parent.groupseqscolor = parent.data.seqgroupsvec.elementAt(currsel[0]).color;
 			parent.repaint();
