@@ -9,10 +9,10 @@ package clans;
  *
  * @author  tancred
  */
-public class changecolordialog extends javax.swing.JDialog {
+public class DialogChangeConnectionColors extends javax.swing.JDialog {
 
     /** Creates new form changecolordialog */
-    public changecolordialog(ClusteringWithGui parent, boolean modal) {
+    public DialogChangeConnectionColors(ClusteringWithGui parent, boolean modal) {
         super(parent, modal);
         this.parent = parent;
         this.colornum = java.lang.reflect.Array.getLength(colorarr);
@@ -606,7 +606,7 @@ public class changecolordialog extends javax.swing.JDialog {
     public static void changecolor(ClusteringWithGui parent, java.awt.Color[] incolorarr) {
         //this should replace the colors in colorarr with new ones
         colorarr = incolorarr;
-        new changecolordialog(parent, false).setVisible(true);
+        new DialogChangeConnectionColors(parent, false).setVisible(true);
     }//en getnewcolors
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel bestlabel;

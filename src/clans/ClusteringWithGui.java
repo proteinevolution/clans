@@ -2056,7 +2056,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void changecolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changecolormenuitemActionPerformed
         // change the colors
-        changecolordialog.changecolor(this,data.colorarr);
+        DialogChangeConnectionColors.changecolor(this,data.colorarr);
         repaint();
     }//GEN-LAST:event_changecolormenuitemActionPerformed
     
