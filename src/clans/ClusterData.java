@@ -179,18 +179,27 @@ public class ClusterData {
         return new File(this.input_filename).getName();
     }
 
+    /**
+     * Resets the draw order so that it will be recomputed the next time it is used. 
+     */
     public void resetDrawOrder() {
         draworder = new ArrayList<ArrayList<int[]>>();
     }
 
-    // --------------------------------------------------------------------------
+    /**
+     * load stuff from a savefile !!!
+     * NOTE!!!: this was edited so as to combine hsp's with the same query-hit combination irrespective of which
+     * sequence is the query and which the hit this is a valid approach in this case, as I later on anyways symmetrize
+     * the sequence interactions
+     * 
+     * @param infile the file to load data from
+     * @return
+     */
     static saverunobject load_run_from_file(File infile) {
-        // load stuff from a savefile
-        // !!!NOTE!!!: this was edited so as to combine hsp's with the same query-hit combination irrespective of which
-        // sequence is the query and which the hit
-        // this is a valid approach in this case, as I later on anyways symmetrize the sequence interactions
+         
         saverunobject myrun = new saverunobject();
         myrun.file = null;// if myrun has a filename all was read ok
+        
         try {
             BufferedReader buffered_file_handle = new BufferedReader(new FileReader(infile));
 
@@ -305,10 +314,9 @@ public class ClusterData {
 
         if (myrun.posarr == null) {
             // give it random values
-            int num = java.lang.reflect.Array.getLength(myrun.inaln);
             Random rand = new Random(System.currentTimeMillis());
-            myrun.posarr = new float[num][3];
-            for (int i = 0; i < num; i++) {
+            myrun.posarr = new float[myrun.inaln.length][3];
+            for (int i = 0; i < myrun.inaln.length; i++) {
                 myrun.posarr[i][0] = rand.nextFloat();
                 myrun.posarr[i][1] = rand.nextFloat();
                 myrun.posarr[i][2] = rand.nextFloat();
@@ -319,6 +327,10 @@ public class ClusterData {
         return myrun;
     }
 
+    /**
+     * Read data from a CLANS format file.d
+     * @param input_filename the input filename
+     */
     public void load_clans_file(String input_filename) {
 
         saverunobject loaded_data = ClusterData.load_run_from_file(new java.io.File(input_filename));
@@ -417,11 +429,9 @@ public class ClusterData {
         changedvals = true;
 
         if (loaded_data.colorarr != null) {
-            System.out.println("setting colorarr");
             colorarr = loaded_data.colorarr;
         }
         if (loaded_data.colorcutoffs != null) {
-            System.out.println("setting colorcutoffs");
             colorcutoffs = loaded_data.colorcutoffs;
         }
 
@@ -441,9 +451,12 @@ public class ClusterData {
         }
     }
 
-    // --------------------------------------------------------------------------
-    static saverunobject load_biolayout_file(File infile) {
-        // this is supposed to read data from a biolayout input file
+    /**
+     * Read data from a biolayout format file. 
+     * @param input_filename the input filename
+     * @return
+     */
+    static saverunobject load_biolayout_file(File input_filename) {
         saverunobject myrun = new saverunobject();
         float attval;
         String name1;
@@ -451,27 +464,32 @@ public class ClusterData {
         ArrayList<String> namelist = new ArrayList<String>();
         ArrayList<minattvals> datlist = new ArrayList<minattvals>();
         try {
-            BufferedReader inread = new BufferedReader(new FileReader(infile));
+            BufferedReader inread = new BufferedReader(new FileReader(input_filename));
             String inline;
             String[] tmparr;
             int vals = 0;
             int seq1num, seq2num, seqnum = 0;
             HashMap<String, Integer> nameshash = new HashMap<String, Integer>();
+           
             while ((inline = inread.readLine()) != null) {
                 if (inline.length() == 0) {
                     continue;
+              
                 } else if (inline.startsWith("//")) {
                     continue;
+                
                 } else {// if this is contact info
                     // split the line on spaces either in two or three
                     tmparr = inline.split("\\s+");
-                    if (java.lang.reflect.Array.getLength(tmparr) == 2) {
+                    
+                    if (tmparr.length == 2) {
                         if ((vals != 2) && (vals != 0)) {
                             System.out.println("ERROR found 2 elements (expected 3) on line '" + inline + "'");
-                            System.err.println("Mixed 2 and 3 element entries in file " + infile.getName()
+                            System.err.println("Mixed 2 and 3 element entries in file " + input_filename.getName()
                                     + " the graph layout WILL misrepresent distances");
                             System.err.println("NEVER mix 2 and 3 element entries!");
                         }
+                        
                         vals = 2;
                         // then assign the connection a strength of 1
                         name1 = tmparr[0];
@@ -479,7 +497,6 @@ public class ClusterData {
                         attval = 1;
                         // now see if the names are already known, else, add as new names
                         if (nameshash.containsKey(name1) == false) {
-                            // System.out.println("new name "+name1);
                             namelist.add(name1);
                             seq1num = seqnum;
                             nameshash.put(name1, new Integer(seq1num));
@@ -487,6 +504,7 @@ public class ClusterData {
                         } else {
                             seq1num = ((Integer) nameshash.get(name1)).intValue();
                         }
+
                         if (nameshash.containsKey(name2) == false) {
                             // System.out.println("new name "+name2);
                             namelist.add(name2);
@@ -497,13 +515,15 @@ public class ClusterData {
                             seq2num = ((Integer) nameshash.get(name2)).intValue();
                         }
                         datlist.add(new minattvals(seq1num, seq2num, attval));
-                    } else if (java.lang.reflect.Array.getLength(tmparr) == 3) {
+                        
+                    } else if (tmparr.length == 3) {
                         if ((vals != 3) && (vals != 0)) {
                             System.out.println("ERROR found 3 elements (expected 2) on line '" + inline + "'");
-                            System.err.println("Mixed 2 and 3 element entries in file " + infile.getName()
+                            System.err.println("Mixed 2 and 3 element entries in file " + input_filename.getName()
                                     + " the graph layout WILL misrepresent distances");
                             System.err.println("NEVER mix 2 and 3 element entries!");
                         }
+                        
                         vals = 3;
                         name1 = tmparr[0];
                         name2 = tmparr[1];
@@ -516,7 +536,6 @@ public class ClusterData {
                         }
                         // now see if the names are already known, else, add as new names
                         if (nameshash.containsKey(name1) == false) {
-                            // System.out.println("new name "+name1);
                             namelist.add(name1);
                             seq1num = seqnum;
                             nameshash.put(name1, new Integer(seq1num));
@@ -524,8 +543,8 @@ public class ClusterData {
                         } else {
                             seq1num = ((Integer) nameshash.get(name1)).intValue();
                         }
+
                         if (nameshash.containsKey(name2) == false) {
-                            // System.out.println("new name "+name2);
                             namelist.add(name2);
                             seq2num = seqnum;
                             nameshash.put(name2, new Integer(seq2num));
@@ -534,18 +553,20 @@ public class ClusterData {
                             seq2num = ((Integer) nameshash.get(name2)).intValue();
                         }
                         datlist.add(new minattvals(seq1num, seq2num, attval));
+
                     } else {
                         System.err.println("ERROR: line '" + inline + "' does not correspond to known format");
                         inread.close();
                         return myrun;
                     }
-                }// end if not empty or // line
-            }// end while reading from file
+                }
+            }
             inread.close();
         } catch (IOException ioe) {
-            System.err.println("IOERROR reading from " + infile.getName());
+            System.err.println("IOERROR reading from " + input_filename.getName());
             return myrun;
         }
+       
         // now make an array out of the arrayList
         myrun.attvals = (minattvals[]) datlist.toArray(new minattvals[0]);
         java.util.Random rand = new java.util.Random(System.currentTimeMillis());
@@ -556,29 +577,35 @@ public class ClusterData {
             myrun.posarr[i][0] = rand.nextFloat();
             myrun.posarr[i][1] = rand.nextFloat();
             myrun.posarr[i][2] = rand.nextFloat();
-        }// end for i
-         // now normalize the attraction values and symmetrize the array of attvals
-        myrun.file = infile;// marker for successful read
-        return myrun;
-    }// end loadrunbiolayout
+        }
 
-    // --------------------------------------------------------------------------
-    static saverunobject load_matrix_file(File infile) {
-        System.out.println("reding matrixdata");
-        // load data from a file with fasta format sequence input (sequence length can be null)
-        // and a matrix with pairwise similarity values
-        // format:
-        // sequences=number_of_sequences
-        // <seqs>
-        // sequences (fasta format, sequences optional, names mandatory)
-        // </seqs>
-        // <mtx>
-        // matrix_with_attracion-values
-        // </mtx>
+        // now normalize the attraction values and symmetrize the array of attvals
+        myrun.file = input_filename; // marker for successful read
+        return myrun;
+    }
+
+    /**
+     * Read a file in matrix format
+     * load data from a file with fasta format sequence input (sequence length can be null) and a matrix with pairwise
+     * similarity values. Format:
+     *     sequences=number_of_sequences
+     *     <seqs> // FASTA format sequence records [headers are mandatory, sequences are optional]
+     *     >header 1
+     *     SEQUENCE1
+     *     </seqs>
+     *     <mtx>
+     *     matrix_with_attracion-values
+     *     </mtx>
+     * @param input_filename
+     * @return
+     */
+    static saverunobject load_matrix_file(File input_filename) {
+        System.out.println("reading matrixdata");
+      
         saverunobject myrun = new saverunobject();
         myrun.file = null;// if myrun has a filename all was read ok
         try {
-            BufferedReader inread = new BufferedReader(new FileReader(infile));
+            BufferedReader inread = new BufferedReader(new FileReader(input_filename));
             String inline;
             int seqs = -1;
             while ((inline = inread.readLine()) != null) {
@@ -607,11 +634,11 @@ public class ClusterData {
                         String currseq = "";
                         while (((inline = inread.readLine().trim()) != null)
                                 && (inline.equalsIgnoreCase("</seqs>") == false)) {
-                            // System.out.println("inline='"+inline+"'");
-                            // skip empty lines
+
                             if (inline.length() == 0) {
                                 continue;
                             }
+                            
                             // read the sequence data
                             if (inline.startsWith(">")) {
                                 if (currname.length() > 0) {
@@ -625,7 +652,7 @@ public class ClusterData {
                             } else {
                                 currseq += inline;
                             }
-                        }// end seq part
+                        }
                         myrun.inaln[counter] = new AminoAcidSequence();
                         myrun.inaln[counter].name = currname;
                         myrun.inaln[counter].seq = currseq;
@@ -636,6 +663,7 @@ public class ClusterData {
                             return myrun;
                         }
                         System.out.println("done reading sequences:" + seqs);
+
                     } else if (inline.equalsIgnoreCase("<mtx>")) {
                         System.out.println("reading matrix");
                         int counter = 0;
@@ -650,7 +678,7 @@ public class ClusterData {
                                 continue;
                             }
                             tmparr = inline.trim().split("\\s+");
-                            if (java.lang.reflect.Array.getLength(tmparr) != seqs) {
+                            if (tmparr.length != seqs) {
                                 System.err.println("ERROR reading positions from " + inline + "; expecting " + seqs
                                         + " values");
                                 inread.close();
@@ -676,21 +704,23 @@ public class ClusterData {
                                             tmphash.put(key, curratt);
                                         }
                                     }
-                                }// end for i
+                                }
                             } catch (NumberFormatException ne) {
                                 System.err.println("ERROR, unable to parse float array from " + inline);
                                 inread.close();
                                 return myrun;
                             }
                             counter++;
-                        }// end while pos
+                        }
                         myrun.attvals = (minattvals[]) (tmphash.values().toArray(new minattvals[0]));
                         System.out.println("done reading matrix:" + counter);
+                        
                         if (counter != seqs) {
                             System.err.println("ERROR, not found the necessary number of positions");
                             inread.close();
                             return myrun;
                         }
+                    
                     } else if (inline.equalsIgnoreCase("<seqgroups>")) {
                         // while I am reading the sequence groups
                         String[] tmparr;
@@ -702,11 +732,13 @@ public class ClusterData {
                                 continue;
                             }
                             tmparr = inline.split("=");
-                            if (java.lang.reflect.Array.getLength(tmparr) != 2) {
+                            
+                            if (tmparr.length != 2) {
                                 System.err.println("ERROR reading from savefile on line '" + inline + "'");
                                 inread.close();
                                 return myrun;
                             }
+                            
                             if (tmparr[0].equalsIgnoreCase("name")) {
                                 if (currgroup != null) {
                                     myrun.seqgroupsvec.addElement(currgroup);
@@ -727,12 +759,11 @@ public class ClusterData {
                                 }
                             } else if (tmparr[0].equalsIgnoreCase("numbers")) {
                                 tmparr = tmparr[1].split(";");
-                                int num = java.lang.reflect.Array.getLength(tmparr);
-                                int[] retarr = new int[num];
+                                int[] retarr = new int[tmparr.length];
                                 try {
-                                    for (int i = 0; i < num; i++) {
+                                    for (int i = 0; i < tmparr.length; i++) {
                                         retarr[i] = Integer.parseInt(tmparr[i]);
-                                    }// end for i
+                                    }
                                 } catch (NumberFormatException ne) {
                                     System.err.println("ERROR parsing numbers from '" + inline + "'");
                                     inread.close();
@@ -744,7 +775,7 @@ public class ClusterData {
                                 inread.close();
                                 return myrun;
                             }
-                        }// end while !=/seqgroups
+                        }
                         if (currgroup != null) {
                             myrun.seqgroupsvec.addElement(currgroup);
                         }
@@ -759,19 +790,23 @@ public class ClusterData {
                     inread.close();
                     return myrun;
                 }
-            }// end while reading from file
+            }
             inread.close();
         } catch (IOException e) {
-            System.err.println("IOError unable to read from " + infile.getName());
+            System.err.println("IOError unable to read from " + input_filename.getName());
             return myrun;
         }
-        myrun.file = infile;
+        myrun.file = input_filename;
         return myrun;
-    }// end loadrunalternate
+    }
 
-    public void save_to_file(java.io.File output_file) {
+    /**
+     * Writes a CLANS format output file to disk.
+     * @param output_filename filename for the output
+     */
+    public void save_to_file(java.io.File output_filename) {
         saverunobject myrun = new saverunobject();
-        myrun.file = output_file;
+        myrun.file = output_filename;
         myrun.inaln = sequences;
         myrun.blasthits = blasthits;
         myrun.attvals = myattvals;
@@ -820,52 +855,58 @@ public class ClusterData {
         myrun = null;
     }
 
-    public void append_groups_or_clusters_from_file(File infile) {
-        // read the seqgroup information from a separate file.
-        // the file has to either contain sequence names or numbers. if numbers,
-        // the names of the sequences have to be specified as well.
-        // read the groups, assign sequence names where necessary and find those names in namearr
-        // then assign groups based on the position of the sequence in namearr
+    /**
+     * read the seqgroup information from a separate file. the file has to either contain sequence names or numbers. if
+     * numbers, the names of the sequences have to be specified as well. read the groups, assign sequence names where
+     * necessary and find those names in namearr then assign groups based on the position of the sequence in namearr
+     * 
+     * @param input_filename
+     */
+    public void append_groups_or_clusters_from_file(File input_filename) {
+         
         try {
-            BufferedReader inread = new BufferedReader(new FileReader(infile));
+            BufferedReader inread = new BufferedReader(new FileReader(input_filename));
             String firstline = inread.readLine();
             inread.close();
+            
             if (firstline.startsWith("<ids>")) {
                 // I want to read cluster data not group data
                 System.out.println("reading cluster data");
-                append_clusters_from_file(infile);
+                append_clusters_from_file(input_filename);
             }// else do the usual read
-            inread = new BufferedReader(new FileReader(infile));
+            
+            inread = new BufferedReader(new FileReader(input_filename));
             Vector<String> tmpvec_strings = new Vector<String>();
             Vector<Integer> tmpvec_integers = new Vector<Integer>();
             HashMap<String, Integer> mynamehash = new HashMap<String, Integer>();
             String[] tmparr;
             String tmpstr = "";
-            int elements = java.lang.reflect.Array.getLength(sequence_names);
-            // System.out.println("parentnames="+elements);
-            for (int i = 0; i < elements; i++) {
+            
+            for (int i = 0; i < sequence_names.length; i++) {
                 tmparr = sequence_names[i].split("\\s+");
                 mynamehash.put(tmparr[0], new Integer(i));
-                // System.out.println("adding '"+tmparr[0]+" as "+i);
-            }// end for i
+            }
+            
             String[] mynamearr = null;
             int maxnum = 0;
             String inline;
             while ((inline = inread.readLine()) != null) {
-                // skip empty lines
+ 
                 if (inline.length() == 0) {
                     continue;
                 }
+                
                 if (inline.equalsIgnoreCase("<seq>")) {
                     // read the sequence names used in this file
                     while ((inline = inread.readLine()) != null) {
-                        // skip empty lines
+
                         if (inline.length() == 0) {
                             continue;
                         }
+                        
                         if (inline.equalsIgnoreCase("</seq>")) {
-                            // exit this while loop
-                            break;
+                              break;
+                            
                         } else if (inline.startsWith(">")) {
                             tmpstr = inline.substring(1).trim();
                             tmparr = tmpstr.split("\\s+");
@@ -875,6 +916,7 @@ public class ClusterData {
                     maxnum = tmpvec_strings.size();
                     mynamearr = new String[maxnum];
                     tmpvec_strings.copyInto(mynamearr);
+                    
                 } else if (inline.equalsIgnoreCase("<seqgroups>")) {
                     // read the groups defined in this file; format is CLANS
                     if (maxnum == 0) {
@@ -889,17 +931,19 @@ public class ClusterData {
                     int size = 0, tmpval;
                     boolean hide = false;
                     while ((inline = inread.readLine()) != null) {
-                        // skip empty lines
+
                         if (inline.length() == 0) {
                             continue;
                         }
+                        
                         if (inline.equalsIgnoreCase("</seqgroups>")) {
-                            // exit this while loop
                             break;
                         }
+                        
                         if (inline.startsWith("name=")) {
                             name = inline.substring(5).trim();
                             type = 0;
+                            
                         } else if (inline.startsWith("type=")) {
                             try {
                                 tmpstr = inline.substring(5).trim();
@@ -907,6 +951,7 @@ public class ClusterData {
                             } catch (NumberFormatException ne) {
                                 System.err.println("ERROR, unable to parse int from '" + tmpstr + "'");
                             }
+                            
                         } else if (inline.startsWith("size=")) {
                             try {
                                 tmpstr = inline.substring(5).trim();
@@ -914,6 +959,7 @@ public class ClusterData {
                             } catch (NumberFormatException ne) {
                                 System.err.println("ERROR, unable to parse int from '" + tmpstr + "'");
                             }
+                            
                         } else if (inline.startsWith("hide=")) {
                             try {
                                 tmpstr = inline.substring(5).trim();
@@ -926,15 +972,19 @@ public class ClusterData {
                             } catch (NumberFormatException ne) {
                                 System.err.println("ERROR, unable to parse int from '" + tmpstr + "'");
                             }
+                            
                         } else if (inline.startsWith("numbers=")) {
                             count++;
                             seqgroup mygroup = new seqgroup();
+                            
                             if (name != null) {
                                 mygroup.name = name;
                                 name = null;
+                            
                             } else {
                                 mygroup.name = String.valueOf(count);
                             }
+                            
                             mygroup.type = type;
                             mygroup.color = color;
                             mygroup.hide = hide;
@@ -943,51 +993,50 @@ public class ClusterData {
                             color = java.awt.Color.red;
                             // now convert the numbers you read to the numbers used in namearr
                             tmparr = inline.substring(8).trim().split(";");
-                            elements = java.lang.reflect.Array.getLength(tmparr);
-                            int[] tmp = new int[elements];
-                            // System.out.println("in:"+inline);
+
+                            int[] tmp = new int[tmparr.length];
+
                             try {
-                                for (int i = 0; i < elements; i++) {
+                                for (int i = 0; i < tmparr.length; i++) {
                                     tmpstr = tmparr[i];
                                     tmp[i] = Integer.parseInt(tmpstr);
-                                }// end for i
+                                }
                             } catch (NumberFormatException ne) {
                                 System.err
                                         .println("Unable to parse int from '" + tmpstr + "' in line '" + inline + "'");
                                 continue;
                             }
                             tmpvec_strings.clear();
-                            for (int i = 0; i < elements; i++) {
+                            for (int i = 0; i < tmparr.length; i++) {
                                 tmpstr = mynamearr[tmp[i]];
-                                // System.out.print(tmpstr+"/");
+
                                 if (mynamehash.containsKey(tmpstr)) {
                                     tmpvec_integers.addElement(mynamehash.get(tmpstr));
-                                    // System.out.println("\t"+tmpstr+"-->"+((Integer)mynamehash.get(tmpstr)).intValue()+":"+namearr[((Integer)mynamehash.get(tmpstr)).intValue()]+";");
                                 } else {
                                     System.err.println("no correspondence found for '" + tmpstr
-                                            + "' in current graph; skipping entry "
-                                            + java.lang.reflect.Array.getLength(sequence_names));
+                                            + "' in current graph; skipping entry " + sequence_names.length);
                                 }
-                            }// end for i
-                             // System.out.println();
+                            }
+                            
                             elements = tmpvec_strings.size();
                             mygroup.sequences = new int[elements];
-                            // System.out.print("out:");
+
                             for (int i = 0; i < elements; i++) {
                                 mygroup.sequences[i] = ((Integer) tmpvec_integers.elementAt(i)).intValue();
-                                // System.out.print(mygroup.sequences[i]+";");
-                            }// end for i
-                             // System.out.println();
+                            }
+                            
                             if (elements > 0) {
                                 this.seqgroupsvec.addElement(mygroup);
                             }
+                            
                         } else if (inline.startsWith("color=")) {
                             tmpstr = inline.substring(6).trim();
                             tmparr = tmpstr.split(";");
-                            if ((java.lang.reflect.Array.getLength(tmparr) != 3)
-                                    && (java.lang.reflect.Array.getLength(tmparr) != 4)) {
+                            
+                            if ((tmparr.length != 3) && (tmparr.length != 4)) {
                                 System.err.println("ERROR reading color info from line '" + inline + "'");
                             }
+                            
                             int red, green, blue;
                             try {
                                 tmpstr = tmparr[0];
@@ -996,13 +1045,14 @@ public class ClusterData {
                                 green = Integer.parseInt(tmpstr);
                                 tmpstr = tmparr[2];
                                 blue = Integer.parseInt(tmpstr);
-                                if (java.lang.reflect.Array.getLength(tmparr) < 4) {
+                                if (tmparr.length < 4) {
                                     color = new java.awt.Color(red, green, blue);
                                 } else {
                                     tmpstr = tmparr[3];
                                     int alpha = Integer.parseInt(tmpstr);
                                     color = new java.awt.Color(red, green, blue, alpha);
                                 }
+                                
                             } catch (NumberFormatException ne) {
                                 System.err
                                         .println("unable to convert '" + tmpstr + "' to int in line '" + inline + "'");
@@ -1011,23 +1061,25 @@ public class ClusterData {
                         }
                     }
                 }
-            }// end while
+            }
             inread.close();
+            
         } catch (IOException ioe) {
-            System.err.println("IOERROR; unable to read from file '" + infile.getAbsolutePath() + "'");
+            System.err.println("IOERROR; unable to read from file '" + input_filename.getAbsolutePath() + "'");
         }
-    }// end loadgroups
+    }
 
-    private void append_clusters_from_file(File infile) {
-        // read the cluster data generated by the iterative clustering approach
-        // (append groups to groupsvec)
-        // System.out.println("in loadcluster groupsvec.size=" + groupsvec.size());
+    /**
+     * read the cluster data generated by the iterative clustering approach (append groups to groupsvec)
+     * 
+     * @param input_filename
+     */
+    private void append_clusters_from_file(File input_filename) {
         HashMap<String, Integer> mynamehash = new HashMap<String, Integer>();
         String[] tmparr;
         String tmpstr = "";
-        int elements = java.lang.reflect.Array.getLength(sequence_names);
-        // System.out.println("parentnames="+elements);
-        for (int i = 0; i < elements; i++) {
+
+        for (int i = 0; i < sequence_names.length; i++) {
             tmparr = sequence_names[i].split("\\s+");
             if (mynamehash.containsKey(tmparr[0])) {
                 System.err.println("ERROR: non unique identifier in parent: name '" + tmparr[0]
@@ -1036,26 +1088,32 @@ public class ClusterData {
             } else {
                 mynamehash.put(tmparr[0], new Integer(i));
             }
-        }// end for i
-         // System.out.println("parent short names:" + mynamehash.size());
+        }
+        
         try {
-            BufferedReader inread = new BufferedReader(new FileReader(infile));
+            BufferedReader inread = new BufferedReader(new FileReader(input_filename));
             String inline;
             HashMap<String, Integer> clusternamehash = new HashMap<String, Integer>();
             String numberstring = "";
             String namestring = "";
+            
             while ((inline = inread.readLine()) != null) {
+            
                 if (inline.equalsIgnoreCase("<ids>")) {
                     System.out.println("reading cluster IDS");
                     boolean stopids = false;
+                    
                     while (stopids == false) {
                         inline = inread.readLine();
+                        
                         if (inline == null) {
                             System.err.println("ERROR, reached EOF before end of <ids>");
                             inread.close();
                             return;
+                        
                         } else if (inline.equalsIgnoreCase("</ids>")) {
                             stopids = true;
+                        
                         } else {
                             tmparr = inline.split("\\s+", 2);
                             numberstring = tmparr[0];
@@ -1074,39 +1132,45 @@ public class ClusterData {
                                 clusternamehash.put(numberstring, null);
                             }
                         }
-                    }// end while stopids==false
+                    }
                     System.out.println("DONE reading cluster IDS; found:" + clusternamehash.size());
+                
                 } else if (inline.equalsIgnoreCase("<clusters>")) {
                     tmpstr = inread.readLine();// next line contains offset=number (substring position 7)
                     float offset = 0;
+                    
                     try {
                         tmpstr = tmpstr.substring(7);
                         offset = Float.parseFloat(tmpstr);
+                    
                     } catch (NumberFormatException ne) {
                         System.err.println("ERROR trying to parse float from '" + tmpstr + "'");
                         inread.close();
                         return;
                     }
+                    
                     System.out.println("reading clusters; offset=" + offset);
                     boolean stopclusters = false;
+              
                     while (stopclusters == false) {
                         inline = inread.readLine();
-                        // System.out.println("reading clusters line '"+inline+"'");
+
                         if (inline == null) {
                             System.err.println("ERROR, reached EOF before end of <clusters>");
                             inread.close();
                             return;
+
                         } else if (inline.equalsIgnoreCase("</clusters>")) {
-                            // System.out.println("STOPCLUSTERS");
                             stopclusters = true;
+
                         } else if (inline.equalsIgnoreCase("<cluster>")) {
-                            // System.out.print(".");
                             seqgroup mycluster = new seqgroup();
                             int clustersize = -1;
                             String nameline = inread.readLine();
                             String sizeline = inread.readLine();
                             String elementline = inread.readLine();
                             tmpstr = inread.readLine();// this should be </cluster>
+
                             if ((tmpstr.equalsIgnoreCase("</cluster>") == false)
                                     || (nameline.startsWith("name=") == false)
                                     || (sizeline.startsWith("size=") == false)
@@ -1117,11 +1181,8 @@ public class ClusterData {
                                 System.err.println(sizeline);
                                 System.err.println(elementline);
                                 System.err.println(tmpstr);
-                            } else {// all is well
-                                // System.out.println("read cluster:");
-                                // System.out.println("\t"+nameline);
-                                // System.out.println("\t"+sizeline);
-                                // System.out.println("\t"+elementline);
+                            
+                            } else {
                                 mycluster.name = nameline.substring(5) + "_of:" + offset;
                                 try {
                                     clustersize = Integer.parseInt(sizeline.substring(5));
@@ -1131,10 +1192,10 @@ public class ClusterData {
                                     return;
                                 }
                                 tmparr = elementline.substring(9).split(";");
-                                if (java.lang.reflect.Array.getLength(tmparr) != clustersize) {
+                                if (tmparr.length != clustersize) {
                                     System.err.println("WARNING: unequal cluster size: should=" + clustersize + " is="
-                                            + java.lang.reflect.Array.getLength(tmparr));
-                                    clustersize = java.lang.reflect.Array.getLength(tmparr);
+                                            + tmparr.length);
+                                    clustersize = tmparr.length;
                                 }
                                 mycluster.sequences = new int[clustersize];
                                 Integer myint;
@@ -1144,110 +1205,116 @@ public class ClusterData {
                                     } else {
                                         System.err.println("WARNING: undefined name for '" + tmparr[i] + "'");
                                     }
-                                }// end for i
-                                 // System.out.println("adding cluster '"+mycluster.name+"' with "+java.lang.reflect.Array.getLength(mycluster.sequences)+" elements");
+                                }
+
                                 this.seqgroupsvec.add(mycluster);
                             }
                         } else {
                             System.out.println("read unknown line '" + inline + "'");
                         }
-                    }// end while stopclusters==false
-                }// else don't do anything
-            }// end while reading file
+                    }
+                }
+            }
             inread.close();
+        
         } catch (IOException ioe) {
-            System.err.println("IOERROR; unable to read from file '" + infile.getAbsolutePath() + "'");
+            System.err.println("IOERROR; unable to read from file '" + input_filename.getAbsolutePath() + "'");
         }
         System.out.println("read " + this.seqgroupsvec.size() + " cluster entries");
-    }// end loadclusters
+    }
 
-    // --------------------------------------------------------------------------
-    private static void saverun(saverunobject in, String[] namesarr, boolean nographics) {
-        // save tha data to the selected file
+    /**
+     * Saves tha data to the selected file
+     * 
+     * @param input
+     * @param sequence_names
+     * @param nographics
+     */
+    private static void saverun(saverunobject input, String[] sequence_names, boolean nographics) {
         int i, j;
         try {
-            PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(in.file)));
+            PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(input.file)));
 
-            outwrite.println("sequences=" + in.inaln.length);
+            outwrite.println("sequences=" + input.inaln.length);
 
             outwrite.println("<param>");
 
-            outwrite.println("attfactor=" + in.attfactor);
-            outwrite.println("attvalpow=" + in.attvalpow);
-            outwrite.println("avgfoldchange=" + in.avgfoldchange);
+            outwrite.println("attfactor=" + input.attfactor);
+            outwrite.println("attvalpow=" + input.attvalpow);
+            outwrite.println("avgfoldchange=" + input.avgfoldchange);
 
-            outwrite.println("blastpath=" + in.blastpath);
+            outwrite.println("blastpath=" + input.blastpath);
 
-            outwrite.println("cluster2d=" + in.cluster2d);
+            outwrite.println("cluster2d=" + input.cluster2d);
 
             outwrite.print("colorarr=");
-            for (i = 0; i < java.lang.reflect.Array.getLength(in.colorarr); i++) {
-                java.awt.Color tmp = in.colorarr[i];
+            for (i = 0; i < input.colorarr.length; i++) {
+                java.awt.Color tmp = input.colorarr[i];
                 outwrite.print("(" + tmp.getRed() + ";" + tmp.getGreen() + ";" + tmp.getBlue() + "):");
-            }// end for i
+            }
             outwrite.println();
 
             outwrite.print("colorcutoffs=");
-            for (i = 0; i < java.lang.reflect.Array.getLength(in.colorcutoffs); i++) {
-                outwrite.print(in.colorcutoffs[i] + ";");
-            }// end for i
+            for (i = 0; i < input.colorcutoffs.length; i++) {
+                outwrite.print(input.colorcutoffs[i] + ";");
+            }
             outwrite.println();
 
-            outwrite.println("complexatt=" + in.complexatt);
-            outwrite.println("cooling=" + in.cooling);
-            outwrite.println("currcool=" + in.currcool);
+            outwrite.println("complexatt=" + input.complexatt);
+            outwrite.println("cooling=" + input.cooling);
+            outwrite.println("currcool=" + input.currcool);
 
-            outwrite.println("dampening=" + in.dampening);
-            outwrite.println("dotsize=" + in.dotsize);
+            outwrite.println("dampening=" + input.dampening);
+            outwrite.println("dotsize=" + input.dotsize);
 
-            outwrite.println("formatdbpath=" + in.formatdbpath);
+            outwrite.println("formatdbpath=" + input.formatdbpath);
 
-            outwrite.println("groupsize=" + in.groupsize);
+            outwrite.println("groupsize=" + input.groupsize);
 
-            outwrite.println("maxmove=" + in.maxmove);
-            outwrite.println("minattract=" + in.minattract);
+            outwrite.println("maxmove=" + input.maxmove);
+            outwrite.println("minattract=" + input.minattract);
 
-            if (in.namesdmp_file != null && in.nodesdmp_file != null) {
-                outwrite.println("namesdmp_file=" + in.namesdmp_file);
-                outwrite.println("nodesdmp_file=" + in.nodesdmp_file);
+            if (input.namesdmp_file != null && input.nodesdmp_file != null) {
+                outwrite.println("namesdmp_file=" + input.namesdmp_file);
+                outwrite.println("nodesdmp_file=" + input.nodesdmp_file);
             }
 
-            outwrite.println("ovalsize=" + in.ovalsize);
+            outwrite.println("ovalsize=" + input.ovalsize);
 
-            outwrite.println("pval=" + in.pval);
+            outwrite.println("pval=" + input.pval);
 
-            outwrite.println("repfactor=" + in.repfactor);
-            outwrite.println("repvalpow=" + in.repvalpow);
-            outwrite.println("rounds_done=" + in.rounds);
+            outwrite.println("repfactor=" + input.repfactor);
+            outwrite.println("repvalpow=" + input.repvalpow);
+            outwrite.println("rounds_done=" + input.rounds);
 
-            outwrite.println("showinfo=" + in.showinfo);
+            outwrite.println("showinfo=" + input.showinfo);
 
-            outwrite.println("usefoldchange=" + in.usefoldchange);
-            outwrite.println("usescval=" + in.usescval);
+            outwrite.println("usefoldchange=" + input.usefoldchange);
+            outwrite.println("usescval=" + input.usescval);
 
-            outwrite.println("zoom=" + in.zoom);
+            outwrite.println("zoom=" + input.zoom);
 
             outwrite.println("</param>");
 
-            if ((in.mapfiles != null) && (in.mapfiles.size() > 0)) {
+            if ((input.mapfiles != null) && (input.mapfiles.size() > 0)) {
                 outwrite.println("<function>");
-                int num = in.mapfiles.size();
+                int num = input.mapfiles.size();
                 for (i = 0; i < num; i++) {
-                    if ((in.lookupfiles != null) && (in.lookupfiles.get(i) != null)) {
-                        outwrite.println(((File) in.mapfiles.get(i)).getAbsolutePath() + "';'"
-                                + ((File) in.lookupfiles.get(i)).getAbsolutePath());
+                    if ((input.lookupfiles != null) && (input.lookupfiles.get(i) != null)) {
+                        outwrite.println(((File) input.mapfiles.get(i)).getAbsolutePath() + "';'"
+                                + ((File) input.lookupfiles.get(i)).getAbsolutePath());
                     } else {
-                        outwrite.println(((File) in.mapfiles.get(i)).getAbsolutePath() + "';'NONE");
+                        outwrite.println(((File) input.mapfiles.get(i)).getAbsolutePath() + "';'NONE");
                     }
-                }// end for i
+                }
                 outwrite.println("</function>");
             }
-            if (in.affyfiles != null) {
+            if (input.affyfiles != null) {
                 outwrite.println("<affyfiles>");
-                int repnum = in.affyfiles.size();
+                int repnum = input.affyfiles.size();
                 replicates rep;
                 for (i = 0; i < repnum; i++) {
-                    rep = (replicates) (in.affyfiles.get(i));
+                    rep = (replicates) (input.affyfiles.get(i));
                     outwrite.println("<");
                     outwrite.println("abbreviation=" + rep.abbreviation);
                     outwrite.println("replicates=" + rep.replicates);
@@ -1255,62 +1322,67 @@ public class ClusterData {
                     outwrite.println("name=" + rep.name);
                     outwrite.println("wtname=" + rep.wtname);
                     outwrite.print("replicate=");
-                    for (j = java.lang.reflect.Array.getLength(rep.replicate); --j >= 0;) {
+                    for (j = rep.replicate.length; --j >= 0;) {
                         outwrite.print(rep.replicate[j].getAbsolutePath() + "';'");
-                    }// end for j
+                    }
                     outwrite.println();
                     outwrite.print("wtreplicate=");
-                    for (j = java.lang.reflect.Array.getLength(rep.wtreplicate); --j >= 0;) {
+                    for (j = rep.wtreplicate.length; --j >= 0;) {
                         outwrite.print(rep.wtreplicate[j].getAbsolutePath() + "';'");
-                    }// end for j
+                    }
                     outwrite.println();
                     outwrite.println(">");
-                }// end for i
+                }
                 outwrite.println("</affyfiles>");
             }
             outwrite.println("<rotmtx>");
             for (i = 0; i < 3; i++) {
                 for (j = 0; j < 3; j++) {
-                    outwrite.print(in.rotmtx[i][j] + ";");
-                }// end for j
+                    outwrite.print(input.rotmtx[i][j] + ";");
+                }
                 outwrite.println();
-            }// end for i
+            }
             outwrite.println("</rotmtx>");
             // first write the sequences to file
             outwrite.println("<seq>");
-            for (i = 0; i < in.inaln.length; i++) {
-                outwrite.println(">" + namesarr[i]);
-                outwrite.println(in.inaln[i].seq);
+            for (i = 0; i < input.inaln.length; i++) {
+                outwrite.println(">" + sequence_names[i]);
+                outwrite.println(input.inaln[i].seq);
             }
             outwrite.println("</seq>");
+
             // write the sequence weights
-            if (in.weights != null) {
+            if (input.weights != null) {
                 outwrite.println("<weight>");
-                int weightsnum = java.lang.reflect.Array.getLength(in.weights);
-                for (i = 0; i < weightsnum; i++) {
-                    outwrite.println(">" + namesarr[i]);
-                    outwrite.println(in.weights[i]);
-                }// end for i
+                for (i = 0; i < input.weights.length; i++) {
+                    outwrite.println(">" + sequence_names[i]);
+                    outwrite.println(input.weights[i]);
+                }
                 outwrite.println("</weight>");
             }
+            
             // write the sequence groups
-            if ((in.seqgroupsvec != null) && (in.seqgroupsvec.size() > 0)) {
+            if ((input.seqgroupsvec != null) && (input.seqgroupsvec.size() > 0)) {
                 outwrite.println("<seqgroups>");
                 seqgroup mygroup;
-                for (i = 0; i < in.seqgroupsvec.size(); i++) {
-                    mygroup = (seqgroup) in.seqgroupsvec.elementAt(i);
-                    if (java.lang.reflect.Array.getLength(mygroup.sequences) == 0) {
+                for (i = 0; i < input.seqgroupsvec.size(); i++) {
+                    mygroup = (seqgroup) input.seqgroupsvec.elementAt(i);
+                    
+                    if (mygroup.sequences.length == 0) {
                         System.err.println("WARNING: seqgroup " + mygroup.name + " has zero elements; skipping save");
                         continue;
                     }
+                    
                     outwrite.println("name=" + mygroup.name);
                     outwrite.println("type=" + mygroup.type);
                     outwrite.println("size=" + mygroup.size);
+                    
                     if (mygroup.hide == true) {
                         outwrite.println("hide=1");
                     } else {
                         outwrite.println("hide=0");
                     }
+                    
                     outwrite.println("color=" + mygroup.color.getRed() + ";" + mygroup.color.getGreen() + ";"
                             + mygroup.color.getBlue() + ";" + mygroup.color.getAlpha());
                     outwrite.print("numbers=");
@@ -1318,73 +1390,85 @@ public class ClusterData {
                     Arrays.sort(mygroup.sequences);
                     for (j = 0; j < mygroup.sequences.length; j++) {
                         outwrite.print(mygroup.sequences[j] + ";");
-                    }// end for j
+                    }
                     outwrite.println();
-                }// end for i
+                }
                 outwrite.println("</seqgroups>");
             }
             // next write the sequence positions
             outwrite.println("<pos>");
-            for (i = 0; i < in.inaln.length; i++) {
-                outwrite.println(i + " " + in.posarr[i][0] + " " + in.posarr[i][1] + " " + in.posarr[i][2]);
-            }// end for i
+            for (i = 0; i < input.inaln.length; i++) {
+                outwrite.println(i + " " + input.posarr[i][0] + " " + input.posarr[i][1] + " " + input.posarr[i][2]);
+            }
             outwrite.println("</pos>");
-            if (in.blasthits != null) {
+            if (input.blasthits != null) {
                 // next write the blast hsp results
                 outwrite.println("<hsp>");
-                int hspnum = java.lang.reflect.Array.getLength(in.blasthits);
                 int tmpsize = 0;
-                for (i = 0; i < hspnum; i++) {
-                    outwrite.print(in.blasthits[i].query + " " + in.blasthits[i].hit + ":");
-                    tmpsize = java.lang.reflect.Array.getLength(in.blasthits[i].val);
+
+                for (i = 0; i < input.blasthits.length; i++) {
+                    outwrite.print(input.blasthits[i].query + " " + input.blasthits[i].hit + ":");
+                    tmpsize = input.blasthits[i].val.length;
+                    
                     for (j = 0; j < tmpsize; j++) {
-                        outwrite.print(in.blasthits[i].val[j] + " ");
-                    }// end for j
+                        outwrite.print(input.blasthits[i].val[j] + " ");
+                    }
+                    
                     outwrite.println();
-                }// end for i
+                }
                 outwrite.println("</hsp>");
-            } else if (in.attvals != null) {
+                
+            } else if (input.attvals != null) {
                 // write the attvals instead of the hsp's
                 outwrite.println("<att>");
-                int elements = java.lang.reflect.Array.getLength(in.attvals);
-                for (i = 0; i < elements; i++) {
-                    outwrite.println(in.attvals[i].query + " " + in.attvals[i].hit + " " + in.attvals[i].att);
+
+                for (i = 0; i < input.attvals.length; i++) {
+                    outwrite.println(input.attvals[i].query + " " + input.attvals[i].hit + " " + input.attvals[i].att);
                 }
+                
                 outwrite.println("</att>");
+                
             } else {
                 System.err.println("unable to print attraction values or list of HSP's to file");
                 javax.swing.JOptionPane.showMessageDialog(new javax.swing.JFrame(),
                         "unable to write attraction values or list of HSP's to file; no data");
             }
             outwrite.close();
+            
         } catch (IOException e) {
-            System.err.println("IOError writing to " + in.file.getName());
+            System.err.println("IOError writing to " + input.file.getName());
             if (nographics == false) {
                 javax.swing.JOptionPane.showMessageDialog(new javax.swing.JFrame(),
-                        "IOERROR writing to '" + in.file.getName() + "'");
-            }
-        }
-    }// end saverun
-
-    // --------------------------------------------------------------------------
-    public void save_attraction_values_to_file(File savefile) {
-        try {
-            PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(savefile)));
-            minattvals myatt;
-            for (int i = java.lang.reflect.Array.getLength(myattvals); --i >= 0;) {
-                myatt = myattvals[i];
-                outwrite.println(myatt.query + " " + myatt.hit + " " + myatt.att);
-            }// end for i
-            outwrite.close();
-        } catch (IOException e) {
-            System.err.println("IOError writing to " + savefile.getName());
-            if (nographics == false) {
-                javax.swing.JOptionPane.showMessageDialog(new javax.swing.JFrame(),
-                        "IOERROR writing to '" + savefile.getName() + "'");
+                        "IOERROR writing to '" + input.file.getName() + "'");
             }
         }
     }
 
+    /**
+     * Saves the attraction values to a file.
+     * @param output_file the file to which the output is written
+     */
+    public void save_attraction_values_to_file(File output_file) {
+        try {
+            PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(output_file)));
+            minattvals myatt;
+            for (int i = myattvals.length; --i >= 0;) {
+                myatt = myattvals[i];
+                outwrite.println(myatt.query + " " + myatt.hit + " " + myatt.att);
+            }
+            outwrite.close();
+        } catch (IOException e) {
+            System.err.println("IOError writing to " + output_file.getName());
+            if (nographics == false) {
+                javax.swing.JOptionPane.showMessageDialog(new javax.swing.JFrame(),
+                        "IOERROR writing to '" + output_file.getName() + "'");
+            }
+        }
+    }
+
+    /**
+     * Computes the attraction values.
+     */
     public void compute_attraction_values() {
 
         if (blasthits == null) {// possible (if alternate data source was loaded)
@@ -1392,10 +1476,10 @@ public class ClusterData {
             return;
         }
 
-        System.out.println("blasthits is size:" + java.lang.reflect.Array.getLength(blasthits));
+        System.out.println("blasthits is size:" + blasthits.length);
         ArrayList<minattvals> tmpvec = new ArrayList<minattvals>();
-        int datanum = java.lang.reflect.Array.getLength(blasthits);
-        HashMap<String, minattvals> myhash = new HashMap<String, minattvals>(datanum);
+        int number_of_blasthits = blasthits.length;
+        HashMap<String, minattvals> myhash = new HashMap<String, minattvals>(number_of_blasthits);
         float newatt;
         String key;
         float maxattval = 0;
@@ -1407,7 +1491,7 @@ public class ClusterData {
         if (rescalepvalues == false) {
             // make the attraction values
             if (attvalsimple) {
-                for (int i = datanum; --i >= 0;) {
+                for (int i = number_of_blasthits; --i >= 0;) {
                     if (blasthits[i].query < blasthits[i].hit) {
                         key = blasthits[i].query + "_" + blasthits[i].hit;
                     } else {
@@ -1449,9 +1533,9 @@ public class ClusterData {
                     if (curratt.att > maxattval) {
                         maxattval = curratt.att;
                     }
-                }// end for i
+                }
             } else {
-                for (int i = 0; i < datanum; i++) {
+                for (int i = 0; i < number_of_blasthits; i++) {
                     if (blasthits[i].query < blasthits[i].hit) {
                         key = blasthits[i].query + "_" + blasthits[i].hit;
                     } else {
@@ -1492,7 +1576,7 @@ public class ClusterData {
                     if (curratt.att > maxattval) {
                         maxattval = curratt.att;
                     }
-                }// end for i
+                }
             }
             // divide all vals by maxattval (-->range: 0-1)
             // standard, just divide all values by the maximum value
@@ -1501,13 +1585,12 @@ public class ClusterData {
                 for (int i = tmpvec.size() - 1; i >= 0; i--) {
                     if (((minattvals) tmpvec.get(i)).att == -1) {
                         ((minattvals) tmpvec.get(i)).att = 1;
-                        // System.out.println(((minattvals)tmpvec.elementAt(i)).query+" "+((minattvals)tmpvec.elementAt(i)).hit+" :"+((minattvals)tmpvec.elementAt(i)).att);
+
                     } else {
                         ((minattvals) tmpvec.get(i)).att /= maxattval;
-                        // System.out.println(((minattvals)tmpvec.elementAt(i)).query+" "+((minattvals)tmpvec.elementAt(i)).hit+" :"+((minattvals)tmpvec.elementAt(i)).att);
                     }
-                }// end for i
-                 // System.out.println("maxattval"+maxattval+" offset="+0);
+                }
+                
                 p2attfactor = maxattval;
                 p2attoffset = 0;
             } else {// if using scval
@@ -1518,7 +1601,7 @@ public class ClusterData {
             float minattval = java.lang.Float.MAX_VALUE;
             // rescale the attraction values to range from 0 to 1 (with the smallest positive non-zero value as zero.
             if (attvalsimple) {
-                for (int i = 0; i < datanum; i++) {
+                for (int i = 0; i < number_of_blasthits; i++) {
                     if (blasthits[i].query < blasthits[i].hit) {
                         key = blasthits[i].query + "_" + blasthits[i].hit;
                     } else {
@@ -1563,9 +1646,9 @@ public class ClusterData {
                     if ((curratt.att > 0) && (curratt.att < minattval)) {
                         minattval = curratt.att;
                     }
-                }// end for i
+                }
             } else {
-                for (int i = 0; i < datanum; i++) {
+                for (int i = 0; i < number_of_blasthits; i++) {
                     if (blasthits[i].query < blasthits[i].hit) {
                         key = blasthits[i].query + "_" + blasthits[i].hit;
                     } else {
@@ -1611,7 +1694,7 @@ public class ClusterData {
                     if ((curratt.att > 0) && (curratt.att < minattval)) {
                         minattval = curratt.att;
                     }
-                }// end for i
+                }
             }
             // and divide all vals by maxattval and offset by minattval(-->range: 0-1)
             float divval = maxattval - minattval;
@@ -1621,19 +1704,19 @@ public class ClusterData {
                 } else {
                     ((minattvals) tmpvec.get(i)).att = (((minattvals) tmpvec.get(i)).att - minattval) / divval;
                 }
-            }// end for i
-             // System.out.println("maxattval"+maxattval+" offset="+minattval);
+            }
+
             p2attfactor = divval;
             p2attoffset = minattval;
         }
         myattvals = (minattvals[]) tmpvec.toArray(new minattvals[0]);
         System.out.println("attvals size=" + myattvals.length);
-    }// end getattvals
+    }
 
+    /**
+     * compute "attraction" values for all sequence pairs from the hsp objects and initialize the positions randomly
+     */
     public void initialize() {
-        // compute "attraction" values for all sequence pairs from the hsp objects
-        // and initialize the positions randomly
-
         rounds = 0;
         currcool = 1;
 
@@ -1684,6 +1767,9 @@ public class ClusterData {
         posarr = myposarr;
     }
 
+    /**
+     * Resets the rotation matrix to represent no rotation.
+     */
     private void reset_rotmtx() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
