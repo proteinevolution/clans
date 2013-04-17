@@ -716,29 +716,34 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		repaint();
 	}// GEN-LAST:event_addbuttonActionPerformed
 
+	/**
+	 * Opens a color chooser to let the user pick a new color for all currently selected groups.
+	 * @param evt
+	 */
 	private void colorbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_colorbuttonActionPerformed
-		// change color for the currently selected sequence groups
-		int[] currsel = groupslist.getSelectedIndices();
-		if (currsel.length > 0) {
-			if ((currsel[0] > -1) && (currsel[0] <= parent.data.seqgroupsvec.size())) {
-				java.awt.Color oldcolor = parent.data.seqgroupsvec.elementAt(currsel[0]).color;
-				java.awt.Color newcolor = null;
+	    int[] selected_groups = groupslist.getSelectedIndices();
+		if (selected_groups.length > 0) {
+			if ((selected_groups[0] > -1) && (selected_groups[0] <= parent.data.seqgroupsvec.size())) {
+				
+			    java.awt.Color current_color = parent.data.seqgroupsvec.elementAt(selected_groups[0]).color;
+				java.awt.Color new_color = null;
+				
 				try {
-					newcolor = JColorChooser.showDialog(this, "Select New Color", oldcolor);
+					new_color = JColorChooser.showDialog(this, "Select New Color", current_color);
 				} catch (java.awt.HeadlessException e) {
 					System.err.println("HeadlessException!");
 				}
 				
-				if (newcolor != null) {
-				    colorbutton.setBackground(newcolor);
-	                for (int i = currsel.length - 1; i >= 0; i--) {
-	                    parent.data.seqgroupsvec.elementAt(currsel[i]).color = newcolor;
+				if (new_color != null) {
+				    colorbutton.setBackground(new_color);
+	                for (int i = selected_groups.length - 1; i >= 0; i--) {
+	                    parent.data.seqgroupsvec.elementAt(selected_groups[i]).color = new_color;
 	                }
 				}
 			}
 			
 			this.repaint();
-			parent.groupseqscolor = parent.data.seqgroupsvec.elementAt(currsel[0]).color;
+			parent.groupseqscolor = parent.data.seqgroupsvec.elementAt(selected_groups[0]).color;
 			parent.repaint();
 		}
 	}// GEN-LAST:event_colorbuttonActionPerformed
