@@ -141,7 +141,7 @@ public class ClusterMethods {
                 //no point in inlining this bit; I have very few selected sequences and therefore the gain should be marginal
                 //cluster only the selected sequences in 2D
                 for(i=selectnamesnum;--i>=0;){
-                    getminattract(posarr[selectnames[i]],currmoveatt,minattract);
+                    add_attraction_towards_origin(posarr[selectnames[i]],currmoveatt,minattract);
 
                     weight1=1;
                     if(weights!=null){
@@ -210,8 +210,7 @@ public class ClusterMethods {
             }else{
                 //cluster only the selected sequences in 3D
                 for(i=selectnamesnum;--i>=0;){
-                    //currmoveatt=getminattract(posarr[selectnames[i]],currmoveatt,minattract);
-                    getminattract(posarr[selectnames[i]],currmoveatt,minattract);
+                    add_attraction_towards_origin(posarr[selectnames[i]],currmoveatt,minattract);
                     weight1=1;
                     if(weights!=null){
                         weight1=weights[selectnames[i]];
@@ -558,28 +557,18 @@ public class ClusterMethods {
         //return posarr;
     }// end domove
 
-    //--------------------------------------------------------------------------
-
-    static void getminattract2d(float[] pos1,double[] movement,double minattract){
-        //get minimum attraction for 2d only
-        movement[0]=-pos1[0]*minattract;
-        movement[1]=-pos1[1]*minattract;
-        movement[2]=0;
-        //return movement;
-    }//end getminattract2d
-
-    //--------------------------------------------------------------------------
-
-    //static double[] getminattract(float[] pos1, double[] movement,double minattract){
-    static void getminattract(float[] pos1, double[] movement,double minattract){
-        //which way is pos1 going to move if it is attracted by the origin
-        movement[0]=-pos1[0]*minattract;
-        movement[1]=-pos1[1]*minattract;
-        movement[2]=-pos1[2]*minattract;
-        //return movement;
-    }// end getminattract
-
-    //--------------------------------------------------------------------------
+    /**
+     * Adds the attractions of the origin of the coordinate system to the points movement. 
+     * 
+     * @param position the position of the point
+     * @param movement the direction of movement so far computed for this point
+     * @param origin_attraction the degree of attraction the origin has on a point
+     */
+    static void add_attraction_towards_origin(float[] position, double[] movement, double origin_attraction) {
+        movement[0] = -position[0] * origin_attraction;
+        movement[1] = -position[1] * origin_attraction;
+        movement[2] = -position[2] * origin_attraction;
+    }
 
     static void getrepulse2d(float[] pos1,float[] pos2,double[] movement, int repvalpow, float repfactor, java.util.Random rand){
         //get the repulsion in 2d only

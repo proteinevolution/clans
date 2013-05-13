@@ -87,8 +87,8 @@ public class MovementComputerThread extends java.lang.Thread {
                 //System.out.println("clusterselected2D");
                 //cluster only the selected sequences in 2D
                 for (int i = start; i < end; i++) {
-                    //currmoveatt=getminattract(posarr[selectnames[i]],currmoveatt,minattract);
-                    ClusterMethods.getminattract(posarr[selectnames[i]], currmoveatt, minattract);
+
+                    ClusterMethods.add_attraction_towards_origin(posarr[selectnames[i]], currmoveatt, minattract);
                     movearr[selectnames[i]][0] += currmoveatt[0];
                     movearr[selectnames[i]][1] += currmoveatt[1];
                     for (int j = elements; --j >= 0;) {
@@ -134,8 +134,8 @@ public class MovementComputerThread extends java.lang.Thread {
                 //cluster only the selected sequences in 3D
                 //System.out.println("clusterselected3D");
                 for (int i = start; i < end; i++) {
-                    //currmoveatt=getminattract(posarr[selectnames[i]],currmoveatt,minattract);
-                    ClusterMethods.getminattract(posarr[selectnames[i]], currmoveatt, minattract);
+
+                    ClusterMethods.add_attraction_towards_origin(posarr[selectnames[i]], currmoveatt, minattract);
                     movearr[selectnames[i]][0] += currmoveatt[0];
                     movearr[selectnames[i]][1] += currmoveatt[1];
                     movearr[selectnames[i]][2] += currmoveatt[2];
@@ -196,7 +196,7 @@ public class MovementComputerThread extends java.lang.Thread {
             
             // add repulsive movements
             for (int i = start; i < end; i++) {
-                ClusterMethods.getminattract(posarr[i], currmoveatt, minattract);
+                ClusterMethods.add_attraction_towards_origin(posarr[i], currmoveatt, minattract);
                 
                 for (int j = 0; j < movearr[i].length; j ++) {
                     movearr[i][j] += currmoveatt[j];
