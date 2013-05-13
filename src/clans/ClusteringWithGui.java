@@ -2396,7 +2396,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     java.awt.Color groupseqscolor=new java.awt.Color(0,0,0);
     int[] blastselectseqs=new int[0];
     float[] clusterconf=null;//confidence values for the selected sequences
-    getmovethread[] movethreads;
+    MovementComputerThread[] movethreads;
 
     static final JFileChooser fc=new JFileChooser(new File("."));
     String repaint=null;

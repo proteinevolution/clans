@@ -40,7 +40,7 @@ public class ClusterData {
     boolean complexatt = true;
     int seqnum = 0;
     float[] seqlengths = null;
-    getmovethread[] movethreads = null;
+    MovementComputerThread[] movethreads = null;
     boolean usescval = false;
     minattvals[] myattvals = null;
 
@@ -111,7 +111,7 @@ public class ClusterData {
 
         this.sequences = ClusterMethods.remove_gaps_from_sequences(sequences);
 
-        this.movethreads = new getmovethread[cpu];
+        this.movethreads = new MovementComputerThread[cpu];
 
         this.blasthits = blasthits;
         this.sequence_names = namearr;

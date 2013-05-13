@@ -1,15 +1,15 @@
 package clans;
 
-import java.awt.Dimension;
 import java.util.HashMap;
 
 /**
  *
  * @author tancred
  */
-public class getmovethread extends java.lang.Thread {
+public class MovementComputerThread extends java.lang.Thread {
 
-    public getmovethread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int myi, int cpu, HashMap<String, Integer> selectnamehash, int[] selectnames, String syncon, ClusterData parent) {
+    public MovementComputerThread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int myi, int cpu,
+            HashMap<String, Integer> selectnamehash, int[] selectnames, String syncon, ClusterData parent) {
         this.done = false;
         this.posarr = myposarr;
         this.attvals = myattvals;
@@ -23,7 +23,8 @@ public class getmovethread extends java.lang.Thread {
         this.selectnames = selectnames;
     }
 
-    public getmovethread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int myi, int cpu, String syncon, ClusterData parent) {
+    public MovementComputerThread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int myi, int cpu,
+            String syncon, ClusterData parent) {
         this.done = false;
         this.posarr = myposarr;
         this.attvals = myattvals;
@@ -46,8 +47,7 @@ public class getmovethread extends java.lang.Thread {
     HashMap<String, Integer> tmphash = null;
     ClusterData parent;
     String syncon;
-    int[] selectnames;//a local copy of parent.selectednames, as that may change during a calculation
-
+    int[] selectnames;// a local copy of parent.selectednames, as that may change during a calculation
 
     /**
      * use the positions of all elements and their attraction/repulsion values to calculate a movement vector for each
@@ -181,12 +181,12 @@ public class getmovethread extends java.lang.Thread {
                     }
                 }//end for i
             }
-        } else {//if no sequences were selected or all should be used
+        } else { // if no sequences were selected or all should be used
 
-            //now get from where to where I should do my calculations
+            // get start and end index of data concerning this thread
             int start, end;
             if (myi == (cpu - 1)) {
-                //special case, do everything from here to end to avoid rounding errors
+                // do everything from here to the last element to avoid rounding errors
                 start = myi * (int) (elements / cpu);
                 end = elements;
             } else {

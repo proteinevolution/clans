@@ -51,13 +51,13 @@ public class ClusterMethods {
                     }//end for i
                     for(int i=0;i<data.cpu;i++){
                         //movethreads[i]=new getmovethread(myposarr,myattvals,mymovearr,i,cpu,tmphash,selectnames,this);//start cpu threads to write the attraction values to mymovearr
-                        data.movethreads[i]=new getmovethread(data.myposarr,data.myattvals,data.mymovearr,i,data.cpu,tmphash,selectnames,syncme,data);//start cpu threads to write the attraction values to mymovearr
+                        data.movethreads[i]=new MovementComputerThread(data.myposarr,data.myattvals,data.mymovearr,i,data.cpu,tmphash,selectnames,syncme,data);//start cpu threads to write the attraction values to mymovearr
                         data.movethreads[i].start();
                     }
                 }else{
                     for(int i=0;i<data.cpu;i++){
                         //movethreads[i]=new getmovethread(myposarr,myattvals,mymovearr,i,cpu,this);//start cpu threads to write the attraction values to mymovearr
-                        data.movethreads[i]=new getmovethread(data.myposarr,data.myattvals,data.mymovearr,i,data.cpu,syncme,data);//start cpu threads to write the attraction values to mymovearr
+                        data.movethreads[i]=new MovementComputerThread(data.myposarr,data.myattvals,data.mymovearr,i,data.cpu,syncme,data);//start cpu threads to write the attraction values to mymovearr
                         data.movethreads[i].start();
                     }
                 }
