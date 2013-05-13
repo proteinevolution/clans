@@ -8,99 +8,107 @@ public class ClusterMethods {
     
 	static final java.util.Random rand=new java.util.Random(System.currentTimeMillis());
 
+    /**
+     * take the hsp objects from indata and compute "attraction" values for all sequence pairs once you have those try
+     * to cluster the data in 2d by "energy minimization" approach. iterative approch, might want to specify maximum
+     * number of iterations use the positions array and the attracion/repulsion values to compute movement vectors for
+     * each object long time=System.currentTimeMillis();
+     * 
+     * @param data
+     */
      static void recluster3d(ClusterData data){
-        //take the hsp objects from indata and compute "attraction" values for all sequence pairs
-        //once you have those try to cluster the data in 2d by "energy minimization" approach.
-        //iterative approch, might want to specify maximum number of iterations
-        //use the positions array and the attracion/repulsion values to
-        //compute movement vectors for each object
-        //long time=System.currentTimeMillis();
+        
         System.arraycopy(data.mymovearr, 0, data.lastmovearr, 0, data.elements);//move all values from mymovearr to lastmovearr
-        float[][] mymovearr=data.mymovearr;
-        for(int i=data.elements;--i>=0;){
-            //lastmovearr[i][0]=mymovearr[i][0];
-            //lastmovearr[i][1]=mymovearr[i][1];
-            //lastmovearr[i][2]=mymovearr[i][2];
-            mymovearr[i][0]=0;
-            mymovearr[i][1]=0;
-            mymovearr[i][2]=0;
+
+        float[][] mymovearr = data.mymovearr;
+        for (int i = data.mymovearr.length; --i >= 0;) {
+            for (int j = 0; j < mymovearr[i].length; j++) {
+                mymovearr[i][j] = 0;
+            }
         }
-        int selnamenum=java.lang.reflect.Array.getLength(data.selectednames);
-        int[] selectnames=new int[selnamenum];//(int[])selectednames.clone();//a copy of the array that won't change during this round of calculations
-        System.arraycopy(data.selectednames,0, data.selectnames,0, data.selnamenum);
-        String syncme="syncme";
+        
+        int selnamenum = data.selectednames.length;
+        int[] selectnames = new int[selnamenum]; //a copy of the array that won't change during this round of calculations
+        System.arraycopy(data.selectednames, 0, data.selectnames, 0, data.selnamenum);
+        String syncme = "syncme";
+        
         synchronized(data.myattvals){
+
             if(data.cpu==1){
-                //mymovearr=getmovement(myposarr,myattvals,mymovearr);
-                getmovement(data.myposarr,data.myattvals,data.mymovearr,data.selectnames,data);
-                domove(data.myposarr,data.mymovearr,data.selectnames,data);
+                getmovement(data.myposarr, data.myattvals, data.mymovearr, data.selectnames, data);
+                domove(data.myposarr, data.mymovearr, data.selectnames, data);
+
             }else{
-                //compute the attraction values using multiple threads
-                int selectnamesnum=java.lang.reflect.Array.getLength(data.selectednames);
-                if((data.moveselectedonly)&&(selectnamesnum>0)&&(selectnamesnum<data.elements)){
-                    selectnamesnum=java.lang.reflect.Array.getLength(selectnames);
-                    java.util.HashMap <String,Integer>tmphash=new java.util.HashMap<String,Integer>();
-                    int threadnum=selectnamesnum/data.cpu;
+                // compute the movements using multiple threads
+                int selectnames_count = data.selectednames.length;
+                if ((data.moveselectedonly) && (selectnames_count > 0) && (selectnames_count < data.elements)) {
+                    selectnames_count = selectnames.length;
+                    java.util.HashMap<String, Integer> tmphash = new java.util.HashMap<String, Integer>();
+                    int threadnum = selectnames_count / data.cpu;
                     int tmpval;
-                    for(int i=selectnamesnum-1;i>=0;i--){
-                        tmpval=(int)i/threadnum;
-                        if(tmpval>data.cpu-1){
-                            tmpval=data.cpu-1;
+
+                    for (int i = selectnames_count - 1; i >= 0; i--) {
+                        tmpval = (int) i / threadnum;
+                        if (tmpval > data.cpu - 1) {
+                            tmpval = data.cpu - 1;
                         }
                         tmphash.put(String.valueOf(selectnames[i]), Integer.valueOf(tmpval));
-                    }//end for i
-                    for(int i=0;i<data.cpu;i++){
-                        //movethreads[i]=new getmovethread(myposarr,myattvals,mymovearr,i,cpu,tmphash,selectnames,this);//start cpu threads to write the attraction values to mymovearr
-                        data.movethreads[i]=new MovementComputerThread(data.myposarr,data.myattvals,data.mymovearr,i,data.cpu,tmphash,selectnames,syncme,data);//start cpu threads to write the attraction values to mymovearr
+                    }
+
+                    for (int i = 0; i < data.cpu; i++) {
+                        data.movethreads[i] = new MovementComputerThread(data.myposarr, data.myattvals, data.mymovearr,
+                                i, data.cpu, tmphash, selectnames, syncme, data);
                         data.movethreads[i].start();
                     }
-                }else{
-                    for(int i=0;i<data.cpu;i++){
-                        //movethreads[i]=new getmovethread(myposarr,myattvals,mymovearr,i,cpu,this);//start cpu threads to write the attraction values to mymovearr
-                        data.movethreads[i]=new MovementComputerThread(data.myposarr,data.myattvals,data.mymovearr,i,data.cpu,syncme,data);//start cpu threads to write the attraction values to mymovearr
+                } else {
+                    for (int i = 0; i < data.cpu; i++) {
+                        data.movethreads[i] = new MovementComputerThread(data.myposarr, data.myattvals, data.mymovearr,
+                                i, data.cpu, syncme, data);
                         data.movethreads[i].start();
                     }
                 }
-                //now wait for all threads to finish
-                boolean alldone=false;
-                try{
-                    //synchronized(this){
-                    synchronized(syncme){
-                        while (alldone==false){
-                            alldone=true;
-                            for(int i=0;i<data.cpu;i++){
-                                if(data.movethreads[i].done==false){
-                                    alldone=false;
+
+                // now wait for all threads to finish
+                boolean alldone = false;
+                try {
+                    synchronized (syncme) {
+                        while (alldone == false) {
+                            alldone = true;
+                            for (int i = 0; i < data.cpu; i++) {
+                                if (data.movethreads[i].done == false) {
+                                    alldone = false;
                                     break;
                                 }
                             }
-                            if(alldone==false){//if I still have to wait for a thread
-                                //this.wait();//release lock on this and wait
-                                syncme.wait();//release lock on this and wait
+                            if (alldone == false) {
+                                syncme.wait();
                             }
                         }
-                    }//end while alldone
-                }catch (InterruptedException e){
+                    }
+                } catch (InterruptedException e) {
                     System.err.println("Interrupted wait in searchblast");
                     e.printStackTrace();
                 }
-                domove(data.myposarr,data.mymovearr,selectnames,data);
-            }//end else cpu>1
-        }//end sync myattvals
-        //then move each according to movevec
-        //System.out.println("calctime="+(System.currentTimeMillis()-time));
-        //return data.myposarr;
-    }// end recluster3d
 
-    //--------------------------------------------------------------------------
+                domove(data.myposarr, data.mymovearr, selectnames, data);
+            }
+        }
+    }
 
+    /**
+     * use the positions of all elements and their attraction/repulsion values to calculate a movement vector for each
+     * (take into account the last movement). repulsion doesn't have a specific value as all evalues below a certain
+     * point are simply regarded as insignificant. therefore use a one formula for all to compute the repulsive forces
+     * (see getrepulse) inline all the getrepulse and getattract methods to reduce the number of method calls
+     * 
+     * @param posarr
+     * @param attvals
+     * @param movement
+     * @param selectnames
+     * @param data
+     */
     static void getmovement(float[][] posarr, minattvals[] attvals, float[][] movement,int[] selectnames, ClusterData data){
-        //use the positions of all elements and their attraction/repulsion values to
-        //calculate a movement vector for each (take into account the last movement).
-        //repulsion doesn't have a specific value as all evalues below a certain point
-        //are simply regarded as insignificant. therefore use a one formula for all
-        //to compute the repulsive forces (see getrepulse)
-        //inline all the getrepulse and getattract methods to reduce the number of method calls
+        
         int i,j;
         int attnum=java.lang.reflect.Array.getLength(attvals);
         double[] currmoverep=new double[3];
@@ -111,8 +119,6 @@ public class ClusterMethods {
         double distx,disty,distz;
         int selectnamesnum=java.lang.reflect.Array.getLength(selectnames);
         float repfac=data.repfactor;
-        //float attfac=attfactor;
-        //int attpow=attvalpow;
         int reppow=data.repvalpow;
         int hnum,qnum;
         float weight1=1,weight2=1;
@@ -125,22 +131,23 @@ public class ClusterMethods {
         float[] weights=data.weights;
         if((data.moveselectedonly)&&(selectnamesnum>0)&&(selectnamesnum!=elements)){
             java.util.HashMap<Integer,Integer> tmphash=new java.util.HashMap<Integer,Integer>((int)(selectnamesnum/0.8)+1,0.8f);
+
             Integer[] hashkeys=new Integer[elements];
-            //hashkey[] hashkeys=new hashkey[elements];
             for(i=elements;--i>=0;){
-                //hashkeys[i]=new hashkey(i);
                 hashkeys[i] = Integer.valueOf(i);
             }
+            
             if(data.cluster2d){
                 //no point in inlining this bit; I have very few selected sequences and therefore the gain should be marginal
                 //cluster only the selected sequences in 2D
                 for(i=selectnamesnum;--i>=0;){
-                    //currmoveatt=getminattract(posarr[selectnames[i]],currmoveatt,minattract);
                     getminattract(posarr[selectnames[i]],currmoveatt,minattract);
+
                     weight1=1;
                     if(weights!=null){
                         weight1=weights[selectnames[i]];
                     }
+                    
                     tmphash.put(hashkeys[selectnames[i]],null);
                     movement[selectnames[i]][0]+=currmoveatt[0]*weight1;
                     movement[selectnames[i]][1]+=currmoveatt[1]*weight1;
@@ -148,16 +155,19 @@ public class ClusterMethods {
                         if(j==selectnames[i]){
                             continue;
                         }
-                        //currmoverep=getrepulse2d(posarr[selectnames[i]],posarr[j],currmoverep,repvalpow, repfactor, rand);
+
                         getrepulse2d(posarr[selectnames[i]],posarr[j],currmoverep,repvalpow,repfactor, rand);
+                        
                         weight2=1;
                         if(weights!=null){
                             weight2=weights[selectnames[j]];
                         }
+                        
                         movement[selectnames[i]][0]+=currmoverep[0]*weight2;
                         movement[selectnames[i]][1]+=currmoverep[1]*weight2;
-                    }//end for j
-                }//end for i
+                    }
+                }
+                
                 for(i=attnum;--i>=0;){
                     if(tmphash.containsKey(hashkeys[attvals[i].query])){
                         //currmoveatt=getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);

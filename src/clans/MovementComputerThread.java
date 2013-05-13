@@ -8,13 +8,13 @@ import java.util.HashMap;
  */
 public class MovementComputerThread extends java.lang.Thread {
 
-    public MovementComputerThread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int myi, int cpu,
+    public MovementComputerThread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int thread_id, int cpu,
             HashMap<String, Integer> selectnamehash, int[] selectnames, String syncon, ClusterData parent) {
         this.done = false;
         this.posarr = myposarr;
         this.attvals = myattvals;
         this.movearr = mymovearr;
-        this.myi = myi;
+        this.thread_id = thread_id;
         this.cpu = cpu;
         this.doselected = true;
         this.tmphash = selectnamehash;
@@ -23,13 +23,13 @@ public class MovementComputerThread extends java.lang.Thread {
         this.selectnames = selectnames;
     }
 
-    public MovementComputerThread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int myi, int cpu,
+    public MovementComputerThread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int thread_id, int cpu,
             String syncon, ClusterData parent) {
         this.done = false;
         this.posarr = myposarr;
         this.attvals = myattvals;
         this.movearr = mymovearr;
-        this.myi = myi;
+        this.thread_id = thread_id;
         this.cpu = cpu;
         this.doselected = false;
         this.tmphash = null;
@@ -42,7 +42,7 @@ public class MovementComputerThread extends java.lang.Thread {
     float[][] posarr;
     minattvals[] attvals;
     float[][] movearr;
-    int myi;
+    int thread_id;
     int cpu;
     HashMap<String, Integer> tmphash = null;
     ClusterData parent;
@@ -75,12 +75,12 @@ public class MovementComputerThread extends java.lang.Thread {
             int selectnames_count = selectnames.length;
             //now get from where to where I should do my calculations
             int start, end;
-            if (myi == (cpu - 1)) {
-                start = myi * (int) (selectnames_count / cpu);
+            if (thread_id == (cpu - 1)) {
+                start = thread_id * (int) (selectnames_count / cpu);
                 end = selectnames_count;
             } else {
-                start = myi * (int) (selectnames_count / cpu);
-                end = (myi + 1) * (int) (selectnames_count / cpu);
+                start = thread_id * (int) (selectnames_count / cpu);
+                end = (thread_id + 1) * (int) (selectnames_count / cpu);
             }
             
             if (parent.cluster2d == true) {
@@ -100,18 +100,18 @@ public class MovementComputerThread extends java.lang.Thread {
                 }//end for i
                 //now add the attraction values, but only for the query or hit sequences in my part of the selectnames array (assigned in recluster3d)
                 for (int i = attnum; --i >= 0;) {
-                    if ((tmphash.containsKey(String.valueOf(attvals[i].query))) && (tmphash.get(String.valueOf(attvals[i].query)).intValue() == myi)) {
+                    if ((tmphash.containsKey(String.valueOf(attvals[i].query))) && (tmphash.get(String.valueOf(attvals[i].query)).intValue() == thread_id)) {
                         //currmoveatt=getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow, attfactor);
                         ClusterMethods.getattract2d(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt, attvalpow, attfactor);
                         movearr[attvals[i].query][0] += currmoveatt[0];
                         movearr[attvals[i].query][1] += currmoveatt[1];
                         //movement[attvals[i].query][2]+=currmoveatt[2];
-                        if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == myi)) {
+                        if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == thread_id)) {
                             movearr[attvals[i].hit][0] -= currmoveatt[0];
                             movearr[attvals[i].hit][1] -= currmoveatt[1];
                             //movement[attvals[i].hit][2]-=currmoveatt[2];
                         }
-                    } else if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == myi)) {
+                    } else if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == thread_id)) {
                         //currmoveatt=getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow, attfactor);
                         ClusterMethods.getattract2d(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt, attvalpow, attfactor);
                         movearr[attvals[i].hit][0] -= currmoveatt[0];
@@ -149,18 +149,18 @@ public class MovementComputerThread extends java.lang.Thread {
                 }//end for i
                 //now add the attraction values, but only for the query or hit sequences in my part of the selectnames array (assigned in recluster3d)
                 for (int i = attnum; --i >= 0;) {
-                    if ((tmphash.containsKey(String.valueOf(attvals[i].query))) && (tmphash.get(String.valueOf(attvals[i].query)).intValue() == myi)) {
+                    if ((tmphash.containsKey(String.valueOf(attvals[i].query))) && (tmphash.get(String.valueOf(attvals[i].query)).intValue() == thread_id)) {
                         //currmoveatt=getattract3d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow, attfactor);
                         ClusterMethods.getattract3d(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt, attvalpow, attfactor);
                         movearr[attvals[i].query][0] += currmoveatt[0];
                         movearr[attvals[i].query][1] += currmoveatt[1];
                         movearr[attvals[i].query][2] += currmoveatt[2];
-                        if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == myi)) {
+                        if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == thread_id)) {
                             movearr[attvals[i].hit][0] -= currmoveatt[0];
                             movearr[attvals[i].hit][1] -= currmoveatt[1];
                             movearr[attvals[i].hit][2] -= currmoveatt[2];
                         }
-                    } else if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == myi)) {
+                    } else if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == thread_id)) {
                         //currmoveatt=getattract3d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow, attfactor);
                         ClusterMethods.getattract3d(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt, attvalpow, attfactor);
                         movearr[attvals[i].hit][0] -= currmoveatt[0];
@@ -185,13 +185,13 @@ public class MovementComputerThread extends java.lang.Thread {
 
             // get start and end index of data concerning this thread
             int start, end;
-            if (myi == (cpu - 1)) {
+            if (thread_id == (cpu - 1)) {
                 // do everything from here to the last element to avoid rounding errors
-                start = myi * (int) (elements / cpu);
+                start = thread_id * (int) (elements / cpu);
                 end = elements;
             } else {
-                start = myi * (int) (elements / cpu);
-                end = (myi + 1) * (int) (elements / cpu);
+                start = thread_id * (int) (elements / cpu);
+                end = (thread_id + 1) * (int) (elements / cpu);
             }
             
             // add repulsive movements
