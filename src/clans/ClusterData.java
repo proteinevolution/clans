@@ -1737,29 +1737,30 @@ public class ClusterData {
         myposarr = new float[elements][dimensions];
         posarrtmp = new float[elements][dimensions];
         drawarrtmp = new int[elements][dimensions];
+        
         mymovearr = new float[elements][dimensions];
         lastmovearr = new float[elements][dimensions];
         for (int i = 0; i < elements; i++) {
-            mymovearr[i][0] = 0;
-            mymovearr[i][1] = 0;
-            mymovearr[i][2] = 0;
-
-            lastmovearr[i][0] = 0;
-            lastmovearr[i][1] = 0;
-            lastmovearr[i][2] = 0;
+            for (int j = 0; j < dimensions; j++) {
+                mymovearr[i][j] = 0;
+                lastmovearr[i][j] = 0;
+            }
         }
 
         // compute the "attraction values"
         if (blasthits != null) {
             if (myattvals == null) {
-                // synchronized(myattvals){//myattvals is null here; cannot sync on it
                 compute_attraction_values();
-                // }
             }
         }
 
         for (int i = 0; i < myposarr.length; i++) {
             for (int j = 0; j < myposarr[j].length; j++) {
+                
+                if (cluster2d && j > 1) { // leave last entry 0
+                    break;
+                }
+                
                 myposarr[i][j] = ClusterMethods.rand.nextFloat() * 2 - 1;
             }
         }
