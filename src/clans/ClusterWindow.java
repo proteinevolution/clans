@@ -124,7 +124,7 @@ public class ClusterWindow extends javax.swing.JDialog {
         int[] myarr;
         for (int i = selectedvals.length; --i >= 0;) {
             
-            seqgroup newgroup = new seqgroup();
+            SequenceGroup newgroup = new SequenceGroup();
             newgroup.name = newname + "_" + i;
             newgroup.color = java.awt.Color.red;
             
@@ -169,7 +169,7 @@ public class ClusterWindow extends javax.swing.JDialog {
             }//end for j
             currcount+=mysize;
         }//end for i
-        seqgroup newgroup=new seqgroup();
+        SequenceGroup newgroup=new SequenceGroup();
         newgroup.name=newname;
         newgroup.color=java.awt.Color.red;
         newgroup.sequences=newselected;

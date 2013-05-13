@@ -336,7 +336,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		// sort the selected sequence groups by their color
 		int[] currsel = groupslist.getSelectedIndices();
 		if (java.lang.reflect.Array.getLength(currsel) > 0) {
-			seqgroup[] tmparr = new seqgroup[java.lang.reflect.Array.getLength(currsel)];
+			SequenceGroup[] tmparr = new SequenceGroup[java.lang.reflect.Array.getLength(currsel)];
 			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					tmparr[i] = parent.data.seqgroupsvec.elementAt(currsel[i]);
@@ -360,7 +360,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		// sort the selected sequence groups by their name
 		int[] currsel = groupslist.getSelectedIndices();
 		if (java.lang.reflect.Array.getLength(currsel) > 0) {
-			seqgroup[] tmparr = new seqgroup[java.lang.reflect.Array.getLength(currsel)];
+			SequenceGroup[] tmparr = new SequenceGroup[java.lang.reflect.Array.getLength(currsel)];
 			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					tmparr[i] = parent.data.seqgroupsvec.elementAt(currsel[i]);
@@ -383,7 +383,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private void sortcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_sortcolormenuitemActionPerformed
 		// sort the groups by their color
 		int num = parent.data.seqgroupsvec.size();
-		seqgroup[] tmparr = new seqgroup[num];
+		SequenceGroup[] tmparr = new SequenceGroup[num];
 		for (int i = 0; i < num; i++) {
 			tmparr[i] = parent.data.seqgroupsvec.elementAt(i);
 		}// end for i
@@ -398,7 +398,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private void sortnamemenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_sortnamemenuitemActionPerformed
 		// sort the sequence groups by name
 		int num = parent.data.seqgroupsvec.size();
-		seqgroup[] tmparr = new seqgroup[num];
+		SequenceGroup[] tmparr = new SequenceGroup[num];
 		for (int i = 0; i < num; i++) {
 			tmparr[i] = parent.data.seqgroupsvec.elementAt(i);
 		}// end for i
@@ -414,7 +414,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		// I want to assign a new random color to all selected groups
 		int[] currsel = groupslist.getSelectedIndices();
 		if (java.lang.reflect.Array.getLength(currsel) > 0) {
-			seqgroup mygroup;
+			SequenceGroup mygroup;
 			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					mygroup = parent.data.seqgroupsvec.elementAt(currsel[i]);
@@ -455,7 +455,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			int returnVal = ClusteringWithGui.fc.showOpenDialog(this);
 			if (returnVal == javax.swing.JFileChooser.APPROVE_OPTION) {
 				java.io.File currdir = (ClusteringWithGui.fc.getSelectedFile());
-				seqgroup mygroup;
+				SequenceGroup mygroup;
 				for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
 					if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 						mygroup = parent.data.seqgroupsvec.elementAt(currsel[i]);
@@ -601,7 +601,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		int[] currsel = groupslist.getSelectedIndices();
 		if (java.lang.reflect.Array.getLength(currsel) > 0) {
 			int counter = 0;
-			seqgroup mygroup;
+			SequenceGroup mygroup;
 			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					counter += parent.data.seqgroupsvec.elementAt(currsel[i]).sequences.length;
@@ -661,7 +661,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			}
 			int[] selecteds = new int[counter];
 			counter = 0;
-			seqgroup mygroup;
+			SequenceGroup mygroup;
 			for (int i = java.lang.reflect.Array.getLength(currselarr) - 1; i >= 0; i--) {
 				mygroup = parent.data.seqgroupsvec.elementAt(currselarr[i]);
 				for (int j = java.lang.reflect.Array.getLength(mygroup.sequences) - 1; j >= 0; j--) {
@@ -695,7 +695,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 					javax.swing.JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		seqgroup newgroup = new seqgroup();
+		SequenceGroup newgroup = new SequenceGroup();
 		String newname = "selected sequences";
 		newname = javax.swing.JOptionPane.showInputDialog("Group name:", newname);
 		if (newname == null || newname.length() < 1) {
@@ -948,12 +948,12 @@ public class WindowEditGroups extends javax.swing.JFrame {
 
 	// --------------------------------------------------------------------------
 
-	class seqgroupscolorcomparator implements java.util.Comparator<seqgroup> {
+	class seqgroupscolorcomparator implements java.util.Comparator<SequenceGroup> {
 
 		/**
 		 * compares the colors of two seqgroups
 		 */
-		public int compare(seqgroup o1, seqgroup o2) {
+		public int compare(SequenceGroup o1, SequenceGroup o2) {
 			float h1 = gethue(o1.color);
 			float h2 = gethue(o2.color);
 			return (h1 > h2 ? 1 : (h1 == h2 ? 0 : -1));
@@ -965,12 +965,12 @@ public class WindowEditGroups extends javax.swing.JFrame {
 
 	}
 
-	class seqgroupsnamecomparator implements java.util.Comparator<seqgroup> {
+	class seqgroupsnamecomparator implements java.util.Comparator<SequenceGroup> {
 
 		/**
 		 * compares the name of two seqgroups
 		 */
-		public int compare(seqgroup o1, seqgroup o2) {
+		public int compare(SequenceGroup o1, SequenceGroup o2) {
 			String h1 = o1.name;
 			String h2 = o2.name;
 			return h1.compareTo(h2);
@@ -994,7 +994,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				myforeground = parent.draw1.fgcolor;
 			}
 			
-			seqgroup group = (seqgroup) value;
+			SequenceGroup group = (SequenceGroup) value;
 			
 			String s = group.name;
 

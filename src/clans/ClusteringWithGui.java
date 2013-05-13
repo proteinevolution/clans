@@ -1396,9 +1396,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 if(data.seqgroupsvec.size()>0){
                     outwrite.println("#user defined sequence groups");
                     outwrite.println("<seqgroups>");
-                    seqgroup mygroup;
+                    SequenceGroup mygroup;
                     for(int i=data.seqgroupsvec.size()-1;i>=0;i--){
-                        mygroup=(seqgroup)data.seqgroupsvec.elementAt(i);
+                        mygroup=(SequenceGroup)data.seqgroupsvec.elementAt(i);
                         outwrite.println("name="+mygroup.name);
                         outwrite.println("color="+mygroup.color.getRed()+";"+mygroup.color.getGreen()+";"+mygroup.color.getBlue());
                         outwrite.print("numbers=");
@@ -1641,7 +1641,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 
 		// fix the sequence ids stored in groups
-		seqgroup current_seqgroup;
+		SequenceGroup current_seqgroup;
 		Vector<Integer> keep_group_sequences;
 		for (int i = 0; i < data.seqgroupsvec.size(); i++) {
 			current_seqgroup = data.seqgroupsvec.elementAt(i);
@@ -1994,7 +1994,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
         }
         parentseqgroups.addElement(data.seqgroupsvec);
-        data.seqgroupsvec=new Vector<seqgroup>();
+        data.seqgroupsvec=new Vector<SequenceGroup>();
         data.selectednames=new int[0];
 
         synchronized(data.myattvals){
@@ -2369,7 +2369,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
     Vector<MinimalHsp[]> parentblasthits=new Vector<MinimalHsp[]>();
     Vector<minattvals[]> parent_orgattvals=new Vector<minattvals[]>();
-    Vector<Vector<seqgroup>> parentseqgroups=new Vector<Vector<seqgroup>>();
+    Vector<Vector<SequenceGroup>> parentseqgroups=new Vector<Vector<SequenceGroup>>();
     Vector<float[]> parentweights=new Vector<float[]>();
  
     Vector <viewblasthits> viewblasthitsvec=new Vector<viewblasthits>();
@@ -3589,15 +3589,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 }//end for i
                 //draw the sequence groups
                 if(data.showseqgroups){
-                    seqgroup mygroup;
+                    SequenceGroup mygroup;
                     for(int i=data.seqgroupsvec.size()-1;i>=0;i--){
-                        mygroup=(seqgroup)data.seqgroupsvec.elementAt(i);
+                        mygroup=(SequenceGroup)data.seqgroupsvec.elementAt(i);
                         if(mygroup.hide==true){
                             continue;
                         }
                         g.setColor(mygroup.color);
                         if(mygroup.type==0){
-                            tmpint=((seqgroup)data.seqgroupsvec.elementAt(i)).size;
+                            tmpint=((SequenceGroup)data.seqgroupsvec.elementAt(i)).size;
                             halfgroup=(float)tmpint/2;
                             for(int j=java.lang.reflect.Array.getLength(mygroup.sequences)-1;j>=0;j--){
                                 if(mygroup.sequences[j]<elements){

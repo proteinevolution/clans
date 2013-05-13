@@ -8,10 +8,10 @@ package clans;
  *
  * @author  tancred
  */
-public class seqgroup {
+public class SequenceGroup {
     
     /** Creates a new instance of seqgroup */
-    public seqgroup() {
+    public SequenceGroup() {
     }
     
     String name="default";

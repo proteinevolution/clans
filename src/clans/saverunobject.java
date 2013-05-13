@@ -47,7 +47,7 @@ public class saverunobject {
     boolean showinfo=false;
     boolean usescval=false;
     boolean complexatt=true;
-    java.util.Vector<seqgroup> seqgroupsvec=new Vector<seqgroup>();
+    java.util.Vector<SequenceGroup> seqgroupsvec=new Vector<SequenceGroup>();
     String blastpath="blastall -p blastp";
     String formatdbpath="formatdb";
     java.util.ArrayList<File> mapfiles=new java.util.ArrayList<File>();
@@ -689,7 +689,7 @@ public class saverunobject {
 		 //while I am reading the sequence groups
         String[] tmparr;
         String tmpstr = "";
-        seqgroup currgroup = null;
+        SequenceGroup currgroup = null;
         int tmpval;
         String inline;
         
@@ -707,7 +707,7 @@ public class saverunobject {
                 if (currgroup != null) {
                     seqgroupsvec.addElement(currgroup);
                 }
-                currgroup = new seqgroup();
+                currgroup = new SequenceGroup();
                 currgroup.name = tmparr[1];
                 currgroup.type = 0;
             } else if (inline.startsWith("type=")) {

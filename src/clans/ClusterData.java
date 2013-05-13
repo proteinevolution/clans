@@ -94,7 +94,7 @@ public class ClusterData {
     int ovalsize = 4;
     int dotsize = 2;
     int groupsize = 4;
-    java.util.Vector<seqgroup> seqgroupsvec = new java.util.Vector<seqgroup>();
+    java.util.Vector<SequenceGroup> seqgroupsvec = new java.util.Vector<SequenceGroup>();
     ArrayList<int[][]> polygons = null;
     boolean showseqgroups = false;
     boolean changedvals = false;
@@ -724,7 +724,7 @@ public class ClusterData {
                     } else if (inline.equalsIgnoreCase("<seqgroups>")) {
                         // while I am reading the sequence groups
                         String[] tmparr;
-                        seqgroup currgroup = null;
+                        SequenceGroup currgroup = null;
                         while (((inline = inread.readLine()) != null)
                                 && (inline.equalsIgnoreCase("</seqgroups>") == false)) {
                             // skip empty lines
@@ -743,7 +743,7 @@ public class ClusterData {
                                 if (currgroup != null) {
                                     myrun.seqgroupsvec.addElement(currgroup);
                                 }
-                                currgroup = new seqgroup();
+                                currgroup = new SequenceGroup();
                                 currgroup.name = tmparr[1];
                             } else if (tmparr[0].equalsIgnoreCase("color")) {
                                 tmparr = tmparr[1].split(";");
@@ -975,7 +975,7 @@ public class ClusterData {
                             
                         } else if (inline.startsWith("numbers=")) {
                             count++;
-                            seqgroup mygroup = new seqgroup();
+                            SequenceGroup mygroup = new SequenceGroup();
                             
                             if (name != null) {
                                 mygroup.name = name;
@@ -1164,7 +1164,7 @@ public class ClusterData {
                             stopclusters = true;
 
                         } else if (inline.equalsIgnoreCase("<cluster>")) {
-                            seqgroup mycluster = new seqgroup();
+                            SequenceGroup mycluster = new SequenceGroup();
                             int clustersize = -1;
                             String nameline = inread.readLine();
                             String sizeline = inread.readLine();
@@ -1364,9 +1364,9 @@ public class ClusterData {
             // write the sequence groups
             if ((input.seqgroupsvec != null) && (input.seqgroupsvec.size() > 0)) {
                 outwrite.println("<seqgroups>");
-                seqgroup mygroup;
+                SequenceGroup mygroup;
                 for (i = 0; i < input.seqgroupsvec.size(); i++) {
-                    mygroup = (seqgroup) input.seqgroupsvec.elementAt(i);
+                    mygroup = (SequenceGroup) input.seqgroupsvec.elementAt(i);
                     
                     if (mygroup.sequences.length == 0) {
                         System.err.println("WARNING: seqgroup " + mygroup.name + " has zero elements; skipping save");
