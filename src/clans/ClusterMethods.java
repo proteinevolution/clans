@@ -99,7 +99,7 @@ public class ClusterMethods {
      * use the positions of all elements and their attraction/repulsion values to calculate a movement vector for each
      * (take into account the last movement). repulsion doesn't have a specific value as all evalues below a certain
      * point are simply regarded as insignificant. therefore use a one formula for all to compute the repulsive forces
-     * (see getrepulse) inline all the getrepulse and getattract methods to reduce the number of method calls
+     * inline all the getrepulse and getattract methods to reduce the number of method calls
      * 
      * @param posarr
      * @param attvals
@@ -156,7 +156,8 @@ public class ClusterMethods {
                             continue;
                         }
 
-                        getrepulse2d(posarr[selectnames[i]],posarr[j],currmoverep,repvalpow,repfactor, rand);
+                        add_repulsion(posarr[selectnames[i]], posarr[j], currmoverep, repvalpow, repfactor, rand,
+                                data.cluster2d);
                         
                         weight2=1;
                         if(weights!=null){
@@ -223,8 +224,9 @@ public class ClusterMethods {
                         if(j==selectnames[i]){
                             continue;
                         }
-                        //currmoverep=getrepulse3d(posarr[selectnames[i]],posarr[j],currmoverep,repvalpow, repfactor,rand);
-                        getrepulse3d(posarr[selectnames[i]],posarr[j],currmoverep,repvalpow, repfactor,rand);
+
+                        add_repulsion(posarr[selectnames[i]],posarr[j],currmoverep,repvalpow, repfactor,rand, data.cluster2d);
+                        
                         weight2=1;
                         if(weights!=null){
                             weight2=weights[selectnames[j]];
@@ -236,7 +238,6 @@ public class ClusterMethods {
                 }//end for i
                 for(i=attnum;--i>=0;){
                     if(tmphash.containsKey(hashkeys[attvals[i].query])){
-                        //currmoveatt=getattract3d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
                         //no point in inlining this bit; I reuse the results a second time
                         getattract3d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
                         weight1=1;
@@ -570,32 +571,6 @@ public class ClusterMethods {
         movement[2] = -position[2] * origin_attraction;
     }
 
-    static void getrepulse2d(float[] pos1,float[] pos2,double[] movement, int repvalpow, float repfactor, java.util.Random rand){
-        //get the repulsion in 2d only
-        double distx=pos2[0]-pos1[0];
-        double disty=pos2[1]-pos1[1];
-        double totaldist=java.lang.Math.sqrt((distx*distx)+(disty*disty));
-        if(totaldist==0){
-            //if two points are at exactly the same position I need to add some random effect
-            movement[0]=repfactor*(rand.nextDouble()-0.5)*0.001;
-            movement[1]=repfactor*(rand.nextDouble()-0.5)*0.001;
-            movement[2]=0;//repfactor*(rand.nextDouble()-0.5)*0.001;
-            return;
-        }
-        //here I scale the force**repvalpow
-        double totalmove=1;
-        for(int i=repvalpow;--i>=0;){
-            totalmove*=totaldist;
-        }
-        totalmove=repfactor/totalmove;
-        movement[0]=(-distx/totaldist)*totalmove;
-        movement[1]=(-disty/totaldist)*totalmove;
-        movement[2]=0;
-        //return movement;
-    }//end getrepulse2d
-
-    //--------------------------------------------------------------------------
-
     static void getattract2d(float[] pos1, float[] pos2, float attval, double[] movement, int attvalpow, float attfactor){
         //get the attractive forces for 2d only (forget Z-axis)
         //tmpattvals are between 0 and 1 (or ==2 for evalue==0) (o=no attraction, 1=max attraction)
@@ -659,33 +634,41 @@ public class ClusterMethods {
         //return movement;
     }// end getattract3d
 
-    //--------------------------------------------------------------------------
-
-    //static double[] getrepulse3d(float[] pos1,float[] pos2,double[] movement, int repvalpow, float repfactor, Random rand){
-    static void getrepulse3d(float[] pos1,float[] pos2,double[] movement, int repvalpow, float repfactor, java.util.Random rand){
-        //given these two objects, which way will object 1 move? force scales with 1/distance**2
-        double distx=pos2[0]-pos1[0];
-        double disty=pos2[1]-pos1[1];
-        double distz=pos2[2]-pos1[2];
-        double totaldist=java.lang.Math.sqrt((distx*distx)+(disty*disty)+(distz*distz));
-        if(totaldist==0){
+    /**
+     * given two objects at position_1 and position_2, which way will object_1 move? force scales with 1/distance**2
+     * 
+     * @param position_1 position of the first point 
+     * @param position_2 position of the second point
+     * @param movement
+     * @param repulsion_exponent
+     * @param repulsion_factor
+     * @param rand
+     */
+    static void add_repulsion(float[] position_1, float[] position_2, double[] movement, int repulsion_exponent,
+            float repulsion_factor, java.util.Random rand, boolean is_2d) {
+        double distx = position_2[0] - position_1[0];
+        double disty = position_2[1] - position_1[1];
+        double distz = position_2[2] - position_1[2];
+        double totaldist = java.lang.Math.sqrt((distx * distx) + (disty * disty) + (distz * distz));
+        
+        if (totaldist == 0) {
             //if two points are at exactly the same position I need to add some random effect
-            movement[0]=repfactor*(rand.nextDouble()-0.5)*0.001;
-            movement[1]=repfactor*(rand.nextDouble()-0.5)*0.001;
-            movement[2]=repfactor*(rand.nextDouble()-0.5)*0.001;
+            movement[0]=repulsion_factor*(rand.nextDouble()-0.5)*0.001;
+            movement[1]=repulsion_factor*(rand.nextDouble()-0.5)*0.001;
+            
+            if (!is_2d) {
+                movement[2]=repulsion_factor*(rand.nextDouble()-0.5)*0.001;
+            }
             return;
         }
-        //here I scale the force**repvalpow
-        double totalmove=1;
-        for(int i=repvalpow;--i>=0;){
-            totalmove*=totaldist;
-        }
-        totalmove=repfactor/totalmove;
-        movement[0]=(-distx/totaldist)*totalmove;
-        movement[1]=(-disty/totaldist)*totalmove;
-        movement[2]=(-distz/totaldist)*totalmove;
-        //return movement;
-    }// end getrepulse3d
+        
+        // scale force**repvalpow
+        double totalmove = repulsion_factor / Math.pow(totaldist, repulsion_exponent);
+
+        movement[0] = (-distx / totaldist) * totalmove;
+        movement[1] = (-disty / totaldist) * totalmove;
+        movement[2] = (-distz / totaldist) * totalmove;
+    }
 
     static minattvals[] filter_attraction_values(minattvals[] attractions, double minpval){
         //use for filtering attraction values [-1<0<1]; -1 and 1 are max repulse/attract

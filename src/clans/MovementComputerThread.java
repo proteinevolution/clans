@@ -53,7 +53,6 @@ public class MovementComputerThread extends java.lang.Thread {
      * use the positions of all elements and their attraction/repulsion values to calculate a movement vector for each
      * (take into account the last movement). repulsion doesn't have a specific value as all evalues below a certain
      * point are simply regarded as insignificant. therefore use a one formula for all to compute the repulsive forces
-     * (see getrepulse)
      */
     @Override
     public void run() {
@@ -84,20 +83,21 @@ public class MovementComputerThread extends java.lang.Thread {
             }
             
             if (parent.cluster2d == true) {
-                //System.out.println("clusterselected2D");
+
                 //cluster only the selected sequences in 2D
                 for (int i = start; i < end; i++) {
-
                     ClusterMethods.add_attraction_towards_origin(posarr[selectnames[i]], currmoveatt, minattract);
                     movearr[selectnames[i]][0] += currmoveatt[0];
                     movearr[selectnames[i]][1] += currmoveatt[1];
+
                     for (int j = elements; --j >= 0;) {
-                        //currmoverep=getrepulse2d(posarr[selectnames[i]],posarr[j],currmoverep,repvalpow,repfactor,rand);
-                        ClusterMethods.getrepulse2d(posarr[selectnames[i]], posarr[j], currmoverep, repvalpow, repfactor, ClusterMethods.rand);
+                        ClusterMethods.add_repulsion(posarr[selectnames[i]], posarr[j], currmoverep, repvalpow,
+                                repfactor, ClusterMethods.rand, parent.cluster2d);
                         movearr[selectnames[i]][0] += currmoverep[0];
                         movearr[selectnames[i]][1] += currmoverep[1];
-                    }//end for j
-                }//end for i
+                    }
+                }
+                
                 //now add the attraction values, but only for the query or hit sequences in my part of the selectnames array (assigned in recluster3d)
                 for (int i = attnum; --i >= 0;) {
                     if ((tmphash.containsKey(String.valueOf(attvals[i].query))) && (tmphash.get(String.valueOf(attvals[i].query)).intValue() == thread_id)) {
@@ -131,8 +131,8 @@ public class MovementComputerThread extends java.lang.Thread {
                     }
                 }//end for i
             } else {
+                
                 //cluster only the selected sequences in 3D
-                //System.out.println("clusterselected3D");
                 for (int i = start; i < end; i++) {
 
                     ClusterMethods.add_attraction_towards_origin(posarr[selectnames[i]], currmoveatt, minattract);
@@ -140,13 +140,14 @@ public class MovementComputerThread extends java.lang.Thread {
                     movearr[selectnames[i]][1] += currmoveatt[1];
                     movearr[selectnames[i]][2] += currmoveatt[2];
                     for (int j = elements; --j >= 0;) {
-                        //currmoverep=getrepulse3d(posarr[selectnames[i]],posarr[j],currmoverep,repvalpow,repfactor,rand);
-                        ClusterMethods.getrepulse3d(posarr[selectnames[i]], posarr[j], currmoverep, repvalpow, repfactor, ClusterMethods.rand);
+                        ClusterMethods.add_repulsion(posarr[selectnames[i]], posarr[j], currmoverep, repvalpow, repfactor, ClusterMethods.rand, parent.cluster2d);
+
                         movearr[selectnames[i]][0] += currmoverep[0];
                         movearr[selectnames[i]][1] += currmoverep[1];
                         movearr[selectnames[i]][2] += currmoverep[2];
                     }//end for j
                 }//end for i
+                
                 //now add the attraction values, but only for the query or hit sequences in my part of the selectnames array (assigned in recluster3d)
                 for (int i = attnum; --i >= 0;) {
                     if ((tmphash.containsKey(String.valueOf(attvals[i].query))) && (tmphash.get(String.valueOf(attvals[i].query)).intValue() == thread_id)) {
@@ -207,7 +208,7 @@ public class MovementComputerThread extends java.lang.Thread {
                         continue;
                     } 
 
-                    ClusterMethods.getrepulse3d(posarr[i], posarr[j], currmoverep, repvalpow, repfactor, ClusterMethods.rand);
+                    ClusterMethods.add_repulsion(posarr[i], posarr[j], currmoverep, repvalpow, repfactor, ClusterMethods.rand, parent.cluster2d);
                     
                     for (int k = 0; k < movearr[i].length; k ++) {
                         movearr[i][k] += currmoverep[k];
