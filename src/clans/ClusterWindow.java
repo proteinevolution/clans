@@ -1,28 +1,37 @@
-/*
- * clusterwindow.java
- *
- * Created on March 9, 2004, 3:25 PM
- */
 package clans;
+
 import java.util.*;
+
 /**
- *
- * @author  tancred
+ * 
+ * @author tancred
  */
-public class clusterwindow extends javax.swing.JDialog {
+public class ClusterWindow extends javax.swing.JDialog {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8677383220559650947L;
+
+    ClusteringWithGui parent;
+    Vector<cluster> clusters;
+    String[] clusternames;
+    boolean didbootstrap = false;
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addtoindividualseqgroupsbutton;
+    private javax.swing.JButton addtoseqgroupsbutton;
+    private javax.swing.JButton closebutton;
+    private javax.swing.JList clusterlist;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane scrollpanel;
+    // End of variables declaration//GEN-END:variables
     
-    /** Creates new form clusterwindow */
-    //public clusterwindow(java.awt.Frame parent, boolean modal) {
-    //    super(parent, modal);
-    //    initComponents();
-    //}
-    
-    public clusterwindow(ClusteringWithGui parent, Vector clustervec,String label,boolean didbootstrap){
-        //super(parent, false);
-        this.parent=parent;
-        this.clustervec=clustervec;
-        this.didbootstrap=didbootstrap;
-        this.clusternames=getclusternames(clustervec);
+    public ClusterWindow(ClusteringWithGui parent, Vector<cluster> clusters, String label, boolean didbootstrap) {
+        this.parent = parent;
+        this.clusters = clusters;
+        this.didbootstrap = didbootstrap;
+        this.clusternames = getclusternames(clusters);
         this.setTitle(label);
         initComponents();
     }
@@ -95,35 +104,46 @@ public class clusterwindow extends javax.swing.JDialog {
         pack();
     }//GEN-END:initComponents
     
+    /**
+     * add each of the currently selected clusters as separate sequence group
+     * @param evt
+     */
     private void addtoindividualseqgroupsbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addtoindividualseqgroupsbuttonActionPerformed
-        //add each of the currently selected clusters as separate sequence group
         String newname=javax.swing.JOptionPane.showInputDialog(this,"Base group name:",this.getTitle());
+        
         if(newname!=null && newname.length()==0){
             return;
         }
+        
         int[] selectedvals=clusterlist.getSelectedIndices();
-        if(java.lang.reflect.Array.getLength(selectedvals)==0){
+        
+        if (selectedvals.length == 0) {
             return;
         }
-        int currcount=0;
-        int mysize;
+        
         int[] myarr;
-        for(int i=java.lang.reflect.Array.getLength(selectedvals);--i>=0;){
-            myarr=((cluster)clustervec.elementAt(selectedvals[i])).member;
-            mysize=java.lang.reflect.Array.getLength(myarr);
-            seqgroup newgroup=new seqgroup();
-            newgroup.name=newname+"_"+i;
-            newgroup.color=java.awt.Color.red;
-            newgroup.sequences=myarr;
-            newgroup.type=0;
-            newgroup.size=parent.data.groupsize;
+        for (int i = selectedvals.length; --i >= 0;) {
+            
+            seqgroup newgroup = new seqgroup();
+            newgroup.name = newname + "_" + i;
+            newgroup.color = java.awt.Color.red;
+            
+            myarr = clusters.elementAt(selectedvals[i]).member;
+            newgroup.sequences = myarr;
+            
+            newgroup.type = 0;
+            newgroup.size = parent.data.groupsize;
             parent.data.seqgroupsvec.addElement(newgroup);
-        }//end for i
+        }
+        
         parent.repaint();
     }//GEN-LAST:event_addtoindividualseqgroupsbuttonActionPerformed
     
+    /**
+     * add the currently selected groups to the seqgroups vector
+     * @param evt
+     */
     private void addtoseqgroupsbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addtoseqgroupsbuttonActionPerformed
-        // add the currently selected groups to the seqgroups vector
         String newname=javax.swing.JOptionPane.showInputDialog(this,"Group name:","selected sequences");
         if(newname!=null && newname.length()==0){
             return;
@@ -134,7 +154,7 @@ public class clusterwindow extends javax.swing.JDialog {
         }
         int newsize=0;
         for(int i=java.lang.reflect.Array.getLength(selectedvals);--i>=0;){
-            newsize+=((cluster)clustervec.elementAt(selectedvals[i])).members();
+            newsize+=((cluster)clusters.elementAt(selectedvals[i])).members();
         }//end for i
         //now add all the values to a new array
         int[] newselected=new int[newsize];
@@ -142,7 +162,7 @@ public class clusterwindow extends javax.swing.JDialog {
         int mysize;
         int[] myarr;
         for(int i=java.lang.reflect.Array.getLength(selectedvals)-1;i>=0;i--){
-            myarr=((cluster)clustervec.elementAt(selectedvals[i])).member;
+            myarr=((cluster)clusters.elementAt(selectedvals[i])).member;
             mysize=java.lang.reflect.Array.getLength(myarr);
             for(int j=0;j<mysize;j++){
                 newselected[j+currcount]=myarr[j];
@@ -164,12 +184,15 @@ public class clusterwindow extends javax.swing.JDialog {
         dispose();
     }//GEN-LAST:event_closebuttonActionPerformed
     
+    /**
+     * update the selected sequences in parent
+     * @param evt
+     */
     private void clusterlistValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_clusterlistValueChanged
-        //update the selected sequences in parent
         int[] selectedvals=clusterlist.getSelectedIndices();
         int newsize=0;
         for(int i=java.lang.reflect.Array.getLength(selectedvals)-1;i>=0;i--){
-            newsize+=((cluster)clustervec.elementAt(selectedvals[i])).members();
+            newsize+=((cluster)clusters.elementAt(selectedvals[i])).members();
         }//end for i
         //now add all the values to a new array
         int[] newselected=new int[newsize];
@@ -183,8 +206,8 @@ public class clusterwindow extends javax.swing.JDialog {
         int[] myarr;
         float[] myconf;
         for(int i=java.lang.reflect.Array.getLength(selectedvals)-1;i>=0;i--){
-            myarr=((cluster)clustervec.elementAt(selectedvals[i])).member;
-            myconf=((cluster)clustervec.elementAt(selectedvals[i])).seqconfidence;
+            myarr=((cluster)clusters.elementAt(selectedvals[i])).member;
+            myconf=((cluster)clusters.elementAt(selectedvals[i])).seqconfidence;
             mysize=java.lang.reflect.Array.getLength(myarr);
             if(didbootstrap){//was: myconf!=null){
                 for(int j=0;j<mysize;j++){
@@ -210,39 +233,25 @@ public class clusterwindow extends javax.swing.JDialog {
     }//GEN-LAST:event_closeDialog
     
     /**
-     * @param args the command line arguments
+     * convert the cluster to s.th. displayable as a String clustername and number of elements for example
+     * 
+     * @param invec
+     * @return
      */
-    //public static void main(String args[]) {
-    //    new clusterwindow(new javax.swing.JFrame(), true).show();
-    //}
-    
-    ClusteringWithGui parent;
-    Vector clustervec;
-    String[] clusternames;
-    boolean didbootstrap=false;
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton addtoindividualseqgroupsbutton;
-    private javax.swing.JButton addtoseqgroupsbutton;
-    private javax.swing.JButton closebutton;
-    private javax.swing.JList clusterlist;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane scrollpanel;
-    // End of variables declaration//GEN-END:variables
-    
-    String[] getclusternames(Vector invec){
-        //convert the cluster to sth displayable as a String
-        //clustername and number of elements for example
-        int vecnum=invec.size();
-        String[] retarr=new String[vecnum];
-        for(int i=0;i<vecnum;i++){
-            if(((cluster)invec.elementAt(i)).clusterconfidence>-1){
-                retarr[i]=((cluster)invec.elementAt(i)).name+" ("+((cluster)invec.elementAt(i)).members()+" sequences) (jacknife:" +((cluster)invec.elementAt(i)).clusterconfidence*100+"%)";
-            }else{
-                retarr[i]=((cluster)invec.elementAt(i)).name+" ("+((cluster)invec.elementAt(i)).members()+" sequences)";
+    String[] getclusternames(Vector<cluster> invec) {
+        String[] retarr = new String[invec.size()];
+        for (int i = 0; i < invec.size(); i++) {
+
+            if (invec.elementAt(i).clusterconfidence > -1) {
+                retarr[i] = invec.elementAt(i).name + " (" + invec.elementAt(i).members() + " sequences) (jacknife:"
+                        + invec.elementAt(i).clusterconfidence * 100 + "%)";
+
+            } else {
+                retarr[i] = invec.elementAt(i).name + " (" + invec.elementAt(i).members() + " sequences)";
             }
-        }//end for i
+
+        }
         return retarr;
-    }//end getclusternames
+    }
     
 }//end clusterwindow

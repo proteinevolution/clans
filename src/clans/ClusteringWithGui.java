@@ -1059,7 +1059,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                         return;
                     }
                 }
-                new clusterwindow(this,clustervec,"convex: "+minseqnum+";"+sigmafac,didbootstrap).setVisible(true);
+                new ClusterWindow(this,clustervec,"convex: "+minseqnum+";"+sigmafac,didbootstrap).setVisible(true);
             }catch (NumberFormatException ne){
                 javax.swing.JOptionPane.showMessageDialog(this,"Unable to parse float from "+tmpstr);
             }
@@ -1086,7 +1086,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                         return;
                     }
                 }
-                new clusterwindow(this,clustervec,"linkage: "+minseqnum+";"+minlinkage,didbootstrap).setVisible(true);
+                new ClusterWindow(this,clustervec,"linkage: "+minseqnum+";"+minlinkage,didbootstrap).setVisible(true);
             }catch (NumberFormatException ne){
                 javax.swing.JOptionPane.showMessageDialog(this,"Unable to parse int from "+tmpstr);
             }
@@ -1122,7 +1122,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                         return;
                     }
                 }
-                new clusterwindow(this,clustervec,"network:"+minseqnum+";"+dooffset+";"+globalaverage,didbootstrap).setVisible(true);
+                new ClusterWindow(this,clustervec,"network:"+minseqnum+";"+dooffset+";"+globalaverage,didbootstrap).setVisible(true);
             }catch(NumberFormatException ne){
                 javax.swing.JOptionPane.showMessageDialog(this,"Unable to parse int from "+tmpstr);
             }
