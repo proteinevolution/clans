@@ -1,5 +1,6 @@
 package clans;
 
+import java.awt.Color;
 import java.util.*;
 
 /**
@@ -121,18 +122,11 @@ public class ClusterWindow extends javax.swing.JDialog {
             return;
         }
         
-        int[] myarr;
         for (int i = selectedvals.length; --i >= 0;) {
             
-            SequenceGroup newgroup = new SequenceGroup();
-            newgroup.name = newname + "_" + i;
-            newgroup.color = java.awt.Color.red;
-            
-            myarr = clusters.elementAt(selectedvals[i]).member;
-            newgroup.sequences = myarr;
-            
-            newgroup.type = 0;
-            newgroup.size = parent.data.groupsize;
+            SequenceGroup newgroup = new SequenceGroup(newname + "_" + i, clusters.elementAt(selectedvals[i]).member,
+                    parent.data.groupsize, 0, Color.red);
+
             parent.data.seqgroupsvec.addElement(newgroup);
         }
         
@@ -169,13 +163,10 @@ public class ClusterWindow extends javax.swing.JDialog {
             }//end for j
             currcount+=mysize;
         }//end for i
-        SequenceGroup newgroup=new SequenceGroup();
-        newgroup.name=newname;
-        newgroup.color=java.awt.Color.red;
-        newgroup.sequences=newselected;
-        newgroup.type=0;
-        newgroup.size=parent.data.groupsize;
+        
+        SequenceGroup newgroup = new SequenceGroup(newname, newselected, parent.data.groupsize, 0, Color.red);
         parent.data.seqgroupsvec.addElement(newgroup);
+        
         parent.repaint();
     }//GEN-LAST:event_addtoseqgroupsbuttonActionPerformed
     

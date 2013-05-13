@@ -19,6 +19,17 @@ public class SequenceGroup {
     int[][] polygon = null;
     boolean hide = false;
 
+    public SequenceGroup() {
+    }
+
+    public SequenceGroup(String name, int[] sequences, int size, int type, Color color) {
+        this.name = name;
+        this.sequences = sequences;
+        this.size = size;
+        this.type = type;
+        this.color = color;
+    }
+
     void remove(int rmindex) {
         int[] tmp = sequences;
         int seqnum = sequences.length;
