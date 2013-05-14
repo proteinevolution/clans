@@ -801,7 +801,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     }//GEN-END:initComponents
     
     private void loadtabsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadtabsmenuitemActionPerformed
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         groupseqs=null;
@@ -1133,7 +1133,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void loadalternatemenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadalternatemenuitemActionPerformed
         // load data from a file with matrix info (oly one value per pair)
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         groupseqs=null;
@@ -1263,7 +1263,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void printmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printmenuitemActionPerformed
         // print the current view
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         java.awt.print.PrinterJob printJob = java.awt.print.PrinterJob.getPrinterJob();
@@ -1316,7 +1316,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void save2dmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_save2dmenuitemActionPerformed
         // save the 2d coordinates of the graph points to a file
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         int returnVal = fc.showSaveDialog(this);
@@ -1351,7 +1351,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     	if (!this.contains_data(true)) {
 			return;
 		}
-    	if(is_running()){
+    	if(is_running(true)){
             return;
         }
         try{
@@ -1377,7 +1377,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void savemtxmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_savemtxmenuitemActionPerformed
         // save the blast matrix to file
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         int returnVal = fc.showSaveDialog(this);
@@ -1533,7 +1533,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void loadmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadmenuitemActionPerformed
         // load my custom format for a run from disk
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         groupseqs=null;
@@ -1753,7 +1753,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 //    private void hidesingletonsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hidesingletonsmenuitemActionPerformed
 //        // hide sequences that have no hit whatsoever to others in the dataset
-//        if(is_running()){
+//        if(is_running(false)){
 //            return;
 //        }
 //        groupseqs=null;
@@ -1854,7 +1854,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void getparentmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getparentmenuitemActionPerformed
         // zoom out one level (use all sequences from the level before for further computation
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         groupseqs=null;
@@ -1930,7 +1930,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void getchildmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getchildmenuitemActionPerformed
         // for further computation use only the selected sequences.(zoom in one level)
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         groupseqs=null;
@@ -2040,7 +2040,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     private void getseqsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getseqsmenuitemActionPerformed
         // Add your handling code here:
         //save the currently selected sequences to file
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         int returnVal = fc.showSaveDialog(this);
@@ -2121,7 +2121,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     	if (!this.contains_data(true)) {
 			return;
 		}
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         try{
@@ -2346,7 +2346,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
     private void saveattvalsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveattvalsmenuitemActionPerformed
         // save the similarity matrix data to a file
-        if(is_running()){
+        if(is_running(false)){
             return;
         }
         int returnVal = fc.showSaveDialog(this);
@@ -2701,13 +2701,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         return true;
     }
     
-    boolean is_running(){
+    boolean is_running(boolean showinfo){
     	/**
     	 * check if the clustering is currently running
     	 * 
     	 * @return: true if the clustering is running, false else
     	 */
-        return !is_stopped(false);
+        return !is_stopped(showinfo);
     }
     
     void initaddedseqs(MinimalHsp[] blastvec,AminoAcidSequence[]allaln,String[]allnamearr,HashMap<String, Integer> allnameshash,int[]newnumarr,float[][]allposarr,float maxmove,double pval,boolean useselectedonly){
