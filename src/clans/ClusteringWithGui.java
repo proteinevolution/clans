@@ -1544,29 +1544,37 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         myview.setVisible(true);
     }//GEN-LAST:event_getblasthitsmenuitemActionPerformed
     
-    private void savemenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_savemenuitemActionPerformed
-        // save the current run to file
-        if (!is_stopped(true)) {
-            return;
+    private void savemenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+
+        boolean was_running = false;
+        if (is_running(false)) {
+            was_running = true;
+            startstopthread(); // stop if running, then restart after setting threshold
         }
 
         JFileChooser jFileChooser = new JFileChooser();
-        
+
         if (data.getAbsoluteInputfileName() != null) {
-        	jFileChooser.setSelectedFile(new File(data.getAbsoluteInputfileName())); // input filename is default output filename
+            // input filename is default output filename
+            jFileChooser.setSelectedFile(new File(data.getAbsoluteInputfileName()));
         }
 
         int returnVal = jFileChooser.showSaveDialog(this);
-        
-        if(returnVal == JFileChooser.APPROVE_OPTION) {
-        	
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+
             data.save_to_file(jFileChooser.getSelectedFile());
-            
-            data.setInputFilename(jFileChooser.getSelectedFile().getPath()); // in case the output filename is not the one the file was loaded from
-            
+
+            // in case the output filename is not the one the file was loaded from
+            data.setInputFilename(jFileChooser.getSelectedFile().getPath());
+
             this.setTitle("Clustering of " + data.getBaseInputfileName());
         }
-    }//GEN-LAST:event_savemenuitemActionPerformed
+
+        if (was_running) {
+            startstopthread(); // restart if previously running
+        }
+    }
     
     private void loadmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadmenuitemActionPerformed
         // load my custom format for a run from disk
