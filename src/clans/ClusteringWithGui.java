@@ -3586,46 +3586,59 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                         g.fillOval((int)(tposarrtmp[tmpselectclass.selectednames[j]][0]-halfoval),(int)(tposarrtmp[tmpselectclass.selectednames[j]][1]-halfoval),ovalsize,ovalsize);
                     }
                 }//end for i
+                
                 //draw the sequence groups
                 if(data.showseqgroups){
                     SequenceGroup mygroup;
                     for(int i=data.seqgroupsvec.size()-1;i>=0;i--){
-                        mygroup=(SequenceGroup)data.seqgroupsvec.elementAt(i);
+                        mygroup = data.seqgroupsvec.elementAt(i);
+                        
                         if(mygroup.hide==true){
                             continue;
                         }
+                        
                         g.setColor(mygroup.color);
+                        
                         if(mygroup.type==0){
-                            tmpint=((SequenceGroup)data.seqgroupsvec.elementAt(i)).size;
-                            halfgroup=(float)tmpint/2;
-                            for(int j=java.lang.reflect.Array.getLength(mygroup.sequences)-1;j>=0;j--){
+                            halfgroup = (float) mygroup.size / 2;
+                            for (int j = mygroup.sequences.length - 1; j >= 0; j--) {
+                                
                                 if(mygroup.sequences[j]<elements){
-                                    g.fillOval((int)(tposarrtmp[mygroup.sequences[j]][0]-halfgroup),(int)(tposarrtmp[mygroup.sequences[j]][1]-halfgroup),tmpint,tmpint);
+                                    g.fillOval((int) (tposarrtmp[mygroup.sequences[j]][0] - halfgroup),
+                                            (int) (tposarrtmp[mygroup.sequences[j]][1] - halfgroup), mygroup.size,
+                                            mygroup.size);
+                                
                                 }else{
-                                    System.err.println("sequence number "+mygroup.sequences[j]+" is not present in file; removing entry from group");
+                                    System.err.println("sequence number " + mygroup.sequences[j]
+                                            + " is not present in file; removing entry from group");
                                     mygroup.remove(j);
                                 }
                             }//end for j
+                        
                         }else{
                             tmpposarr=mygroup.polygon;
                             posnum=tmpposarr[2][0];//the number of points
                             xposarr=new int[posnum];
                             yposarr=new int[posnum];
-                            for(int j=java.lang.reflect.Array.getLength(mygroup.sequences)-1;j>=0;j--){
+                            for (int j = mygroup.sequences.length - 1; j >= 0; j--) {
+                                
                                 if(mygroup.sequences[j]<elements){
                                     for(int k=0;k<posnum;k++){
                                         xposarr[k]=(int)(tmpposarr[0][k]+tposarrtmp[mygroup.sequences[j]][0]);
                                         yposarr[k]=(int)(tmpposarr[1][k]+tposarrtmp[mygroup.sequences[j]][1]);
-                                    }//end for k
+                                    }
                                     g.fillPolygon(xposarr,yposarr,posnum);
+                                
                                 }else{
-                                    System.err.println("sequence number "+mygroup.sequences[j]+" is not present in file; removing entry from group");
+                                    System.err.println("sequence number " + mygroup.sequences[j]
+                                            + " is not present in file; removing entry from group");
                                     mygroup.remove(j);
                                 }
-                            }//end for j
+                            }
                         }
-                    }//end for i
-                }//end if showseqgroups
+                    }
+                }
+                
                 if(groupseqs!=null){//draw the sequences from the currently selected group
                     g.setColor(groupseqscolor);
                     for(int i=java.lang.reflect.Array.getLength(groupseqs);--i>=0;){
