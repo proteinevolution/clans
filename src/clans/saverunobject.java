@@ -629,6 +629,9 @@ public class saverunobject {
             }
             lastline = inline;
         }//end while hsp
+        
+        System.out.println(); // add newline to the System.out.print() used before
+        
         if (inline.equalsIgnoreCase("</hsp>")) {
             blasthits = (MinimalHsp[]) hsphash.values().toArray(new MinimalHsp[0]);
         } else {
