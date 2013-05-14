@@ -171,8 +171,9 @@ public class ClusterMethods {
                 
                 for(i=attnum;--i>=0;){
                     if(tmphash.containsKey(hashkeys[attvals[i].query])){
-                        //currmoveatt=getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
-                        getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
+                        add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt,
+                                attvalpow, attfactor, data.cluster2d);
+
                         weight1=1;
                         weight2=1;
                         if(weights!=null){
@@ -186,8 +187,9 @@ public class ClusterMethods {
                             movement[attvals[i].hit][1]-=currmoveatt[1]*weight1;
                         }
                     }else if(tmphash.containsKey(hashkeys[attvals[i].hit])){
-                        //currmoveatt=getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
-                        getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
+                        add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt,
+                                attvalpow, attfactor, data.cluster2d);
+
                         weight1=1;
                         if(weights!=null){
                             weight1=weights[attvals[i].query];
@@ -236,10 +238,12 @@ public class ClusterMethods {
                         movement[selectnames[i]][2]+=currmoverep[2]*weight2;
                     }//end for j
                 }//end for i
+                
                 for(i=attnum;--i>=0;){
                     if(tmphash.containsKey(hashkeys[attvals[i].query])){
                         //no point in inlining this bit; I reuse the results a second time
-                        getattract3d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
+                        add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt,
+                                attvalpow, attfactor, data.cluster2d);
                         weight1=1;
                         weight2=1;
                         if(weights!=null){
@@ -255,8 +259,8 @@ public class ClusterMethods {
                             movement[attvals[i].hit][2]-=currmoveatt[2]*weight1;
                         }
                     }else if(tmphash.containsKey(hashkeys[attvals[i].hit])){
-                        //currmoveatt=getattract3d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
-                        getattract3d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
+                        add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt,
+                                attvalpow, attfactor, data.cluster2d);
                         weight1=1;
                         if(weights!=null){
                             weight1=weights[attvals[i].query];
@@ -311,18 +315,22 @@ public class ClusterMethods {
                                 movement[j][0]-=(-distx/totaldist)*totalmove*weight1;
                                 movement[j][1]-=(-disty/totaldist)*totalmove*weight1;
                             }
-                        }//end for j
-                    }//end for i
+                        }
+                    }
+                    
                     for(i=attnum;--i>=0;){
-                        getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
+                        add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt,
+                                attvalpow, attfactor, data.cluster2d);
+                        
                         weight1=weights[attvals[i].query];
                         weight2=weights[attvals[i].hit];
                         movement[attvals[i].query][0]+=currmoveatt[0]*weight2;
                         movement[attvals[i].query][1]+=currmoveatt[1]*weight2;
                         movement[attvals[i].hit][0]-=currmoveatt[0]*weight1;
                         movement[attvals[i].hit][1]-=currmoveatt[1]*weight1;
-                    }//end for i
-                }else{//if weights==null, the use a default weighting of 1
+                    }
+                    
+                } else {// if weights==null, the use a default weighting of 1
                     for(i=elements;--i>=0;){
                         movement[i][0]-=posarr[i][0]*minattract;
                         movement[i][1]-=posarr[i][1]*minattract;
@@ -352,7 +360,9 @@ public class ClusterMethods {
                         }//end for j
                     }//end for i
                     for(i=attnum;--i>=0;){
-                        getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow,attfactor);
+                        add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt,
+                                attvalpow, attfactor, data.cluster2d);
+                        
                         movement[attvals[i].query][0]+=currmoveatt[0];
                         movement[attvals[i].query][1]+=currmoveatt[1];
                         movement[attvals[i].hit][0]-=currmoveatt[0];
@@ -571,68 +581,44 @@ public class ClusterMethods {
         movement[2] = -position[2] * origin_attraction;
     }
 
-    static void getattract2d(float[] pos1, float[] pos2, float attval, double[] movement, int attvalpow, float attfactor){
-        //get the attractive forces for 2d only (forget Z-axis)
-        //tmpattvals are between 0 and 1 (or ==2 for evalue==0) (o=no attraction, 1=max attraction)
-        double distx=pos2[0]-pos1[0];
-        double disty=pos2[1]-pos1[1];
-        double totaldist=java.lang.Math.sqrt((distx*distx)+(disty*disty));
-        //scale totalmove with distance**attvalpow
-        double totalmove=1;
-        for(int i=attvalpow;--i>=0;){
-            totalmove*=totaldist;
-        }
-        totalmove=totalmove*attval*attfactor;
-        if(attval<0){
-            //in cae of repulsion I want to react inversely to the attractive forces
-            totalmove=-1/totalmove;
-        }
-        if(totaldist!=0){
-            movement[0]=(distx/totaldist)*totalmove;
-            movement[1]=(disty/totaldist)*totalmove;
-            movement[2]=0;
-        }else{
-            //repulsion values will differentially move them
-            movement[0]=0;
-            movement[1]=0;
-            movement[2]=0;
-        }
-        //return movement;
-    }//end getattract2d
+    /**
+     * attractive force that scales with distance**2. Determines which way pos1 is going to move, given pos2
+     * 
+     * @param position_1
+     * @param position_2
+     * @param attraction_value
+     * @param movement
+     * @param attraction_exponent
+     * @param attraction_factor
+     * @param is_2d
+     */
+    static void add_attraction(float[] position_1, float[] position_2, float attraction_value, double[] movement,
+            int attraction_exponent, float attraction_factor, boolean is_2d) {
 
-    //--------------------------------------------------------------------------
+        double distx = position_2[0] - position_1[0];
+        double disty = position_2[1] - position_1[1];
+        double distz = position_2[2] - position_1[2];
 
-    //static double[] getattract3d(float[] pos1, float[] pos2, float attval,double[] movement,int attvalpow, float attfactor){
-    static void getattract3d(float[] pos1, float[] pos2, float attval,double[] movement,int attvalpow, float attfactor){
-        //similar to getrepulse but this is an attractive force that scales with distance**2 (the further away, the greater)
-        //which way is pos1 going to move, given pos2
-        //tmpattvals are between 0 and 1 (or ==2 for evalue==0) (o=no attraction, 1=max attraction)
-        double distx=pos2[0]-pos1[0];
-        double disty=pos2[1]-pos1[1];
-        double distz=pos2[2]-pos1[2];
-        double totaldist=java.lang.Math.sqrt((distx*distx)+(disty*disty)+(distz*distz));
-        //scale totalmove with distance**attvalpow
-        double totalmove=1;
-        for(int i=attvalpow;--i>=0;){
-            totalmove*=totaldist;
+        double totaldist = Math.sqrt((distx * distx) + (disty * disty) + (distz * distz));
+
+        double totalmove = attraction_value * attraction_factor * Math.pow(totaldist, attraction_exponent);
+
+        if (attraction_value < 0) { // in case of repulsion act inversely to the attractive forces
+            totalmove = -1 / totalmove;
         }
-        totalmove=totalmove*attval*attfactor;
-        if(attval<0){
-            //in cae of repulsion I want to react inversely to the attractive forces
-            totalmove=-1/totalmove;
+
+        if (totaldist != 0) {
+            movement[0] = (distx / totaldist) * totalmove;
+            movement[1] = (disty / totaldist) * totalmove;
+            movement[2] = (distz / totaldist) * totalmove;
+
+        } else {
+            // attraction does not work on these points if their at the same location
+            movement[0] = 0;
+            movement[1] = 0;
+            movement[2] = 0;
         }
-        if(totaldist!=0){
-            movement[0]=(distx/totaldist)*totalmove;
-            movement[1]=(disty/totaldist)*totalmove;
-            movement[2]=(distz/totaldist)*totalmove;
-        }else{
-            //the repulsion values will differentially move them
-            movement[0]=0;
-            movement[1]=0;
-            movement[2]=0;
-        }
-        //return movement;
-    }// end getattract3d
+    }
 
     /**
      * given two objects at position_1 and position_2, which way will object_1 move? force scales with 1/distance**2

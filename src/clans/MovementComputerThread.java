@@ -101,8 +101,9 @@ public class MovementComputerThread extends java.lang.Thread {
                 //now add the attraction values, but only for the query or hit sequences in my part of the selectnames array (assigned in recluster3d)
                 for (int i = attnum; --i >= 0;) {
                     if ((tmphash.containsKey(String.valueOf(attvals[i].query))) && (tmphash.get(String.valueOf(attvals[i].query)).intValue() == thread_id)) {
-                        //currmoveatt=getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow, attfactor);
-                        ClusterMethods.getattract2d(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt, attvalpow, attfactor);
+                        ClusterMethods.add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att,
+                                currmoveatt, attvalpow, attfactor, parent.cluster2d);
+
                         movearr[attvals[i].query][0] += currmoveatt[0];
                         movearr[attvals[i].query][1] += currmoveatt[1];
                         //movement[attvals[i].query][2]+=currmoveatt[2];
@@ -112,8 +113,9 @@ public class MovementComputerThread extends java.lang.Thread {
                             //movement[attvals[i].hit][2]-=currmoveatt[2];
                         }
                     } else if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == thread_id)) {
-                        //currmoveatt=getattract2d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow, attfactor);
-                        ClusterMethods.getattract2d(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt, attvalpow, attfactor);
+                        ClusterMethods.add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att,
+                                currmoveatt, attvalpow, attfactor, parent.cluster2d);
+
                         movearr[attvals[i].hit][0] -= currmoveatt[0];
                         movearr[attvals[i].hit][1] -= currmoveatt[1];
                         //movement[attvals[i].hit][2]-=currmoveatt[2];
@@ -151,8 +153,9 @@ public class MovementComputerThread extends java.lang.Thread {
                 //now add the attraction values, but only for the query or hit sequences in my part of the selectnames array (assigned in recluster3d)
                 for (int i = attnum; --i >= 0;) {
                     if ((tmphash.containsKey(String.valueOf(attvals[i].query))) && (tmphash.get(String.valueOf(attvals[i].query)).intValue() == thread_id)) {
-                        //currmoveatt=getattract3d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow, attfactor);
-                        ClusterMethods.getattract3d(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt, attvalpow, attfactor);
+                        ClusterMethods.add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att,
+                                currmoveatt, attvalpow, attfactor, parent.cluster2d);
+
                         movearr[attvals[i].query][0] += currmoveatt[0];
                         movearr[attvals[i].query][1] += currmoveatt[1];
                         movearr[attvals[i].query][2] += currmoveatt[2];
@@ -162,8 +165,9 @@ public class MovementComputerThread extends java.lang.Thread {
                             movearr[attvals[i].hit][2] -= currmoveatt[2];
                         }
                     } else if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == thread_id)) {
-                        //currmoveatt=getattract3d(posarr[attvals[i].query],posarr[attvals[i].hit],attvals[i].att,currmoveatt,attvalpow, attfactor);
-                        ClusterMethods.getattract3d(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt, attvalpow, attfactor);
+                        ClusterMethods.add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att,
+                                currmoveatt, attvalpow, attfactor, parent.cluster2d);
+                        
                         movearr[attvals[i].hit][0] -= currmoveatt[0];
                         movearr[attvals[i].hit][1] -= currmoveatt[1];
                         movearr[attvals[i].hit][2] -= currmoveatt[2];
@@ -219,7 +223,8 @@ public class MovementComputerThread extends java.lang.Thread {
             // add attractive movements
             for (int i = attnum; --i >= 0;) {
                 if (attvals[i].query >= start && attvals[i].query < end) {
-                    ClusterMethods.getattract3d(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att, currmoveatt, attvalpow, attfactor);
+                    ClusterMethods.add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att,
+                            currmoveatt, attvalpow, attfactor, parent.cluster2d);
                     
                     for (int j = 0; j < movearr[attvals[i].query].length; j ++) { 
                         movearr[attvals[i].query][j] += currmoveatt[j];
@@ -227,7 +232,8 @@ public class MovementComputerThread extends java.lang.Thread {
                 }
                 
                 if (attvals[i].hit >= start && attvals[i].hit < end) {
-                    ClusterMethods.getattract3d(posarr[attvals[i].hit], posarr[attvals[i].query], attvals[i].att, currmoveatt, attvalpow, attfactor);
+                    ClusterMethods.add_attraction(posarr[attvals[i].hit], posarr[attvals[i].query], attvals[i].att,
+                            currmoveatt, attvalpow, attfactor, parent.cluster2d);
 
                     for (int j = 0; j < movearr[attvals[i].hit].length; j ++) {
                         movearr[attvals[i].hit][j] += currmoveatt[j];
