@@ -1345,36 +1345,73 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             System.err.println("HeadlessException!");
         }
     }//GEN-LAST:event_changenumbercolorActionPerformed
-    
-    private void button_cutoff_valueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minpvalbuttonActionPerformed
-        // same as pressing return in the corresponding text field
-    	if (!this.contains_data(true)) {
-			return;
-		}
-    	if(is_running(true)){
+
+    /**
+     * When the return key is pressed in the threshold text field, the threshold value will be set.
+     * 
+     * @param evt
+     */
+    private void textfield_cutoff_valueActionPerformed(java.awt.event.ActionEvent evt) {
+        double new_threshold;
+        try {
+            new_threshold = java.lang.Double.parseDouble(textfield_cutoff_value.getText());
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "ERROR; unable to parse double from '"
+                    + textfield_cutoff_value.getText() + "'");
             return;
         }
-        try{
-            data.pvalue_threshold=java.lang.Double.parseDouble(textfield_cutoff_value.getText());
-        }catch (NumberFormatException e){
-            javax.swing.JOptionPane.showMessageDialog(this,"ERROR; unable to parse double from '"+textfield_cutoff_value.getText()+"'");
+        set_threshold(new_threshold);
+    }
+
+    /**
+     * When the "Use p-values better than" button is pressed, the threshold value will be set.
+     * 
+     * @param evt
+     */
+    private void button_cutoff_valueActionPerformed(java.awt.event.ActionEvent evt) {
+        textfield_cutoff_valueActionPerformed(evt);
+    }
+
+    /**
+     * sets the threshold value used for clustering. In case the clustering is running, it is temporarily stopped then
+     * resumed.
+     * 
+     * @param threshold
+     *            the new threshold value
+     */
+    private void set_threshold(double threshold) {
+
+        if (!this.contains_data(true)) {
             return;
         }
-        //if I have a valid number update the attvals data
-        if(data.blasthits!=null){
-            synchronized(data.myattvals){
+
+        boolean was_running = false;
+        if (is_running(false)) {
+            was_running = true;
+            startstopthread(); // stop if running, then restart after setting threshold
+        }
+
+        data.pvalue_threshold = threshold;
+
+        if (data.blasthits != null) {
+            synchronized (data.myattvals) {
                 data.compute_attraction_values();
             }
-        }else if(data.myattvals!=null){//remove all attvals below the specified value
-            if(data.orgattvals==null){
-                data.orgattvals=data.myattvals;
+        } else if (data.myattvals != null) {// remove all attvals below the specified value
+            if (data.orgattvals == null) {
+                data.orgattvals = data.myattvals;
             }
-            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
+            data.myattvals = ClusterMethods.filter_attraction_values(data.orgattvals, data.pvalue_threshold);
         }
+
         data.resetDrawOrder();
         repaint();
-    }//GEN-LAST:event_minpvalbuttonActionPerformed
-    
+
+        if (was_running) { // restart if previously running
+            startstopthread();
+        }
+    }
+
     private void savemtxmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_savemtxmenuitemActionPerformed
         // save the blast matrix to file
         if(is_running(false)){
@@ -2116,35 +2153,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         data.zoomfactor=1;
         this.center_graph(-1);
     }//GEN-LAST:event_zoombuttonActionPerformed
-    
-    private void textfield_cutoff_valueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minpvaltextfieldActionPerformed
-    	if (!this.contains_data(true)) {
-			return;
-		}
-        if(is_running(false)){
-            return;
-        }
-        try{
-            data.pvalue_threshold=java.lang.Double.parseDouble(textfield_cutoff_value.getText());
-        }catch (NumberFormatException e){
-            javax.swing.JOptionPane.showMessageDialog(this,"ERROR, unable to parse double from '"+textfield_cutoff_value.getText()+"'");
-            return;
-        }
-        //if I have a valid number update the attvals data
-        if(data.blasthits!=null){
-            synchronized(data.myattvals){
-            	data.compute_attraction_values();
-            }
-        }else if(data.myattvals!=null){//remove all attvals below the specified value
-            if(data.orgattvals==null){
-                System.out.println("setting orgattval=myattvals");
-                data.orgattvals=data.myattvals;
-            }
-            data.myattvals=ClusterMethods.filter_attraction_values(data.orgattvals,data.pvalue_threshold);
-        }
-        data.resetDrawOrder();
-        repaint();
-    }//GEN-LAST:event_minpvaltextfieldActionPerformed
     
     private void button_select_moveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selecttbuttonActionPerformed
         // Add your handling code here
