@@ -82,12 +82,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
         button_select_all_or_clear.setText("Select All");
 
-        if(new File("positionfile.dat").canRead()){
-            System.out.println("reading former data");
-            data.myposarr=readsave.readpos();
-            data.posarr=data.myposarr;
-        }
-        
         if(data.errbuff.length()>0){
             //If I have had errors up to this point
             new errwindow(this,true,data.errbuff.toString()).setVisible(true);
@@ -95,6 +89,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         
         if(data.getAbsoluteInputfileName() != null){
             loaddata(data.getAbsoluteInputfileName());
+        }
+        
+        if (new File(data.getIntermediateResultfileName()).canRead()) {
+            System.out.println("reading former data");
+            readsave.parse_intermediate_results(data);
+            data.posarr = data.myposarr;
         }
     }// end init
     
@@ -2394,7 +2394,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     boolean zoom=false;
     boolean mouse_is_pressed=false;
     boolean moveseqs=false;//flag to set if I want to draw sequences in 3d-space
-    boolean save_intermediate_results=false;
     boolean recalc=true;//synchronize drawing and calculating
     drawpanel draw1;
     shownamedialog shownames;
@@ -3900,28 +3899,32 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 
                 ClusterMethods.recluster3d(parent.data);
                 
-				if (level == 0 && save_intermediate_results) {
+				if (level == 0 && data.save_intermediate_results) {
                     try{
-                        PrintWriter outwriter=new PrintWriter(new BufferedWriter(new FileWriter("positionfile.dat")));
-                        //now save the current variables to file
-                        outwriter.println("sequences: "+java.lang.reflect.Array.getLength(data.myposarr));
+                        PrintWriter outwriter = new PrintWriter(new BufferedWriter(new FileWriter(
+                                data.getIntermediateResultfileName())));
+
+                        outwriter.println("sequences: " + data.myposarr.length);
                         outwriter.println("values: ");
-                        outwriter.println("minattract "+data.minattract);
-                        outwriter.println("maxmove "+data.maxmove);
-                        outwriter.println("cooling "+data.cooling);
-                        outwriter.println("currcool "+data.currcool);
-                        outwriter.println("mineval "+data.mineval);
-                        outwriter.println("minpval "+data.pvalue_threshold);
-                        outwriter.println("repfactor "+data.repfactor);
-                        outwriter.println("attfactor "+data.attfactor);
-                        outwriter.println("hidebelow "+data.hidebelow);
-                        outwriter.println("dampening "+data.dampening);
-                        outwriter.println("rounds "+data.rounds);
-                        printout.saveseqpos(outwriter,data.myposarr);
+                        outwriter.println("minattract " + data.minattract);
+                        outwriter.println("maxmove " + data.maxmove);
+                        outwriter.println("cooling " + data.cooling);
+                        outwriter.println("currcool " + data.currcool);
+                        outwriter.println("mineval " + data.mineval);
+                        outwriter.println("minpval " + data.pvalue_threshold);
+                        outwriter.println("repfactor " + data.repfactor);
+                        outwriter.println("attfactor " + data.attfactor);
+                        outwriter.println("hidebelow " + data.hidebelow);
+                        outwriter.println("dampening " + data.dampening);
+                        outwriter.println("rounds " + data.rounds);
+                        
+                        printout.save_semicolon_delimited_positions(outwriter,data.myposarr);
+                        
                         outwriter.flush();
                         outwriter.close();
+                    
                     }catch (IOException e){
-                        System.err.println("unable to save positions to positionfile.dat");
+                        System.err.println("unable to save positions to " + data.getIntermediateResultfileName());
                         e.printStackTrace();
                     }
                 }

@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package clans;
 import java.io.*;
 import java.util.*;
@@ -12,15 +7,11 @@ import java.util.*;
  */
 public class readsave {
     
-    /** Creates a new instance of readsave */
-    public readsave() {
-    }
-    
     public static int[] checkblast(String filename,int seqnum,boolean skipcheck){
         //see if the data in tmpblasthsp is complete
         //return a two element array containing
         int[] retarr={0,0};
-        HashMap nameshash=new HashMap();
+        HashMap<String, Object> nameshash=new HashMap<String, Object>();
         try{
             BufferedReader inread=new BufferedReader(new FileReader(filename));
             String inline;
@@ -30,6 +21,7 @@ public class readsave {
                     if(skipcheck==false){
                         retarr[0]=seqnum;
                         retarr[1]=seqnum;
+                        inread.close();
                         return retarr;
                     }
                 }else if(inline.startsWith("hsp:")){
@@ -189,10 +181,9 @@ public class readsave {
     
     //--------------------------------------------------------------------------
     
-    static float[][] readpos(){
-        String filename="positionfile.dat";
+    static void parse_intermediate_results(ClusterData data){
         try{
-            BufferedReader inread=new BufferedReader(new FileReader(filename));
+            BufferedReader inread=new BufferedReader(new FileReader(data.getIntermediateResultfileName()));
             String inline=inread.readLine();
             int sequences=0;
             try{
@@ -205,6 +196,18 @@ public class readsave {
             String[] tmpstr;
             int ipos;
             while ((inline=inread.readLine())!=null){
+                
+                if (inline.startsWith("rounds")) {
+                    try {
+                        String[] x = inline.split(" ");
+                        data.rounds = Integer.parseInt(x[1]);
+                    } catch (NumberFormatException num) {
+                        System.err.println("couldn't parse rounds line (" + inline + ") from "
+                                + data.getIntermediateResultfileName());
+                    }
+                    continue;
+                }
+                
                 if(inline.equals("positions:")){
                     readpos=true;
                     continue;
@@ -222,16 +225,20 @@ public class readsave {
                         System.out.println(tmpstr[1]);
                         System.out.println(tmpstr[2]);
                         System.out.println(tmpstr[3]);
-                        return posarr;
+                        inread.close();
+                        data.myposarr = posarr;
+                        return;
                     }
                 }//end if readpos
             }//end while reading
             inread.close();
-            return posarr;
+            data.myposarr = posarr;
+            return;
         }catch (IOException e){
-            System.err.println("unable to read from positionfile.dat");
+            System.err.println("unable to read from " + data.getIntermediateResultfileName());
             e.printStackTrace();
-            return new float[0][0];
+            data.myposarr = new float[0][0];
+            return;
         }
     }//end readpos
     

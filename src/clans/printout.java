@@ -315,13 +315,12 @@ public class printout {
     
     //--------------------------------------------------------------------------
     
-    static void saveseqpos(PrintWriter outwrite, float[][] posarr){
-        int elements=java.lang.reflect.Array.getLength(posarr);
+    static void save_semicolon_delimited_positions(PrintWriter outwrite, float[][] positions) {
         outwrite.println("positions:");
-        for(int i=0;i<elements;i++){
-            outwrite.println(i+";"+posarr[i][0]+";"+posarr[i][1]+";"+posarr[i][2]);
+        for (int i = 0; i < positions.length; i++) {
+            outwrite.println(i + ";" + positions[i][0] + ";" + positions[i][1] + ";" + positions[i][2]);
         }
         outwrite.flush();
-    }//end saveseqpos
+    }
     
 }

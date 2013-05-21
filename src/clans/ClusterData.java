@@ -178,6 +178,14 @@ public class ClusterData {
         
         return new File(this.input_filename).getName();
     }
+    
+    /**
+     * 
+     * @return the name of the file used for writing intermediate results after each round if that flag is set
+     */
+    public String getIntermediateResultfileName() {
+        return getAbsoluteInputfileName() + ".savepos";
+    }
 
     /**
      * Resets the draw order so that it will be recomputed the next time it is used. 
