@@ -1,16 +1,14 @@
-/*
- * optionsdialog.java
- *
- * Created on March 11, 2005, 5:06 PM
- */
 package clans;
-/**
- *
- * @author  tancred
- */
+
 public class rotationdialog extends javax.swing.JFrame {
     
-    /** Creates new form optionsdialog */
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -4229599705833513486L;
+    
+    
     public rotationdialog(ClusteringWithGui parent) {
         this.parent=parent;
         this.setTitle("Rotation");
@@ -170,14 +168,7 @@ public class rotationdialog extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_repaintbuttonActionPerformed
-    
-    /**
-     * @param args the command line arguments
-     */
-    //public static void main(String args[]) {
-    //    new optionsdialog(new javax.swing.JFrame(), true).show();
-    //}
-    
+        
     ClusteringWithGui parent=null;
     float xrot=0;
     float yrot=0;
@@ -236,7 +227,7 @@ public class rotationdialog extends javax.swing.JFrame {
                 currtime=System.currentTimeMillis()-lasttime;
                 if(currtime<minms){
                     try{
-                        this.sleep(minms-currtime);
+                        Thread.sleep(minms - currtime);
                     }catch (java.lang.InterruptedException ie){
                         ie.printStackTrace();
                     }
