@@ -1,22 +1,13 @@
-/*
- * clustertest.java
- *
- * Created on December 15, 2002, 3:47 PM
- */
 package clans;
+
 import java.util.*;
-
 import javax.swing.*;
-
 import java.awt.event.KeyEvent;
 import java.io.*;
 import java.lang.reflect.Array;
-/**
- *
- * @author  tancred
- */
+
 public class ClusteringWithGui extends javax.swing.JFrame {
-    
+
     /**
 	 * 
 	 */
@@ -2423,11 +2414,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             
             update_values_from_options_window();
             
-            
-            if(data.hidebelowold!=data.hidebelow){
-                data.resetDrawOrder();
-                data.hidebelowold=data.hidebelow;
-            }
             mythread.stop=true;
             mythread=new computethread(this);
             mythread.start();
@@ -2451,10 +2437,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
         update_values_from_options_window();
 
-        if(data.hidebelowold!=data.hidebelow){
-            data.resetDrawOrder();
-            data.hidebelowold=data.hidebelow;
-        }
         data.changedvals=false;
         if(is_stopped(false)==true){//if thread is stopped
             update_values_from_options_window();
@@ -3755,12 +3737,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
                 if(data.changedvals){
                     update_values_from_options_window();
-                    if(data.hidebelowold!=data.hidebelow){
-                        data.resetDrawOrder();
-                        data.hidebelowold=data.hidebelow;
-                    }
                     data.changedvals=false;
-                }//end if changedvals
+                }
                 
                 ClusterMethods.recluster3d(parent.data);
                 
@@ -3779,7 +3757,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                         outwriter.println("minpval " + data.pvalue_threshold);
                         outwriter.println("repfactor " + data.repfactor);
                         outwriter.println("attfactor " + data.attfactor);
-                        outwriter.println("hidebelow " + data.hidebelow);
                         outwriter.println("dampening " + data.dampening);
                         outwriter.println("rounds " + data.rounds);
                         

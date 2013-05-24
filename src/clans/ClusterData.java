@@ -52,8 +52,6 @@ public class ClusterData {
     float maxmove = 0.1f;
     double pvalue_threshold = 1;
     double mineval = 1;
-    float hidebelow = 0;
-    float hidebelowold = 0;
     double cooling = 1;
     double currcool = 1;
     saverunobject saveddata = null;
