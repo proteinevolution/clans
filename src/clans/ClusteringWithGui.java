@@ -899,12 +899,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     
     private void showoptionsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showoptionsmenuitemActionPerformed
         // show the options window
-        if(myoptionswindow!=null){
-            myoptionswindow.setVisible(false);
-            myoptionswindow.dispose();
+        if(options_window!=null){
+            options_window.setVisible(false);
+            options_window.dispose();
         }
-        myoptionswindow=new optionsdialog(this);
-        myoptionswindow.setVisible(true);
+        options_window=new WindowOptions(this);
+        options_window.setVisible(true);
     }//GEN-LAST:event_showoptionsmenuitemActionPerformed
     
     private void skipdrawingroundsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skipdrawingroundsActionPerformed
@@ -1354,7 +1354,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     private void textfield_cutoff_valueActionPerformed(java.awt.event.ActionEvent evt) {
         double new_threshold;
         try {
-            new_threshold = java.lang.Double.parseDouble(textfield_cutoff_value.getText());
+            new_threshold = Double.parseDouble(textfield_cutoff_value.getText());
         } catch (NumberFormatException e) {
             javax.swing.JOptionPane.showMessageDialog(this, "ERROR; unable to parse double from '"
                     + textfield_cutoff_value.getText() + "'");
@@ -2415,7 +2415,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     static final JFileChooser fc=new JFileChooser(new File("."));
     String repaint=null;
 
-    optionsdialog myoptionswindow=null;//clans options
+    WindowOptions options_window = null;
     rotationdialog myrotationdialog=null;//clans rotation values
     affydialog myaffydialog=null;//loads/shows affymetrix data
     mapfunctiondialog_tab mymapfunctiondialog=null;//loads/shows metabolic/functional mapping
@@ -2522,29 +2522,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 return;
             }
             
-            String tmpstr="";
-            if(myoptionswindow!=null){
-                try{
-                    tmpstr=myoptionswindow.coolfield.getText();
-                    data.cooling=java.lang.Double.parseDouble(tmpstr);
-                    tmpstr=myoptionswindow.attfield.getText();
-                    data.attfactor=java.lang.Float.parseFloat(tmpstr);
-                    tmpstr=myoptionswindow.repfield.getText();
-                    data.repfactor=java.lang.Float.parseFloat(tmpstr);
-                    tmpstr=myoptionswindow.dampfield.getText();
-                    data.dampening=java.lang.Float.parseFloat(tmpstr);
-                    tmpstr=myoptionswindow.minattfield.getText();
-                    data.minattract=java.lang.Double.parseDouble(tmpstr);
-                    tmpstr=myoptionswindow.maxmovefield.getText();
-                    data.maxmove=java.lang.Float.parseFloat(tmpstr);
-                    tmpstr=myoptionswindow.attvalpowtextfield.getText();
-                    data.attvalpow=java.lang.Integer.parseInt(tmpstr);
-                    tmpstr=myoptionswindow.repvalpowtextfield.getText();
-                    data.repvalpow=java.lang.Integer.parseInt(tmpstr);
-                }catch (NumberFormatException e){
-                    javax.swing.JOptionPane.showMessageDialog(this,"ERROR, unable to parse number from '"+tmpstr+"'");
-                }
-            }
+            update_values_from_options_window();
+            
+            
             if(data.hidebelowold!=data.hidebelow){
                 data.resetDrawOrder();
                 data.hidebelowold=data.hidebelow;
@@ -2569,46 +2549,23 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     //--------------------------------------------------------------------------
 
     void initgraph(){
-        //first some stuff specific to the graphical interface
-        String tmpstr="";
-        if(myoptionswindow!=null){
-            try{
-                tmpstr=myoptionswindow.attfield.getText();
-                data.attfactor=java.lang.Float.parseFloat(tmpstr);
-                tmpstr=myoptionswindow.repfield.getText();
-                data.repfactor=java.lang.Float.parseFloat(tmpstr);
-                tmpstr=myoptionswindow.dampfield.getText();
-                data.dampening=java.lang.Float.parseFloat(tmpstr);
-                tmpstr=myoptionswindow.coolfield.getText();
-                data.cooling=java.lang.Double.parseDouble(tmpstr);
-                tmpstr=myoptionswindow.currcoolfield.getText();
-                data.currcool=java.lang.Double.parseDouble(tmpstr);
-                tmpstr=myoptionswindow.minattfield.getText();
-                data.minattract=java.lang.Double.parseDouble(tmpstr);
-                tmpstr=myoptionswindow.maxmovefield.getText();
-                data.maxmove=java.lang.Float.parseFloat(tmpstr);
-                tmpstr=myoptionswindow.attvalpowtextfield.getText();
-                data.attvalpow=java.lang.Integer.parseInt(tmpstr);
-                tmpstr=myoptionswindow.repvalpowtextfield.getText();
-                data.repvalpow=java.lang.Integer.parseInt(tmpstr);
-            }catch(NumberFormatException e){
-                javax.swing.JOptionPane.showMessageDialog(this,"ERROR, unable to parse number from '"+tmpstr+"'");
-            }
-        }
+
+        update_values_from_options_window();
+
         if(data.hidebelowold!=data.hidebelow){
             data.resetDrawOrder();
             data.hidebelowold=data.hidebelow;
         }
         data.changedvals=false;
         if(is_stopped(false)==true){//if thread is stopped
-            updatevals();
+            update_values_from_options_window();
             repaint();
         }
         
         data.initialize();
         
-        if(myoptionswindow!=null){
-            myoptionswindow.currcoolfield.setText(String.valueOf(data.currcool));
+        if(options_window!=null){
+            options_window.currcoolfield.setText(String.valueOf(data.currcool));
         }
         button_start_stop_resume.setText("Start run");
         button_start_stop_resume.setMnemonic(KeyEvent.VK_S);
@@ -2662,17 +2619,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             showinfocheckbox.setSelected(false);
         }
         textfield_cutoff_value.setText(String.valueOf(data.pvalue_threshold));
-        if(myoptionswindow!=null){
-            myoptionswindow.coolfield.setText(String.valueOf(data.cooling));
-            myoptionswindow.currcoolfield.setText(String.valueOf(data.currcool));
-            myoptionswindow.attfield.setText(String.valueOf(data.attfactor));
-            myoptionswindow.attvalpowtextfield.setText(String.valueOf(data.attvalpow));
-            myoptionswindow.repfield.setText(String.valueOf(data.repfactor));
-            myoptionswindow.repvalpowtextfield.setText(String.valueOf(data.repvalpow));
-            myoptionswindow.dampfield.setText(String.valueOf(data.dampening));
-            myoptionswindow.minattfield.setText(String.valueOf(data.minattract));
-            myoptionswindow.maxmovefield.setText(String.valueOf(data.maxmove));
+        
+        if (options_window != null) {
+            options_window.initialize_textfields();
         }
+        
         textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
         this.setTitle("Clustering of " + data.getBaseInputfileName());
         
@@ -2781,35 +2732,51 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         return retarr;
     }//end getselectedseqs
 
-    void updatevals(){
-        String tmpstr="";
-        if(myoptionswindow!=null){
-            try{
-                tmpstr=myoptionswindow.attfield.getText();
-                data.attfactor=java.lang.Float.parseFloat(tmpstr);
-                tmpstr=myoptionswindow.repfield.getText();
-                data.repfactor=java.lang.Float.parseFloat(tmpstr);
-                tmpstr=myoptionswindow.dampfield.getText();
-                data.dampening=java.lang.Float.parseFloat(tmpstr);
-                tmpstr=myoptionswindow.coolfield.getText();
-                data.cooling=java.lang.Double.parseDouble(tmpstr);
-                tmpstr=myoptionswindow.currcoolfield.getText();
-                data.currcool=java.lang.Double.parseDouble(tmpstr);
-                tmpstr=myoptionswindow.minattfield.getText();
-                data.minattract=java.lang.Double.parseDouble(tmpstr);
-                tmpstr=myoptionswindow.maxmovefield.getText();
-                data.maxmove=java.lang.Float.parseFloat(tmpstr);
-                tmpstr=myoptionswindow.attvalpowtextfield.getText();
-                data.attvalpow=java.lang.Integer.parseInt(tmpstr);
-                tmpstr=myoptionswindow.repvalpowtextfield.getText();
-                data.repvalpow=java.lang.Integer.parseInt(tmpstr);
-                tmpstr=myoptionswindow.roundstextfield.getText();
-                data.roundslimit=java.lang.Integer.parseInt(tmpstr);
-            }catch(NumberFormatException e){
-                javax.swing.JOptionPane.showMessageDialog(this,"ERROR, unable to parse number from '"+tmpstr+"'");
-            }
+    /**
+     * parses the values set in the options dialog and sets them in the data instance
+     */
+    void update_values_from_options_window() {
+        if (options_window == null) {
+            return;
         }
-    }//end updatevals
+
+        String tmpstr = "";
+
+        try{
+            tmpstr = options_window.attfield.getText();
+            data.attfactor = Float.parseFloat(tmpstr);
+
+            tmpstr = options_window.repfield.getText();
+            data.repfactor = Float.parseFloat(tmpstr);
+
+            tmpstr = options_window.dampfield.getText();
+            data.dampening = Float.parseFloat(tmpstr);
+
+            tmpstr = options_window.coolfield.getText();
+            data.cooling = Double.parseDouble(tmpstr);
+
+            tmpstr = options_window.currcoolfield.getText();
+            data.currcool = Double.parseDouble(tmpstr);
+
+            tmpstr = options_window.minattfield.getText();
+            data.minattract = Double.parseDouble(tmpstr);
+
+            tmpstr = options_window.maxmovefield.getText();
+            data.maxmove = Float.parseFloat(tmpstr);
+
+            tmpstr = options_window.attvalpowtextfield.getText();
+            data.attvalpow = Integer.parseInt(tmpstr);
+
+            tmpstr = options_window.repvalpowtextfield.getText();
+            data.repvalpow = Integer.parseInt(tmpstr);
+
+            tmpstr = options_window.roundstextfield.getText();
+            data.roundslimit = Integer.parseInt(tmpstr);
+
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse number from '" + tmpstr + "'");
+        }
+    }
 
     void updateselected(int[] tmpreg,boolean deselect){
         //if deselect==true I want to deselect all the sequences in the selectes region
@@ -3485,7 +3452,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             //old, slow for many elements
             int[][] tposarrtmp=data.drawarrtmp;
             int elements=data.elements;//java.lang.reflect.Array.getLength(tposarrtmp);//was posarr 19.1.04
-            int tmpint;
             int dotsize=data.dotsize;
             int ovalsize=data.ovalsize;
 
@@ -3889,7 +3855,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 }
 
                 if(data.changedvals){
-                    updatevals();
+                    update_values_from_options_window();
                     if(data.hidebelowold!=data.hidebelow){
                         data.resetDrawOrder();
                         data.hidebelowold=data.hidebelow;
@@ -3931,8 +3897,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
                 data.posarr=data.myposarr;
                 tmpcool=(((float)((int)(data.currcool*100000)))/100000);
-                if(myoptionswindow!=null){
-                    myoptionswindow.currcoolfield.setText(String.valueOf(tmpcool));
+                if(options_window!=null){
+                    options_window.currcoolfield.setText(String.valueOf(tmpcool));
                 }
                 if(tmpcool<=1e-5){
                     stop=true;

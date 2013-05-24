@@ -5,14 +5,14 @@
  */
 package clans;
 
-public class optionsdialog extends javax.swing.JFrame {
+public class WindowOptions extends javax.swing.JFrame {
     
     /**
      * 
      */
     private static final long serialVersionUID = -3176609803781991304L;
 
-    public optionsdialog(ClusteringWithGui parent) {
+    public WindowOptions(ClusteringWithGui parent) {
         this.parent=parent;
         this.setTitle("CLANS options");
         initComponents();
@@ -196,7 +196,7 @@ public class optionsdialog extends javax.swing.JFrame {
         // set the number of rounds to cluster at a time
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_roundstextfieldActionPerformed
@@ -204,7 +204,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private void currcoolfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currcoolfieldActionPerformed
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_currcoolfieldActionPerformed
@@ -214,7 +214,7 @@ public class optionsdialog extends javax.swing.JFrame {
         //I therefore use this button to re-read the values entered in the various fields
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_maxrepdistbuttonActionPerformed
@@ -222,7 +222,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private void maxmovefieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxmovefieldActionPerformed
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_maxmovefieldActionPerformed
@@ -230,7 +230,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private void minattfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minattfieldActionPerformed
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_minattfieldActionPerformed
@@ -238,7 +238,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private void dampfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dampfieldActionPerformed
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_dampfieldActionPerformed
@@ -246,7 +246,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private void repvalpowtextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_repvalpowtextfieldActionPerformed
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_repvalpowtextfieldActionPerformed
@@ -254,7 +254,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private void repfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_repfieldActionPerformed
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_repfieldActionPerformed
@@ -262,7 +262,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private void attvalpowtextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attvalpowtextfieldActionPerformed
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_attvalpowtextfieldActionPerformed
@@ -270,7 +270,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private void attfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attfieldActionPerformed
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_attfieldActionPerformed
@@ -278,7 +278,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private void coolfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_coolfieldActionPerformed
         parent.data.changedvals=true;
         if(parent.is_stopped(false)){//if thread is stopped
-            parent.updatevals();
+            parent.update_values_from_options_window();
             parent.repaint();
         }
     }//GEN-LAST:event_coolfieldActionPerformed
