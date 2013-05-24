@@ -2431,8 +2431,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }
     }//end startstopthread
 
-    //--------------------------------------------------------------------------
-
     void initgraph(){
 
         update_values_from_options_window();
@@ -2451,12 +2449,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         button_start_stop_resume.setText("Start run");
         button_start_stop_resume.setMnemonic(KeyEvent.VK_S);
         button_start_stop_resume.setEnabled(true);
-        data.rounds=0;
         mousemove[0]=0;
         mousemove[1]=0;
         
         this.center_graph(-1);
-    }//end initgraph
+    }
 
     //--------------------------------------------------------------------------
     
