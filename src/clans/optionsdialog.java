@@ -16,7 +16,7 @@ public class optionsdialog extends javax.swing.JFrame {
         this.parent=parent;
         this.setTitle("CLANS options");
         initComponents();
-        readoptions();
+        initialize_textfields();
         repaint();
     }
     
@@ -316,7 +316,7 @@ public class optionsdialog extends javax.swing.JFrame {
     private javax.swing.JPanel settingpanel;
     // End of variables declaration//GEN-END:variables
     
-    void readoptions(){
+    void initialize_textfields(){
      //read the parameters from the parent
         attfield.setText(String.valueOf(parent.data.attfactor));
         repfield.setText(String.valueOf(parent.data.repfactor));
