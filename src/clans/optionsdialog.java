@@ -4,13 +4,14 @@
  * Created on March 11, 2005, 5:06 PM
  */
 package clans;
-/**
- *
- * @author  tancred
- */
+
 public class optionsdialog extends javax.swing.JFrame {
     
-    /** Creates new form optionsdialog */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -3176609803781991304L;
+
     public optionsdialog(ClusteringWithGui parent) {
         this.parent=parent;
         this.setTitle("CLANS options");
