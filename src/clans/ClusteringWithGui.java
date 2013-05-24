@@ -2525,32 +2525,31 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		return false;
 	}
 
-    boolean is_stopped(boolean showinfo){
-    	/**
-    	 * check if the clustering is currently stopped
-    	 * 
-    	 * @param showinfo: if true, an alert message dialog will be shown if the run is not stopped 
-    	 * @type showinfo: boolean
-    	 * 
-    	 * @return: true if the clustering is stopped, false else
-    	 */
-        //check to see if the clustering is running
-        //if so, output an error message
-        if(mythread.didrun==true && mythread.stop==false){//if the thread is running
-            if(showinfo){
-                javax.swing.JOptionPane.showMessageDialog(this,"you have to stop the clustering first","Stop first",javax.swing.JOptionPane.ERROR_MESSAGE);
+    /**
+     * check if the clustering is currently stopped
+     * 
+     * @param showinfo: if true, an alert message dialog will be shown if the run is not stopped 
+     * @type showinfo: boolean
+     * 
+     * @return: true if the clustering is stopped, false else
+     */
+    boolean is_stopped(boolean showinfo) {
+        if (mythread.didrun == true && mythread.stop == false) {
+            if (showinfo) {
+                javax.swing.JOptionPane.showMessageDialog(this, "you have to stop the clustering first", "Stop first",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
             }
             return false;
         }
         return true;
     }
     
-    boolean is_running(boolean showinfo){
-    	/**
-    	 * check if the clustering is currently running
-    	 * 
-    	 * @return: true if the clustering is running, false else
-    	 */
+    /**
+     * check if the clustering is currently running
+     * 
+     * @return: true if the clustering is running, false else
+     */
+    boolean is_running(boolean showinfo) {
         return !is_stopped(showinfo);
     }
     
