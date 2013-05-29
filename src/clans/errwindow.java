@@ -1,16 +1,12 @@
-/*
- * errwindow.java
- *
- * Created on July 9, 2004, 9:26 AM
- */
 package clans;
-/**
- *
- * @author  tancred
- */
+
 public class errwindow extends javax.swing.JDialog {
     
-    /** Creates new form errwindow */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 5580971089628346508L;
+
     public errwindow(java.awt.Frame parent, boolean modal,String text) {
         super(parent, modal);
         this.text=text;
