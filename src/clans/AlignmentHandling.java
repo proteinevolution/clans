@@ -4,10 +4,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * this class should contain everything necessary to read alignment files and
- * output them as an array of aaseq objects.
- * 
- * @author tancred
+ * this class should contain everything necessary to read alignment files and output them as an array of aaseq objects.
  */
 public class AlignmentHandling {
 
@@ -16,6 +13,11 @@ public class AlignmentHandling {
 		return read(infile);
 	}
 
+	/**
+	 * 
+	 * @param infile
+	 * @return
+	 */
     public static AminoAcidSequence[] read(File infile){
         try{
             BufferedReader inread;
@@ -40,7 +42,7 @@ public class AlignmentHandling {
                         return parse_stockholm_format(infile);
                     }else{//see if the line read has one or two numbers (if neither :unknown format)
                         String[] tmparr=inline.split("\\s+",0);
-                        int arrsize=java.lang.reflect.Array.getLength(tmparr);
+                        int arrsize=tmparr.length;
                         boolean didconv=true;
                         try{//try to convert the string to numbers
                             for(int i=0;i<arrsize;i++){
@@ -69,18 +71,25 @@ public class AlignmentHandling {
         }
         System.err.println("empty file for "+infile.getAbsolutePath());
         return new AminoAcidSequence[0];
-    }//end read file
+    }
     
-    //--------------------------------------------------------------------------
-    
-    public static AminoAcidSequence[] parse_fasta_format(String infilename){
-        File tmpfile=new File(infilename);
+    /**
+     * 
+     * @param infilename
+     * @return
+     */
+    public static AminoAcidSequence[] parse_fasta_format(String infilename) {
+        File tmpfile = new File(infilename);
         return parse_fasta_format(tmpfile);
     }
     
-    public static AminoAcidSequence[] parse_fasta_format(File infile){
-        //this should read fasta format data from infile and return it as an array
-        //of aasseq objects (name,seq)
+    /**
+     * this should read fasta format data from infile and return it as an array of aasseq objects (name,seq)
+     * 
+     * @param infile
+     * @return
+     */
+    public static AminoAcidSequence[] parse_fasta_format(File infile) {
 		Vector<AminoAcidSequence> tmpvec = new Vector<AminoAcidSequence>();
         try{
             BufferedReader inread;
@@ -121,12 +130,15 @@ public class AlignmentHandling {
         AminoAcidSequence[] retarr=new AminoAcidSequence[tmpvec.size()];
         tmpvec.copyInto(retarr);
         return retarr;
-    }// end fastaread
-    
-    //--------------------------------------------------------------------------
-    
-    public static AminoAcidSequence[] parse_clustal_format(File infile){
-        //read a clustal alignment and convert to array of aaseq objects
+    }
+
+    /**
+     * read a clustal alignment and convert to array of aaseq objects
+     * 
+     * @param infile
+     * @return
+     */
+    public static AminoAcidSequence[] parse_clustal_format(File infile) {
         //this format is: CLUSTAL in the first line
         //name 'space(s)' seq on a line
         //name2 'space(s)' seq2 on one line
@@ -134,6 +146,7 @@ public class AlignmentHandling {
         //maybe an empty line
         //name 'space(s)' seq part 2 on a line
         //etc...
+        
 		HashMap<String, StringBuffer> myhash = new HashMap<String, StringBuffer>();
 		Vector<String> alnnames = new Vector<String>();
         try{
@@ -190,18 +203,21 @@ public class AlignmentHandling {
             retarr[i].seq=((StringBuffer)myhash.get(retarr[i].name)).toString().toUpperCase();
         }
         return retarr;
-    }// end clustalread
-    
-    //--------------------------------------------------------------------------
-    
-    public static AminoAcidSequence[] parse_treecon_format(File filenamein)
-    //read in a treecon-format alignment.
-    //format: one number on the first line
-    //next a line with the name
-    //following lines: the sequence
-    //empty lines (opt.)
-    //next name...
-    throws IOException{
+    }
+
+    /**
+     * read in a treecon-format alignment.
+     * 
+     * @param filenamein
+     * @return
+     * @throws IOException
+     */
+    public static AminoAcidSequence[] parse_treecon_format(File filenamein) throws IOException {
+        //format: one number on the first line
+        //next a line with the name
+        //following lines: the sequence
+        //empty lines (opt.)
+        //next name...
         String aaseqname;
 		Vector<AminoAcidSequence> seqvector = new Vector<AminoAcidSequence>();
         int seqlength, iaa;
@@ -255,11 +271,15 @@ public class AlignmentHandling {
         seqvector.copyInto(seqarrayout);
         alignread.close();
         return seqarrayout;
-    }//end of treeconread()
-    
-    //--------------------------------------------------------------------------
-    
-    public static AminoAcidSequence[] parse_phylip_format(File infile){
+    }
+
+    /**
+     * Parse a Phylip sequential or interleaved file
+     * 
+     * @param infile
+     * @return
+     */
+    public static AminoAcidSequence[] parse_phylip_format(File infile) {
         //this needs to decide wether I am reading phylip sequential or interleaved
         //physeq: first line : number of species + sequence length
         //opt. empty lines
@@ -309,7 +329,7 @@ public class AlignmentHandling {
                 }
             }
             try{
-                if(java.lang.reflect.Array.getLength(tmparr)==2){
+                if(tmparr.length==2){
                     specnum=Integer.parseInt(tmparr[0]);
                     seqlength=Integer.parseInt(tmparr[1]);
                 }else{
@@ -409,10 +429,13 @@ public class AlignmentHandling {
             System.err.println("unable to read Phylip alignment from "+infile.getName());
         }
         return retarr;
-    }// end phylipread
-    
-    //--------------------------------------------------------------------------
-    
+    }
+
+    /**
+     * Parse a file in Stockholm format.
+     * @param infile
+     * @return
+     */
     public static AminoAcidSequence[] parse_stockholm_format(File infile){
         AminoAcidSequence[] retarr=new AminoAcidSequence[0];
 		Vector<AminoAcidSequence> seqvec = new Vector<AminoAcidSequence>();
@@ -452,8 +475,5 @@ public class AlignmentHandling {
         retarr=new AminoAcidSequence[seqvec.size()];
         seqvec.copyInto(retarr);
         return retarr;
-    }//end stockholmread
-    
-    //--------------------------------------------------------------------------
-    
+    }
 }
