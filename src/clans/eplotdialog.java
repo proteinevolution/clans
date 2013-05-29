@@ -1,17 +1,12 @@
-/*
- * eplotdialog.java
- *
- * Created on July 7, 2003, 2:19 PM
- */
 package clans;
-//import java.util.*;
-/**
- *
- * @author  tancred
- */
+
 public class eplotdialog extends javax.swing.JDialog {
     
-    /** Creates new form eplotdialog */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 3001537593616478349L;
+
     public eplotdialog(MinimalHsp[] vecarr, double maxval, boolean doscores) {
         this.vecarr=vecarr;
         this.maxval=maxval;//==minpval in clustertest
@@ -190,14 +185,18 @@ public class eplotdialog extends javax.swing.JDialog {
     private javax.swing.JTextField mintextfield;
     // End of variables declaration//GEN-END:variables
     
-    public float[] makescoredata(){
-        //bin the score values present in attvals
+    /**
+     * bin the score values present in attvals
+     * 
+     * @return
+     */
+    public float[] makescoredata() {
         int elements=100;//make 100 elements
         //now get the maximum and minimum values
         //I only want to use the best values in this case
         maxval=0;
         minval=Double.MAX_VALUE;
-        for(int i=java.lang.reflect.Array.getLength(vecarr);--i>=0;){
+        for(int i=vecarr.length;--i>=0;){
             if(vecarr[i].val[0]>maxval){
                 maxval=vecarr[i].val[0];
             }
@@ -210,7 +209,7 @@ public class eplotdialog extends javax.swing.JDialog {
         //now see in what bins the values fall
         float stepsize=(float)((maxval-minval)/(float)elements);
         System.out.println("minval="+minval+" maxval="+maxval+" stepsize="+stepsize);
-        for(int i=java.lang.reflect.Array.getLength(vecarr);--i>=0;){
+        for(int i=vecarr.length;--i>=0;){
             retarr[(int)((vecarr[i].val[0]-minval)/stepsize)]++;
         }//end for i
         for(int i=1;i<=elements;i++){
@@ -221,28 +220,28 @@ public class eplotdialog extends javax.swing.JDialog {
         }//end for i
         draw1.elements=elements;
         return retarr;
-    }//end makescoredata
-    
-    //--------------------------------------------------------------------------
-    
-    public float[] makedata(){
-        //bin the evalues present in attvals
-        //attvals are numbers from 0 to 1
-        //int elements=100;
+    }
+
+    /**
+     * bin the evalues present in attvals attvals are numbers from 0 to 1 int elements=100;
+     * 
+     * @return
+     */
+    public float[] makedata() {
         int elements=(int)((java.lang.Math.log(maxval)-java.lang.Math.log(minval))/ln10);//make an elements per power of 10
         if(elements==0){
             elements=1;
         }
         System.out.println("elements="+elements+" maxe="+maxval+" mine="+minval);
-        int vecsize=java.lang.reflect.Array.getLength(vecarr);
-        int j,k,index;
+        int vecsize=vecarr.length;
+        int k,index;
         int vecelem;
         double pval;
         float[] retarr=new float[elements+1];
         //float scale=(float)((float)elements/(java.lang.Math.log(maxval/minval)/ln10));
         float scale=1;
         for(int i=0;i<vecsize;i++){
-            vecelem=java.lang.reflect.Array.getLength(vecarr[i].val);
+            vecelem = vecarr[i].val.length;
             for(k=0;k<vecelem;k++){
                 pval=vecarr[i].val[k];
                 if(pval<=minval){
@@ -270,9 +269,11 @@ public class eplotdialog extends javax.swing.JDialog {
     
     class drawclass extends javax.swing.JPanel{
         
-        public drawclass(){
-        }
-        
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 206366659024062602L;
+
         int xoffset=20;
         int yoffset=20;
         float[] vals=new float[0];//values ranging from 0 to 1
