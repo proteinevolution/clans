@@ -1,19 +1,16 @@
-/*
- * affyplotdialog.java
- *
- * Created on January 16, 2006, 9:37 AM
- */
 package clans;
+
+import java.awt.event.MouseEvent;
 import java.util.*;
-//import javax.swing.*;
-/**
- *
- * @author  tancred
- */
+
 public class affyplotdialog extends javax.swing.JFrame {
     
-    /** Creates new form affyplotdialog */
-    public affyplotdialog(ArrayList inlist,float infloat,Vector datavec) {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 3098881348245117983L;
+
+    public affyplotdialog(ArrayList<datapoint[]> inlist,float infloat,Vector<replicates> datavec) {
         this.datlist=inlist;
         this.datavec=datavec;
         draw1.globalrelstdev=infloat;
@@ -162,7 +159,7 @@ public class affyplotdialog extends javax.swing.JFrame {
     
     private void deselectmenuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectmenuitemActionPerformed
         // de-select all sequences
-        for(int i=java.lang.reflect.Array.getLength(draw1.selecteds);--i>=0;){
+        for(int i=draw1.selecteds.length;--i>=0;){
             draw1.selecteds[i]=0;
         }//end for i
         repaint();
@@ -243,7 +240,7 @@ public class affyplotdialog extends javax.swing.JFrame {
         mousestarty=mousey;
         if(evt.isAltDown() || evt.isAltGraphDown()){
             dozoom=true;
-            if(evt.getButton()==evt.BUTTON3){
+            if (evt.getButton() == MouseEvent.BUTTON3) {
                 //alt & right click=unzoom everything
                 draw1.xzoom=1;
                 draw1.yzoom=1;
@@ -275,7 +272,7 @@ public class affyplotdialog extends javax.swing.JFrame {
      */
     
     drawpanel draw1=new drawpanel();
-    ArrayList datlist=null;
+    ArrayList<datapoint[]> datlist=null;
     int mousex=0;
     int mousey=0;
     int mousestartx=0;
@@ -283,7 +280,7 @@ public class affyplotdialog extends javax.swing.JFrame {
     boolean dozoom=false;
     boolean doselect=false;
     affyselectwindow myselectwindow=null;
-    Vector datavec=null;
+    Vector<replicates> datavec=null;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBoxMenuItem avgfoldchangecheckbox;
@@ -315,7 +312,7 @@ public class affyplotdialog extends javax.swing.JFrame {
                 float tmpval;
                 for(int i=datlist.size();--i>=0;){
                     tmparr=(datapoint[])datlist.get(i);
-                    arrsize=java.lang.reflect.Array.getLength(tmparr);
+                    arrsize=tmparr.length;
                     for(int j=0;j<arrsize;j++){
                         if(tmparr[j]!=null){
                             valint=java.lang.reflect.Array.getLength(tmparr[j].values);
@@ -355,7 +352,7 @@ public class affyplotdialog extends javax.swing.JFrame {
                 //the datanum increases as I do all vs. all comparisons of the possible foldchanges
                 for(int i=datlist.size();--i>=0;){
                     tmparr=(datapoint[])datlist.get(i);
-                    arrsize=java.lang.reflect.Array.getLength(tmparr);
+                    arrsize=tmparr.length;
                     for(int j=arrsize;--j>=0;){
                         if(tmparr[j]!=null){
                             valint=java.lang.reflect.Array.getLength(tmparr[j].values);
@@ -394,7 +391,7 @@ public class affyplotdialog extends javax.swing.JFrame {
             float tmpval;
             for(int i=datlist.size();--i>=0;){
                 tmparr=(datapoint[])datlist.get(i);
-                arrsize=java.lang.reflect.Array.getLength(tmparr);
+                arrsize=tmparr.length;
                 for(int j=0;j<arrsize;j++){
                     if(tmparr[j]!=null){
                         valint=java.lang.reflect.Array.getLength(tmparr[j].values);
@@ -422,8 +419,10 @@ public class affyplotdialog extends javax.swing.JFrame {
     
     class drawpanel extends javax.swing.JPanel{
         
-        public void drawpanel(){
-        }
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -6995289276294816339L;
         
         public void init(){
             //initialize the data for this graph
@@ -655,9 +654,10 @@ public class affyplotdialog extends javax.swing.JFrame {
                     }
                 }
             }//end for i
+            
             if(myselectwindow!=null){
                 //then update the selection in there as well
-                ArrayList tmplist=new ArrayList();
+                ArrayList<Integer> tmplist = new ArrayList<Integer>();
                 for(int i=0;i<datnum;i++){
                     if(selecteds[i]==1){
                         tmplist.add(new Integer(i));
