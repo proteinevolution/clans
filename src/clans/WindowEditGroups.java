@@ -998,7 +998,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			
 			String s = group.name;
 
-			s += "(" + group.sequences.length + ")";
+			s += " (" + group.sequences.length + ")";
 
 			if (group.confvals != null) {
 				s += " (cohesion: " + group.confvals + ")";
