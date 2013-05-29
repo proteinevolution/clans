@@ -18,7 +18,7 @@ public class viewblasthitsutils {
     
     hsp[] gethsps(int referenceseqnum,AminoAcidSequence[] inaln,String cmd,String formatdbpath,String blastpath,boolean addblastvbparam,String[] referencedb,double mineval,double minpval){
         //get all the blast hits to this sequence.
-        Vector retvec=new Vector();
+        Vector<hsp[]> retvec = new Vector<hsp[]>();
         String basename=String.valueOf(System.currentTimeMillis());
         String blastcommand="";
         String tmpfilestring=basename+".query";
@@ -26,7 +26,7 @@ public class viewblasthitsutils {
         String dbstring=basename;
         System.out.println("passed formatdbpath="+formatdbpath);
         Runtime rt=Runtime.getRuntime();
-        int seqnum=java.lang.reflect.Array.getLength(inaln);
+        int seqnum=inaln.length;
         if(addblastvbparam==true){
             //see whether I have more sequences than would normally be returned by blast
             if(seqnum>250){//250 is the default used by blast
@@ -47,7 +47,7 @@ public class viewblasthitsutils {
                 }
             }
         }
-        HashMap nameshash=new HashMap();
+        HashMap<String, Integer> nameshash = new HashMap<String, Integer>();
         for(int i=0;i<seqnum;i++){
             nameshash.put(inaln[i].name, new Integer(i));
         }//end for i
@@ -78,7 +78,6 @@ public class viewblasthitsutils {
             System.out.println("trying "+formatcmd);
             BufferedReader perr;
             BufferedReader pin;
-            PrintWriter pout;
             threadstreamreader perrread;
             threadstreamreader pinread;
             Process p=rt.exec(formatcmd);
@@ -119,13 +118,13 @@ public class viewblasthitsutils {
             return new hsp[0];
         }
         //run against either the referencedb's or directly against the present sequences
-        if((java.lang.reflect.Array.getLength(referencedb)>0)&&(blastpath.indexOf("blastpgp")>-1)){
+        if((referencedb.length>0)&&(blastpath.indexOf("blastpgp")>-1)){
             System.out.println("profile psiblast run for "+basename);
-            Vector tmpvec=new Vector();//supposed to hold the command parameters
+            Vector<String> tmpvec=new Vector<String>();//supposed to hold the command parameters
             //first do the psiblast runs agains all specified databases
             //first put all database names into one string
             dbstring=basename;
-            for(int i=0;i<java.lang.reflect.Array.getLength(referencedb);i++){
+            for(int i=0;i<referencedb.length;i++){
                 dbstring+=" "+referencedb[i];
             }//end for i
             blastcommand=blastpath;
@@ -140,7 +139,7 @@ public class viewblasthitsutils {
             tmpvec.addElement(tmpcheckfile);
             tmpvec.addElement("-d");
             tmpvec.addElement(dbstring);
-            for(int i=java.lang.reflect.Array.getLength(cmdarr);i>0;i--){
+            for(int i=cmdarr.length;i>0;i--){
                 tmpvec.add(0,cmdarr[i-1]);
             }
             if(cmd.length()>0){
@@ -160,7 +159,6 @@ public class viewblasthitsutils {
                 outwrite.close();
                 BufferedReader perr;
                 BufferedReader pin;
-                PrintWriter pout;
                 threadstreamreader perrread;
                 threadstreamreader pinread;
                 Process p=rt.exec(cmdarr);
@@ -197,7 +195,7 @@ public class viewblasthitsutils {
                 pinread=null;//.clear();
             }catch (IOException ioe){
                 System.err.println("IOError in "+blastcommand+" for "+inaln[referenceseqnum].name);
-                for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+                for(int i=0;i<cmdarr.length;i++){
                     System.err.println(cmdarr[i]);
                 }
                 System.out.println("inoutsize="+inout.length());
@@ -208,13 +206,13 @@ public class viewblasthitsutils {
             //then do the last round using the psiblast checkpoint file against blastdb
             System.out.println("actual psiblast run on "+inaln[referenceseqnum].name);
             blastcommand=blastpath+" -d "+basename+" -T T -e "+mineval+" -i "+tmpfilestring+" -R "+tmpcheckfile;
-        }else if((java.lang.reflect.Array.getLength(referencedb)>0)&&(blastpath.indexOf("psiblast")>-1)){
+        }else if((referencedb.length>0)&&(blastpath.indexOf("psiblast")>-1)){
             System.out.println("profile psiblast run for "+basename);
-            Vector tmpvec=new Vector();//supposed to hold the command parameters
+            Vector<String> tmpvec = new Vector<String>();// supposed to hold the command parameters
             //first do the psiblast runs agains all specified databases
             //first put all database names into one string
             dbstring=basename;
-            for(int i=0;i<java.lang.reflect.Array.getLength(referencedb);i++){
+            for(int i=0;i<referencedb.length;i++){
                 dbstring+=" "+referencedb[i];
             }//end for i
             blastcommand=blastpath;
@@ -229,7 +227,7 @@ public class viewblasthitsutils {
             tmpvec.addElement(tmpcheckfile);
             tmpvec.addElement("-db");
             tmpvec.addElement(dbstring);
-            for(int i=java.lang.reflect.Array.getLength(cmdarr);i>0;i--){
+            for(int i=cmdarr.length;i>0;i--){
                 tmpvec.add(0,cmdarr[i-1]);
             }
             if(cmd.length()>0){
@@ -249,7 +247,6 @@ public class viewblasthitsutils {
                 outwrite.close();
                 BufferedReader perr;
                 BufferedReader pin;
-                PrintWriter pout;
                 threadstreamreader perrread;
                 threadstreamreader pinread;
                 Process p=rt.exec(cmdarr);
@@ -286,7 +283,7 @@ public class viewblasthitsutils {
                 pinread=null;//.clear();
             }catch (IOException ioe){
                 System.err.println("IOError in "+blastcommand+" for "+inaln[referenceseqnum].name);
-                for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+                for(int i=0;i<cmdarr.length;i++){
                     System.err.println(cmdarr[i]);
                 }
                 System.out.println("inoutsize="+inout.length());
@@ -320,7 +317,6 @@ public class viewblasthitsutils {
             outwrite.close();
             BufferedReader perr;
             BufferedReader pin;
-            PrintWriter pout;
             threadstreamreader perrread;
             threadstreamreader pinread;
             Process p=rt.exec(blastcommand);
@@ -362,12 +358,12 @@ public class viewblasthitsutils {
             return new hsp[0];
         }
         //parse the hsp's from myblast
-        retvec=hspget.get(myblast, retvec, mineval, minpval, 0f, 0f, 0f, 0, nameshash,false);
+        retvec = hspget.get(myblast, retvec, mineval, minpval, 0f, 0f, 0f, 0, nameshash, false);
         System.out.println("hsp's for "+inaln[referenceseqnum].name+" = "+retvec.size());
         //now output the hsp elements
         hsp[] retarr=new hsp[retvec.size()];
         retvec.copyInto(retarr);
-        //for(int i=0;i<java.lang.reflect.Array.getLength(retarr);i++){
+        //for(int i=0;i<retarr.length;i++){
         //    System.out.println("hit:"+retarr[i].hname+" pval="+retarr[i].pvalue);
         //}
         //now remove the temporary files

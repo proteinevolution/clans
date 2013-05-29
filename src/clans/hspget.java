@@ -34,7 +34,7 @@ public class hspget {
         return get(tmpstr.toString(), new Vector(), eval, pval, coverage, scval, ident, verbose, nameshash, useallrounds);
     }//end get for lowmem
 
-    public static Vector get(String inreadstring, Vector invec, double eval, double pval, float coverage, float scval, float ident, int verbose, HashMap nameshash, boolean useallrounds) {
+    public static Vector<hsp[]> get(String inreadstring, Vector invec, double eval, double pval, float coverage, float scval, float ident, int verbose, HashMap nameshash, boolean useallrounds) {
         //this should read the data from inread (a bufferedReader with blast output in html format)
         //to be able to filter by pval I need to search through the inread BufferedReader for the database size
         int seqnum = nameshash.size();
