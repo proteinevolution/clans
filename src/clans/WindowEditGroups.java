@@ -117,7 +117,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
         });
         buttonpanel.add(highlight_groups_with_selected_sequences);
 
-        buttonpanel.add(new Label(""));
+        buttonpanel.add(new Label("")); // skip one position in the grid layout
         
 		jPanel3.setLayout(new java.awt.GridLayout(1, 0));
 
