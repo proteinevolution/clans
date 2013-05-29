@@ -1,21 +1,18 @@
-/*
- * changecolordialog.java
- *
- * Created on July 15, 2003, 9:52 AM
- */
 package clans;
 
-/**
- *
- * @author  tancred
- */
+import javax.swing.JColorChooser;
+
 public class DialogChangeConnectionColors extends javax.swing.JDialog {
 
-    /** Creates new form changecolordialog */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1895643871437384612L;
+
     public DialogChangeConnectionColors(ClusteringWithGui parent, boolean modal) {
         super(parent, modal);
         this.parent = parent;
-        this.colornum = java.lang.reflect.Array.getLength(colorarr);
+        this.colornum = colorarr.length;
         draw1 = new drawpanel(colorarr);
         initComponents();
         draw1.drawwidth = mainpanel.getWidth();
@@ -572,7 +569,7 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
         //now see what element that was
         int colorelement = (int) (xval / draw1.elementwidth);
         try {
-            colorarr[colorelement] = colorchooser.showDialog(this, "Select New Color", colorarr[colorelement]);
+            colorarr[colorelement] = JColorChooser.showDialog(this, "Select New Color", colorarr[colorelement]);
         } catch (java.awt.HeadlessException e) {
             System.err.println("HeadlessException!");
         }
@@ -635,6 +632,11 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
     // End of variables declaration//GEN-END:variables
 
     class drawpanel extends javax.swing.JPanel {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 5838939531675395908L;
 
         public drawpanel(java.awt.Color[] colorarr) {
             this.colorarr = colorarr;
