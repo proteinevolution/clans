@@ -1,22 +1,19 @@
-/*
- * shownamedialog.java
- *
- * Created on December 17, 2002, 3:04 PM
- */
 package clans;
+
 import java.util.*;
-/**
- *
- * @author  tancred
- */
+
 public class getsinglenamedialog extends javax.swing.JDialog {
     
-    /** Creates new form shownamedialog */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -829231543202153360L;
+
     public getsinglenamedialog(String[] namesarr, java.awt.Frame parent) {
         super(parent,true);
         this.namesarr=numberarr(namesarr);
         initComponents();
-        this.jScrollPane2.getVerticalScrollBar().setUnitIncrement((int)(jPanel1.getHeight()/java.lang.reflect.Array.getLength(namesarr)));
+        this.jScrollPane2.getVerticalScrollBar().setUnitIncrement((int)(jPanel1.getHeight()/namesarr.length));
     }
     
     /** This method is called from within the constructor to
@@ -84,10 +81,9 @@ public class getsinglenamedialog extends javax.swing.JDialog {
     }//GEN-END:initComponents
 
     private void searchbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchbuttonActionPerformed
-        // Add your handling code here:
         String query=getquery();
         int[] selectedseqs=getmatches(query,namesarr);
-        if(java.lang.reflect.Array.getLength(selectedseqs)==0){
+        if(selectedseqs.length==0){
             javax.swing.JOptionPane.showMessageDialog(this,"No sequences found for '"+query+"'","ERROR",javax.swing.JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -110,6 +106,11 @@ public class getsinglenamedialog extends javax.swing.JDialog {
         dispose();
     }//GEN-LAST:event_closeDialog
     
+    /**
+     * 
+     * @param seqnames
+     * @return
+     */
     public static int getrefseq(String[] seqnames) {
         new getsinglenamedialog(seqnames,new javax.swing.JFrame()).setVisible(true);
         return refseq;
@@ -128,19 +129,27 @@ public class getsinglenamedialog extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
     
+    /**
+     * get the regexp query string
+     * 
+     * @return
+     */
     String getquery(){
-        //get the regexp query string 
         String retstring="";
         retstring="(?i).*"+querydialog.getquery()+".*";
         return retstring;
-    }//end getquery
-    
-    //--------------------------------------------------------------------------
-    
-    int[] getmatches(String query, String[] namesarr){
-        //get the index of all names that match query
-        int namesnum=java.lang.reflect.Array.getLength(namesarr);
-        Vector tmpvec=new Vector();
+    }
+
+    /**
+     * get the index of all names that match query
+     * 
+     * @param query
+     * @param namesarr
+     * @return
+     */
+    int[] getmatches(String query, String[] namesarr) {
+        int namesnum=namesarr.length;
+        Vector<Integer> tmpvec=new Vector<Integer>();
         for(int i=0;i<namesnum;i++){
             if(namesarr[i].matches(query)){
                 tmpvec.addElement(new Integer(i));
@@ -151,12 +160,15 @@ public class getsinglenamedialog extends javax.swing.JDialog {
             retarr[i]=((Integer)tmpvec.elementAt(i)).intValue();
         }
         return retarr;
-    }//end getmatches
-    
-    //--------------------------------------------------------------------------
-    
+    }
+
+    /**
+     * 
+     * @param innames
+     * @return
+     */
     String[] numberarr(String[] innames){
-        int elements=java.lang.reflect.Array.getLength(innames);
+        int elements = innames.length;
         String[] retarr=new String[elements];
         int numlength=(String.valueOf(elements).length())+1;
         StringBuffer tmpstrbuff=new StringBuffer();
@@ -167,12 +179,16 @@ public class getsinglenamedialog extends javax.swing.JDialog {
                 tmpstrbuff.append(" ");
             }
             retarr[i]=tmpstrbuff+innames[i];
-        }// end for i
+        }
         return retarr;
-    }// end printnames
+    }
 
+    /**
+     * 
+     * @param selectednames
+     */
     void setselected(int[] selectednames){
         seqnamelist.setSelectedIndices(selectednames);
     }
     
-}// end class
+}
