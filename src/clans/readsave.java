@@ -1,15 +1,19 @@
 package clans;
+
 import java.io.*;
 import java.util.*;
-/**
- *
- * @author  tancred
- */
+
 public class readsave {
     
+    /**
+     * see if the data in tmpblasthsp is complete return a two element array containing
+     * 
+     * @param filename
+     * @param seqnum
+     * @param skipcheck
+     * @return
+     */
     public static int[] checkblast(String filename,int seqnum,boolean skipcheck){
-        //see if the data in tmpblasthsp is complete
-        //return a two element array containing
         int[] retarr={0,0};
         HashMap<String, Object> nameshash=new HashMap<String, Object>();
         try{
@@ -45,12 +49,16 @@ public class readsave {
             System.exit(1);
         }//end catch
         return retarr;
-    }//end checkblast
-    
-    //--------------------------------------------------------------------------
-    
+    }
+
+    /**
+     * read the hsp data from a blast savefile
+     * 
+     * @param filename
+     * @param cutoff
+     * @return
+     */
     public static MinimalHsp[] blast(String filename,double cutoff){
-        //read the hsp data from a blast savefile
         MinimalHsp[] retarr=new MinimalHsp[0];
         try{
             BufferedReader inread=new BufferedReader(new FileReader(filename));
@@ -59,10 +67,8 @@ public class readsave {
                 System.err.println("Error reading former blast results from file: "+filename+"; NO DATA!; restart the program with the option \"-readblast F\" or remove that file.");
                 System.exit(1);
             }
-            //first line should be the number of array elements to create
-            int seqs=0;
             try{
-                seqs=Integer.parseInt(inline.substring(0,inline.indexOf(" sequences")));
+                Integer.parseInt(inline.substring(0,inline.indexOf(" sequences")));
             }catch (NumberFormatException num){
                 System.err.println("NumberFormatError, Wrong Format!");
                 System.exit(0);
@@ -74,7 +80,7 @@ public class readsave {
             int hspcount=-1;
             double pval=-1;
             String[] tmparr;
-            HashMap hsphash=new HashMap();
+            HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
             String hspkey;
             while ((inline=inread.readLine())!=null){
                 if(inline.startsWith("#")){
@@ -93,12 +99,12 @@ public class readsave {
                                 currhsp.val[0]=pval;
                                 hsphash.put(hspkey,currhsp);
                             }else{
-                                ((MinimalHsp)hsphash.get(hspkey)).addpval(pval);
+                                hsphash.get(hspkey).addpval(pval);
                             }
                         }
                     }
                     tmparr=(inline.substring(5)).split(";",0);
-                    if(java.lang.reflect.Array.getLength(tmparr)==3){
+                    if(tmparr.length==3){
                         try{
                             ival=Integer.parseInt(tmparr[0]);
                             jval=Integer.parseInt(tmparr[1]);
@@ -162,14 +168,17 @@ public class readsave {
                         currhsp.val[0]=pval;
                         hsphash.put(hspkey,currhsp);
                     }else{
-                        ((MinimalHsp)hsphash.get(hspkey)).addpval(pval);
+                        hsphash.get(hspkey).addpval(pval);
                     }
                 }
             }
             int elements=hsphash.size();
             retarr=new MinimalHsp[elements];
             System.out.println("hsp's="+hsphash.size());
-            retarr=(MinimalHsp[])(hsphash.values().toArray(retarr));
+            retarr = hsphash.values().toArray(retarr);
+            
+            inread.close();
+            
         }catch (IOException e){
             System.out.println("IOerror reading blastfile "+filename);
             System.exit(0);
