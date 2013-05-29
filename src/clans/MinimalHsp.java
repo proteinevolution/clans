@@ -1,9 +1,5 @@
 package clans;
 
-/**
- * 
- * @author tancred
- */
 public class MinimalHsp {
 
 	public int query = -1;
@@ -46,7 +42,7 @@ public class MinimalHsp {
 	 * @param pv
 	 */
 	void addpval(double pv) {
-		int length = java.lang.reflect.Array.getLength(val);
+		int length = val.length;
 		double[] tmp = new double[length + 1];
 		for (int i = 0; i < length; i++) {
 			tmp[i] = val[i];
