@@ -1,16 +1,12 @@
-/*
- * querydialog.java
- *
- * Created on July 7, 2003, 10:53 AM
- */
 package clans;
-/**
- *
- * @author  tancred
- */
+
 public class querydialog extends javax.swing.JDialog {
     
-    /** Creates new form querydialog */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1667911988255971995L;
+
     public querydialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
