@@ -242,7 +242,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
         TreePath[] selectedpaths=currtree.getSelectionPaths();
         int[] selecteds=infolist.getSelectedIndices();
         int num;
-        if((num=java.lang.reflect.Array.getLength(selecteds))>0){
+        if((num=selecteds.length)>0){
             TreePath[] newpaths=new TreePath[num];
             for(int i=0;i<num;i++){
                 newpaths[i]=selectedpaths[selecteds[i]];
@@ -267,7 +267,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
         //I need to update the "lookup" hashMap as I use that in the tree-renderer
         int selindex=tabpane.getSelectedIndex();
         if(selindex>-1){
-            lookup=(HashMap) lookuplist.get(selindex);
+            lookup = lookuplist.get(selindex);
             if(((Boolean)golist.get(selindex)).booleanValue()==false){
                 currtree=(javax.swing.JTree) treelist.get(selindex);
             }else{
@@ -304,7 +304,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
     private void mapclansbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mapclansbuttonActionPerformed
         // get the selected sequences from clans and show which functional categories they belong to by selecting them and collapsing the rest
         //see if any sequences are selected in the parent
-        int selectednum=java.lang.reflect.Array.getLength(parent.data.selectednames);
+        int selectednum=parent.data.selectednames.length;
         if(selectednum>0){
             //find all the tree leaf-nodes corresponding to the selected names
             //set these as selected in the tree (expand branches as necessary)
@@ -357,16 +357,18 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
                     return;
                 }
             }
-            HashMap mylookup=(HashMap)lookuplist.get(selindex);
+            
+            HashMap<String, String> mylookup = lookuplist.get(selindex);
             TreePath[] tmp=tree.getSelectionPaths();
             if(tmp==null){
                 parent.data.selectednames=new int[0];
                 parent.repaint();
                 return;
             }
-            HashMap selectedhash=new HashMap();
+            
+            HashMap<String, String> selectedhash=new HashMap<String, String>();
             mapnode currnode;
-            for(int i=java.lang.reflect.Array.getLength(tmp);--i>=0;){
+            for(int i=tmp.length;--i>=0;){
                 currnode=(mapnode)tmp[i].getLastPathComponent();
                 getleaves(currnode,selectedhash);
             }//end for i
@@ -374,15 +376,16 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
             selectedhash.clear();
             //now make sure I only have each leaf present ONCE
             //adding it to the hash will remove duplicate names
-            for(int i=java.lang.reflect.Array.getLength(selectednames);--i>=0;){
+            for(int i=selectednames.length;--i>=0;){
                 selectedhash.put(selectednames[i],null);
             }//end for i
             selectednames=(String[]) selectedhash.keySet().toArray(new String[0]);
             selectedhash.clear();
+            
             //now I know which leaves I want to select
             //now I need to see which are present in the clans map
-            ArrayList selist=new ArrayList();
-            for(int i=java.lang.reflect.Array.getLength(selectednames);--i>=0;){
+            ArrayList<Integer> selist = new ArrayList<Integer>();
+            for(int i=selectednames.length;--i>=0;){
                 if(nameshash.containsKey(selectednames[i])){
                     //System.out.println("nameshash contains "+selectednames[i]);
                     selist.add(parent.data.nameshash.get(nameshash.get(selectednames[i])));
@@ -447,7 +450,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
     
     ClusteringWithGui parent=null;
     JFileChooser fc=new JFileChooser(new File("."));
-    //mapnode map=new mapnode();
+
     ArrayList<mapnode> maplist=new ArrayList<mapnode>();
     ArrayList<Boolean> golist=new ArrayList<Boolean>();
     ArrayList treelist=new ArrayList();
@@ -458,8 +461,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
     HashMap<String, String> nameshash=new HashMap<String, String>();
     String lookupfile="";
     Vector<String> infovector=new Vector<String>();
-    //boolean GOfile=false;//remember whether I loaded a GO file (a bit more complex)
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu Edit;
     private javax.swing.JPanel buttonpanel;
@@ -507,7 +509,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
                     }
                 });
                 ArrayList<JTree> tmptreelist=new ArrayList<JTree>();
-                for(int i=0; i<java.lang.reflect.Array.getLength(map.child);i++){
+                for(int i=0; i<map.child.length;i++){
                     javax.swing.JTree tree=new javax.swing.JTree(new mapmodel(map.child[i]));
                     tree.setCellRenderer(new maprenderer());
                     tree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
@@ -552,7 +554,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
                 HashMap<String, String> tmphash = new HashMap<String, String>();// make sure no identical names are
                                                                                 // added to either the list or the text
                 if(lookup!=null){
-                    int num=java.lang.reflect.Array.getLength(tmp);
+                    int num=tmp.length;
                     for(int i=0;i<num;i++){
                         addstring=((mapnode)tmp[i].getLastPathComponent()).level+"->"+lookup.get(((mapnode)tmp[i].getLastPathComponent()).leaf)+":"+((mapnode)tmp[i].getLastPathComponent()).info;
                         if(lookup.containsKey(((mapnode)tmp[i].getLastPathComponent()).leaf)){
@@ -571,7 +573,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
                         }
                     }
                 }else{
-                    int num=java.lang.reflect.Array.getLength(tmp);
+                    int num=tmp.length;
                     for(int i=0;i<num;i++){
                         addstring=((mapnode)tmp[i].getLastPathComponent()).level+":"+((mapnode)tmp[i].getLastPathComponent()).info;
                         if(tmphash.containsKey(addstring)==false){
@@ -627,8 +629,8 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
         java.util.regex.Pattern query=java.util.regex.Pattern.compile("(?i).*"+querystring+".*");
         if(selindex>-1){
             //next, iterate through the tree-nodes and select those with matching names in the names hash
-            ArrayList nodeslist=new ArrayList();
-            ArrayList pathlist=new ArrayList();
+            ArrayList<TreePath> nodeslist=new ArrayList<TreePath>();
+            ArrayList<mapnode> pathlist=new ArrayList<mapnode>();
             //now I have all the necessary tree-paths
             javax.swing.JTree tree;
             if(((Boolean)golist.get(selindex)).booleanValue()==false){
@@ -659,13 +661,22 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
         }
     }//end settreeselected
     
-    void gettreepaths(ArrayList pathlist, ArrayList retlist, java.util.regex.Pattern query, boolean goterms){
-        //search through the tree and see which mapnodes correspond in name to one of the genes I'm looking for
+    /**
+     * search through the tree and see which mapnodes correspond in name to one of the genes I'm looking for
+     * 
+     * @param pathlist
+     * @param retlist
+     * @param query
+     * @param goterms
+     */
+    void gettreepaths(ArrayList<mapnode> pathlist, ArrayList<TreePath> retlist, java.util.regex.Pattern query,
+            boolean goterms) {
+
         mapnode innode=(mapnode)pathlist.get(pathlist.size()-1);
         //System.out.println(innode.level);
         if(innode.child!=null){
-            for(int i=java.lang.reflect.Array.getLength(innode.child);--i>=0;){
-                ArrayList newpathlist=new ArrayList(pathlist);
+            for(int i=innode.child.length;--i>=0;){
+                ArrayList<mapnode> newpathlist=new ArrayList<mapnode>(pathlist);
                 newpathlist.add(innode.child[i]);
                 gettreepaths(newpathlist,retlist,query,goterms);
             }//end for i
@@ -695,8 +706,8 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
         //and then set these as selected in the tree.
         int selindex=tabpane.getSelectedIndex();
         if(selindex>-1){
-            HashMap names=new HashMap();
-            int num=java.lang.reflect.Array.getLength(selectednames);
+            HashMap<String, String> names=new HashMap<String, String>();
+            int num=selectednames.length;
             if(lookup!=null){
                 //System.out.println("lookup!=null");
                 for(int i=num;--i>=0;){
@@ -713,8 +724,8 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
             }
             //now I should have a feasible lookup for the names I want to look for
             //next, iterate through the tree-leafnodes and select those with matching names in the names hash
-            ArrayList nodeslist=new ArrayList();
-            ArrayList pathlist=new ArrayList();
+            ArrayList<TreePath> nodeslist=new ArrayList<TreePath>();
+            ArrayList<mapnode> pathlist=new ArrayList<mapnode>();
             //now I have all the necessary tree-paths
             javax.swing.JTree tree;
             if(((Boolean)golist.get(selindex)).booleanValue()==false){
@@ -745,13 +756,13 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
         }
     }//end settreeselected\
     
-    void gettreepaths(ArrayList pathlist, ArrayList retlist, HashMap names){
+    void gettreepaths(ArrayList<mapnode> pathlist, ArrayList<TreePath> retlist, HashMap<String, String> names){
         //search through the tree and see which mapnodes correspond in name to one of the genes I'm looking for
         mapnode innode=(mapnode)pathlist.get(pathlist.size()-1);
         //System.out.println(innode.level);
         if(innode.child!=null){
-            for(int i=java.lang.reflect.Array.getLength(innode.child);--i>=0;){
-                ArrayList newpathlist=new ArrayList(pathlist);
+            for(int i=innode.child.length;--i>=0;){
+                ArrayList<mapnode> newpathlist=new ArrayList<mapnode>(pathlist);
                 newpathlist.add(innode.child[i]);
                 gettreepaths(newpathlist,retlist,names);
             }//end for i
@@ -780,8 +791,8 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
     void makenameshash(){
         //convert the names in parent.namearr into sth. with faster lookup
         //if I then map back the nameshash object via parent.namshash I should get an Integer object
-        nameshash=new HashMap();
-        int num=java.lang.reflect.Array.getLength(parent.data.sequence_names);
+        nameshash=new HashMap<String, String>();
+        int num=parent.data.sequence_names.length;
         String key;
         for(int i=num;--i>=0;){
             key=parent.data.sequence_names[i];
@@ -796,10 +807,10 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
     
     //--------------------------------------------------------------------------
     
-    void getleaves(mapnode innode,HashMap inhash){
+    void getleaves(mapnode innode,HashMap<String, String> inhash){
         //get all the leaf-node-names
         if(innode.child!=null){
-            for(int i=java.lang.reflect.Array.getLength(innode.child);--i>=0;){
+            for(int i=innode.child.length;--i>=0;){
                 getleaves(innode.child[i],inhash);
             }
         }
@@ -815,6 +826,11 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
     
     class maprenderer extends DefaultTreeCellRenderer {
         
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -7765644828040844519L;
+
         public maprenderer() {
         }
         
@@ -844,7 +860,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
     public class mapmodel implements TreeModel {
-        private Vector treeModelListeners = new Vector();
+        private Vector<TreeModelListener> treeModelListeners = new Vector<TreeModelListener>();
         private mapnode rootnode=null;
         
         public mapmodel(mapnode root) {
@@ -861,7 +877,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
         
         public int getChildCount(Object parent) {
             if(((mapnode)parent).child!=null){
-                return java.lang.reflect.Array.getLength(((mapnode)parent).child);
+                return ((mapnode)parent).child.length;
             }else{
                 return 0;
             }
