@@ -1,34 +1,50 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package clans;
+
 import java.util.*;
 import java.io.*;
 
-/**
- *
- * @author tancred
- */
 public class searchblast {
-   /** Creates a new instance of searchblast */
+
     public searchblast(StringBuffer errbuff,boolean addblastvbparam) {
         this.errbuff=errbuff;
         this.addblastvbparam=addblastvbparam;
-        //System.out.println("addblastvbparam="+addblastvbparam);
     }
     
     StringBuffer errbuff;
     boolean addblastvbparam;
-    
-    //--------------------------------------------------------------------------
-    
-    public MinimalHsp[] gethits(AminoAcidSequence[] oldaln,MinimalHsp[] oldblasthits,AminoAcidSequence[] newaln,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,int exhaustive,boolean readblast,boolean newblast){
-        //get the blast hits for the new sequences (newaln) agains a concatenated database of old and new seqs
+
+    /**
+     * get the blast hits for the new sequences (newaln) agains a concatenated database of old and new seqs
+     * 
+     * @param oldaln
+     * @param oldblasthits
+     * @param newaln
+     * @param cmd
+     * @param formatdbpath
+     * @param blastpath
+     * @param cpu
+     * @param eval
+     * @param pval
+     * @param coverage
+     * @param scval
+     * @param ident
+     * @param verbose
+     * @param nameshash
+     * @param useallrounds
+     * @param lowmem
+     * @param referencedb
+     * @param exhaustive
+     * @param readblast
+     * @param newblast
+     * @return
+     */
+    public MinimalHsp[] gethits(AminoAcidSequence[] oldaln, MinimalHsp[] oldblasthits, AminoAcidSequence[] newaln,
+            String cmd, String formatdbpath, String blastpath, int cpu, double eval, double pval, float coverage,
+            float scval, float ident, int verbose, HashMap<String, Integer> nameshash, boolean useallrounds, boolean lowmem,
+            String[] referencedb, int exhaustive, boolean readblast, boolean newblast) {
         System.out.println("doing searchblast for new sequences");
-        int oldelements=java.lang.reflect.Array.getLength(oldaln);
-        int newelements=java.lang.reflect.Array.getLength(newaln);
+        int oldelements=oldaln.length;
+        int newelements=newaln.length;
         int allelements=oldelements+newelements;
         double cutoff=pval;
         if(scval>=0){
@@ -41,7 +57,8 @@ public class searchblast {
         for(int i=0;i<newelements;i++){
             allaln[oldelements+i]=newaln[i];
         }//end for i
-        File tmpfile=new File("tmpblasthsp.txt");
+        
+        new File("tmpblasthsp.txt"); // this might not be necessary
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter("tmpblasthsp.txt")));
             String blastdbname=new File(String.valueOf(System.currentTimeMillis())).getAbsolutePath();//set the name for the blast database to search against
@@ -123,7 +140,9 @@ public class searchblast {
                 allstart=oldelements;
             }
             for(int i=0;(i<cpu)&&(i<newelements);i++){
-                mythreads[i]=new blastthread(this,seqnum,cmd,blastpath,blastdbname,allaln[allstart],eval,pval,coverage,scval,ident,new Vector[seqnum],nameshash,verbose,rt,i,useallrounds,referencedb,lowmem);
+                mythreads[i] = new blastthread(this, seqnum, cmd, blastpath, blastdbname, allaln[allstart], eval, pval,
+                        coverage, scval, ident, new Vector[seqnum], nameshash, verbose, rt, i, useallrounds,
+                        referencedb, lowmem);
                 mythreads[i].start();
                 allstart++;
             }
@@ -158,11 +177,13 @@ public class searchblast {
                 }
                 //if(lowmem){
                 //write the data to disk
-                printout.saveblastappend(outwrite,mythreads[freethread].retarr,((Integer)nameshash.get(mythreads[freethread].query.name)).intValue());
+                printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                 if(mythreads[freethread].errbuff.length()>0){
                     errbuff.append(mythreads[freethread].errbuff);
                 }
-                mythreads[freethread]=new blastthread(this,seqnum,cmd,blastpath,blastdbname,allaln[allstart],eval,pval,coverage,scval,ident,new Vector[seqnum],nameshash,verbose,rt,freethread,useallrounds,referencedb,lowmem);
+                mythreads[freethread] = new blastthread(this, seqnum, cmd, blastpath, blastdbname, allaln[allstart],
+                        eval, pval, coverage, scval, ident, new Vector[seqnum], nameshash, verbose, rt, freethread,
+                        useallrounds, referencedb, lowmem);
                 alldone++;
                 mythreads[freethread].start();
                 allstart++;
@@ -197,7 +218,7 @@ public class searchblast {
                 }// end while freethread==-1
                 //if(lowmem){
                 //write the data to disk and clear that array element
-                printout.saveblastappend(outwrite,mythreads[freethread].retarr,((Integer)nameshash.get(mythreads[freethread].query.name)).intValue());
+                printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                 if(mythreads[freethread].errbuff.length()>0){
                     errbuff.append(mythreads[freethread].errbuff);
                 }
@@ -213,19 +234,18 @@ public class searchblast {
                     outwrite.flush();
                 }
             }// end while alldone
-            //now that all primary blast runs are done check to see if exhaustive or non-exhaustive searching was done
-            int j;
+            
             if(exhaustive==1){
                 //if non-exhaustive searching was done and I want to back-validate the hits I collected for the new sequences
                 //repeat the search from above for the sequences with hits to the new seqs
                 //first get the sequences with hits
                 retarr=readsave.blast("tmpblasthsp.txt",cutoff);
-                Vector tmpvec=new Vector();
+                Vector<Integer> tmpvec = new Vector<Integer>();
                 boolean[] redoseqs=new boolean[oldelements];
                 for(int i=0;i<oldelements;i++){
                     redoseqs[i]=false;
                 }
-                for(int i=java.lang.reflect.Array.getLength(retarr);--i>=0;){
+                for(int i=retarr.length;--i>=0;){
                     if((retarr[i].query>=oldelements)&&(retarr[i].hit<oldelements)){
                         if(redoseqs[retarr[i].hit]==false){
                             tmpvec.addElement(new Integer(retarr[i].hit));
@@ -236,7 +256,7 @@ public class searchblast {
                 int backvalnum=tmpvec.size();
                 int[] backvalseqs=new int[backvalnum];
                 for(int i=0;i<backvalnum;i++){
-                    backvalseqs[i]=((Integer)tmpvec.elementAt(i)).intValue();
+                    backvalseqs[i]=tmpvec.elementAt(i).intValue();
                 }
                 tmpvec=null;
                 if(verbose>0){
@@ -248,7 +268,9 @@ public class searchblast {
                 alldone=0;
                 allstart=0;
                 for(int i=0;(i<cpu)&&(i<backvalnum);i++){
-                    mythreads[i]=new blastthread(this,seqnum,cmd,blastpath,blastdbname,allaln[backvalseqs[allstart]],eval,pval,coverage,scval,ident,new Vector[seqnum],nameshash,verbose,rt,i,useallrounds,referencedb,lowmem);
+                    mythreads[i] = new blastthread(this, seqnum, cmd, blastpath, blastdbname,
+                            allaln[backvalseqs[allstart]], eval, pval, coverage, scval, ident, new Vector[seqnum],
+                            nameshash, verbose, rt, i, useallrounds, referencedb, lowmem);
                     mythreads[i].start();
                     allstart++;
                 }
@@ -282,11 +304,13 @@ public class searchblast {
                     }
                     //if(lowmem){
                     //write the data to disk and clear that array element
-                    printout.saveblastappend(outwrite,mythreads[freethread].retarr,((Integer)nameshash.get(mythreads[freethread].query.name)).intValue());
+                    printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                     if(mythreads[freethread].errbuff.length()>0){
                         errbuff.append(mythreads[freethread].errbuff);
                     }
-                    mythreads[freethread]=new blastthread(this,seqnum,cmd,blastpath,blastdbname,allaln[backvalseqs[allstart]],eval,pval,coverage,scval,ident,new Vector[seqnum],nameshash,verbose,rt,freethread,useallrounds,referencedb,lowmem);
+                    mythreads[freethread] = new blastthread(this, seqnum, cmd, blastpath, blastdbname,
+                            allaln[backvalseqs[allstart]], eval, pval, coverage, scval, ident, new Vector[seqnum],
+                            nameshash, verbose, rt, freethread, useallrounds, referencedb, lowmem);
                     alldone++;
                     mythreads[freethread].start();
                     allstart++;
@@ -321,7 +345,7 @@ public class searchblast {
                     }// end while freethread==-1
                     //if(lowmem){
                     //write the data to disk and clear that array element
-                    printout.saveblastappend(outwrite,mythreads[freethread].retarr,((Integer)nameshash.get(mythreads[freethread].query.name)).intValue());
+                    printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                     if(mythreads[freethread].errbuff.length()>0){
                         errbuff.append(mythreads[freethread].errbuff);
                     }
@@ -343,10 +367,10 @@ public class searchblast {
                 //then I redid all blast runs and have all data in retarr
             }else{
                 //I need to look at what parts to keep and which to add
-                Vector tmpvec=new Vector();
+                Vector<MinimalHsp> tmpvec = new Vector<MinimalHsp>();
                 if(exhaustive<2){
                     //if I didn't redo the old blast runs; transfer the old info
-                    for(int i=java.lang.reflect.Array.getLength(retarr)-1;i>=0;i--){
+                    for(int i=retarr.length-1;i>=0;i--){
                         tmpvec.addElement(retarr[i]);
                     }//end for i
                     for(int i=0;i<oldelements;i++){
@@ -356,7 +380,7 @@ public class searchblast {
                 //now for a fast version just mirror the blast values for the new sequences
                 if(exhaustive==0){
                     //if I want to make a->b == b->a (one way search)
-                    for(int i=java.lang.reflect.Array.getLength(retarr)-1;i>=0;i--){
+                    for(int i=retarr.length-1;i>=0;i--){
                         tmpvec.addElement(new MinimalHsp(retarr[i].hit,retarr[i].query,retarr[i].val));//inverted query and hit info
                     }//end for i
                 }//end if exhaustive==0
@@ -428,60 +452,34 @@ public class searchblast {
             ioe.printStackTrace();
             return new MinimalHsp[0];
         }
-    }//end gethits for new added seqs
-    
-    //--------------------------------------------------------------------------
-    
-   /* public Vector[][] gethits(aaseq[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,String[] references,boolean useallrounds,boolean lowmem,String[] referencedb,boolean readblast){
-        //get the blast hits to and from only those sequences in String[] references
-        //get all blast hits
-        Vector[][] tmphits=gethits(inarr,cmd,formatdbpath,blastpath,cpu,eval,pval,coverage,scval,ident,verbose,nameshash,useallrounds,lowmem,referencedb,readblast);
-        //now remove all those hits that do not come from or go to a sequence in "references" array
-        int elements=java.lang.reflect.Array.getLength(references);
-        int[] referencesnum=new int[elements];
-        int arrsize=java.lang.reflect.Array.getLength(tmphits);
-        boolean[][] keephits=new boolean[arrsize][arrsize];
-        //now look through nameshash to see which reference sequence is which array number
-        String[] keys=(String[])(nameshash.keySet().toArray(new String[0]));
-        int keysnum=java.lang.reflect.Array.getLength(keys);
-        int j;
-        for(int i=0;i<elements;i++){
-            referencesnum[i]=-1;
-            for(j=0;j<keysnum;j++){
-                if(keys[j].startsWith(references[i])){//if this is a sequence I want to keep hits for
-                    referencesnum[i]=((Integer)nameshash.get(keys[j])).intValue();
-                }
-            }// end for j
-            if(referencesnum[i]==-1){
-                System.err.println("unable to find reference sequence "+references[i]);
-                errbuff.append("-ERROR, unable to find reference sequence "+references[i]+"\n");
-            }
-        }//end for i
-        //now clear all hsp vectors in tmphits that do not belong to one of the numbers in referencesnum
-        boolean keepme;
-        int k;
-        for(int i=0;i<arrsize;i++){
-            for(j=0;j<arrsize;j++){
-                keepme=false;
-                for(k=0;k<elements;k++){
-                    if((referencesnum[k]==j)||(referencesnum[k]==i)){
-                        keepme=true;
-                        break;
-                    }
-                }//end for k
-                if(keepme==false){
-                    tmphits[i][j].clear();
-                }
-            }//end for j
-        }// end for i
-        return tmphits;
-    }//end gethits using references
-    */
-    
-    //--------------------------------------------------------------------------
-    
-    public MinimalHsp[] gethits(AminoAcidSequence[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval, float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,boolean readblast, boolean newblast){
-        //run an all against all blast search and save the hsp's in vector[][]
+    }
+
+    /**
+     * run an all against all blast search and save the hsp's in vector[][]
+     * 
+     * @param inarr
+     * @param cmd
+     * @param formatdbpath
+     * @param blastpath
+     * @param cpu
+     * @param eval
+     * @param pval
+     * @param coverage
+     * @param scval
+     * @param ident
+     * @param verbose
+     * @param nameshash
+     * @param useallrounds
+     * @param lowmem
+     * @param referencedb
+     * @param readblast
+     * @param newblast
+     * @return
+     */
+    public MinimalHsp[] gethits(AminoAcidSequence[] inarr, String cmd, String formatdbpath, String blastpath, int cpu,
+            double eval, double pval, float coverage, float scval, float ident, int verbose,
+            HashMap<String, Integer> nameshash, boolean useallrounds, boolean lowmem, String[] referencedb,
+            boolean readblast, boolean newblast) {
         System.out.println("doing searchblast");
         File tmpfile=new File("tmpblasthsp.txt");
         if(tmpfile.canRead()&&readblast){
@@ -492,7 +490,7 @@ public class searchblast {
             try{
                 PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter("tmpblasthsp.txt")));
                 String blastdbname=new File(String.valueOf(System.currentTimeMillis())).getAbsolutePath();//set the name for the blast database to search against
-                int seqnum=java.lang.reflect.Array.getLength(inarr);
+                int seqnum=inarr.length;
                 //if(lowmem){
                 if(newblast==true){
                     outwrite.println(seqnum+" sequences");
@@ -577,7 +575,9 @@ public class searchblast {
                 int allstart=0;
                 for(int i=0;(i<cpu)&&(i<seqnum);i++){
                     //mythreads[i]=new blastthread(this,cmd,blastpath,blastdbname,inarr[allstart],eval,pval,coverage,scval,ident,retarr[allstart],nameshash,verbose,rt,i,useallrounds,referencedb,lowmem);
-                    mythreads[i]=new blastthread(this,seqnum,cmd,blastpath,blastdbname,inarr[allstart],eval,pval,coverage,scval,ident,new Vector[seqnum],nameshash,verbose,rt,i,useallrounds,referencedb,lowmem);
+                    mythreads[i] = new blastthread(this, seqnum, cmd, blastpath, blastdbname, inarr[allstart], eval,
+                            pval, coverage, scval, ident, new Vector[seqnum], nameshash, verbose, rt, i, useallrounds,
+                            referencedb, lowmem);
                     mythreads[i].start();
                     allstart++;
                 }
@@ -612,7 +612,7 @@ public class searchblast {
                     }
                     //if(lowmem){
                     //write the data to disk and clear that array element
-                    printout.saveblastappend(outwrite,mythreads[freethread].retarr,((Integer)nameshash.get(mythreads[freethread].query.name)).intValue());
+                    printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                     //retarr[((Integer)nameshash.get(mythreads[freethread].query.name)).intValue()]=new Vector[seqnum];
                     //}else{
                     //    retarr[((Integer)nameshash.get(mythreads[freethread].query.name)).intValue()]=mythreads[freethread].retarr;//get the array with the computed values from that thread
@@ -621,7 +621,9 @@ public class searchblast {
                     if(mythreads[freethread].errbuff.length()>0){
                         errbuff.append(mythreads[freethread].errbuff);
                     }
-                    mythreads[freethread]=new blastthread(this,seqnum,cmd,blastpath,blastdbname,inarr[allstart],eval,pval,coverage,scval,ident,new Vector[seqnum],nameshash,verbose,rt,freethread,useallrounds,referencedb,lowmem);
+                    mythreads[freethread] = new blastthread(this, seqnum, cmd, blastpath, blastdbname, inarr[allstart],
+                            eval, pval, coverage, scval, ident, new Vector[seqnum], nameshash, verbose, rt, freethread,
+                            useallrounds, referencedb, lowmem);
                     alldone++;
                     mythreads[freethread].start();
                     allstart++;
@@ -656,7 +658,7 @@ public class searchblast {
                     }// end while freethread==-1
                     //if(lowmem){
                     //write the data to disk and clear that array element
-                    printout.saveblastappend(outwrite,mythreads[freethread].retarr,((Integer)nameshash.get(mythreads[freethread].query.name)).intValue());
+                    printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                     //retarr[((Integer)nameshash.get(mythreads[freethread].query.name)).intValue()]=new Vector[seqnum];
                     //}else{
                     //    retarr[((Integer)nameshash.get(mythreads[freethread].query.name)).intValue()]=mythreads[freethread].retarr;//get the array with the computed values from that thread
@@ -741,18 +743,43 @@ public class searchblast {
                 return new MinimalHsp[0];
             }
         }
-    }// end gethits
-    
-    //--------------------------------------------------------------------------
-    
-    public MinimalHsp[] gethits(MinimalHsp[] blasthits,AminoAcidSequence[] inarr,String cmd,String formatdbpath,String blastpath,int cpu,double eval,double pval,float coverage,float scval,float ident,int verbose,HashMap nameshash,boolean useallrounds,boolean lowmem,String[] referencedb,int[] seqstodo,boolean readblast,boolean newblast){
-        //do all blast runs for sequences present in seqstodo NOT FOR THE OTHERS (should only happen for interrupted runs)
+    }
+
+    /**
+     * do all blast runs for sequences present in seqstodo NOT FOR THE OTHERS (should only happen for interrupted runs)
+     * 
+     * @param blasthits
+     * @param inarr
+     * @param cmd
+     * @param formatdbpath
+     * @param blastpath
+     * @param cpu
+     * @param eval
+     * @param pval
+     * @param coverage
+     * @param scval
+     * @param ident
+     * @param verbose
+     * @param nameshash
+     * @param useallrounds
+     * @param lowmem
+     * @param referencedb
+     * @param seqstodo
+     * @param readblast
+     * @param newblast
+     * @return
+     */
+    public MinimalHsp[] gethits(MinimalHsp[] blasthits, AminoAcidSequence[] inarr, String cmd, String formatdbpath,
+            String blastpath, int cpu, double eval, double pval, float coverage, float scval, float ident, int verbose,
+            HashMap<String, Integer> nameshash, boolean useallrounds, boolean lowmem, String[] referencedb,
+            int[] seqstodo, boolean readblast, boolean newblast) {
+
         System.out.println("continuing searchblast");
         File tmpfile=new File("tmpblasthsp.txt");
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(tmpfile,true)));//append to the end of the file
             String blastdbname=new File(String.valueOf(System.currentTimeMillis())).getAbsolutePath();//set the name for the blast database to search against
-            int seqnum=java.lang.reflect.Array.getLength(inarr);
+            int seqnum=inarr.length;
             //if(lowmem){
             if(newblast==true){
                 outwrite.println(seqnum+" sequences");
@@ -826,11 +853,13 @@ public class searchblast {
             }
             //I have a formatted database, so now start -cpu threads that do the blast searches.
             blastthread[] mythreads=new blastthread[cpu];
-            int seqstodonum=java.lang.reflect.Array.getLength(seqstodo);
+            int seqstodonum=seqstodo.length;
             int alldone=0;
             int allstart=0;
             for(int i=0;(i<cpu)&&(i<seqstodonum);i++){
-                mythreads[i]=new blastthread(this,seqnum,cmd,blastpath,blastdbname,inarr[seqstodo[allstart]],eval,pval,coverage,scval,ident,new Vector[seqnum],nameshash,verbose,rt,i,useallrounds,referencedb,lowmem);
+                mythreads[i] = new blastthread(this, seqnum, cmd, blastpath, blastdbname, inarr[seqstodo[allstart]],
+                        eval, pval, coverage, scval, ident, new Vector[seqnum], nameshash, verbose, rt, i,
+                        useallrounds, referencedb, lowmem);
                 mythreads[i].start();
                 allstart++;
             }
@@ -865,11 +894,13 @@ public class searchblast {
                 }
                 //if(lowmem){
                 //write the data to disk and clear that array element
-                printout.saveblastappend(outwrite,mythreads[freethread].retarr,((Integer)nameshash.get(mythreads[freethread].query.name)).intValue());
+                printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                 if(mythreads[freethread].errbuff.length()>0){
                     errbuff.append(mythreads[freethread].errbuff);
                 }
-                mythreads[freethread]=new blastthread(this,seqnum,cmd,blastpath,blastdbname,inarr[seqstodo[allstart]],eval,pval,coverage,scval,ident,new Vector[seqnum],nameshash,verbose,rt,freethread,useallrounds,referencedb,lowmem);
+                mythreads[freethread] = new blastthread(this, seqnum, cmd, blastpath, blastdbname,
+                        inarr[seqstodo[allstart]], eval, pval, coverage, scval, ident, new Vector[seqnum], nameshash,
+                        verbose, rt, freethread, useallrounds, referencedb, lowmem);
                 alldone++;
                 mythreads[freethread].start();
                 allstart++;
@@ -904,7 +935,7 @@ public class searchblast {
                 }// end while freethread==-1
                 //if(lowmem){
                 //write the data to disk and clear that array element
-                printout.saveblastappend(outwrite,mythreads[freethread].retarr,((Integer)nameshash.get(mythreads[freethread].query.name)).intValue());
+                printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                 if(mythreads[freethread].errbuff.length()>0){
                     errbuff.append(mythreads[freethread].errbuff);
                 }
@@ -984,12 +1015,37 @@ public class searchblast {
     
     //--------------------------------------------------------------------------
     
-}// end class searchblast
+}
 
 class blastthread extends java.lang.Thread{
     //this class should perform the blast run and filter the output according to coverage,scval,ident,etc.
     
-    public blastthread(searchblast parent,int allseqnum,String cmd,String blastpath,String blastdbname,AminoAcidSequence query,double eval,double pval,float coverage,float scval,float ident,Vector[] retvecarr,HashMap nameshash,int verbose,Runtime rt,int threadnum,boolean useallrounds,String[] referencedb,boolean lowmem){
+    /**
+     * 
+     * @param parent
+     * @param allseqnum
+     * @param cmd
+     * @param blastpath
+     * @param blastdbname
+     * @param query
+     * @param eval
+     * @param pval
+     * @param coverage
+     * @param scval
+     * @param ident
+     * @param retvecarr
+     * @param nameshash
+     * @param verbose
+     * @param rt
+     * @param threadnum
+     * @param useallrounds
+     * @param referencedb
+     * @param lowmem
+     */
+    public blastthread(searchblast parent, int allseqnum, String cmd, String blastpath, String blastdbname,
+            AminoAcidSequence query, double eval, double pval, float coverage, float scval, float ident,
+            Vector<hsp>[] retvecarr, HashMap<String, Integer> nameshash, int verbose, Runtime rt, int threadnum,
+            boolean useallrounds, String[] referencedb, boolean lowmem) {
         this.parent=parent;
         this.allseqnum=allseqnum;
         this.cmd=cmd;
@@ -1052,8 +1108,8 @@ class blastthread extends java.lang.Thread{
     float ident;
     int verbose;
     int allseqnum=0;
-    Vector[] retarr;
-    HashMap nameshash;
+    Vector<hsp>[] retarr;
+    HashMap<String, Integer> nameshash;
     searchblast parent;
     boolean done=false;
     boolean stopthread=false;
@@ -1075,7 +1131,7 @@ class blastthread extends java.lang.Thread{
         String dbstring;
         String[] cmdarr;
         //convert the String commands to a array of Strings (resolves some runtime.exec problems)
-        Vector tmpvec=new Vector();
+        Vector<String> tmpvec = new Vector<String>();
         if(blastpath.indexOf("blastall")>-1 || blastpath.indexOf("blastpgp")>-1){//for the old blast version
             cmdarr=blastpath.split("\\s+");
             tmpvec.addElement("-T");
@@ -1086,7 +1142,7 @@ class blastthread extends java.lang.Thread{
             tmpvec.addElement(new File(tmpfilestring).getAbsolutePath());
             tmpvec.addElement("-d");
             tmpvec.addElement(blastdbname);
-            for(int i=java.lang.reflect.Array.getLength(cmdarr);i>0;i--){
+            for(int i=cmdarr.length;i>0;i--){
                 tmpvec.add(0,cmdarr[i-1]);
             }
             if(cmd.length()>0){
@@ -1103,7 +1159,7 @@ class blastthread extends java.lang.Thread{
             tmpvec.addElement(new File(tmpfilestring).getAbsolutePath());
             tmpvec.addElement("-db");
             tmpvec.addElement(blastdbname);
-            for(int i=java.lang.reflect.Array.getLength(cmdarr);i>0;i--){
+            for(int i=cmdarr.length;i>0;i--){
                 tmpvec.add(0,cmdarr[i-1]);
             }
             if(cmd.length()>0){
@@ -1112,15 +1168,18 @@ class blastthread extends java.lang.Thread{
             }
         }
         
-        if((java.lang.reflect.Array.getLength(referencedb)>0)&&(blastpath.indexOf("blastpgp")>-1)){
+        if((referencedb.length>0)&&(blastpath.indexOf("blastpgp")>-1)){
             if(verbose>1){
                 System.out.println("profile psiblast run on "+threadnum);
             }
-            Vector tmpvec2=(Vector)tmpvec.clone();//supposed to hold the command parameters
+            
+            @SuppressWarnings("unchecked")
+            Vector<String> tmpvec2 = (Vector<String>) tmpvec.clone();// supposed to hold the command parameters
+            
             //first do the psiblast runs agains all specified databases
             //first put all database names into one string
             dbstring=blastdbname;
-            for(int i=0;i<java.lang.reflect.Array.getLength(referencedb);i++){
+            for(int i=0;i<referencedb.length;i++){
                 dbstring+=" "+referencedb[i];
             }//end for i
             //blastcommand=blastpath+" -T T -e "+eval+" -i "+tmpfilestring+" -C "+tmpcheckfile+" -d "+dbstring;
@@ -1139,7 +1198,7 @@ class blastthread extends java.lang.Thread{
                 tmpvec2.addElement("-o");
                 tmpvec2.addElement(tmpoutfile);
             }
-            //for(int i=java.lang.reflect.Array.getLength(cmdarr);i>0;i--){
+            //for(int i=cmdarr.length;i>0;i--){
             //    tmpvec.add(0,cmdarr[i-1]);
             //}
             //if(cmd.length()>0){
@@ -1153,7 +1212,7 @@ class blastthread extends java.lang.Thread{
             if(verbose>2){
                 //System.out.println("for "+query.name+" trying command="+blastcommand);
                 System.out.print(query.name+" trying:");
-                for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+                for(int i=0;i<cmdarr.length;i++){
                     System.out.print("'"+cmdarr[i]+"' ");
                 }//end for i
                 System.out.println();
@@ -1167,7 +1226,6 @@ class blastthread extends java.lang.Thread{
                 //System.out.println("done writing for "+tmpfilestring);
                 BufferedReader perr;
                 BufferedReader pin;
-                PrintWriter pout;
                 threadstreamreader perrread;
                 threadstreamreader pinread;
                 Process p=rt.exec(cmdarr);
@@ -1188,7 +1246,7 @@ class blastthread extends java.lang.Thread{
                     if(verbose>2){
                         //System.out.println("Done feeding, waiting for "+blastcommand+" query="+query.name);
                         System.out.print("Done feeding, waiting for:");
-                        for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+                        for(int i=0;i<cmdarr.length;i++){
                             System.out.print("'"+cmdarr[i]+"' ");
                         }//end for i
                         System.out.println(" query="+query.name);
@@ -1213,7 +1271,7 @@ class blastthread extends java.lang.Thread{
                 }catch (InterruptedException e){
                     //System.err.println("Interrupted process "+blastcommand+" for "+query.name);
                     System.out.print("Interrupted process for:"+query.name+"; command=");
-                    for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+                    for(int i=0;i<cmdarr.length;i++){
                         System.out.print("'"+cmdarr[i]+"' ");
                     }//end for i
                     System.out.println();
@@ -1225,11 +1283,11 @@ class blastthread extends java.lang.Thread{
                 //System.err.println("IOError in "+blastcommand+" for "+query.name);
                 System.err.print("IOERROR for "+query.name+" command:");
                 errbuff.append("IOERROR for "+query.name+" command\n");
-                for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+                for(int i=0;i<cmdarr.length;i++){
                     System.err.print("'"+cmdarr[i]+"';");
                 }//end for i
                 System.err.println();
-                //for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+                //for(int i=0;i<cmdarr.length;i++){
                 //    System.err.println(cmdarr[i]);
                 //}
                 System.out.println("inoutsize="+inout.length());
@@ -1268,7 +1326,7 @@ class blastthread extends java.lang.Thread{
         if(verbose>2){
             //System.out.println("for "+query.name+" trying command="+blastcommand);
             System.out.print(query.name+" trying:");
-            for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+            for(int i=0;i<cmdarr.length;i++){
                 System.out.print("'"+cmdarr[i]+"' ");
             }//end for i
             System.out.println();
@@ -1287,7 +1345,6 @@ class blastthread extends java.lang.Thread{
         try{
             BufferedReader perr;
             BufferedReader pin;
-            PrintWriter pout;
             threadstreamreader perrread;
             threadstreamreader pinread;
             //Process p=rt.exec(blastcommand);
@@ -1309,7 +1366,7 @@ class blastthread extends java.lang.Thread{
                 if(verbose>2){
                     //System.out.println("Done feeding, waiting for "+blastcommand+" query="+query.name);
                     System.out.print("Done feeding for "+query.name+" waiting for command:");
-                    for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+                    for(int i=0;i<cmdarr.length;i++){
                         System.out.print("'"+cmdarr[i]+"' ");
                     }//end for i
                     System.out.println();
@@ -1338,7 +1395,7 @@ class blastthread extends java.lang.Thread{
                 //System.err.println("Interrupted process "+blastcommand+" for "+query.name);
                 System.out.print("Interrupted process for "+query.name+" command:");
                 errbuff.append("Interrupted process for "+query.name+" command:");
-                for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+                for(int i=0;i<cmdarr.length;i++){
                     System.out.print("'"+cmdarr[i]+"' ");
                 }//end for i
                 System.out.println();
@@ -1349,12 +1406,12 @@ class blastthread extends java.lang.Thread{
             pinread=null;//.clear();
         }catch (IOException ioe){
             //System.err.println("IOError in "+blastcommand+" for "+query.name);
-            //for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+            //for(int i=0;i<cmdarr.length;i++){
             //    System.err.println(cmdarr[i]);
             //}
             System.out.print("IOERROR for running "+query.name+" command:");
             errbuff.append("IOERROR running "+query.name+" command\n");
-            for(int i=0;i<java.lang.reflect.Array.getLength(cmdarr);i++){
+            for(int i=0;i<cmdarr.length;i++){
                 System.out.print("'"+cmdarr[i]+"' ");
             }//end for i
             System.out.println();
@@ -1378,11 +1435,11 @@ class blastthread extends java.lang.Thread{
         if(verbose>2){
             System.out.println("getting hsp's from "+query.name);
         }
-        Vector hspvec;
+        Vector<hsp> hspvec;
         if(lowmem){
-            hspvec=hspget.get(lowmem,tmpoutfile,new Vector(),eval,pval,coverage,scval,ident,verbose,nameshash,useallrounds);//here the blast output is filtered for valid hsp's
+            hspvec=hspget.get(lowmem,tmpoutfile,new Vector<hsp>(),eval,pval,coverage,scval,ident,verbose,nameshash,useallrounds);//here the blast output is filtered for valid hsp's
         }else{
-            hspvec=hspget.get(myblast,new Vector(),eval,pval,coverage,scval,ident,verbose,nameshash,useallrounds);//here the blast output is filtered for valid hsp's
+            hspvec=hspget.get(myblast,new Vector<hsp>(),eval,pval,coverage,scval,ident,verbose,nameshash,useallrounds);//here the blast output is filtered for valid hsp's
         }
         if(verbose>1){
             System.out.println("hsp's="+hspvec.size());
@@ -1392,17 +1449,17 @@ class blastthread extends java.lang.Thread{
         //now I have all the hsp's in a vector.
         //next assign the hsp's by name of hit sequence to a position in the retarr
         int hspnum=hspvec.size();
-        int arrsize=java.lang.reflect.Array.getLength(retarr);
+        int arrsize=retarr.length;
         for(int i=0;i<arrsize;i++){
-            retarr[i]=new Vector();
+            retarr[i]=new Vector<hsp>();
         }
         int namenum=-1;
         for(int i=0;i<hspnum;i++){
-            if(nameshash.containsKey(((hsp)hspvec.elementAt(i)).hname)){
-                namenum=((Integer)nameshash.get(((hsp)hspvec.elementAt(i)).hname)).intValue();
+            if(nameshash.containsKey(hspvec.elementAt(i).hname)){
+                namenum=nameshash.get(hspvec.elementAt(i).hname).intValue();
                 retarr[namenum].addElement(hspvec.elementAt(i));
             }else{
-                System.err.println("unknown name for "+((hsp)hspvec.elementAt(i)).hname);
+                System.err.println("unknown name for "+hspvec.elementAt(i).hname);
             }
         }
         //all done, notify parent to get the data
