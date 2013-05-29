@@ -53,10 +53,10 @@ public class searchblast {
         AminoAcidSequence[] allaln=new AminoAcidSequence[allelements];
         for(int i=0;i<oldelements;i++){
             allaln[i]=oldaln[i];
-        }//end for i
+        }
         for(int i=0;i<newelements;i++){
             allaln[oldelements+i]=newaln[i];
-        }//end for i
+        }
         
         new File("tmpblasthsp.txt"); // this might not be necessary
         try{
@@ -64,11 +64,11 @@ public class searchblast {
             String blastdbname=new File(String.valueOf(System.currentTimeMillis())).getAbsolutePath();//set the name for the blast database to search against
             int seqnum=allelements;
             MinimalHsp[] retarr=new MinimalHsp[0];
-            //if(lowmem){
+
             if(newblast==true){
                 outwrite.println(seqnum+" sequences");
             }
-            //}
+
             //write the database to blast against to file
             try{
                 PrintWriter blastdb=new PrintWriter(new BufferedWriter(new FileWriter(blastdbname)));
@@ -76,7 +76,7 @@ public class searchblast {
                     allaln[i].seq=(allaln[i].seq.replaceAll("-","")).toUpperCase();
                     blastdb.println(">"+allaln[i].name);
                     blastdb.println(allaln[i].seq);//remove all gaps before printing
-                }// end for i <seqnum
+                }
                 blastdb.close();
             }catch (IOException e){
                 System.err.println("Error while creating blast database.");
@@ -175,7 +175,7 @@ public class searchblast {
                     errbuff.append("-Interrupted wait in searchblast\n");
                     e.printStackTrace();
                 }
-                //if(lowmem){
+
                 //write the data to disk
                 printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                 if(mythreads[freethread].errbuff.length()>0){
@@ -202,7 +202,7 @@ public class searchblast {
                                     freethread=i;
                                     break;
                                 }
-                            }// end for i
+                            }
                             if(freethread==-1){
                                 if(verbose>1){
                                     System.out.println("Waiting(end)..."+alldone);
@@ -216,7 +216,7 @@ public class searchblast {
                         e.printStackTrace();
                     }
                 }// end while freethread==-1
-                //if(lowmem){
+
                 //write the data to disk and clear that array element
                 printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                 if(mythreads[freethread].errbuff.length()>0){
@@ -252,7 +252,7 @@ public class searchblast {
                         }
                         redoseqs[retarr[i].hit]=true;
                     }
-                }//end for i
+                }
                 int backvalnum=tmpvec.size();
                 int[] backvalseqs=new int[backvalnum];
                 for(int i=0;i<backvalnum;i++){
@@ -277,6 +277,7 @@ public class searchblast {
                 if(verbose>1){
                     System.out.println("init-backvalidation started");
                 }
+
                 //now for the lowmem case:
                 while (allstart<backvalnum){
                     freethread=-1;
@@ -302,7 +303,7 @@ public class searchblast {
                         errbuff.append("interrupted wait in searchblast\n");
                         e.printStackTrace();
                     }
-                    //if(lowmem){
+
                     //write the data to disk and clear that array element
                     printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                     if(mythreads[freethread].errbuff.length()>0){
@@ -329,7 +330,7 @@ public class searchblast {
                                         freethread=i;
                                         break;
                                     }
-                                }// end for i
+                                }
                                 if(freethread==-1){
                                     if(verbose>1){
                                         System.out.println("Waiting(backvalidation end)..."+alldone);
@@ -343,7 +344,7 @@ public class searchblast {
                             e.printStackTrace();
                         }
                     }// end while freethread==-1
-                    //if(lowmem){
+
                     //write the data to disk and clear that array element
                     printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                     if(mythreads[freethread].errbuff.length()>0){
@@ -351,14 +352,12 @@ public class searchblast {
                     }
                     alldone++;
                     mythreads[freethread].done=false;
-                    //if(lowmem){
+
                     outwrite.println("#DONE all backvalidation blast runs");
-                    //}
                 }
-                //if(lowmem){
+
                 retarr=null;
                 outwrite.println("DONE");
-                //}
                 outwrite.close();
             }//end if exhaustive==1
             System.out.println("re-reading hsp's");
@@ -372,17 +371,17 @@ public class searchblast {
                     //if I didn't redo the old blast runs; transfer the old info
                     for(int i=retarr.length-1;i>=0;i--){
                         tmpvec.addElement(retarr[i]);
-                    }//end for i
+                    }
                     for(int i=0;i<oldelements;i++){
                         tmpvec.addElement(oldblasthits[i]);
-                    }//end for i
+                    }
                 }//end if exhaustive<2
                 //now for a fast version just mirror the blast values for the new sequences
                 if(exhaustive==0){
                     //if I want to make a->b == b->a (one way search)
                     for(int i=retarr.length-1;i>=0;i--){
                         tmpvec.addElement(new MinimalHsp(retarr[i].hit,retarr[i].query,retarr[i].val));//inverted query and hit info
-                    }//end for i
+                    }
                 }//end if exhaustive==0
             }
             //all threads started and done. the values are stored in retarr.
@@ -400,7 +399,7 @@ public class searchblast {
                     if(rmfile.exists()){
                         rmfile.delete();
                     }
-                }// end for i<cpu
+                }
                 rmfile=new File(blastdbname);
                 if(rmfile.exists()){
                     rmfile.delete();
@@ -504,12 +503,12 @@ public class searchblast {
                         inarr[i].seq=(inarr[i].seq.replaceAll("-","")).toUpperCase();
                         blastdb.println(">"+inarr[i].name);
                         blastdb.println(inarr[i].seq);//remove all gaps before printing
-                    }// end for i <seqnum
+                    }
                     //}else{
                     //    for(int i=0;i<seqnum;i++){
                     //        blastdb.println(">"+inarr[i].name);
                     //        blastdb.println((inarr[i].seq.replaceAll("-","")).toUpperCase());//remove all gaps before printing
-                    //    }// end for i <seqnum
+                    //    }
                     //}
                     blastdb.close();
                 }catch (IOException e){
@@ -565,8 +564,8 @@ public class searchblast {
                 if(verbose>0){
                     System.out.println("starting blast runs");
                 }
+
                 //I have a formatted database, so now start -cpu threads that do the blast searches.
-                //Vector[][] retarr=new Vector[seqnum][seqnum];
                 if(verbose>1){
                     System.out.println("done Vector initialization");
                 }
@@ -574,13 +573,13 @@ public class searchblast {
                 int alldone=0;
                 int allstart=0;
                 for(int i=0;(i<cpu)&&(i<seqnum);i++){
-                    //mythreads[i]=new blastthread(this,cmd,blastpath,blastdbname,inarr[allstart],eval,pval,coverage,scval,ident,retarr[allstart],nameshash,verbose,rt,i,useallrounds,referencedb,lowmem);
                     mythreads[i] = new blastthread(this, seqnum, cmd, blastpath, blastdbname, inarr[allstart], eval,
                             pval, coverage, scval, ident, new Vector[seqnum], nameshash, verbose, rt, i, useallrounds,
                             referencedb, lowmem);
                     mythreads[i].start();
                     allstart++;
                 }
+                
                 if(verbose>1){
                     System.out.println("init-blastthreads started");
                 }
@@ -610,14 +609,9 @@ public class searchblast {
                         errbuff.append("Interrupted wait in searchblast\n");
                         e.printStackTrace();
                     }
-                    //if(lowmem){
                     //write the data to disk and clear that array element
                     printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
-                    //retarr[((Integer)nameshash.get(mythreads[freethread].query.name)).intValue()]=new Vector[seqnum];
-                    //}else{
-                    //    retarr[((Integer)nameshash.get(mythreads[freethread].query.name)).intValue()]=mythreads[freethread].retarr;//get the array with the computed values from that thread
-                    //}
-                    //mythreads[freethread]=new blastthread(this,cmd,blastpath,blastdbname,inarr[allstart],eval,pval,coverage,scval,ident,retarr[allstart],nameshash,verbose,rt,freethread,useallrounds,referencedb,lowmem);
+
                     if(mythreads[freethread].errbuff.length()>0){
                         errbuff.append(mythreads[freethread].errbuff);
                     }
@@ -627,7 +621,8 @@ public class searchblast {
                     alldone++;
                     mythreads[freethread].start();
                     allstart++;
-                }// end while allstart
+                }
+                
                 //now everything has been started, now wait for the last threads to finish.
                 if(verbose>1){
                     System.out.println("waiting for all to finish");
@@ -642,7 +637,7 @@ public class searchblast {
                                         freethread=i;
                                         break;
                                     }
-                                }// end for i
+                                }
                                 if(freethread==-1){
                                     if(verbose>1){
                                         System.out.println("Waiting(end)..."+alldone);
@@ -690,7 +685,7 @@ public class searchblast {
                         if(rmfile.exists()){
                             rmfile.delete();
                         }
-                    }// end for i<cpu
+                    }
                     rmfile=new File(blastdbname);
                     if(rmfile.exists()){
                         rmfile.delete();
@@ -793,12 +788,12 @@ public class searchblast {
                     inarr[i].seq=(inarr[i].seq.replaceAll("-","")).toUpperCase();
                     blastdb.println(">"+inarr[i].name);
                     blastdb.println(inarr[i].seq);//remove all gaps before printing
-                }// end for i <seqnum
+                }
                 //}else{
                 //    for(int i=0;i<seqnum;i++){
                 //        blastdb.println(">"+inarr[i].name);
                 //        blastdb.println((inarr[i].seq.replaceAll("-","")).toUpperCase());//remove all gaps before printing
-                //    }// end for i <seqnum
+                //    }
                 //}
                 blastdb.close();
             }catch (IOException e){
@@ -892,7 +887,7 @@ public class searchblast {
                     errbuff.append("-Interrupted wait in searchblast\n");
                     e.printStackTrace();
                 }
-                //if(lowmem){
+
                 //write the data to disk and clear that array element
                 printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                 if(mythreads[freethread].errbuff.length()>0){
@@ -905,6 +900,7 @@ public class searchblast {
                 mythreads[freethread].start();
                 allstart++;
             }// end while allstart
+            
             //now everything has been started, now wait for the last threads to finish.
             if(verbose>1){
                 System.out.println("waiting for all to finish");
@@ -919,7 +915,7 @@ public class searchblast {
                                     freethread=i;
                                     break;
                                 }
-                            }// end for i
+                            }
                             if(freethread==-1){
                                 if(verbose>1){
                                     System.out.println("Waiting(end)..."+alldone);
@@ -932,8 +928,8 @@ public class searchblast {
                         errbuff.append("-Interrupted wait in searchblast\n");
                         e.printStackTrace();
                     }
-                }// end while freethread==-1
-                //if(lowmem){
+                }
+
                 //write the data to disk and clear that array element
                 printout.saveblastappend(outwrite,mythreads[freethread].retarr,nameshash.get(mythreads[freethread].query.name).intValue());
                 if(mythreads[freethread].errbuff.length()>0){
@@ -943,8 +939,8 @@ public class searchblast {
                 mythreads[freethread].done=false;
                 outwrite.println("DONE");
                 outwrite.close();
-            }// end while alldone
-            //if(lowmem){
+            }
+
             System.out.println("re-reading hsp's");
             blasthits=readsave.blast("tmpblasthsp.txt",pval);
             //}
@@ -963,7 +959,7 @@ public class searchblast {
                     if(rmfile.exists()){
                         rmfile.delete();
                     }
-                }// end for i<cpu
+                }
                 rmfile=new File(blastdbname);
                 if(rmfile.exists()){
                     rmfile.delete();
@@ -1181,7 +1177,7 @@ class blastthread extends java.lang.Thread{
             dbstring=blastdbname;
             for(int i=0;i<referencedb.length;i++){
                 dbstring+=" "+referencedb[i];
-            }//end for i
+            }
             //blastcommand=blastpath+" -T T -e "+eval+" -i "+tmpfilestring+" -C "+tmpcheckfile+" -d "+dbstring;
             //cmdarr=blastpath.split("\\s+");
             //tmpvec.addElement("-T");
@@ -1214,7 +1210,7 @@ class blastthread extends java.lang.Thread{
                 System.out.print(query.name+" trying:");
                 for(int i=0;i<cmdarr.length;i++){
                     System.out.print("'"+cmdarr[i]+"' ");
-                }//end for i
+                }
                 System.out.println();
             }
             try{
@@ -1248,7 +1244,7 @@ class blastthread extends java.lang.Thread{
                         System.out.print("Done feeding, waiting for:");
                         for(int i=0;i<cmdarr.length;i++){
                             System.out.print("'"+cmdarr[i]+"' ");
-                        }//end for i
+                        }
                         System.out.println(" query="+query.name);
                     }
                     p.waitFor();
@@ -1273,7 +1269,7 @@ class blastthread extends java.lang.Thread{
                     System.out.print("Interrupted process for:"+query.name+"; command=");
                     for(int i=0;i<cmdarr.length;i++){
                         System.out.print("'"+cmdarr[i]+"' ");
-                    }//end for i
+                    }
                     System.out.println();
                     stopthread=true;
                 }
@@ -1285,7 +1281,7 @@ class blastthread extends java.lang.Thread{
                 errbuff.append("IOERROR for "+query.name+" command\n");
                 for(int i=0;i<cmdarr.length;i++){
                     System.err.print("'"+cmdarr[i]+"';");
-                }//end for i
+                }
                 System.err.println();
                 //for(int i=0;i<cmdarr.length;i++){
                 //    System.err.println(cmdarr[i]);
@@ -1307,10 +1303,7 @@ class blastthread extends java.lang.Thread{
             if(verbose>1){
                 System.out.println("actual psiblast run on "+threadnum);
             }
-            //blastcommand=blastpath+" -d "+blastdbname+" -T T -e "+eval+" -i "+tmpfilestring+" -R "+tmpcheckfile;
-            //if(lowmem){
-            //    blastcommand+="-o "+tmpoutfile;
-            //}
+
             tmpvec.addElement("-d");
             tmpvec.addElement(blastdbname);
             tmpvec.addElement("-R");
@@ -1328,7 +1321,7 @@ class blastthread extends java.lang.Thread{
             System.out.print(query.name+" trying:");
             for(int i=0;i<cmdarr.length;i++){
                 System.out.print("'"+cmdarr[i]+"' ");
-            }//end for i
+            }
             System.out.println();
         }
         String myblast="";
@@ -1368,7 +1361,7 @@ class blastthread extends java.lang.Thread{
                     System.out.print("Done feeding for "+query.name+" waiting for command:");
                     for(int i=0;i<cmdarr.length;i++){
                         System.out.print("'"+cmdarr[i]+"' ");
-                    }//end for i
+                    }
                     System.out.println();
                 }
                 p.waitFor();
@@ -1397,7 +1390,7 @@ class blastthread extends java.lang.Thread{
                 errbuff.append("Interrupted process for "+query.name+" command:");
                 for(int i=0;i<cmdarr.length;i++){
                     System.out.print("'"+cmdarr[i]+"' ");
-                }//end for i
+                }
                 System.out.println();
                 stopthread=true;
             }
@@ -1413,7 +1406,7 @@ class blastthread extends java.lang.Thread{
             errbuff.append("IOERROR running "+query.name+" command\n");
             for(int i=0;i<cmdarr.length;i++){
                 System.out.print("'"+cmdarr[i]+"' ");
-            }//end for i
+            }
             System.out.println();
             stopthread=true;
         }
@@ -1436,11 +1429,14 @@ class blastthread extends java.lang.Thread{
             System.out.println("getting hsp's from "+query.name);
         }
         Vector<hsp> hspvec;
-        if(lowmem){
-            hspvec=hspget.get(lowmem,tmpoutfile,new Vector<hsp>(),eval,pval,coverage,scval,ident,verbose,nameshash,useallrounds);//here the blast output is filtered for valid hsp's
-        }else{
-            hspvec=hspget.get(myblast,new Vector<hsp>(),eval,pval,coverage,scval,ident,verbose,nameshash,useallrounds);//here the blast output is filtered for valid hsp's
+        if (lowmem) {
+            hspvec = hspget.get(lowmem, tmpoutfile, new Vector<hsp>(), eval, pval, coverage, scval, ident, verbose,
+                    nameshash, useallrounds);// here the blast output is filtered for valid hsp's
+        } else {
+            hspvec = hspget.get(myblast, new Vector<hsp>(), eval, pval, coverage, scval, ident, verbose, nameshash,
+                    useallrounds);// here the blast output is filtered for valid hsp's
         }
+        
         if(verbose>1){
             System.out.println("hsp's="+hspvec.size());
         }
