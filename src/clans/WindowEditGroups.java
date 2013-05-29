@@ -7,10 +7,6 @@ import java.util.*;
 
 import javax.swing.JColorChooser;
 
-/**
- * 
- * @author tancred
- */
 public class WindowEditGroups extends javax.swing.JFrame {
 
 	/**
@@ -325,7 +321,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private void hidebuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_hidebuttonActionPerformed
 		int reference = groupslist.getSelectedIndex();
 		if (reference == -1) {
-			return;// none selected
+            return; // none selected
 		}
 		if ((reference > -1) && (reference <= parent.data.seqgroupsvec.size())) {
 			boolean refbool = parent.data.seqgroupsvec.elementAt(reference).hide;
@@ -341,7 +337,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 					if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 						parent.data.seqgroupsvec.elementAt(currsel[i]).hide = refbool;
 					}
-				}// end for i
+				}
 			}
 		}
 		repaint();
@@ -356,15 +352,15 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					tmparr[i] = parent.data.seqgroupsvec.elementAt(currsel[i]);
 				}
-			}// end for i
-				// now sort tmparr
+			}
+
 			java.util.Arrays.sort(tmparr, new seqgroupscolorcomparator());
 			// and now re-add them to the seqgroupsvec
 			for (int i = currsel.length - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					parent.data.seqgroupsvec.set(currsel[i], tmparr[i]);
 				}
-			}// end for i
+			}
 			repaint();
 		} else {
 			javax.swing.JOptionPane.showMessageDialog(this, "You need to select at least one group");
@@ -380,7 +376,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					tmparr[i] = parent.data.seqgroupsvec.elementAt(currsel[i]);
 				}
-			}// end for i
+			}
 				// now sort tmparr
 			java.util.Arrays.sort(tmparr, new seqgroupsnamecomparator());
 			// and now re-add them to the seqgroupsvec
@@ -388,7 +384,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					parent.data.seqgroupsvec.set(currsel[i], tmparr[i]);
 				}
-			}// end for i
+			}
 			repaint();
 		} else {
 			javax.swing.JOptionPane.showMessageDialog(this, "You need to select at least one group");
@@ -401,11 +397,11 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		SequenceGroup[] tmparr = new SequenceGroup[num];
 		for (int i = 0; i < num; i++) {
 			tmparr[i] = parent.data.seqgroupsvec.elementAt(i);
-		}// end for i
+		}
 		java.util.Arrays.sort(tmparr, new seqgroupscolorcomparator());
 		for (int i = 0; i < num; i++) {
 			parent.data.seqgroupsvec.setElementAt(tmparr[i], i);
-		}// end for i
+		}
 		groupslist.setListData(parent.data.seqgroupsvec);
 		repaint();
 	}// GEN-LAST:event_sortcolormenuitemActionPerformed
@@ -416,11 +412,11 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		SequenceGroup[] tmparr = new SequenceGroup[num];
 		for (int i = 0; i < num; i++) {
 			tmparr[i] = parent.data.seqgroupsvec.elementAt(i);
-		}// end for i
+		}
 		java.util.Arrays.sort(tmparr, new seqgroupsnamecomparator());
 		for (int i = 0; i < num; i++) {
 			parent.data.seqgroupsvec.setElementAt(tmparr[i], i);
-		}// end for i
+		}
 		groupslist.setListData(parent.data.seqgroupsvec);
 		repaint();
 	}// GEN-LAST:event_sortnamemenuitemActionPerformed
@@ -483,7 +479,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 							for (int j = sequences.length; --j >= 0;) {
 								outwrite.println(">" + parent.data.sequence_names[sequences[j]] + " " + sequences[j]);
 								outwrite.println(parent.data.sequences[sequences[j]].seq);
-							}// end for j
+							}
 							outwrite.close();
 						} catch (java.io.IOException ioe) {
 							System.err.println("IOERROR writing to " + outfile);
@@ -524,7 +520,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 								parent.data.seqgroupsvec.elementAt(currsel[i]).type,
 								parent.data.seqgroupsvec.elementAt(currsel[i]).size);
 					}
-				}// end for i
+				}
 				largerbutton.setText("^ (" + (parent.data.seqgroupsvec.elementAt(reference).size + 1) + ")");
 				smallerbutton.setText("v (" + (parent.data.seqgroupsvec.elementAt(reference).size - 1) + ")");
 			}
@@ -550,7 +546,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 								parent.data.seqgroupsvec.elementAt(currsel[i]).type,
 								parent.data.seqgroupsvec.elementAt(currsel[i]).size);
 					}
-				}// end for i
+				}
 				largerbutton.setText("^ (" + (parent.data.seqgroupsvec.elementAt(reference).size + 1) + ")");
 				smallerbutton.setText("v (" + (parent.data.seqgroupsvec.elementAt(reference).size - 1) + ")");
 			}
@@ -582,7 +578,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 					parent.data.seqgroupsvec.elementAt(currsel[i]).polygon = makepolygons.get(draw1.type,
 							parent.data.seqgroupsvec.elementAt(currsel[i]).size);
 				}
-			}// end for i
+			}
 		}
 		repaint();
 	}// GEN-LAST:event_typepanelMouseClicked
@@ -635,8 +631,8 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				for (int j = mygroup.sequences.length - 1; j >= 0; j--) {
 					selecteds[counter] = mygroup.sequences[j];
 					counter++;
-				}// end for j
-			}// end for i
+				}
+			}
 			parent.data.selectednames = selecteds;
 			parent.button_select_all_or_clear.setText("Clear Selection");
 			if (selected_groups.length == 1) {
@@ -651,6 +647,10 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		} else {
 			parent.button_select_all_or_clear.setText("Select All");
 		}
+        
+        if (highlight_groups_with_selected_sequences.isSelected()) {
+            repaint(); 
+        }
 	}// GEN-LAST:event_setasselectedbuttonActionPerformed
 
 	private void showinparentActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_showinparentActionPerformed
@@ -688,8 +688,8 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				for (int j = mygroup.sequences.length - 1; j >= 0; j--) {
 					selecteds[counter] = mygroup.sequences[j];
 					counter++;
-				}// end for j
-			}// end for i
+				}
+			}
 			parent.groupseqs = selecteds;
 			parent.groupseqscolor = parent.data.seqgroupsvec.elementAt(currsel).color;
 			parent.repaint();
@@ -837,11 +837,15 @@ public class WindowEditGroups extends javax.swing.JFrame {
 
 	// End of variables declaration//GEN-END:variables
 
-	// --------------------------------------------------------------------------
-
-	float getavgatt(int[] seqs, minattvals[] attvals) {
-		// get the average attractive force of sequences in this group
-		float sumval = 0;
+	/**
+     * get the average attractive force of sequences in this group
+     * 
+     * @param seqs
+     * @param attvals
+     * @return
+     */
+    float getavgatt(int[] seqs, minattvals[] attvals) {
+        float sumval = 0;
 		int seqnum = seqs.length;
 		int attnum = attvals.length;
 		int q, h, j;
@@ -855,18 +859,23 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				if (seqs[j] == h) {
 					h = -1;
 				}
-			}// end for j
+			}
 			if ((q == -1) && (h == -1)) {
 				sumval += attvals[i].att;
 			}
-		}// end for i
+		}
 		return sumval / attnum;
-	}// end getavgatt
+	}
 
-	// --------------------------------------------------------------------------
-
-	float getvaratt(int[] seqs, minattvals[] attvals, float avg) {
-		// get the variance of the attvals in this group
+    /**
+     * get the variance of the attvals in this group
+     * 
+     * @param seqs
+     * @param attvals
+     * @param avg
+     * @return
+     */
+    float getvaratt(int[] seqs, minattvals[] attvals, float avg) {
 		float varval = 0;
 		float diff;
 		int q, h, j;
@@ -882,19 +891,23 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				if (seqs[j] == h) {
 					h = -1;
 				}
-			}// end for j
+			}
 			if ((q == -1) && (h == -1)) {
 				diff = attvals[i].att - avg;
 				varval += (diff * diff);
 			}
-		}// end for i
+		}
 		return varval / attnum;
-	}// end getvaratt
+	}
 
-	// --------------------------------------------------------------------------
-
-	float getoutavgatt(int[] seqs, minattvals[] attvals) {
-		// get the average attractive force of sequences in this group to the non-group seqs
+    /**
+     * get the average attractive force of sequences in this group to the non-group seqs
+     * 
+     * @param seqs
+     * @param attvals
+     * @return
+     */
+    float getoutavgatt(int[] seqs, minattvals[] attvals) {
 		int elements = attvals.length;
 		int seqnum = seqs.length;
 		int attnum = attvals.length;
@@ -915,21 +928,26 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				if (seqs[j] == h) {
 					h = -1;
 				}
-			}// end for j
+			}
 			if ((q == -1) || (h == -1) && (q != -1 || h != -1)) {
 				// if either query or hit are part of this group but not both
 				sumval += attvals[i].att;
 				counter++;
 			}
-		}// end for i
+		}
 		return sumval / counter;
-	}// end getoutavgatt
+	}
 
-	// --------------------------------------------------------------------------
-
-	float getoutvaratt(int[] seqs, minattvals[] attvals, float avg) {
-		// get the variance of the attvals in this group to the non-group seqs
-		int elements = attvals.length;
+    /**
+     * get the variance of the attvals in this group to the non-group seqs
+     * 
+     * @param seqs
+     * @param attvals
+     * @param avg
+     * @return
+     */
+    float getoutvaratt(int[] seqs, minattvals[] attvals, float avg) {
+	    int elements = attvals.length;
 		int seqnum = seqs.length;
 		int attnum = attvals.length;
 		if (seqnum == elements) {
@@ -950,23 +968,21 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				if (seqs[j] == h) {
 					h = -1;
 				}
-			}// end for j
+			}
 			if ((q == -1) || (h == -1) && (q != -1 || h != -1)) {
 				// if either query or hit are part of this group but not both
 				diff = attvals[i].att - avg;
 				varval += (diff * diff);
 				counter++;
 			}
-		}// end for i
+		}
 		return varval / counter;
-	}// end getoutvaratt
-
-	// --------------------------------------------------------------------------
-
+	}
+	
 	class seqgroupscolorcomparator implements java.util.Comparator<SequenceGroup> {
 
 		/**
-		 * compares the colors of two seqgroups
+		 * Compares the colors of two SequenceGroup-s according to their hue.
 		 */
 		public int compare(SequenceGroup o1, SequenceGroup o2) {
 			float h1 = gethue(o1.color);
@@ -983,12 +999,10 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	class seqgroupsnamecomparator implements java.util.Comparator<SequenceGroup> {
 
 		/**
-		 * compares the name of two seqgroups
+		 * Compares the name of two SequenceGroup-s
 		 */
 		public int compare(SequenceGroup o1, SequenceGroup o2) {
-			String h1 = o1.name;
-			String h2 = o2.name;
-			return h1.compareTo(h2);
+			return o1.name.compareTo(o2.name);
 		}
 
 	}
@@ -1007,18 +1021,37 @@ public class WindowEditGroups extends javax.swing.JFrame {
         }
 		
 		
-		public java.awt.Component getListCellRendererComponent(javax.swing.JList list, Object value, int index,
-				boolean isSelected, boolean cellHasFocus) {
-			if (index == 0) {
-				myfont = parent.parent.draw1.myfont;
-				mybackground = parent.parent.draw1.bgcolor;
-				myforeground = parent.parent.draw1.fgcolor;
-			}
-			
+        public java.awt.Component getListCellRendererComponent(javax.swing.JList list, Object value, int index,
+                boolean isSelected, boolean cellHasFocus) {
+            if (index == 0) {
+                myfont = parent.parent.draw1.myfont;
+                mybackground = parent.parent.draw1.bgcolor;
+                myforeground = parent.parent.draw1.fgcolor;
+            }
+
             SequenceGroup group = (SequenceGroup) value;
 
             setText(get_group_description_text(group));
 
+            set_foreground_and_background_colors(group, list.getSelectionBackground(), isSelected);
+
+            setEnabled(list.isEnabled());
+            setFont(myfont);
+            setOpaque(true);
+            return this;
+        }
+
+        /**
+         * Sets the foreground and background colors.
+         * 
+         * @param group
+         *            the group for which to set the colors
+         * 
+         * @param default_background_color
+         * @param isSelected
+         */
+        private void set_foreground_and_background_colors(SequenceGroup group, Color default_background_color,
+                boolean isSelected) {
             // set foreground color
             if (colornamescheckbox.isSelected()) {
                 setForeground(group.color);
@@ -1026,10 +1059,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
                 setForeground(myforeground);
             }
 
-			// set background color
-			
+            // set background color
             if (isSelected) {
-                setBackground(list.getSelectionBackground());
+                setBackground(default_background_color);
             } else {
                 if (highlight_groups_with_selected_sequences.isSelected() && group_contains_selected_sequences(group)) {
                     setBackground(new Color(189, 252, 201));
@@ -1037,12 +1069,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
                     setBackground(mybackground);
                 }
             }
-			
-			setEnabled(list.isEnabled());
-			setFont(myfont);
-			setOpaque(true);
-			return this;
-		}
+        }
 
         /**
          * Assembles the string that is used as text in the groups list.
@@ -1051,7 +1078,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
          *            the group for which the text is needed
          * @return group description text
          */
-        public String get_group_description_text(SequenceGroup group) {
+        private String get_group_description_text(SequenceGroup group) {
             String s = group.name;
 
             s += " (" + group.sequences.length + ")";
@@ -1073,7 +1100,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
          *            the group in question
          * @return true iff at least one sequence in this group is currently selected in the main window
          */
-        public boolean group_contains_selected_sequences(SequenceGroup group) {
+        private boolean group_contains_selected_sequences(SequenceGroup group) {
             if (parent.parent.data.selectednames.length == 0) {
                 return false;
             }
@@ -1091,6 +1118,8 @@ public class WindowEditGroups extends javax.swing.JFrame {
 
             return false;
         }
+        
+        
 	}// end class cellrenderer
 
 	// --------------------------------------------------------------------------
@@ -1101,9 +1130,6 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		 * 
 		 */
 		private static final long serialVersionUID = -2444671386154267112L;
-
-		public graphpanel() {
-		}
 
 		int type = 0;
 		int framewidth = 50;
@@ -1125,6 +1151,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			g.fillRect(0, 0, framewidth, frameheight);
 			tmpposarr = ((int[][]) polygons.get(type));
 			g.setColor(colorbutton.getBackground());
+			
 			if (type != 0) {
 				posnum = tmpposarr[2][0];
 				xposarr = new int[posnum];
@@ -1132,13 +1159,12 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				for (int i = 0; i < posnum; i++) {
 					xposarr[i] = tmpposarr[0][i] + xoffset;
 					yposarr[i] = tmpposarr[1][i] + yoffset;
-				}// end for i
+				}
 				g.fillPolygon(xposarr, yposarr, posnum);
+			
 			} else {
 				g.fillOval((int) (xoffset - size / 2), (int) (yoffset - size / 2), size, size);
 			}
-		}// end paintComponent
-
-	}// end class graphpanel
-
-}// end class
+		}
+	}
+}
