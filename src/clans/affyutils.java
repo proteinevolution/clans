@@ -1,24 +1,18 @@
-/*
- * utils.java
- *
- * Created on January 11, 2006, 12:00 PM
- */
 package clans;
+
 import java.io.*;
 import java.util.*;
 
-/**
- *
- * @author  tancred
- */
 public class affyutils {
-    
-    /** Creates a new instance of utils */
-    public affyutils() {
-    }
-    
-    public static int load(File infile, affydialog parent){
-        //save all the possible parameters of the parent object to a file
+
+    /**
+     * save all the possible parameters of the parent object to a file
+     * 
+     * @param infile
+     * @param parent
+     * @return
+     */
+    public static int load(File infile, affydialog parent) {
         try{
             BufferedReader inread=new BufferedReader(new FileReader(infile));
             String inline;
@@ -42,7 +36,7 @@ public class affyutils {
                     }
                 }else if(inline.startsWith("wtfiles=")){
                     tmparr=inline.substring(8).split(";");
-                    tmpint=java.lang.reflect.Array.getLength(tmparr);
+                    tmpint=tmparr.length;
                     parent.wtfiles=new File[tmpint];
                     for(int i=0;i<tmpint;i++){
                         parent.wtfiles[i]=new File(tmparr[i]);
@@ -50,9 +44,6 @@ public class affyutils {
                 }else if(inline.startsWith("<data>")){
                     replicates myrep=null;
                     while((inline=inread.readLine()).equals("</data>")==false){
-                        if(inline==null){
-                            break;
-                        }
                         if(inline.startsWith("name=")){
                             if(myrep!=null){
                                 parent.datavec.addElement(myrep);
@@ -65,7 +56,7 @@ public class affyutils {
                             //System.out.println("wtname="+myrep.wtname);
                         }else if(inline.startsWith("replicate=")){
                             tmparr=inline.substring(10).split(";");
-                            tmpint=java.lang.reflect.Array.getLength(tmparr);
+                            tmpint=tmparr.length;
                             myrep.replicate=new File[tmpint];
                             for(int i=0;i<tmpint;i++){
                                 myrep.replicate[i]=new File(tmparr[i]);
@@ -74,7 +65,7 @@ public class affyutils {
                             
                         }else if(inline.startsWith("wtreplicate=")){
                             tmparr=inline.substring(12).split(";");
-                            tmpint=java.lang.reflect.Array.getLength(tmparr);
+                            tmpint=tmparr.length;
                             myrep.wtreplicate=new File[tmpint];
                             for(int i=0;i<tmpint;i++){
                                 myrep.wtreplicate[i]=new File(tmparr[i]);
@@ -99,14 +90,16 @@ public class affyutils {
             return -1;
         }
         return 0;
-    }//end save
-    
-    //--------------------------------------------------------------------------
-    
-    static float getglobalrelstdev(Vector datvec){
-        //calculate a value giving me the average noise ratio over this dataset
-        //then return a float that, when multiplied with the average value for each sequence
-        //tells me wether my datapoint is outside the "noise" range
+    }
+
+    /**
+     * calculate a value giving me the average noise ratio over this dataset then return a float that, when multiplied
+     * with the average value for each sequence tells me wether my datapoint is outside the "noise" range
+     * 
+     * @param datvec
+     * @return
+     */
+    static float getglobalrelstdev(Vector<datapoint[]> datvec) {
         int datnum=datvec.size();
         float retval=0;
         float mystdev;
@@ -119,7 +112,7 @@ public class affyutils {
             myavg=0;
             mystdev=0;
             //use the slower version (2-pass) as that limits roundoff errors
-            conditions=java.lang.reflect.Array.getLength(datarr);
+            conditions=datarr.length;
             subtract=0;
             for(int j=conditions;--j>=0;){
                 if(datarr[j]==null){//possible if one data set is missing some entries
@@ -141,11 +134,15 @@ public class affyutils {
         }//end for i
         retval/=datnum;
         return retval;
-    }//end getglobalrelstdev
-    
-    //--------------------------------------------------------------------------
-    
-    static Vector getfoldchange(Vector datvec, boolean useavg){
+    }
+
+    /**
+     * 
+     * @param datvec
+     * @param useavg
+     * @return
+     */
+    static Vector<datapoint[]> getfoldchange(Vector<datapoint[]> datvec, boolean useavg){
         int datnum=datvec.size();
         datapoint[] tmparr;
         int arrsize;
@@ -154,13 +151,14 @@ public class affyutils {
             //the amount of data doesn't change
             for(int i=0;i<datnum;i++){
                 tmparr=(datapoint[])datvec.elementAt(i);
-                arrsize=java.lang.reflect.Array.getLength(tmparr);
+                arrsize=tmparr.length;
                 for(int j=0;j<arrsize;j++){
+
                     if(tmparr[j]!=null){
-                        valint=java.lang.reflect.Array.getLength(tmparr[j].values);
-                        for(int k=0;k<valint;k++){
-                            tmparr[j].values[k]/=tmparr[j].wtval;
-                        }//end for k
+                        valint = tmparr[j].values.length;
+                        for (int k = 0; k < valint; k++) {
+                            tmparr[j].values[k] /= tmparr[j].wtval;
+                        }
                         tmparr[j].value/=tmparr[j].wtval;
                         tmparr[j].stdev/=tmparr[j].wtval;
                     }
@@ -173,12 +171,12 @@ public class affyutils {
             //the datanum increases
             for(int i=0;i<datnum;i++){
                 tmparr=(datapoint[])datvec.elementAt(i);
-                arrsize=java.lang.reflect.Array.getLength(tmparr);
+                arrsize=tmparr.length;
                 avgval=0;
                 for(int j=0;j<arrsize;j++){
                     if(tmparr[j]!=null){
-                        valint=java.lang.reflect.Array.getLength(tmparr[j].values);
-                        wtint=java.lang.reflect.Array.getLength(tmparr[j].wtvalues);
+                        valint = tmparr[j].values.length;
+                        wtint = tmparr[j].wtvalues.length;
                         newarr=new float[valint*wtint];
                         for(int k=0;k<valint;k++){
                             for(int l=0;l<wtint;l++){
@@ -194,23 +192,27 @@ public class affyutils {
             }//end for i
         }
         return datvec;
-    }//end getfoldchange
-        
-    //--------------------------------------------------------------------------
-    
-    static Vector readdata(Vector datavec){
-        //load the data into a vector of datapoint[] and try to use less memory
-        //at the end, each vector element should correspond to all the conditions for one spot-set(i.e. gene)
+    }
+
+    /**
+     * load the data into a vector of datapoint[] and try to use less memory at the end, each vector element should
+     * correspond to all the conditions for one spot-set(i.e. gene)
+     * 
+     * @param datavec
+     * @return
+     */
+    static Vector<datapoint[]> readdata(Vector<replicates> datavec) {
         int datnum=datavec.size();
         File tmpfile;
         replicates myreplicate;
-        HashMap nameshash=new HashMap();
-        Vector tmpvec=new Vector();
+        HashMap<String, Object> nameshash = new HashMap<String, Object>();
+        Vector<datapoint[]> temp_datapoints = new Vector<datapoint[]>();
+        Vector<indata> temp_indata = new Vector<indata>();
         indata tmpdat;
         datapoint mypoint;
         double sumval,sumsqval;
         datapoint[] tmparr;
-        Vector retvec=new Vector();
+        Vector<datapoint[]> retvec=new Vector<datapoint[]>();
         int unknownval=0;
         int presentval=1;
         int absentval=-1;
@@ -220,13 +222,15 @@ public class affyutils {
             System.out.println("reading "+myreplicate.name+"/"+myreplicate.wtname);
             //read the data
             nameshash.clear();
+
             for(int j=0;j<myreplicate.replicates;j++){
                 tmpfile=myreplicate.replicate[j];
-                if((tmpvec=readfile(tmpfile,absentval,marginalval,presentval,unknownval))==null){
-                    tmpvec=new Vector();
+                if ((temp_indata = readfile(tmpfile, absentval, marginalval, presentval, unknownval)) == null) {
+                    temp_indata = new Vector<indata>();
                 }
-                for(int k=tmpvec.size();--k>=0;){
-                    tmpdat=(indata)tmpvec.elementAt(k);
+                
+                for(int k=temp_indata.size();--k>=0;){
+                    tmpdat=temp_indata.elementAt(k);
                     if(nameshash.containsKey(tmpdat.name)){
                         //add this value to an existing datapoint
                         mypoint=((datapoint)nameshash.get(tmpdat.name));
@@ -258,11 +262,11 @@ public class affyutils {
             //now read the wt-data
             for(int j=0;j<myreplicate.wtreplicates;j++){
                 tmpfile=myreplicate.wtreplicate[j];
-                if((tmpvec=readfile(tmpfile,absentval,marginalval,presentval,unknownval))==null){
-                    tmpvec=new Vector();
+                if ((temp_indata = readfile(tmpfile, absentval, marginalval, presentval, unknownval)) == null) {
+                    temp_indata = new Vector<indata>();
                 }
-                for(int k=tmpvec.size();--k>=0;){
-                    tmpdat=(indata)tmpvec.elementAt(k);
+                for (int k = temp_indata.size(); --k >= 0;) {
+                    tmpdat = (indata) temp_indata.elementAt(k);
                     if(nameshash.containsKey(tmpdat.name)){
                         //add this value to an existing datapoint
                         mypoint=((datapoint)nameshash.get(tmpdat.name));
@@ -272,13 +276,14 @@ public class affyutils {
                         //forget about this point; should never happen!
                         System.err.println("ERROR found point with no data, but reference values:"+tmpdat.name+"("+myreplicate.name+"/"+myreplicate.wtname+")");
                     }
-                }//end for k
-            }//end for j
+                }
+            }
+            
             System.out.println();//needed to get a new line after reading the files
             //now calculate the avg and stdev for each datapoint
             String[] names=(String[])(nameshash.keySet().toArray(new String[0]));
             java.util.Arrays.sort(names);
-            int namesnum=java.lang.reflect.Array.getLength(names);
+            int namesnum=names.length;
             tmparr=new datapoint[namesnum];
             for(int j=namesnum;--j>=0;){
                 mypoint=(datapoint)nameshash.get(names[j]);
@@ -306,14 +311,14 @@ public class affyutils {
             }//end for j
             retvec.addElement(tmparr);
         }//end for i
+
         //now I have all the data, but ordered in the wrong manner (odered by file)
-        //System.out.println("conditions:"+retvec.size()+" elements:"+java.lang.reflect.Array.getLength((datapoint[])retvec.elementAt(0)));
         //I need to reorder them by gene/spot-identifier
         datapoint[] tmparr2;
         nameshash.clear();
         for(int i=0;i<retvec.size();i++){
             tmparr=(datapoint[])retvec.elementAt(i);
-            for(int j=java.lang.reflect.Array.getLength(tmparr);--j>=0;){
+            for(int j=tmparr.length;--j>=0;){
                 if(nameshash.containsKey(tmparr[j].name)){
                     tmparr2=(datapoint[])nameshash.get(tmparr[j].name);
                     tmparr2[i]=tmparr[j];
@@ -328,33 +333,28 @@ public class affyutils {
             }//end for j
         }//end for i
         //and now reconvert the data in nameshash to an array of datapoints
-        tmpvec=new Vector();
+        temp_datapoints = new Vector<datapoint[]>();
         String[] names=(String[])(nameshash.keySet().toArray(new String[0]));
         java.util.Arrays.sort(names);
-        for(int i=java.lang.reflect.Array.getLength(names);--i>=0;){
-            tmpvec.addElement((datapoint[])nameshash.get(names[i]));
-        }//end for i
-        //now post-filter the data and assign a dummy entry to all datapoints assigned as "null" 
-        //(can happen if certain files do not contain certain entries)
-        //for(int i=tmpvec.size();--i>=0;){
-        //    tmparr2=(datapoint[])tmpvec.get(i);
-        //    for(int j=java.lang.reflect.Array.getLength(tmparr2);--j>=0;){
-        //        if(tmparr2[j]==null){
-        //            tmparr2[j]=new datapoint(true);
-        //        }
-        //    }//end for j
-        //}//end for i
-        //System.out.println("conditions:"+java.lang.reflect.Array.getLength((datapoint[])tmpvec.elementAt(0))+" elements:"+tmpvec.size());
-        return tmpvec;
-    }//end readdata
-    
-    //--------------------------------------------------------------------------
-    
-    static Vector readfile(File infile,float absentval,float marginalval,float presentval,float unknownval){
-        //just read the data from the file; no filtering whatsoever
-        //return the data as a Vector of indata elements
-        //System.out.println("in readfile for "+infile);
-        Vector retvec=new Vector();
+        for(int i=names.length;--i>=0;){
+            temp_datapoints.addElement((datapoint[]) nameshash.get(names[i]));
+        }
+        return temp_datapoints;
+    }
+
+    /**
+     * just read the data from the file; no filtering whatsoever return the data as a Vector of indata elements
+     * System.out.println("in readfile for "+infile);
+     * 
+     * @param infile
+     * @param absentval
+     * @param marginalval
+     * @param presentval
+     * @param unknownval
+     * @return
+     */
+    static Vector<indata> readfile(File infile, float absentval, float marginalval, float presentval, float unknownval) {
+        Vector<indata> retvec=new Vector<indata>();
         try{
             BufferedReader inread=new BufferedReader(new FileReader(infile));
             String inline;
@@ -369,7 +369,7 @@ public class affyutils {
                 }
                 //second possibility; this is a converted GCRMA file; then all entries are: name;value.
                 //read GCRMA data here
-                if(java.lang.reflect.Array.getLength(inline.trim().split("\\s+;\\s+"))==2){//then I have a converted GCRMA file
+                if (inline.trim().split("\\s+;\\s+").length == 2) {// then I have a converted GCRMA file
                     inread.close();
                     //System.out.println("GCRMA file");
                     System.out.print(".");
@@ -383,7 +383,7 @@ public class affyutils {
                         continue;
                     }
                     tmparr=inline.split("\\s+",0);
-                    int arrsize=java.lang.reflect.Array.getLength(tmparr);
+                    int arrsize=tmparr.length;
                     if((arrsize!=6)&&(arrsize!=3)){
                         if(arrsize==2){
                             System.out.println("missing name for '"+inline+"'");
@@ -443,15 +443,19 @@ public class affyutils {
             return null;
         }
         return retvec;
-    }//end readfile
-    
-    //--------------------------------------------------------------------------
-    
-    static Vector readgcrmafile(File infile,float presentval){
-        Vector retvec=new Vector();
+    }
+
+    /**
+     * 
+     * @param infile
+     * @param presentval
+     * @return
+     */
+    static Vector<indata> readgcrmafile(File infile,float presentval){
+        Vector<indata> retvec=new Vector<indata>();
         try{
             BufferedReader inread=new BufferedReader(new FileReader(infile));
-            String inline,tmp;
+            String inline;
             String[] tmparr;
             indata currpoint;
             while((inline=inread.readLine())!=null){
@@ -460,7 +464,7 @@ public class affyutils {
                     continue;
                 }
                 tmparr=inline.split(";",0);
-                int arrsize=java.lang.reflect.Array.getLength(tmparr);
+                int arrsize=tmparr.length;
                 if(arrsize!=2){
                     javax.swing.JOptionPane.showMessageDialog(new javax.swing.JFrame(),"ERROR reading from file "+infile.getAbsolutePath()+" unreadable line '"+inline+"' elements="+arrsize+" not in name;value format?");
                     break;
@@ -486,21 +490,13 @@ public class affyutils {
             return null;
         }
         return retvec;
-    }//end readgcrmafile
-    
-    //--------------------------------
-    
+    }
+
     static class indata{
-        
-        public indata(){}
-        
         String name=null;
         double val=-1;
         float presentval=0;
         boolean reference=false;
         
-    }//end class indata
-    
-    //--------------------------------------------------------------------------
-    
+    }
 }
