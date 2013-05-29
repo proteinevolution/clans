@@ -3,10 +3,6 @@ package clans;
 import java.awt.Color;
 import java.util.*;
 
-/**
- * 
- * @author tancred
- */
 public class ClusterWindow extends javax.swing.JDialog {
 
     /**
@@ -143,11 +139,11 @@ public class ClusterWindow extends javax.swing.JDialog {
             return;
         }
         int[] selectedvals=clusterlist.getSelectedIndices();
-        if(java.lang.reflect.Array.getLength(selectedvals)==0){
+        if(selectedvals.length==0){
             return;
         }
         int newsize=0;
-        for(int i=java.lang.reflect.Array.getLength(selectedvals);--i>=0;){
+        for(int i=selectedvals.length;--i>=0;){
             newsize+=((cluster)clusters.elementAt(selectedvals[i])).members();
         }//end for i
         //now add all the values to a new array
@@ -155,9 +151,9 @@ public class ClusterWindow extends javax.swing.JDialog {
         int currcount=0;
         int mysize;
         int[] myarr;
-        for(int i=java.lang.reflect.Array.getLength(selectedvals)-1;i>=0;i--){
+        for(int i=selectedvals.length-1;i>=0;i--){
             myarr=((cluster)clusters.elementAt(selectedvals[i])).member;
-            mysize=java.lang.reflect.Array.getLength(myarr);
+            mysize=myarr.length;
             for(int j=0;j<mysize;j++){
                 newselected[j+currcount]=myarr[j];
             }//end for j
@@ -182,7 +178,7 @@ public class ClusterWindow extends javax.swing.JDialog {
     private void clusterlistValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_clusterlistValueChanged
         int[] selectedvals=clusterlist.getSelectedIndices();
         int newsize=0;
-        for(int i=java.lang.reflect.Array.getLength(selectedvals)-1;i>=0;i--){
+        for(int i=selectedvals.length-1;i>=0;i--){
             newsize+=((cluster)clusters.elementAt(selectedvals[i])).members();
         }//end for i
         //now add all the values to a new array
@@ -196,10 +192,10 @@ public class ClusterWindow extends javax.swing.JDialog {
         int mysize;
         int[] myarr;
         float[] myconf;
-        for(int i=java.lang.reflect.Array.getLength(selectedvals)-1;i>=0;i--){
+        for(int i=selectedvals.length-1;i>=0;i--){
             myarr=((cluster)clusters.elementAt(selectedvals[i])).member;
             myconf=((cluster)clusters.elementAt(selectedvals[i])).seqconfidence;
-            mysize=java.lang.reflect.Array.getLength(myarr);
+            mysize=myarr.length;
             if(didbootstrap){//was: myconf!=null){
                 for(int j=0;j<mysize;j++){
                     newselected[j+currcount]=myarr[j];
