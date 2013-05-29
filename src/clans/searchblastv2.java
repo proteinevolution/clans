@@ -1,16 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package clans;
 
 import java.util.*;
 import java.io.*;
 
-/**
- *
- * @author tancred
- */
 public class searchblastv2 {
 
     //allow a few more parameters when searching for blast hits
@@ -61,9 +53,9 @@ public class searchblastv2 {
 
     //I need a method to get hits for a full set of sequences
     public MinimalHsp[] gethits(AminoAcidSequence[] queryseqs) {
-        int allseqnum = java.lang.reflect.Array.getLength(queryseqs);
+        int allseqnum = queryseqs.length;
         //first set up the queryvec with the sequences to search for
-        for (int i = java.lang.reflect.Array.getLength(queryseqs); --i >= 0;) {
+        for (int i = queryseqs.length; --i >= 0;) {
             queryvec.add(queryseqs[i]);
         }//end for i
         //now read through former BLAST results and ONLY repeat those sequences that were not already completed
@@ -227,7 +219,6 @@ public class searchblastv2 {
             HashMap<String, MinimalHsp> roundhash = new HashMap<String, MinimalHsp>();
             //read until I hit the "#done for sequence" lines and then pass the current elements to the final hash containing the data
             MinimalHsp myhsp;
-            int queryid = -1;
             boolean passrounds = false;
             HashMap<Integer, Integer> donehash = new HashMap<Integer, Integer>();
             int count = 0;
@@ -235,7 +226,7 @@ public class searchblastv2 {
                 while ((inline = fileread.readLine()) != null) {
                     if (inline.startsWith("hsp: ")) {
                         tmparr = idline.split(";");
-                        if (java.lang.reflect.Array.getLength(tmparr) >= 2) {
+                        if (tmparr.length >= 2) {
                             tmpstr = tmparr[0] + ";" + tmparr[1];
                             if (roundhash.containsKey(tmpstr)) {
                                 myhsp = roundhash.get(tmpstr);
@@ -266,7 +257,7 @@ public class searchblastv2 {
                             count++;
                             //then move the data from the roundhash to the allhash for those sequences in donehash
                             MinimalHsp[] checkarr = roundhash.values().toArray(new MinimalHsp[0]);
-                            for (int i = java.lang.reflect.Array.getLength(checkarr); --i >= 0;) {
+                            for (int i = checkarr.length; --i >= 0;) {
                                 myhsp = checkarr[i];
                                 if (donehash.containsKey(new Integer(myhsp.query))) {
                                     allhash.put(myhsp.query + ";" + myhsp.hit, myhsp);
@@ -295,7 +286,7 @@ public class searchblastv2 {
                     count++;
                     //then move the data from the roundhash to the allhash for those sequences in donehash
                     MinimalHsp[] checkarr = roundhash.values().toArray(new MinimalHsp[0]);
-                    for (int i = java.lang.reflect.Array.getLength(checkarr); --i >= 0;) {
+                    for (int i = checkarr.length; --i >= 0;) {
                         myhsp = checkarr[i];
                         if (donehash.containsKey(new Integer(myhsp.query))) {
                             allhash.put(myhsp.query + ";" + myhsp.hit, myhsp);
@@ -449,7 +440,7 @@ public class searchblastv2 {
                 tmpvec.addElement(new File(tmpoutfile).getAbsolutePath());
                 tmpvec.addElement("-db");
                 tmpvec.addElement(dbfilename);
-                for (int i = java.lang.reflect.Array.getLength(cmdarr); --i >= 0;) {
+                for (int i = cmdarr.length; --i >= 0;) {
                     tmpvec.add(0, cmdarr[i]);
                 }
                 if (cmd.length() > 0) {
@@ -469,7 +460,7 @@ public class searchblastv2 {
                 tmpvec.addElement(new File(tmpoutfile).getAbsolutePath());
                 tmpvec.addElement("-d");
                 tmpvec.addElement(dbfilename);
-                for (int i = java.lang.reflect.Array.getLength(cmdarr); i > 0; i--) {
+                for (int i = cmdarr.length; i > 0; i--) {
                     tmpvec.add(0, cmdarr[i - 1]);
                 }
                 if (cmd.length() > 0) {
@@ -483,7 +474,7 @@ public class searchblastv2 {
             StringBuffer errout = new StringBuffer();
             if (verbose > 2) {
                 System.out.print(threadnum + " trying:");
-                for (int i = 0; i < java.lang.reflect.Array.getLength(cmdarr); i++) {
+                for (int i = 0; i < cmdarr.length; i++) {
                     System.out.print("'" + cmdarr[i] + "' ");
                 }//end for i
                 System.out.println();
@@ -494,7 +485,7 @@ public class searchblastv2 {
                 PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(tmpfilestring)));
                 synchronized (queryvec) {
                     AminoAcidSequence currquery;
-                    for (int i = java.lang.reflect.Array.getLength(myqueries); --i >= 0;) {
+                    for (int i = myqueries.length; --i >= 0;) {
                         currquery = myqueries[i];
                         outwrite.println(">" + currquery.name);
                         outwrite.println(currquery.seq.replaceAll("-", ""));
@@ -527,7 +518,7 @@ public class searchblastv2 {
                         pinread.start();
                         if (verbose > 2) {
                             System.out.print("Done setting sequence data for" + threadnum + " waiting for command:");
-                            for (int i = 0; i < java.lang.reflect.Array.getLength(cmdarr); i++) {
+                            for (int i = 0; i < cmdarr.length; i++) {
                                 System.out.print("'" + cmdarr[i] + "' ");
                             }//end for i
                             System.out.println(" to finish");
@@ -540,7 +531,7 @@ public class searchblastv2 {
                         }
                         if (verbose > 0) {
                             System.out.println(threadnum + ": blast done for " + blastblock + "queries:");
-                            for (int i = java.lang.reflect.Array.getLength(myqueries); --i >= 0;) {
+                            for (int i = myqueries.length; --i >= 0;) {
                                 System.out.println("\t" + myqueries[i].name);
                             }
                         }
@@ -559,7 +550,7 @@ public class searchblastv2 {
                     } catch (InterruptedException e) {
                         System.out.print("Interrupted process for thread " + threadnum + " command:");
                         errbuff.append("Interrupted process for thread " + threadnum + " command:");
-                        for (int i = 0; i < java.lang.reflect.Array.getLength(cmdarr); i++) {
+                        for (int i = 0; i < cmdarr.length; i++) {
                             System.out.print("'" + cmdarr[i] + "' ");
                             errbuff.append("'" + cmdarr[i] + "' ");
                         }//end for i
@@ -573,7 +564,7 @@ public class searchblastv2 {
                 } catch (IOException ioe) {
                     System.out.print("IOERROR for running thread " + threadnum + " command:");
                     errbuff.append("IOERROR running thread" + threadnum + " command\n");
-                    for (int i = 0; i < java.lang.reflect.Array.getLength(cmdarr); i++) {
+                    for (int i = 0; i < cmdarr.length; i++) {
                         System.out.print("'" + cmdarr[i] + "' ");
                         errbuff.append("'" + cmdarr[i] + "'");
                     }//end for i
@@ -647,9 +638,9 @@ public class searchblastv2 {
                     synchronized (filesync) {
                         outwrite.println("SECTION:");
                         MinimalHsp mymin;
-                        for (int i = java.lang.reflect.Array.getLength(mymins); --i >= 0;) {
+                        for (int i = mymins.length; --i >= 0;) {
                             mymin = mymins[i];
-                            for (int j = java.lang.reflect.Array.getLength(mymin.val); --j >= 0;) {
+                            for (int j = mymin.val.length; --j >= 0;) {
                                 outwrite.println("hsp: " + mymin.query + ";" + mymin.hit + ";" + j);
                                 outwrite.println("\tvalue: " + mymin.val[j]);
                                 //System.out.println("hsp: "+mymin.query+";"+mymin.hit+";"+j);
@@ -658,7 +649,7 @@ public class searchblastv2 {
                             }//end for j
                         }//end for i
                         //now print out the sequence id's that were done
-                        for (int i = java.lang.reflect.Array.getLength(myqueries); --i >= 0;) {
+                        for (int i = myqueries.length; --i >= 0;) {
                             outwrite.println("# done for:" + myqueries[i].name);
                         }//end for i
                         outwrite.flush();
