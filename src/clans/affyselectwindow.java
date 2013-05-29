@@ -1,17 +1,14 @@
-/*
- * affyselectwindow.java
- *
- * Created on January 16, 2006, 12:26 PM
- */
 package clans;
+
 import javax.swing.*;
-/**
- *
- * @author  tancred
- */
+
 public class affyselectwindow extends javax.swing.JFrame {
     
-    /** Creates new form affyselectwindow */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -442951450358508151L;
+
     public affyselectwindow(affyplotdialog parent) {
         this.parent=parent;
         myelements=new listelem[parent.draw1.datnum];
@@ -96,7 +93,7 @@ public class affyselectwindow extends javax.swing.JFrame {
     private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jList1ValueChanged
         // update the selection change in parent
         int[] selecteds=jList1.getSelectedIndices();
-        int num=java.lang.reflect.Array.getLength(selecteds);
+        int num=selecteds.length;
         if(num==0){
             return;
         }
@@ -112,7 +109,7 @@ public class affyselectwindow extends javax.swing.JFrame {
     private void changecolorbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changecolorbuttonActionPerformed
         // change the color of this element
         int[] selecteds=jList1.getSelectedIndices();
-        int num=java.lang.reflect.Array.getLength(selecteds);
+        int num=selecteds.length;
         if(num==0){
             return;
         }
@@ -126,7 +123,7 @@ public class affyselectwindow extends javax.swing.JFrame {
     
     private void deselectbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectbuttonActionPerformed
         int[] selecteds=jList1.getSelectedIndices();
-        int num=java.lang.reflect.Array.getLength(selecteds);
+        int num=selecteds.length;
         if(num==0){
             return;
         }
@@ -140,7 +137,7 @@ public class affyselectwindow extends javax.swing.JFrame {
     
     private void selectbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectbuttonActionPerformed
         int[] selecteds=jList1.getSelectedIndices();
-        int num=java.lang.reflect.Array.getLength(selecteds);
+        int num=selecteds.length;
         if(num==0){
             return;
         }
@@ -187,6 +184,11 @@ public class affyselectwindow extends javax.swing.JFrame {
         // This is the only method defined by ListCellRenderer.
         // We just reconfigure the JLabel each time we're called.
         
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -1222260897878518690L;
+
         public java.awt.Component getListCellRendererComponent(
         JList list,
         Object value,            // value to display
