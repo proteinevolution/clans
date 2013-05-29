@@ -1,17 +1,12 @@
-/*
- * eplotdialog.java
- *
- * Created on July 7, 2003, 2:19 PM
- */
 package clans;
-//import java.util.*;
-/**
- *
- * @author  tancred
- */
+
 public class attplotdialog extends javax.swing.JDialog {
     
-    /** Creates new form eplotdialog */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 5634627265820774794L;
+
     public attplotdialog(minattvals[] attvals,double minpval) {
         this.attvals=attvals;
         draw1=new drawclass();
@@ -181,17 +176,19 @@ public class attplotdialog extends javax.swing.JDialog {
     private javax.swing.JTextField mintextfield;
     // End of variables declaration//GEN-END:variables
     
-    public float[] makedata(){
-        //bin the attraction values
-        //attvals are numbers from 0 to maxval
+    /**
+     * bin the attraction values attvals are numbers from 0 to maxval
+     * 
+     * @return
+     */
+    public float[] makedata() {
         int elements=1000;
-        int seqnum=java.lang.reflect.Array.getLength(attvals);
+        int seqnum=attvals.length;
         float[] retarr=new float[elements+1];
         for(int i=0;i<elements+1;i++){
             retarr[i]=0;
         }
-        float scale=1;
-        int i,j;
+        int i;
         float maxval=1;
         for(i=0;i<seqnum;i++){
             if(attvals[i].att>maxval){
@@ -224,14 +221,14 @@ public class attplotdialog extends javax.swing.JDialog {
         }//end for i
         draw1.elements=elements;
         return retarr;
-    }//end makedata
-    
-    //--------------------------------------------------------------------------
-    
+    }
+
     class drawclass extends javax.swing.JPanel{
         
-        public drawclass(){
-        }
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 2993200522965133780L;
         
         int xoffset=20;
         int yoffset=20;
