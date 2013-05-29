@@ -1,17 +1,16 @@
-/*
- * getsearchtext.java
- *
- * Created on March 3, 2005, 12:00 PM
- */
 package clans;
+
 import java.io.*;
-/**
- *
- * @author  tancred
- */
+
+import javax.swing.JFileChooser;
+
 public class getsearchtext extends javax.swing.JDialog {
     
-    /** Creates new form getsearchtext */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 9176398008906892605L;
+
     public getsearchtext(shownamedialog parent, boolean modal) {
         super(parent, modal);
         this.parent=parent;
@@ -102,13 +101,12 @@ public class getsearchtext extends javax.swing.JDialog {
     }//GEN-LAST:event_clearbuttonActionPerformed
 
     private void loadbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadbuttonActionPerformed
-        // Load text from a file and disply it in the textarea
-        StringBuffer tmpbuff=new StringBuffer();
         String filename="no_name";
         try{
-            javax.swing.JFileChooser fc=parent.parent.fc;
+            javax.swing.JFileChooser fc=ClusteringWithGui.fc;
             int retval=fc.showOpenDialog(this);
-            if(retval==fc.APPROVE_OPTION){
+            
+            if(retval==JFileChooser.APPROVE_OPTION){
                 File selectedfile=fc.getSelectedFile();
                 filename=selectedfile.getAbsolutePath();
                 BufferedReader inread=new BufferedReader(new FileReader(selectedfile));
