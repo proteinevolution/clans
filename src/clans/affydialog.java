@@ -1,16 +1,9 @@
-/*
- * affydialog.java
- *
- * Created on January 16, 2006, 8:31 AM
- */
 package clans;
+
 import javax.swing.*;
 import java.util.*;
 import java.io.*;
-/**
- *
- * @author  tancred
- */
+
 public class affydialog extends javax.swing.JFrame {
     
     /**
@@ -312,7 +305,7 @@ public class affydialog extends javax.swing.JFrame {
     private void loadbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadbuttonActionPerformed
         //load the data from the files
         valhash.clear();
-        Vector mydat=affyutils.readdata(datavec);
+        Vector<datapoint[]> mydat=affyutils.readdata(datavec);
         //if I wan to use the fold-changes, convert the values
         if(foldchangecheckbox.isSelected()){
             parent.usefoldchange=true;
@@ -515,19 +508,26 @@ public class affydialog extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_addreplicatebuttonActionPerformed
     
+    /**
+     *  remove an element from the data vector
+     * @param evt
+     */
     private void rmdatabuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rmdatabuttonActionPerformed
-        // remove an element from the data vector
         int[] currelements=datalist.getSelectedIndices();
         for(int i=currelements.length-1;i>=0;i--){
             datavec.removeElementAt(currelements[i]);
             datanamesvec.removeElementAt(currelements[i]);
-        }//end for i
+        }
+        
         datalist.setListData(datanamesvec);
         datalist.setSelectedIndices(new int[0]);
-        replicatelist.setListData(new Vector());
+        
+        replicatelist.setListData(new Vector<File>());
         replicatelist.setSelectedIndices(new int[0]);
-        wtreplicatelist.setListData(new Vector());
+        
+        wtreplicatelist.setListData(new Vector<File>());
         wtreplicatelist.setSelectedIndices(new int[0]);
+        
         repaint();
     }//GEN-LAST:event_rmdatabuttonActionPerformed
     
@@ -612,10 +612,10 @@ public class affydialog extends javax.swing.JFrame {
     ClusteringWithGui parent;
     JFileChooser fc=new JFileChooser(new File("."));
     File[] wtfiles=null;
-    Vector datanamesvec=new Vector();//names for the data elements
+    Vector<String> datanamesvec = new Vector<String>();// names for the data elements
     Vector<replicates> datavec = new Vector<replicates>();//the data+replicates
-    Vector replicatevec=new Vector();//temporary replicate element Vector
-    Vector wtreplicatevec=new Vector();//temporary vector for wt replicate data
+    Vector<File> replicatevec = new Vector<File>();// temporary replicate element Vector
+    Vector<File> wtreplicatevec = new Vector<File>();// temporary vector for wt replicate data
     HashMap<String, datapoint[]> valhash=new HashMap<String, datapoint[]>();
     float globalrelstdev=0;
     
@@ -654,16 +654,17 @@ public class affydialog extends javax.swing.JFrame {
 }
 
 class veclistcellrenderer extends javax.swing.JLabel implements javax.swing.ListCellRenderer {
-    // This is the only method defined by ListCellRenderer.
-    // We just reconfigure the JLabel each time we're called.
-    
-    public java.awt.Component getListCellRendererComponent(
-    JList list,
-    Object value,            // value to display
-    int index,               // cell index
-    boolean isSelected,      // is the cell selected
-    boolean cellHasFocus)    // the list and the cell have the focus
-    {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 6805731310066182683L;
+
+    /**
+     * This is the only method defined by ListCellRenderer. We just reconfigure the JLabel each time we're called.
+     */
+    public java.awt.Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+            boolean cellHasFocus) {
         String s = ((File)value).getAbsolutePath();
         setText(s);
         if (isSelected){
