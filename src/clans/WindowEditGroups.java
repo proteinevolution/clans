@@ -335,9 +335,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				refbool = true;
 			}
 			int[] currsel = groupslist.getSelectedIndices();
-			if (java.lang.reflect.Array.getLength(currsel) > 0) {
+			if (currsel.length > 0) {
 				int i;
-				for (i = java.lang.reflect.Array.getLength(currsel); --i >= 0;) {
+				for (i = currsel.length; --i >= 0;) {
 					if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 						parent.data.seqgroupsvec.elementAt(currsel[i]).hide = refbool;
 					}
@@ -350,9 +350,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private void sortselcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_sortselcolormenuitemActionPerformed
 		// sort the selected sequence groups by their color
 		int[] currsel = groupslist.getSelectedIndices();
-		if (java.lang.reflect.Array.getLength(currsel) > 0) {
-			SequenceGroup[] tmparr = new SequenceGroup[java.lang.reflect.Array.getLength(currsel)];
-			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
+		if (currsel.length > 0) {
+			SequenceGroup[] tmparr = new SequenceGroup[currsel.length];
+			for (int i = currsel.length - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					tmparr[i] = parent.data.seqgroupsvec.elementAt(currsel[i]);
 				}
@@ -360,7 +360,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				// now sort tmparr
 			java.util.Arrays.sort(tmparr, new seqgroupscolorcomparator());
 			// and now re-add them to the seqgroupsvec
-			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
+			for (int i = currsel.length - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					parent.data.seqgroupsvec.set(currsel[i], tmparr[i]);
 				}
@@ -374,9 +374,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private void sortselnamemenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_sortselnamemenuitemActionPerformed
 		// sort the selected sequence groups by their name
 		int[] currsel = groupslist.getSelectedIndices();
-		if (java.lang.reflect.Array.getLength(currsel) > 0) {
-			SequenceGroup[] tmparr = new SequenceGroup[java.lang.reflect.Array.getLength(currsel)];
-			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
+		if (currsel.length > 0) {
+			SequenceGroup[] tmparr = new SequenceGroup[currsel.length];
+			for (int i = currsel.length - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					tmparr[i] = parent.data.seqgroupsvec.elementAt(currsel[i]);
 				}
@@ -384,7 +384,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				// now sort tmparr
 			java.util.Arrays.sort(tmparr, new seqgroupsnamecomparator());
 			// and now re-add them to the seqgroupsvec
-			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
+			for (int i = currsel.length - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					parent.data.seqgroupsvec.set(currsel[i], tmparr[i]);
 				}
@@ -428,9 +428,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private void randcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_randcolormenuitemActionPerformed
 		// I want to assign a new random color to all selected groups
 		int[] currsel = groupslist.getSelectedIndices();
-		if (java.lang.reflect.Array.getLength(currsel) > 0) {
+		if (currsel.length > 0) {
 			SequenceGroup mygroup;
-			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
+			for (int i = currsel.length - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					mygroup = parent.data.seqgroupsvec.elementAt(currsel[i]);
 					mygroup.color = new java.awt.Color(ClusterMethods.rand.nextInt(16777216));
@@ -465,13 +465,13 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		// I want to write all of the selected groups to separate files (named after the clusters)
 		// first get the directory to write to
 		int[] currsel = groupslist.getSelectedIndices();
-		if (java.lang.reflect.Array.getLength(currsel) > 0) {
+		if (currsel.length > 0) {
 			ClusteringWithGui.fc.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
 			int returnVal = ClusteringWithGui.fc.showOpenDialog(this);
 			if (returnVal == javax.swing.JFileChooser.APPROVE_OPTION) {
 				java.io.File currdir = (ClusteringWithGui.fc.getSelectedFile());
 				SequenceGroup mygroup;
-				for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
+				for (int i = currsel.length - 1; i >= 0; i--) {
 					if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 						mygroup = parent.data.seqgroupsvec.elementAt(currsel[i]);
 						int[] sequences = mygroup.sequences;
@@ -480,7 +480,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 							java.io.PrintWriter outwrite = new java.io.PrintWriter(new java.io.BufferedWriter(
 									new java.io.FileWriter(outfile)));
 							// now write each of the sequences to the file
-							for (int j = java.lang.reflect.Array.getLength(sequences); --j >= 0;) {
+							for (int j = sequences.length; --j >= 0;) {
 								outwrite.println(">" + parent.data.sequence_names[sequences[j]] + " " + sequences[j]);
 								outwrite.println(parent.data.sequences[sequences[j]].seq);
 							}// end for j
@@ -515,9 +515,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		if ((reference > -1) && (reference <= parent.data.seqgroupsvec.size())) {
 			int refsize = parent.data.seqgroupsvec.elementAt(reference).size + 1;
 			int[] currsel = groupslist.getSelectedIndices();
-			if (java.lang.reflect.Array.getLength(currsel) > 0) {
+			if (currsel.length > 0) {
 				int i;
-				for (i = java.lang.reflect.Array.getLength(currsel); --i >= 0;) {
+				for (i = currsel.length; --i >= 0;) {
 					if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 						parent.data.seqgroupsvec.elementAt(currsel[i]).size = refsize;
 						parent.data.seqgroupsvec.elementAt(currsel[i]).polygon = makepolygons.get(
@@ -541,9 +541,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		if ((reference > -1) && (reference <= parent.data.seqgroupsvec.size())) {
 			int refsize = parent.data.seqgroupsvec.elementAt(reference).size - 1;
 			int[] currsel = groupslist.getSelectedIndices();
-			if (java.lang.reflect.Array.getLength(currsel) > 0) {
+			if (currsel.length > 0) {
 				int i;
-				for (i = java.lang.reflect.Array.getLength(currsel); --i >= 0;) {
+				for (i = currsel.length; --i >= 0;) {
 					if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 						parent.data.seqgroupsvec.elementAt(currsel[i]).size = refsize;
 						parent.data.seqgroupsvec.elementAt(currsel[i]).polygon = makepolygons.get(
@@ -575,8 +575,8 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		}
 
 		int[] currsel = groupslist.getSelectedIndices();
-		if (java.lang.reflect.Array.getLength(currsel) > 0) {
-			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
+		if (currsel.length > 0) {
+			for (int i = currsel.length - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					parent.data.seqgroupsvec.elementAt(currsel[i]).type = draw1.type;
 					parent.data.seqgroupsvec.elementAt(currsel[i]).polygon = makepolygons.get(draw1.type,
@@ -617,29 +617,31 @@ public class WindowEditGroups extends javax.swing.JFrame {
 
 	private void setasselectedbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_setasselectedbuttonActionPerformed
 		// replace the current sequence selection with this group
-		int[] currsel = groupslist.getSelectedIndices();
-		if (java.lang.reflect.Array.getLength(currsel) > 0) {
+		int[] selected_groups = groupslist.getSelectedIndices();
+        if (selected_groups.length > 0) {
 			int counter = 0;
-			SequenceGroup mygroup;
-			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
-				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
-					counter += parent.data.seqgroupsvec.elementAt(currsel[i]).sequences.length;
+			
+			for (int i = selected_groups.length - 1; i >= 0; i--) {
+				if ((selected_groups[i] > -1) && (selected_groups[i] <= parent.data.seqgroupsvec.size())) {
+					counter += parent.data.seqgroupsvec.elementAt(selected_groups[i]).sequences.length;
 				}
 			}
+			
 			int[] selecteds = new int[counter];
+			SequenceGroup mygroup;
 			counter = 0;
-			for (int i = java.lang.reflect.Array.getLength(currsel) - 1; i >= 0; i--) {
-				mygroup = parent.data.seqgroupsvec.elementAt(currsel[i]);
-				for (int j = java.lang.reflect.Array.getLength(mygroup.sequences) - 1; j >= 0; j--) {
+			for (int i = selected_groups.length - 1; i >= 0; i--) {
+				mygroup = parent.data.seqgroupsvec.elementAt(selected_groups[i]);
+				for (int j = mygroup.sequences.length - 1; j >= 0; j--) {
 					selecteds[counter] = mygroup.sequences[j];
 					counter++;
 				}// end for j
 			}// end for i
 			parent.data.selectednames = selecteds;
 			parent.button_select_all_or_clear.setText("Clear Selection");
-			if (java.lang.reflect.Array.getLength(currsel) == 1) {
-				if (parent.data.seqgroupsvec.elementAt(currsel[0]).seqconf != null) {
-					parent.clusterconf = parent.data.seqgroupsvec.elementAt(currsel[0]).seqconf;
+			if (selected_groups.length == 1) {
+				if (parent.data.seqgroupsvec.elementAt(selected_groups[0]).seqconf != null) {
+					parent.clusterconf = parent.data.seqgroupsvec.elementAt(selected_groups[0]).seqconf;
 				} else {
 					parent.clusterconf = null;
 				}
@@ -673,7 +675,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			// and now highlight the currently selected groups in the map
 			int[] currselarr = groupslist.getSelectedIndices();
 			int counter = 0;
-			for (int i = java.lang.reflect.Array.getLength(currselarr) - 1; i >= 0; i--) {
+			for (int i = currselarr.length - 1; i >= 0; i--) {
 				if ((currselarr[i] > -1) && (currselarr[i] <= parent.data.seqgroupsvec.size())) {
 					counter += parent.data.seqgroupsvec.elementAt(currselarr[i]).sequences.length;
 				}
@@ -681,9 +683,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			int[] selecteds = new int[counter];
 			counter = 0;
 			SequenceGroup mygroup;
-			for (int i = java.lang.reflect.Array.getLength(currselarr) - 1; i >= 0; i--) {
+			for (int i = currselarr.length - 1; i >= 0; i--) {
 				mygroup = parent.data.seqgroupsvec.elementAt(currselarr[i]);
-				for (int j = java.lang.reflect.Array.getLength(mygroup.sequences) - 1; j >= 0; j--) {
+				for (int j = mygroup.sequences.length - 1; j >= 0; j--) {
 					selecteds[counter] = mygroup.sequences[j];
 					counter++;
 				}// end for j
@@ -697,7 +699,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private void delbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_delbuttonActionPerformed
 		// remove currently selected sequence group
 		int[] currsel = groupslist.getSelectedIndices();
-		for (int i = java.lang.reflect.Array.getLength(currsel); --i >= 0;) {
+		for (int i = currsel.length; --i >= 0;) {
 			if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 				parent.data.seqgroupsvec.removeElementAt(currsel[i]);
 			}
@@ -708,7 +710,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 
 	private void addbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addbuttonActionPerformed
 		// add the current sequence selection as a new sequence group
-		if (java.lang.reflect.Array.getLength(parent.data.selectednames) == 0) {
+		if (parent.data.selectednames.length == 0) {
 			// don't add a new group
 			javax.swing.JOptionPane.showMessageDialog(this, "No sequences selected", "Error",
 					javax.swing.JOptionPane.ERROR_MESSAGE);
@@ -840,8 +842,8 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	float getavgatt(int[] seqs, minattvals[] attvals) {
 		// get the average attractive force of sequences in this group
 		float sumval = 0;
-		int seqnum = java.lang.reflect.Array.getLength(seqs);
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+		int seqnum = seqs.length;
+		int attnum = attvals.length;
 		int q, h, j;
 		for (int i = 0; i < attnum; i++) {
 			q = attvals[i].query;
@@ -868,8 +870,8 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		float varval = 0;
 		float diff;
 		int q, h, j;
-		int seqnum = java.lang.reflect.Array.getLength(seqs);
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+		int seqnum = seqs.length;
+		int attnum = attvals.length;
 		for (int i = 0; i < attnum; i++) {
 			q = attvals[i].query;
 			h = attvals[i].hit;
@@ -893,9 +895,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 
 	float getoutavgatt(int[] seqs, minattvals[] attvals) {
 		// get the average attractive force of sequences in this group to the non-group seqs
-		int elements = java.lang.reflect.Array.getLength(attvals);
-		int seqnum = java.lang.reflect.Array.getLength(seqs);
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+		int elements = attvals.length;
+		int seqnum = seqs.length;
+		int attnum = attvals.length;
 		if (seqnum == elements) {
 			return 0;
 		}
@@ -927,9 +929,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 
 	float getoutvaratt(int[] seqs, minattvals[] attvals, float avg) {
 		// get the variance of the attvals in this group to the non-group seqs
-		int elements = java.lang.reflect.Array.getLength(attvals);
-		int seqnum = java.lang.reflect.Array.getLength(seqs);
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+		int elements = attvals.length;
+		int seqnum = seqs.length;
+		int attnum = attvals.length;
 		if (seqnum == elements) {
 			return 0;
 		}
