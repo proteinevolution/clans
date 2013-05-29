@@ -1,18 +1,12 @@
-
-
-/*
- * fontchooserdialog.java
- *
- * Created on May 15, 2003, 1:49 PM
- */
 package clans;
-/**
- *
- * @author  tancred
- */
+
 public class fontchooserdialog extends javax.swing.JDialog {
-    
-    /** Creates new form fontchooserdialog */
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 7404540807325185729L;
+
     public fontchooserdialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         this.setTitle(titlestring);
@@ -27,7 +21,7 @@ public class fontchooserdialog extends javax.swing.JDialog {
         int fontsize=retfont.getSize();
         String myfontname=retfont.getName();
         int fontstyle=retfont.getStyle();
-        for(int i=java.lang.reflect.Array.getLength(fontnames)-1;i>=0;i--){
+        for (int i = fontnames.length - 1; i >= 0; i--) {
             if(myfontname.equalsIgnoreCase(fontnames[i])){
                 fontComboBox.setSelectedIndex(i);
                 break;
@@ -196,6 +190,12 @@ public class fontchooserdialog extends javax.swing.JDialog {
     String[] stylearr;
     String[] intarr;
     
+    /**
+     * 
+     * @param instring
+     * @param infont
+     * @return
+     */
     public static java.awt.Font getfont(String instring,java.awt.Font infont){
         titlestring=instring;
         stdfont=infont;
@@ -218,6 +218,9 @@ public class fontchooserdialog extends javax.swing.JDialog {
     private javax.swing.JLabel stylelabel;
     // End of variables declaration//GEN-END:variables
     
+    /**
+     * 
+     */
     public void changefont(){
         retfont = new java.awt.Font(fontname, style, size);
         jTextArea1.setFont(retfont);
