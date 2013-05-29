@@ -1,23 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package clans;
 
 import java.io.*;
 import java.util.*;
 
-/**
- *
- * @author  tancred
- */
 public class hspget {
 
     /** Creates a new instance of hspget */
     public hspget() {
     }
 
-    public static Vector get(boolean lowmem, String filename, Vector invec, double eval, double pval, float coverage, float scval, float ident, int verbose, HashMap nameshash, boolean useallrounds) {
+    public static Vector<hsp> get(boolean lowmem, String filename, Vector<hsp> invec, double eval, double pval,
+            float coverage, float scval, float ident, int verbose, HashMap<String, Integer> nameshash, boolean useallrounds) {
         //simple fix, read blast file to ram
         System.out.println("lowmem, reading blast from " + filename);
         StringBuffer tmpstr = new StringBuffer();
@@ -31,10 +24,11 @@ public class hspget {
         } catch (IOException e) {
             System.err.println("IOError reading from " + filename);
         }
-        return get(tmpstr.toString(), new Vector(), eval, pval, coverage, scval, ident, verbose, nameshash, useallrounds);
+        return get(tmpstr.toString(), new Vector<hsp>(), eval, pval, coverage, scval, ident, verbose, nameshash, useallrounds);
     }//end get for lowmem
 
-    public static Vector<hsp[]> get(String inreadstring, Vector invec, double eval, double pval, float coverage, float scval, float ident, int verbose, HashMap nameshash, boolean useallrounds) {
+    public static Vector<hsp> get(String inreadstring, Vector<hsp> invec, double eval, double pval, float coverage,
+            float scval, float ident, int verbose, HashMap<String, Integer> nameshash, boolean useallrounds) {
         //this should read the data from inread (a bufferedReader with blast output in html format)
         //to be able to filter by pval I need to search through the inread BufferedReader for the database size
         int seqnum = nameshash.size();
@@ -236,15 +230,15 @@ public class hspget {
                                 }
                             } else {//i'm using blast
                                 String[] tmparr = inline.split("\\s", 0);
-                                if (tmparr[java.lang.reflect.Array.getLength(tmparr) - 1].charAt(0) == 'e') {
-                                    tmparr[java.lang.reflect.Array.getLength(tmparr) - 1] = "1" + tmparr[java.lang.reflect.Array.getLength(tmparr) - 1];
+                                if (tmparr[tmparr.length - 1].charAt(0) == 'e') {
+
                                 }
                                 try {
-                                    myeval = Double.parseDouble(tmparr[java.lang.reflect.Array.getLength(tmparr) - 1]);
+                                    myeval = Double.parseDouble(tmparr[tmparr.length - 1]);
                                     mypval = myeval * pvalfactor;
                                 //mypval=1-java.lang.Math.exp(-myeval);//NCBI formula doesn't work as well (may be correct but works less well)
                                 } catch (NumberFormatException e) {
-                                    System.err.println("Error parsing E-value " + tmparr[java.lang.reflect.Array.getLength(tmparr) - 1] + " for " + currname);
+                                    System.err.println("Error parsing E-value " + tmparr[tmparr.length - 1] + " for " + currname);
                                     myeval = -1;
                                     mypval = -1;
                                 }
@@ -468,12 +462,10 @@ public class hspget {
         int hstart = -1;
         int qend = -1;
         int hend = -1;
-        int currpos = 0;
-        int endnum = 0;
         String currseq = "";
         //do the query
         String[] splitarr = inhsp.qseq.split(" ", 0);//split at spaces
-        int elems = java.lang.reflect.Array.getLength(splitarr);
+        int elems = splitarr.length;
         int counter = 0;
         for (int i = 0; i < elems; i++) {
             if (splitarr[i].length() == 0) {//skip empty strings
@@ -511,7 +503,7 @@ public class hspget {
         inhsp.qend = qend;
         currseq = "";
         splitarr = inhsp.hseq.split(" ", 0);//split at spaces
-        elems = java.lang.reflect.Array.getLength(splitarr);
+        elems = splitarr.length;
         counter = 0;
         for (int i = 0; i < elems; i++) {
             if (splitarr[i].length() == 0) {//skip empty strings
@@ -551,7 +543,7 @@ public class hspget {
     }// end makefinal
 
     //------------------------------------------------------------------------------
-    static String extractqueryname(String instring, HashMap nameshash) {
+    static String extractqueryname(String instring, HashMap<String, Integer> nameshash) {
         //get the name part of the query identifier block
         //see it it is present in nameshash.
         int begin;
@@ -562,7 +554,7 @@ public class hspget {
     }//end extractqueryname
 
     //------------------------------------------------------------------------------
-    static String extractname(String instring, HashMap nameshash) {
+    static String extractname(String instring, HashMap<String, Integer> nameshash) {
         //get the name part of the hitseq identifier block
         //see if it is present in nameshash
         int begin;

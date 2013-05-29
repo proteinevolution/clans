@@ -1,15 +1,8 @@
-/*
- * viewblasthitsutils.java
- *
- * Created on November 3, 2003, 12:25 PM
- */
 package clans;
+
 import java.util.*;
 import java.io.*;
-/**
- *
- * @author  tancred
- */
+
 public class viewblasthitsutils {
     
     /** Creates a new instance of viewblasthitsutils */
@@ -18,7 +11,7 @@ public class viewblasthitsutils {
     
     hsp[] gethsps(int referenceseqnum,AminoAcidSequence[] inaln,String cmd,String formatdbpath,String blastpath,boolean addblastvbparam,String[] referencedb,double mineval,double minpval){
         //get all the blast hits to this sequence.
-        Vector<hsp[]> retvec = new Vector<hsp[]>();
+        Vector<hsp> retvec = new Vector<hsp>();
         String basename=String.valueOf(System.currentTimeMillis());
         String blastcommand="";
         String tmpfilestring=basename+".query";
