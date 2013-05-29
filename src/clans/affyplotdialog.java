@@ -315,18 +315,20 @@ public class affyplotdialog extends javax.swing.JFrame {
                     arrsize=tmparr.length;
                     for(int j=0;j<arrsize;j++){
                         if(tmparr[j]!=null){
-                            valint=java.lang.reflect.Array.getLength(tmparr[j].values);
+                            valint = tmparr[j].values.length;
                             tmparr[j].value=0;
                             for(int k=valint;--k>=0;){
                                 tmparr[j].value+=tmparr[j].values[k];
                             }//end for k
                             tmparr[j].value/=valint;
-                            valint=java.lang.reflect.Array.getLength(tmparr[j].wtvalues);
+                            
+                            valint = tmparr[j].wtvalues.length;
                             tmparr[j].wtval=0;
                             for(int k=valint;--k>=0;){
                                 tmparr[j].wtval+=tmparr[j].wtvalues[k];
                             }//end for k
                             tmparr[j].wtval/=valint;
+                            
                             //now save foldchange to tmparr[j].value
                             tmparr[j].value/=tmparr[j].wtval;
                             tmparr[j].stdev=0;
@@ -355,8 +357,8 @@ public class affyplotdialog extends javax.swing.JFrame {
                     arrsize=tmparr.length;
                     for(int j=arrsize;--j>=0;){
                         if(tmparr[j]!=null){
-                            valint=java.lang.reflect.Array.getLength(tmparr[j].values);
-                            wtint=java.lang.reflect.Array.getLength(tmparr[j].wtvalues);
+                            valint = tmparr[j].values.length;
+                            wtint = tmparr[j].wtvalues.length;
                             newarr=new float[valint*wtint];//array contains all vs. all foldchanges
                             avgval=0;
                             for(int k=valint;--k>=0;){
@@ -394,17 +396,19 @@ public class affyplotdialog extends javax.swing.JFrame {
                 arrsize=tmparr.length;
                 for(int j=0;j<arrsize;j++){
                     if(tmparr[j]!=null){
-                        valint=java.lang.reflect.Array.getLength(tmparr[j].values);
+                        valint = tmparr[j].values.length;
                         tmparr[j].value=0;
                         for(int k=0;k<valint;k++){
                             tmparr[j].value+=tmparr[j].values[k];
                         }//end for k
+                        
                         tmparr[j].value/=valint;
                         tmparr[j].stdev=0;
                         for(int k=0;k<valint;k++){
                             tmpval=tmparr[j].values[k]-tmparr[j].value;
                             tmparr[j].stdev+=tmpval*tmpval;
                         }
+                        
                         if(valint>1){
                             tmparr[j].stdev=(float)java.lang.Math.sqrt((1/(valint-1))*tmparr[j].stdev);
                         }else{
@@ -440,7 +444,7 @@ public class affyplotdialog extends javax.swing.JFrame {
             minmin=-1;
             colorarr=new java.awt.Color[datnum];
             if(datnum>0){
-                conditions=java.lang.reflect.Array.getLength((datapoint[])datlist.get(0));//-1;
+                conditions = datlist.get(0).length; // -1;
             }
             avgarr=new float[datnum];
             for(int i=datnum;--i>=0;){
