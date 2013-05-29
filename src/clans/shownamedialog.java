@@ -1,30 +1,24 @@
-
-/*
- * shownamedialog.java
- *
- * Created on December 17, 2002, 3:04 PM
- */
 package clans;
 
 import java.util.*;
 
-/**
- *
- * @author  tancred
- */
 public class shownamedialog extends javax.swing.JFrame {
 
-    /** Creates new form shownamedialog */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -4171611623198735444L;
+
     public shownamedialog(String[] namesarr, ClusteringWithGui parent) {
         this.parent = parent;
         this.namesarr = numberarr(namesarr);
         initComponents();
-        if (java.lang.reflect.Array.getLength(parent.data.selectednames) > 0) {
+        if (parent.data.selectednames.length > 0) {
             showall = false;
             //show only the selected seqs
             //globalselected=parent.selectednames;
-            selectednames = new String[java.lang.reflect.Array.getLength(parent.data.selectednames)];
-            for (int i = 0; i < java.lang.reflect.Array.getLength(selectednames); i++) {
+            selectednames = new String[parent.data.selectednames.length];
+            for (int i = 0; i < selectednames.length; i++) {
                 selectednames[i] = this.namesarr[parent.data.selectednames[i]];
             }//end for i
             seqnamelist.setListData(selectednames);
@@ -33,7 +27,7 @@ public class shownamedialog extends javax.swing.JFrame {
         } else {
             showall = true;
         }
-        this.jScrollPane2.getVerticalScrollBar().setUnitIncrement((int) (jPanel1.getHeight() / java.lang.reflect.Array.getLength(namesarr)));
+        this.jScrollPane2.getVerticalScrollBar().setUnitIncrement((int) (jPanel1.getHeight() / namesarr.length));
     }
 
     /** This method is called from within the constructor to
@@ -171,9 +165,9 @@ public class shownamedialog extends javax.swing.JFrame {
         } else {
             globalselected = (int[]) selectedvec.remove(selectedvec.size() - 1);
             parent.data.selectednames = globalselected;
-            selectednames = new String[java.lang.reflect.Array.getLength(globalselected)];
-            int[] myselected = new int[java.lang.reflect.Array.getLength(globalselected)];
-            for (int i = 0; i < java.lang.reflect.Array.getLength(selectednames); i++) {
+            selectednames = new String[globalselected.length];
+            int[] myselected = new int[globalselected.length];
+            for (int i = 0; i < selectednames.length; i++) {
                 selectednames[i] = namesarr[globalselected[i]];
                 myselected[i] = i;
             }//end for i
@@ -195,8 +189,8 @@ public class shownamedialog extends javax.swing.JFrame {
             showall = false;
             //show only the selected seqs
             globalselected = seqnamelist.getSelectedIndices();
-            selectednames = new String[java.lang.reflect.Array.getLength(parent.data.selectednames)];
-            for (int i = 0; i < java.lang.reflect.Array.getLength(selectednames); i++) {
+            selectednames = new String[parent.data.selectednames.length];
+            for (int i = 0; i < selectednames.length; i++) {
                 selectednames[i] = namesarr[parent.data.selectednames[i]];
             }//end for i
             seqnamelist.setListData(selectednames);
@@ -216,7 +210,7 @@ public class shownamedialog extends javax.swing.JFrame {
         String query = getquery();
         if (showall) {
             int[] selectedseqs = getmatches(query, namesarr);
-            if (java.lang.reflect.Array.getLength(selectedseqs) == 0) {
+            if (selectedseqs.length == 0) {
                 javax.swing.JOptionPane.showMessageDialog(this, "No sequences found for '" + query + "'", "ERROR", javax.swing.JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -224,7 +218,7 @@ public class shownamedialog extends javax.swing.JFrame {
             seqnamelist.setSelectedIndices(selectedseqs);
         } else {
             int[] selectedseqs = getmatches(query, selectednames);
-            if (java.lang.reflect.Array.getLength(selectedseqs) == 0) {
+            if (selectedseqs.length == 0) {
                 javax.swing.JOptionPane.showMessageDialog(this, "No sequences found for '" + query + "'", "ERROR", javax.swing.JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -239,25 +233,25 @@ public class shownamedialog extends javax.swing.JFrame {
             showall = true;
             selectednamesbutton.setText("show selected names");
         }
-        selectedvec = new Vector();
+        selectedvec = new Vector<int[]>();
         backbutton.setText("Back (0)");
     }//GEN-LAST:event_clearbuttonActionPerformed
 
     private void okbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okbuttonActionPerformed
         //don't forget to update globalselected!
         int[] myselected = seqnamelist.getSelectedIndices();
-        if (java.lang.reflect.Array.getLength(myselected) > 0) {
+        if (myselected.length > 0) {
             if (showall) {
                 parent.data.selectednames = myselected;
                 parent.setclearbuttontext();
                 parent.repaint();
             } else {//If I am only showing a subset of all sequences I need to reassign the correct indices
                 globalselected = parent.data.selectednames;
-                for (int i = java.lang.reflect.Array.getLength(myselected); --i >= 0;) {
+                for (int i = myselected.length; --i >= 0;) {
                     myselected[i] = globalselected[myselected[i]];//reassign the sequence number globally
                 }//end for i
-                if (java.lang.reflect.Array.getLength(myselected) < java.lang.reflect.Array.getLength(globalselected)) {
-                    if (java.lang.reflect.Array.getLength(parent.data.selectednames) > 0) {//save the former data
+                if (java.lang.reflect.Array.getLength(myselected) < globalselected.length) {
+                    if (parent.data.selectednames.length > 0) {//save the former data
                         selectedvec.addElement(parent.data.selectednames);
                         backbutton.setText("Back (" + selectedvec.size() + ")");
                     }
@@ -265,8 +259,8 @@ public class shownamedialog extends javax.swing.JFrame {
                 parent.data.selectednames = myselected;
                 globalselected = myselected;
                 //now update this window view
-                selectednames = new String[java.lang.reflect.Array.getLength(parent.data.selectednames)];
-                for (int i = 0; i < java.lang.reflect.Array.getLength(selectednames); i++) {
+                selectednames = new String[parent.data.selectednames.length];
+                for (int i = 0; i < selectednames.length; i++) {
                     selectednames[i] = namesarr[parent.data.selectednames[i]];
                 }//end for i
                 seqnamelist.setListData(selectednames);
@@ -291,7 +285,7 @@ public class shownamedialog extends javax.swing.JFrame {
     boolean showall = true;
     String[] selectednames;
     int[] globalselected = new int[0];
-    Vector selectedvec = new Vector();
+    Vector<int[]> selectedvec = new Vector<int[]>();
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backbutton;
     private javax.swing.JPanel buttonpanel;
@@ -326,10 +320,10 @@ public class shownamedialog extends javax.swing.JFrame {
                 javax.swing.JOptionPane.showMessageDialog(this, "Namesarr=null; close this window and open a new one");
                 return new int[0];
             }
-            int namesnum = java.lang.reflect.Array.getLength(namesarr);
-            Vector tmpvec = new Vector();
+            int namesnum = namesarr.length;
+            Vector<Integer> tmpvec = new Vector<Integer>();
             if (tmparr[0].equals("^exact^")) {
-                for (int j = java.lang.reflect.Array.getLength(tmparr); --j > 0;) {//skip element 0
+                for (int j = tmparr.length; --j > 0;) {//skip element 0
                     tmparr[j] = tmparr[j].replaceAll("\\|", "\\\\\\|");
                     tmparr[j] = tmparr[j].replaceAll("\\[", "\\\\\\[");
                     tmparr[j] = tmparr[j].replaceAll("\\]", "\\\\\\]");
@@ -345,7 +339,7 @@ public class shownamedialog extends javax.swing.JFrame {
                     }//end for i
                 }
             } else {//non-exact matching
-                for (int j = java.lang.reflect.Array.getLength(tmparr); --j >= 0;) {
+                for (int j = tmparr.length; --j >= 0;) {
                     tmparr[j] = tmparr[j].replaceAll("\\|", "\\\\\\|");
                     tmparr[j] = tmparr[j].replaceAll("\\[", "\\\\\\[");
                     tmparr[j] = tmparr[j].replaceAll("\\]", "\\\\\\]");
@@ -372,7 +366,7 @@ public class shownamedialog extends javax.swing.JFrame {
 
     //--------------------------------------------------------------------------
     String[] numberarr(String[] innames) {
-        int elements = java.lang.reflect.Array.getLength(innames);
+        int elements = innames.length;
         String[] retarr = new String[elements];
         int numlength = (String.valueOf(elements).length()) + 1;
         StringBuffer tmpstrbuff = new StringBuffer();
@@ -395,8 +389,8 @@ public class shownamedialog extends javax.swing.JFrame {
     void setselected(int[] selectednamesint, boolean showonly) {
         seqnamelist.setSelectedIndices(selectednamesint);
         if (showonly) {//if I only want to see the selected names
-            selectednames = new String[java.lang.reflect.Array.getLength(selectednamesint)];
-            for (int i = 0; i < java.lang.reflect.Array.getLength(selectednames); i++) {
+            selectednames = new String[selectednamesint.length];
+            for (int i = 0; i < selectednames.length; i++) {
                 selectednames[i] = namesarr[selectednamesint[i]];
             }//end for i
             seqnamelist.setListData(selectednames);
