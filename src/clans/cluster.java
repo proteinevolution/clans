@@ -1,42 +1,41 @@
-/*
- * clusternode.java
- *
- * Created on April 29, 2003, 10:15 AM
- */
 package clans;
-/**
- *
- * @author  tancred
- */
-public class cluster{
-    
-    /** Creates a new instance of clusternode */
-    public cluster() {
-    }
+
+public class cluster {
     
     String name="no name";
     int[] member=new int[0];
     float clusterconfidence=-1;
     float[] seqconfidence=null;
     
+    /**
+     * 
+     * @param newmember
+     */
     void add(int newmember){
         int[] oldmember=member;
-        int oldsize=java.lang.reflect.Array.getLength(oldmember);
+        int oldsize=oldmember.length;
         member=new int[oldsize+1];
+        
         for(int i=0;i<oldsize;i++){
             member[i]=oldmember[i];
+            
             if(newmember==oldmember[i]){//if what I want to add is already present as an element
                 member=oldmember;
-                return;//don't add anything
+                return;
             }
-        }//end for i
+        }
+        
         member[oldsize]=newmember;
-    }//end addmember
+    }
     
+    /**
+     * 
+     * @param newmembers
+     */
     void add(int[] newmembers){
         int[] oldmember=member;
-        int oldsize=java.lang.reflect.Array.getLength(oldmember);
-        int newsize=java.lang.reflect.Array.getLength(newmembers);
+        int oldsize=oldmember.length;
+        int newsize=newmembers.length;
         member=new int[oldsize+newsize];
         int poscount=0;
         for(int i=0;i<oldsize;i++){
@@ -62,13 +61,15 @@ public class cluster{
         for(int i=0;i<poscount;i++){
             member[i]=oldmember[i];
         }
-    }//end addmember
+    }
     
-    //-------------------------------------
-    
+    /**
+     * 
+     * @param xmember
+     */
     void remove(int xmember){
         int[] oldmember=member;
-        int oldsize=java.lang.reflect.Array.getLength(oldmember);
+        int oldsize=oldmember.length;
         if(oldsize<1){
             return;
         }
@@ -85,15 +86,6 @@ public class cluster{
                 return;
             }
             member[i-offset]=oldmember[i];
-        }//end for i
-    }//end remove
-    
-    //--------------------------------------
-    
-    int members(){
-        return java.lang.reflect.Array.getLength(member);
-    }//end members()
-    
-    //---------------------------------------
-    
-}//end class
+        }
+    }
+}

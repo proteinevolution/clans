@@ -144,7 +144,7 @@ public class ClusterWindow extends javax.swing.JDialog {
         }
         int newsize=0;
         for(int i=selectedvals.length;--i>=0;){
-            newsize+=((cluster)clusters.elementAt(selectedvals[i])).members();
+            newsize+=((cluster)clusters.elementAt(selectedvals[i])).member.length;
         }//end for i
         //now add all the values to a new array
         int[] newselected=new int[newsize];
@@ -179,7 +179,7 @@ public class ClusterWindow extends javax.swing.JDialog {
         int[] selectedvals=clusterlist.getSelectedIndices();
         int newsize=0;
         for(int i=selectedvals.length-1;i>=0;i--){
-            newsize+=((cluster)clusters.elementAt(selectedvals[i])).members();
+            newsize+=((cluster)clusters.elementAt(selectedvals[i])).member.length;
         }//end for i
         //now add all the values to a new array
         int[] newselected=new int[newsize];
@@ -230,11 +230,11 @@ public class ClusterWindow extends javax.swing.JDialog {
         for (int i = 0; i < invec.size(); i++) {
 
             if (invec.elementAt(i).clusterconfidence > -1) {
-                retarr[i] = invec.elementAt(i).name + " (" + invec.elementAt(i).members() + " sequences) (jacknife:"
+                retarr[i] = invec.elementAt(i).name + " (" + invec.elementAt(i).member.length + " sequences) (jacknife:"
                         + invec.elementAt(i).clusterconfidence * 100 + "%)";
 
             } else {
-                retarr[i] = invec.elementAt(i).name + " (" + invec.elementAt(i).members() + " sequences)";
+                retarr[i] = invec.elementAt(i).name + " (" + invec.elementAt(i).member.length + " sequences)";
             }
 
         }
