@@ -1,28 +1,22 @@
-/*
- * mapfunctionutils.java
- *
- * Created on June 20, 2006, 3:13 PM
- */
 package clans;
+
 import java.io.*;
 import java.util.*;
-/**
- *
- * @author  tancred
- */
+
 public class mapfunctionutils {
-    
-    /** Creates a new instance of mapfunctionutils */
-    public mapfunctionutils() {
-    }
-    
-    static HashMap loadlookup(File loadfile){
-        //read data from a file containing affy_id classification_id lookup
-        HashMap lookup=new HashMap();
+
+    /**
+     * read data from a file containing affy_id classification_id lookup
+     * 
+     * @param loadfile
+     * @return
+     */
+    static HashMap<String, String> loadlookup(File loadfile){
+        
+        HashMap<String, String> lookup=new HashMap<String, String>();
         System.out.println("reading "+loadfile.getName());
         try{
             BufferedReader inread=new BufferedReader(new InputStreamReader(new javax.swing.ProgressMonitorInputStream(new javax.swing.JFrame(),"Reading "+loadfile.getName(),new FileInputStream(loadfile))));
-            //BufferedReader inread=new BufferedReader(new FileReader(loadfile));
             String inline;
             String affyid,lookupid;
             String[] tmp;
@@ -45,15 +39,19 @@ public class mapfunctionutils {
         }
         System.out.println();
         return lookup;
-    }//end loadlookup
-    
-    //--------------------------------------------------------------------------
-    
+    }
+
+    /**
+     * read data from a file containing affy_id classification_id lookup in the GO-case I then have to add the
+     * classification names to the mapnode bins as "leaves"
+     * 
+     * @param loadfile
+     * @param rootnode
+     */
     static void loadGOlookup(File loadfile, mapnode rootnode){
         System.out.println("reading "+loadfile.getName());
-        //read data from a file containing affy_id classification_id lookup
-        //in the GO-case I then have to add the classification names to the mapnode bins as "leaves"
-        HashMap nodehash=new HashMap();
+        HashMap<String, mapnode> nodehash=new HashMap<String, mapnode>();
+
         //add each of the nodes to a hash to make a faster name-lookup
         addnodestohash(nodehash,rootnode);
         try{
@@ -101,29 +99,36 @@ public class mapfunctionutils {
         System.out.println();
     }//end loadlookup
     
-    //--------------------------------------------------------------------------
-    
-    static void addnodestohash(HashMap nodehash, mapnode curr){
+    /**
+     * 
+     * @param nodehash
+     * @param curr
+     */
+    static void addnodestohash(HashMap<String, mapnode> nodehash, mapnode curr) {
         if(curr.child!=null){
-            for(int i=java.lang.reflect.Array.getLength(curr.child);--i>=0;){
+            for(int i=curr.child.length;--i>=0;){
                 addnodestohash(nodehash,curr.child[i]);
             }//end for i
         }
         if(curr.level.indexOf("|")>-1){
             String[] tmp=curr.level.split("\\|");
-            for(int i=java.lang.reflect.Array.getLength(tmp);--i>=0;){
+            for(int i=tmp.length;--i>=0;){
                 nodehash.put(tmp[i],curr);
             }//end for i
         }else{
             nodehash.put(curr.level,curr);
         }
-    }//end addnodestohash
-    
-    //--------------------------------------------------------------------------
-    
-    static mapnode loadunknownformat(File loadfile){
-        //see if the file is in genebins/mapman format or GO.obo format
-        //then use the corresponding load function to load the data
+    }
+
+    /**
+     * see if the file is in genebins/mapman format or GO.obo format then use the corresponding load function to load
+     * the data
+     * 
+     * @param loadfile
+     * @return
+     */
+    static mapnode loadunknownformat(File loadfile) {
+
         try{
             BufferedReader inread=new BufferedReader(new FileReader(loadfile));
             String inline="";
@@ -132,7 +137,7 @@ public class mapfunctionutils {
                 inline=inline.trim();
                 if(inline.length()>0){
                     String[] tmp=inline.split("[\"\']*[\t;][\"\']*",4);
-                    if(java.lang.reflect.Array.getLength(tmp)>=4){
+                    if(tmp.length>=4){
                         //then I am reading a valid MapMan or GeneBins file
                         inread.close();
                         return loadbins(loadfile);
@@ -143,37 +148,38 @@ public class mapfunctionutils {
                     }
                 }
             }
+            inread.close();
         }catch (IOException ioe){
             System.err.println("IOERROR trying to read from '"+loadfile.getAbsolutePath()+"'");
             return null;
         }
         return null;
-    }//end loadunknownformat
-    
-    //--------------------------------------------------------------------------
-    
+    }
+
+    /**
+     * load from a gene-ontology *.obo file level should identify a hierarchichal node in a tree name should match zero
+     * or one sequence id's in the clans map (or the lookup file) description is optional and is used to describe a tree
+     * node
+     * 
+     * @param loadfile
+     * @return
+     */
     static mapnode loadGOobo(File loadfile){
-        //load from a gene-ontology *.obo file
-        //level should identify a hierarchichal node in a tree
-        //name should match zero or one sequence id's in the clans map (or the lookup file)
-        //description is optional and is used to describe a tree node
-        HashMap nodehash=new HashMap();
-        ArrayList noparentnodes=new ArrayList();
+
+        HashMap<String, mapnode> nodehash = new HashMap<String, mapnode>();
+        ArrayList<mapnode> noparentnodes = new ArrayList<mapnode>();
         try{
             System.out.println("Attempting to read Gene-Ontology *.obo format '"+loadfile.getName()+"'");
             BufferedReader inread=new BufferedReader(new FileReader(loadfile));
             String inline;
-            mapnode currnode;
             String id="";//GO-number
             String name="";//name associated to GO-number
-            //String annot="";//the definition of the go term
-            //String namespace="";//the category this belongs to
+
             boolean obsolete=true;
-            ArrayList parents=new ArrayList();//the parents of this node
-            ArrayList altids=new ArrayList();
-            int size;
+            ArrayList<String> parents=new ArrayList<String>();//the parents of this node
+            ArrayList<String> altids=new ArrayList<String>();
             int count=0;
-            mapnode curr,addcurr;
+            mapnode curr;
             String pid;
             while((inline=inread.readLine())!=null){
                 inline=inline.trim();
@@ -182,33 +188,16 @@ public class mapfunctionutils {
                     if(count%1000==0){
                         System.out.print(".");
                     }
+                    
                     if(obsolete==false){
                         //then remember the data
                         //to do this, see if the current node is already defined in the hash.
                         if(nodehash.containsKey(id)==false){
-                            //I don't need to check the alternate id's as the GO-terms always use the main id's
-                            //check the alternate id's
-                            //boolean hadalternate=false;
-                            //for(int i=altids.size();--i>=0;){
-                            //    if(nodehash.containsKey((String)altids.get(i))){
-                            //        hadalternate=true;
-                            //        curr=(mapnode)nodehash.get((String)altids.get(i));
-                            //        nodehash.put(id,curr);
-                            //    }
-                            //}//end for i
-                            //if it is not defined, create a new tmpnode
-                            //if(hadalternate==false){
                             curr=new mapnode();
                             curr.child=new mapnode[0];
                             nodehash.put(id,curr);
-                            //}else{//if I DID have an alternate name
-                            //    curr=(mapnode)nodehash.get(id);
-                            //}
-                            //and now add the alternate names
-                            //for(int i=altids.size();--i>=0;){
-                            //    nodehash.put((String)altids.get(i),curr);
-                            //}
                         }
+                        
                         //now add the data for this node
                         curr=(mapnode)nodehash.get(id);
                         curr.level=id;
@@ -284,23 +273,23 @@ public class mapfunctionutils {
         }//end for i
         System.out.println("DONE");
         return rootnode;
-    }//end loadobo
-    
-    //--------------------------------------------------------------------------
-    
-    static mapnode loadbins(File loadfile){
-        //load from a file containing level;[description];name;[annot_info];
-        //level should identify a hierarchichal node in a tree
-        //name should match zero or one sequence id's in the clans map
-        //description is optional and is used to describe a tree node
-        HashMap nodehash=new HashMap();
+    }
+
+    /**
+     * load from a file containing level;[description];name;[annot_info]; level should identify a hierarchichal node in
+     * a tree name should match zero or one sequence id's in the clans map description is optional and is used to
+     * describe a tree node
+     * 
+     * @param loadfile
+     * @return
+     */
+    static mapnode loadbins(File loadfile) {
+        HashMap<String, mapnode> nodehash=new HashMap<String, mapnode>();
         try{
             System.out.println("Attempting to read GeneBins/MapMan file '"+loadfile.getName()+"'");
             BufferedReader inread=new BufferedReader(new FileReader(loadfile));
             String inline;
-            mapnode currnode;
             String[] tmp;
-            String annot="";
             String idstr="";
             int size;
             int count=0;
@@ -309,12 +298,15 @@ public class mapfunctionutils {
                 if(count%1000==0){
                     System.out.print(".");
                 }
-                //System.err.println("reading "+inline);
+
                 tmp=inline.split("[\"\']*[\t;][\"\']*",4);
-                size=java.lang.reflect.Array.getLength(tmp);
+                size=tmp.length;
+
                 if(size<2){
                     System.err.println("ERROR parsing on line '"+inline.trim()+"'");
+                    inread.close();
                     return null;
+                
                 }else if(size==2){
                     //i.e. I only have bincode and name
                     String[] tmptmp=new String[4];
@@ -323,6 +315,7 @@ public class mapfunctionutils {
                     tmptmp[2]="";
                     tmptmp[3]="";
                     tmp=tmptmp;
+           
                 }else if(size==3){
                     //i.e. I have bincode and name and identifiers, but no descriptions
                     String[] tmptmp=new String[4];
@@ -332,6 +325,7 @@ public class mapfunctionutils {
                     tmptmp[3]="";
                     tmp=tmptmp;
                 }//els I have 4 or more elements; all that I need
+
                 //tmp[0] is the level/node assignment (i.e. 3.2.14)
                 tmp[0]=tmp[0].trim();
                 //I might still have a string delimiter at the first position, check for that
@@ -386,20 +380,19 @@ public class mapfunctionutils {
         System.out.println("finalizing, may take a while");
         //now I should have all the nodes in a hash; next, create the tree hierarchy
         String[] keys=(String[])nodehash.keySet().toArray(new String[0]);
-        int num=java.lang.reflect.Array.getLength(keys);
+        int num=keys.length;
         String[] tmp;
-        String currlevel;
         mapnode lastnode;
         mapnode newnode;
         for(int i=num;--i>=0;){
             tmp=keys[i].split("\\.");
             //now create the level (string) array
-            for(int j=1;j<java.lang.reflect.Array.getLength(tmp);j++){
+            for(int j=1;j<tmp.length;j++){
                 tmp[j]=tmp[j-1]+"."+tmp[j];
             }//end for j
             lastnode=(mapnode)nodehash.get(keys[i]);
             //now go through the levels and add nodes where necessary
-            for(int j=java.lang.reflect.Array.getLength(tmp)-1;--j>=0;){//not the last element, as that is the node I am looking at!
+            for(int j=tmp.length-1;--j>=0;){//not the last element, as that is the node I am looking at!
                 if(nodehash.containsKey(tmp[j])){
                     newnode=(mapnode)nodehash.get(tmp[j]);
                 }else{
@@ -420,7 +413,7 @@ public class mapfunctionutils {
         mapnode currnode;
         String parentname;
         int lastdotindex;
-        for(int i=java.lang.reflect.Array.getLength(keys);--i>=0;){
+        for(int i=keys.length;--i>=0;){
             currnode=(mapnode)nodehash.get(keys[i]);
             if(currnode.info.equalsIgnoreCase("undefined")&&currnode.leaf!=null){
                 //then assign it the parent info
@@ -437,7 +430,7 @@ public class mapfunctionutils {
         mapnode rootnode=new mapnode();
         rootnode.level="root";
         rootnode.leaf=null;
-        for(int i=java.lang.reflect.Array.getLength(keys);--i>=0;){
+        for(int i=keys.length;--i>=0;){
             if(keys[i].indexOf(".")==-1){//i.e. if this key has no dot in it
                 rootnode.add((mapnode)nodehash.get(keys[i]));
             }
@@ -447,30 +440,35 @@ public class mapfunctionutils {
         //printnode(rootnode,"");
         System.out.println("DONE");
         return rootnode;
-    }//end loadbins
-    
-    //--------------------------------------------------------------------------
-    
-    static void sortnode(mapnode innode){
-        //sort the childnodes of this node
-        if(innode.child==null){
+    }
+
+    /**
+     * sort the childnodes of this node
+     * 
+     * @param innode
+     */
+    static void sortnode(mapnode innode) {
+
+      if(innode.child==null){
             return;
         }
-        for(int i=java.lang.reflect.Array.getLength(innode.child);--i>=0;){
+        for(int i=innode.child.length;--i>=0;){
             sortnode(innode.child[i]);
         }//end for i
         java.util.Arrays.sort(innode.child,new childnodecomparator());
-    }//end sortnode
+    }
+
     
-    //---------------------
-    
-    static class childnodecomparator implements java.util.Comparator{
+    static class childnodecomparator implements java.util.Comparator<mapnode>{
         
-        public int compare(Object o1, Object o2){
-            String[] s1=((mapnode)o1).level.split("\\.");
-            String[] s2=((mapnode)o2).level.split("\\.");
-            int inum=java.lang.reflect.Array.getLength(s1);
-            int jnum=java.lang.reflect.Array.getLength(s2);
+        /**
+         * 
+         */
+        public int compare(mapnode o1, mapnode o2) {
+            String[] s1 = o1.level.split("\\.");
+            String[] s2 = o2.level.split("\\.");
+            int inum=s1.length;
+            int jnum=s2.length;
             int lim=inum;
             if(lim>jnum){
                 lim=jnum;
@@ -501,17 +499,19 @@ public class mapfunctionutils {
             }
         }
         
-    }//end comparator
-    
-    //--------------------------------------------------------------------------
-    
+    }
+
+    /**
+     * 
+     * @param innode
+     * @param spacer
+     */
     static void printnode(mapnode innode, String spacer){
         System.out.println(spacer+"'"+innode.level+"' "+innode.info);
         if(innode.leaf==null){
-            for(int i=java.lang.reflect.Array.getLength(innode.child);--i>=0;){
+            for (int i = innode.child.length; --i >= 0;) {
                 printnode(innode.child[i],spacer+"  ");
-            }//end for i
+            }
         }
-    }//end printnode
-    
+    }
 }

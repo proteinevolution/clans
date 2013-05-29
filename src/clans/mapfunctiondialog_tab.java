@@ -1,22 +1,19 @@
-/*
- * mapfunctiondialog.java
- *
- * Created on June 20, 2006, 3:04 PM
- */
 package clans;
+
 import javax.swing.*;
 import javax.swing.tree.*;
-//import javax.swing.event.TreeModelEvent;
+// import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import java.util.*;
 import java.io.*;
-/**
- *
- * @author  tancred
- */
+
 public class mapfunctiondialog_tab extends javax.swing.JFrame {
     
-    /** Creates new form mapfunctiondialog */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -561248779145267780L;
+
     public mapfunctiondialog_tab(ClusteringWithGui parent) {
         this.parent=parent;
         initComponents();
@@ -42,7 +39,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
             }
             tabpane.setSelectedIndex(selindex);
             if(selindex>-1){//if I successfully read a mapfile
-                lookup=(HashMap) lookuplist.get(selindex);
+                lookup = lookuplist.get(selindex);
                 if(((Boolean)golist.get(selindex)).booleanValue()==false){
                     currtree=(javax.swing.JTree) treelist.get(selindex);
                 }else{
@@ -451,16 +448,16 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
     ClusteringWithGui parent=null;
     JFileChooser fc=new JFileChooser(new File("."));
     //mapnode map=new mapnode();
-    ArrayList maplist=new ArrayList();
-    ArrayList golist=new ArrayList();
+    ArrayList<mapnode> maplist=new ArrayList<mapnode>();
+    ArrayList<Boolean> golist=new ArrayList<Boolean>();
     ArrayList treelist=new ArrayList();
     javax.swing.JTree currtree=null;
     String linesep=System.getProperty("line.separator");
-    HashMap lookup=null;
-    ArrayList lookuplist=new ArrayList();
-    HashMap nameshash=new HashMap();
+    HashMap<String, String> lookup=null;
+    ArrayList<HashMap<String, String>> lookuplist=new ArrayList<HashMap<String, String>>();
+    HashMap<String, String> nameshash=new HashMap<String, String>();
     String lookupfile="";
-    Vector infovector=new Vector();
+    Vector<String> infovector=new Vector<String>();
     //boolean GOfile=false;//remember whether I loaded a GO file (a bit more complex)
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -509,7 +506,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
                         tabpaneStateChanged(evt);
                     }
                 });
-                ArrayList tmptreelist=new ArrayList();
+                ArrayList<JTree> tmptreelist=new ArrayList<JTree>();
                 for(int i=0; i<java.lang.reflect.Array.getLength(map.child);i++){
                     javax.swing.JTree tree=new javax.swing.JTree(new mapmodel(map.child[i]));
                     tree.setCellRenderer(new maprenderer());
@@ -552,7 +549,8 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
         if(currtree!=null){
             TreePath[] tmp=currtree.getSelectionPaths();
             if(tmp!=null){
-                HashMap tmphash=new HashMap();//make sure no identical names are added to either the list or the text
+                HashMap<String, String> tmphash = new HashMap<String, String>();// make sure no identical names are
+                                                                                // added to either the list or the text
                 if(lookup!=null){
                     int num=java.lang.reflect.Array.getLength(tmp);
                     for(int i=0;i<num;i++){
@@ -599,7 +597,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
     //--------------------------------------------------------------------------
     
     boolean loadlookupfile(File lookupfile, int index){
-        HashMap mylookup=null;
+        HashMap<String, String> mylookup=null;
         if(((Boolean)golist.get(index)).booleanValue()==false){
             if((mylookup=mapfunctionutils.loadlookup(lookupfile))==null){
                 javax.swing.JOptionPane.showMessageDialog(this,"ERROR loading lookup data from '"+lookupfile.getName()+"'");
