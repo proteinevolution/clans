@@ -1,47 +1,57 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package clans;
+
 import java.io.*;
 import java.util.*;
-/**
- *
- * @author  tancred
- */
+
 public class printout {
-    
-    /** Creates a new instance of printaln */
-    public printout() {
-    }
-    
+
+    /**
+     * print the working alignment to file outfilename in the specified format
+     * 
+     * @param inaln
+     * @param outfilename
+     * @param oformat
+     * @param blocksize
+     */
     static void printaln(AminoAcidSequence[] inaln,String outfilename, String oformat, int blocksize){
-        //print the working alignment to file outfilename in the specified format
         if(oformat.equalsIgnoreCase("clustal")){
             printclustal(inaln,outfilename,blocksize);
         }else{
             printfasta(inaln,outfilename);
         }
-    }//end printaln
+    }
     
-    //--------------------------------------------------------------------------
-    
-    static void printconf(AminoAcidSequence[] inaln, double[][] confarr, String outfilename, String oformat, int blocksize){
-        //print the position specific confidences for each sequence
-        if(oformat.equalsIgnoreCase("clustal")){
+    /**
+     * print the position specific confidences for each sequence
+     * 
+     * @param inaln
+     * @param confarr
+     * @param outfilename
+     * @param oformat
+     * @param blocksize
+     */
+    static void printconf(AminoAcidSequence[] inaln, double[][] confarr, String outfilename, String oformat,
+            int blocksize) {
+       if(oformat.equalsIgnoreCase("clustal")){
             printclustal(inaln,confarr,outfilename,blocksize);
         }else{
             printfasta(inaln,confarr,outfilename);
         }
-    }//end printconf
-    
-    //--------------------------------------------------------------------------
-    
-    static void printfiltered(AminoAcidSequence[] inaln, double[][] confarr, String outfilename, String oformat, int blocksize, float filtercutoff){
-        //print the input alignment filtered for confidence.
-        //replace low confidence residues by dashes
-        int elements=java.lang.reflect.Array.getLength(inaln);
+    }
+
+    /**
+     * print the input alignment filtered for confidence. replace low confidence residues by dashes
+     * 
+     * @param inaln
+     * @param confarr
+     * @param outfilename
+     * @param oformat
+     * @param blocksize
+     * @param filtercutoff
+     */
+    static void printfiltered(AminoAcidSequence[] inaln, double[][] confarr, String outfilename, String oformat,
+            int blocksize, float filtercutoff) {
+        int elements=inaln.length;
         int seqlength=inaln[0].seq.length();
         AminoAcidSequence[] tmpaln=new AminoAcidSequence[elements];
         for(int i=0;i<elements;i++){
@@ -49,11 +59,8 @@ public class printout {
             tmpaln[i].name=inaln[i].name;
             tmpaln[i].seq=inaln[i].seq;
         }//end for i
-        int maxnamelength=0;
-        String[] namearr=new String[elements];
         int j;
         StringBuffer tmpstr=new StringBuffer(blocksize+3);
-        int position=0;
         for(int i=0;i<elements;i++){
             tmpstr.setLength(0);
             for(j=0;j<seqlength;j++){
@@ -70,55 +77,69 @@ public class printout {
         }else{
             printfasta(tmpaln,outfilename);
         }
-    }//end printfiltered
+    }
     
-    //--------------------------------------------------------------------------
-    //--------------------------------------------------------------------------
-    
-    static void printfasta(AminoAcidSequence[] inaln, String outfilename){
-        //print the alignment in fasta format
+    /**
+     * print the alignment in fasta format
+     * 
+     * @param inaln
+     * @param outfilename
+     */
+    static void printfasta(AminoAcidSequence[] inaln, String outfilename) {
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfilename)));
-            int elements=java.lang.reflect.Array.getLength(inaln);
+            int elements=inaln.length;
             for(int i=0;i<elements;i++){
                 outwrite.println(">"+inaln[i].name);
                 outwrite.println(inaln[i].seq);
-            }//end for i
+            }
             outwrite.close();
         }catch (IOException e){
             System.err.println("IOERROR in printfiltered");
             e.printStackTrace();
         }
-    }//end printfasta
+    }
     
-    static void printfasta(AminoAcidSequence[] inaln, File outfile){
-        //print the alignment in fasta format
+    /**
+     * print the alignment in fasta format
+     * 
+     * @param inaln
+     * @param outfile
+     */
+    static void printfasta(AminoAcidSequence[] inaln, File outfile) {
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfile)));
-            int elements=java.lang.reflect.Array.getLength(inaln);
+            int elements=inaln.length;
             for(int i=0;i<elements;i++){
                 outwrite.println(">"+inaln[i].name);
                 outwrite.println(inaln[i].seq);
-            }//end for i
+            }
             outwrite.close();
         }catch (IOException e){
             System.err.println("IOERROR in printfiltered");
             e.printStackTrace();
         }
-    }//end printfasta
-    
-    static void printfasta(AminoAcidSequence[] inaln, double[][] confarr, String outfilename){
-        //print the confarr in fasta format
+    }
+
+    /**
+     * print the confarr in fasta format
+     * 
+     * @param inaln
+     * @param confarr
+     * @param outfilename
+     */
+    static void printfasta(AminoAcidSequence[] inaln, double[][] confarr, String outfilename) {
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfilename)));
-            int elements=java.lang.reflect.Array.getLength(inaln);
+            int elements=inaln.length;
             if(elements<1){
                 System.err.println("ERROR: empty alignment");
+                outwrite.close();
                 return;
             }
             int seqlength=inaln[0].seq.length();
             int j;
-            StringBuffer tmp=new StringBuffer();
+
             for(int i=0;i<elements;i++){
                 outwrite.println(">"+inaln[i].name);
                 for(j=0;j<seqlength;j++){
@@ -131,17 +152,22 @@ public class printout {
             System.err.println("IOERROR in printfiltered");
             e.printStackTrace();
         }
-    }//end printfasta
+    }
     
-    //--------------------------------------------------------------------------
-    
+    /**
+     * print the alignment in clustal format
+     * 
+     * @param inaln
+     * @param outfilename
+     * @param blocksize
+     */
     static void printclustal(AminoAcidSequence[] inaln, String outfilename, int blocksize){
-        //print the alignment in clustal format
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfilename)));
-            int elements=java.lang.reflect.Array.getLength(inaln);
+            int elements=inaln.length;
             if(elements<1){
                 System.err.println("ERROR: empty alignment");
+                outwrite.close();
                 return;
             }
             int position=0;
@@ -187,15 +213,24 @@ public class printout {
             System.err.println("IOERROR in printfiltered");
             e.printStackTrace();
         }
-    }//end printclustal
+    }
     
-    static void printclustal(AminoAcidSequence[] inaln, double[][] confarr, String outfilename, int blocksize){
-        //print the confarr in clustal format
+    /**
+     * print the confarr in clustal format
+     * 
+     * @param inaln
+     * @param confarr
+     * @param outfilename
+     * @param blocksize
+     */
+    static void printclustal(AminoAcidSequence[] inaln, double[][] confarr, String outfilename, int blocksize) {
+
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfilename)));
-            int elements=java.lang.reflect.Array.getLength(inaln);
+            int elements=inaln.length;
             if(elements<1){
                 System.err.println("ERROR: empty alignment");
+                outwrite.close();
                 return;
             }
             int position=0;
@@ -244,17 +279,20 @@ public class printout {
             System.err.println("IOERROR in printfiltered");
             e.printStackTrace();
         }
-    }//end printclustal
+    }
     
-    //--------------------------------------------------------------------------
-    
-    static void saveblast(String outfilename, Vector[][] blastvals){
+    /**
+     * 
+     * @param outfilename
+     * @param blastvals
+     */
+    static void saveblast(String outfilename, Vector<hsp>[][] blastvals){
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(outfilename)));
-            int vecsize=java.lang.reflect.Array.getLength(blastvals);
+            int vecsize=blastvals.length;
             int i,j,k;
             int tmpvecsize;
-            Vector tmpvec;
+            Vector<hsp> tmpvec;
             hsp tmphsp;
             outwrite.println(vecsize+" sequences");
             for(i=0;i<vecsize;i++){
@@ -263,32 +301,30 @@ public class printout {
                     tmpvec=blastvals[i][j];
                     tmpvecsize=tmpvec.size();
                     for(k=0;k<tmpvecsize;k++){
-                        tmphsp=(hsp)tmpvec.elementAt(k);
-                        //now print the hsp data
+                        tmphsp = tmpvec.elementAt(k);
                         outwrite.println("hsp: "+i+";"+j+";"+k);
-                        //outwrite.println("\tqname: "+tmphsp.qname);
-                        //outwrite.println("\tqseq: "+tmphsp.qseq);
-                        //outwrite.println("\thname: "+tmphsp.hname);
-                        //outwrite.println("\thseq: "+tmphsp.hseq);
-                        //outwrite.println("\tqstart: "+tmphsp.qstart);
-                        //outwrite.println("\tqend: "+tmphsp.qend);
-                        //outwrite.println("\thstart: "+tmphsp.hstart);
-                        //outwrite.println("\thend: "+tmphsp.hend);
                         outwrite.println("\tvalue: "+tmphsp.value);
-                    }//end for k
-                }//end for j
-            }//end for i
+                    }
+                }
+            }
             outwrite.close();
+            
         }catch (IOException e){
             System.out.println("Error printing blast results to "+outfilename);
         }
-    }//end saveblast
+    }
     
-    static void saveblastappend(PrintWriter outwrite, Vector[] blastvals, int i){
-        int vecsize=java.lang.reflect.Array.getLength(blastvals);
+    /**
+     * 
+     * @param outwrite
+     * @param blastvals
+     * @param i
+     */
+    static void saveblastappend(PrintWriter outwrite, Vector<hsp>[] blastvals, int i) {
+        int vecsize=blastvals.length;
         int j,k;
         int tmpvecsize;
-        Vector tmpvec;
+        Vector<hsp> tmpvec;
         hsp tmphsp;
         for(j=0;j<vecsize;j++){
             //print the hsp data for this sequence comparison
@@ -296,25 +332,19 @@ public class printout {
             if(tmpvec!=null){
                 tmpvecsize=tmpvec.size();
                 for(k=0;k<tmpvecsize;k++){
-                    tmphsp=(hsp)tmpvec.elementAt(k);
-                    //now print the hsp data
+                    tmphsp = tmpvec.elementAt(k);
                     outwrite.println("hsp: "+i+";"+j+";"+k);
-                    //outwrite.println("\tqname: "+tmphsp.qname);
-                    //outwrite.println("\tqseq: "+tmphsp.qseq);
-                    //outwrite.println("\thname: "+tmphsp.hname);
-                    //outwrite.println("\thseq: "+tmphsp.hseq);
-                    //outwrite.println("\tqstart: "+tmphsp.qstart);
-                    //outwrite.println("\tqend: "+tmphsp.qend);
-                    //outwrite.println("\thstart: "+tmphsp.hstart);
-                    //outwrite.println("\thend: "+tmphsp.hend);
                     outwrite.println("\tvalue: "+tmphsp.value);
-                }//end for k
+                }
             }
-        }//end for j
-    }//end saveblastappend
-    
-    //--------------------------------------------------------------------------
-    
+        }
+    }
+
+    /**
+     * 
+     * @param outwrite
+     * @param positions
+     */
     static void save_semicolon_delimited_positions(PrintWriter outwrite, float[][] positions) {
         outwrite.println("positions:");
         for (int i = 0; i < positions.length; i++) {
@@ -322,5 +352,4 @@ public class printout {
         }
         outwrite.flush();
     }
-    
 }
