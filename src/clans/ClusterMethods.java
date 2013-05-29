@@ -1,9 +1,5 @@
 package clans;
 
-/**
- *
- * @author tancred
- */
 public class ClusterMethods {
     
 	static final java.util.Random rand=new java.util.Random(System.currentTimeMillis());
@@ -110,14 +106,14 @@ public class ClusterMethods {
     static void getmovement(float[][] posarr, minattvals[] attvals, float[][] movement,int[] selectnames, ClusterData data){
         
         int i,j;
-        int attnum=java.lang.reflect.Array.getLength(attvals);
+        int attnum=attvals.length;
         double[] currmoverep=new double[3];
         double[] currmoveatt=new double[3];
         float tmp;
         double totaldist=0;
         double totalmove=1;
         double distx,disty,distz;
-        int selectnamesnum=java.lang.reflect.Array.getLength(selectnames);
+        int selectnamesnum=selectnames.length;
         float repfac=data.repfactor;
         int reppow=data.repvalpow;
         int hnum,qnum;
@@ -532,7 +528,7 @@ public class ClusterMethods {
         data.currcool=data.currcool*data.cooling;
         //float totalpos;
         float multdamp=1-data.dampening;
-        int selectnamesnum=java.lang.reflect.Array.getLength(selectnames);
+        int selectnamesnum=selectnames.length;
         double currcool=data.currcool;
         float[][] lastmovearr=data.lastmovearr;
         if((data.moveselectedonly)&&(selectnamesnum>0)&&(selectnamesnum!=data.elements)){
@@ -680,14 +676,14 @@ public class ClusterMethods {
         //just use the BEST value!
         if(invec==null){
             return 0;
-        }else if(java.lang.reflect.Array.getLength(invec)<1){//if I have no hits
+        }else if(invec.length<1){//if I have no hits
             return 0;
         }
         double bestval=invec[0];//is a p-value (should be from 0 to 1)
         double currval;
         if(data.usescval){
             bestval=0;
-            for(int i=java.lang.reflect.Array.getLength(invec)-1;i>=0;i--){
+            for(int i=invec.length-1;i>=0;i--){
                 currval=invec[i];
                 if(currval>bestval){
                     bestval=currval;
@@ -702,7 +698,7 @@ public class ClusterMethods {
                 return 0;
             }
         }else{
-            for(int i=java.lang.reflect.Array.getLength(invec)-1;i>=1;i--){
+            for(int i=invec.length-1;i>=1;i--){
                 currval=invec[i];
                 if(currval<bestval){
                     bestval=currval;
@@ -732,14 +728,14 @@ public class ClusterMethods {
         //new: multiply the pvalues of different hsp's
         if(invec==null){
             return 0;
-        }else if(java.lang.reflect.Array.getLength(invec)<1){
+        }else if(invec.length<1){
             return 0;
         }
         double currval=invec[0];
         if(data.usescval){
             //then I am using score values (no logarithming at the end)
             currval=0;
-            for(int i=java.lang.reflect.Array.getLength(invec);--i>=0;){//sum the values
+            for(int i=invec.length;--i>=0;){//sum the values
                 currval+=invec[i];
             }// end for i
             if(currval<data.maxvalfound){//maxvalfound=worst accepted value (comes from P-values where larger=worse)
@@ -749,7 +745,7 @@ public class ClusterMethods {
                 return 0;
             }
         }else{//then I am using P-values
-            for(int i=java.lang.reflect.Array.getLength(invec);--i>=1;){
+            for(int i=invec.length;--i>=1;){
                 currval*=invec[i];
             }// end for i
             if(currval>data.maxvalfound){
