@@ -87,12 +87,12 @@ public class findclusters {
 			// first reset all the unassigned cluster sequences
 			maxconn = 0;
 			for (int i = 0; i < seqnum; i++) {
-				if (((int[]) clusterhash.get(hashkeys[i]))[0] == 0
-						|| ((int[]) clusterhash.get(hashkeys[i]))[0] == -3) {
-					((int[]) clusterhash.get(hashkeys[i]))[0] = -1;
+				if (clusterhash.get(hashkeys[i])[0] == 0
+						|| clusterhash.get(hashkeys[i])[0] == -3) {
+					clusterhash.get(hashkeys[i])[0] = -1;
 				}
-                if (((int[]) clusterhash.get(hashkeys[i]))[0] == -1
-                        && ((int[]) clusterhash.get(hashkeys[i]))[2] > maxconn) {// if
+                if (clusterhash.get(hashkeys[i])[0] == -1
+                        && clusterhash.get(hashkeys[i])[2] > maxconn) {// if
                                                                                  // this
                                                                                  // sequence
                                                                                  // is
@@ -101,7 +101,7 @@ public class findclusters {
                                                                                  // has
                                                                                  // max
                                                                                  // connections
-					maxconn = ((int[]) clusterhash.get(hashkeys[i]))[2];
+					maxconn = clusterhash.get(hashkeys[i])[2];
 					maxnum = i;
 					// System.out.println("maxconn="+maxconn+" new seed="+maxnum);
 
@@ -129,7 +129,7 @@ public class findclusters {
 				break;
 			}
 			for (int i = 0; i < seqnum; i++) {
-				((int[]) clusterhash.get(hashkeys[i]))[1] = 0;// seqshits[i]=0;//the
+				clusterhash.get(hashkeys[i])[1] = 0;// seqshits[i]=0;//the
 																// number of
 																// links
 																// connecting
@@ -138,9 +138,9 @@ public class findclusters {
 			}// end for i
 			for (int i = conarr.length - 1; i >= 0; i--) {
 				// remember which sequences had hits with current seed
-				((int[]) clusterhash.get(hashkeys[conarr[i]]))[1] = 1;// seqshits[maxnumarr[i]]=1;
+				clusterhash.get(hashkeys[conarr[i]])[1] = 1;// seqshits[maxnumarr[i]]=1;
 			}
-			((int[]) clusterhash.get(hashkeys[maxnum]))[0] = 1;// counter;//groupvals[maxnum]=counter;
+			clusterhash.get(hashkeys[maxnum])[0] = 1;// counter;//groupvals[maxnum]=counter;
 			newcluster = new cluster();
 			while (newcluster.member.length == 0) {
 				// get the minlinks other sequences that share the most hits
@@ -153,7 +153,7 @@ public class findclusters {
 					if (tmpseqs[i] == -1) {
 						// remove the current seed from analysis until end
 						// (where it might come back in)
-						((int[]) clusterhash.get(hashkeys[maxnum]))[0] = -2;// skip
+						clusterhash.get(hashkeys[maxnum])[0] = -2;// skip
 																			// this
 																			// seq
 																			// for
@@ -166,7 +166,7 @@ public class findclusters {
 					}
 				}// end for i
 				for (int i = tmpseqs.length - 1; i >= 0; i--) {
-					((int[]) clusterhash.get(hashkeys[tmpseqs[i]]))[0] = -3;// groupvals[tmpseqs[i]]=-3;//am
+					clusterhash.get(hashkeys[tmpseqs[i]])[0] = -3;// groupvals[tmpseqs[i]]=-3;//am
 																			// checking,
 																			// remeber
 																			// it
@@ -187,8 +187,8 @@ public class findclusters {
 				for (int i = tmpseqs2.length - 1; i >= 0; i--) {
 					newcluster.add(tmpseqs2[i]);
 					// System.out.println("\tseq:"+tmpseqs2[i]);
-					if (((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] != -2) {
-						((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] = 0;// groupvals[i]=0;//added
+					if (clusterhash.get(hashkeys[tmpseqs2[i]])[0] != -2) {
+						clusterhash.get(hashkeys[tmpseqs2[i]])[0] = 0;// groupvals[i]=0;//added
 																				// to
 																				// cluster
 					}
@@ -206,10 +206,10 @@ public class findclusters {
 					tmpseqs2 = getfound(attvals, clusterhash, hashkeys,
 							newcluster.member, minlinks);
 					for (int i = tmpseqs2.length - 1; i >= 0; i--) {
-						if (((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] != 0) {
+						if (clusterhash.get(hashkeys[tmpseqs2[i]])[0] != 0) {
 							newcluster.add(tmpseqs2[i]);
-							if (((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] != -2) {
-								((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] = 0;// groupvals[i]=0;//added
+							if (clusterhash.get(hashkeys[tmpseqs2[i]])[0] != -2) {
+								clusterhash.get(hashkeys[tmpseqs2[i]])[0] = 0;// groupvals[i]=0;//added
 																						// to
 																						// cluster
 							}
@@ -220,7 +220,7 @@ public class findclusters {
 				if (newcluster.member.length < minlinks) {
 					// System.out.println("setting "+maxnum+" to -2");
 					// if my currnet cluster has less than minlinks elements
-					((int[]) clusterhash.get(hashkeys[maxnum]))[0] = -2;// skip
+					clusterhash.get(hashkeys[maxnum])[0] = -2;// skip
 																		// this
 																		// seq
 																		// for
@@ -245,9 +245,9 @@ public class findclusters {
 				tmpseqs2 = getfound(attvals, clusterhash, hashkeys,
 						newcluster.member, minlinks);
 				for (int i = tmpseqs2.length - 1; i >= 0; i--) {
-					if (((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] != 0) {
+					if (clusterhash.get(hashkeys[tmpseqs2[i]])[0] != 0) {
 						newcluster.add(tmpseqs2[i]);
-						((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] = 0;// groupvals[i]=0;//added
+						clusterhash.get(hashkeys[tmpseqs2[i]])[0] = 0;// groupvals[i]=0;//added
 																				// to
 																				// cluster
 					}
@@ -257,7 +257,7 @@ public class findclusters {
 				// set the groups info
 			for (int i = newcluster.member.length - 1; i >= 0; i--) {
 				// if(((int[])clusterhash.get(hashkeys[newcluster.member[i]]))[0]==0){
-				((int[]) clusterhash.get(hashkeys[newcluster.member[i]]))[0] = counter;
+				clusterhash.get(hashkeys[newcluster.member[i]])[0] = counter;
 				// }
 			}// end for i
 			counter++;
@@ -281,26 +281,26 @@ public class findclusters {
 		}// end for i
 			// initialize to zero
 		for (int i = 0; i < seqnum; i++) {
-			((int[]) clusterhash.get(hashkeys[i]))[1] = 0;// seqshits[i]=0;
+			clusterhash.get(hashkeys[i])[1] = 0;// seqshits[i]=0;
 		}// end for i
 			// now see which were found by the above
 		for (int i = 0; i < attnum; i++) {
 			if (tmphash.containsKey(hashkeys[attvals[i].query])) {
-				((int[]) clusterhash.get(hashkeys[attvals[i].hit]))[1]++;
+				clusterhash.get(hashkeys[attvals[i].hit])[1]++;
 			}
 			if (tmphash.containsKey(hashkeys[attvals[i].hit])) {
-				((int[]) clusterhash.get(hashkeys[attvals[i].query]))[1]++;
+				clusterhash.get(hashkeys[attvals[i].query])[1]++;
 			}
 		}// end for i
 		Vector<Integer> tmpvec = new Vector<Integer>();
 		for (int i = 0; i < seqnum; i++) {
-			if (((int[]) clusterhash.get(hashkeys[i]))[1] >= minlinks) {
+			if (clusterhash.get(hashkeys[i])[1] >= minlinks) {
 				tmpvec.addElement(new Integer(i));
 			}
 		}// end for i
 		int[] retarr = new int[tmpvec.size()];
 		for (int i = tmpvec.size() - 1; i >= 0; i--) {
-			retarr[i] = ((Integer) tmpvec.elementAt(i)).intValue();
+			retarr[i] = tmpvec.elementAt(i).intValue();
 		}// end for i
 		return retarr;
 	}
@@ -328,8 +328,8 @@ public class findclusters {
 										// output
 		}// end for i
 		for (int i = 0; i < seqnum; i++) {
-			if ((((int[]) clusterhash.get(hashkeys[i]))[1] == 1)
-					&& (((int[]) clusterhash.get(hashkeys[i]))[0] == -1)) {// if
+			if ((clusterhash.get(hashkeys[i])[1] == 1)
+					&& (clusterhash.get(hashkeys[i])[0] == -1)) {// if
 																			// this
 																			// sequence
 																			// had
@@ -342,13 +342,13 @@ public class findclusters {
 																			// currently
 																			// unassigned
 				for (int j = 1; j <= minlinks; j++) {
-					if (((int[]) clusterhash.get(hashkeys[i]))[2] > maxconn[j]) {
+					if (clusterhash.get(hashkeys[i])[2] > maxconn[j]) {
 						// shift all subsequent values
 						for (int k = minlinks; k > j; k--) {
 							maxconn[k] = maxconn[k - 1];
 							retarr[k] = retarr[k - 1];
 						}// end for k
-						maxconn[j] = ((int[]) clusterhash.get(hashkeys[i]))[2];
+						maxconn[j] = clusterhash.get(hashkeys[i])[2];
 						retarr[j] = i;
 						break;
 					}
@@ -404,8 +404,8 @@ public class findclusters {
 		// get how many connections to others each sequence has
 		int attnum = attvals.length;
 		for (int i = 0; i < attnum; i++) {
-			((int[]) clusterhash.get(hashkeys[attvals[i].query]))[hashpos]++;
-			((int[]) clusterhash.get(hashkeys[attvals[i].hit]))[hashpos]++;
+			clusterhash.get(hashkeys[attvals[i].query])[hashpos]++;
+			clusterhash.get(hashkeys[attvals[i].hit])[hashpos]++;
 		}// end for i
 		return;
 	}// end getmaxnum
@@ -532,7 +532,7 @@ public class findclusters {
 				// add all leftover sequences as separate clusters
 				while (basevec.size() > 0) {
 					currcluster = new cluster();
-					currcluster.add(((Integer) basevec.remove(0)).intValue());
+					currcluster.add(basevec.remove(0).intValue());
 					retvec.addElement(currcluster);
 				}// end while basevec.size 2nd
 				break;
@@ -544,7 +544,7 @@ public class findclusters {
 			currcluster = new cluster();
 			currcluster.member = new int[currvec.size()];
 			for (int i = currvec.size() - 1; i >= 0; i--) {
-				currcluster.member[i] = ((Integer) currvec.elementAt(i))
+				currcluster.member[i] = currvec.elementAt(i)
 						.intValue();
 			}// end for i
 			retvec.add(currcluster);
@@ -587,7 +587,7 @@ public class findclusters {
 		HashMap<String, Integer> tmphash = new HashMap<String, Integer>(elements);
 		float[] sumvals = new float[elements];
 		for (int i = 0; i < elements; i++) {
-			tmphash.put(hashkeys[((Integer) invec.elementAt(i)).intValue()],
+			tmphash.put(hashkeys[invec.elementAt(i).intValue()],
 					new Integer(i));
 			sumvals[i] = 0;
 		}// end for i
@@ -596,11 +596,11 @@ public class findclusters {
 		int attnum = attvals.length;
 		for (int i = 0; i < attnum; i++) {
 			if (tmphash.containsKey(hashkeys[attvals[i].query])) {
-				sumvals[((Integer) tmphash.get(hashkeys[attvals[i].query]))
+				sumvals[tmphash.get(hashkeys[attvals[i].query])
 						.intValue()] += attvals[i].att;
 			}
 			if (tmphash.containsKey(hashkeys[attvals[i].hit])) {
-				sumvals[((Integer) tmphash.get(hashkeys[attvals[i].hit]))
+				sumvals[tmphash.get(hashkeys[attvals[i].hit])
 						.intValue()] += attvals[i].att;
 			}
 		}// end for i
@@ -620,7 +620,7 @@ public class findclusters {
 		// split one cluster off basevec and put the representatives in currvec
 		// System.out.println("seed "+seed);//("in getcluster for seed "+seed);//"seed="+seed);
 		currvec.add(basevec.remove(seed));
-		int seednum = ((Integer) currvec.elementAt(0)).intValue();
+		int seednum = currvec.elementAt(0).intValue();
 		HashMap<String, ?> tmphash = new HashMap<String, Object>();
 		tmphash.put(hashkeys[seednum], null);
 		// now add all those values with attraction to currvec greater than to
@@ -643,7 +643,7 @@ public class findclusters {
 			// elements
 			for (int i = 0; i < elements; i++) {
 				curratt = getavgatt(
-						((Integer) basevec.elementAt(i)).intValue(), currvec,
+						basevec.elementAt(i).intValue(), currvec,
 						attvals, hashkeys, tmphash);
 				// System.out.println("done getavgatt "+i);
 				if (curratt > maxatt) {
@@ -655,7 +655,7 @@ public class findclusters {
 			// System.out.println("elements="+elements+" maxnum="+maxnum+" maxatt="+maxatt);
 			if (maxnum > -1) {
 				if (limit < maxatt) {
-					tmphash.put(hashkeys[((Integer) basevec.elementAt(maxnum))
+					tmphash.put(hashkeys[basevec.elementAt(maxnum)
 							.intValue()], null);
 					currvec.addElement(basevec.remove(maxnum));
 					elements--;
@@ -702,7 +702,7 @@ public class findclusters {
 		int elements = invec.size();
 		HashMap<String, ?> tmphash = new HashMap<String, Object>(elements);
 		for (int i = 0; i < elements; i++) {
-			tmphash.put(hashkeys[((Integer) invec.elementAt(i)).intValue()],
+			tmphash.put(hashkeys[invec.elementAt(i).intValue()],
 					null);
 		}// end for i
 		int attnum = attvals.length;
@@ -728,7 +728,7 @@ public class findclusters {
 		int elements = invec.size();
 		HashMap<String, ?> tmphash = new HashMap<String, Object>(elements);
 		for (int i = 0; i < elements; i++) {
-			tmphash.put(hashkeys[((Integer) invec.elementAt(i)).intValue()],
+			tmphash.put(hashkeys[invec.elementAt(i).intValue()],
 					null);
 		}// end for i
 		int attnum = attvals.length;
@@ -1019,10 +1019,10 @@ public class findclusters {
 		String key;
 		float[] tmparr, newarr;
 		for (int i = conn.size() - 1; i >= 0; i--) {
-			tmparr = (float[]) conn.elementAt(i);
+			tmparr = conn.elementAt(i);
 			key = String.valueOf(nodes[(int) tmparr[0]].number);
 			if (tmphash.containsKey(key)) {
-				newarr = ((float[]) tmphash.get(key));
+				newarr = tmphash.get(key);
 				newarr[1] += tmparr[1];
 				tmphash.put(key, newarr);
 			} else {
@@ -1032,7 +1032,7 @@ public class findclusters {
 				tmphash.put(key, newarr);
 			}
 		}// end for i
-		float[][] retarr = (float[][]) tmphash.values()
+		float[][] retarr = tmphash.values()
 				.toArray(new float[0][2]);
 		for (int i = retarr.length - 1; i >= 0; i--) {
 			if (retarr[i][1] > maxatt) {
