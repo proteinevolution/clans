@@ -2,10 +2,6 @@ package clans;
 
 import java.util.*;
 
-/**
- * 
- * @author tancred
- */
 public class SelectedSubsetHandling {
 
 	static MinimalHsp[] get_blasthits(MinimalHsp[] blasthits,
@@ -62,7 +58,7 @@ public class SelectedSubsetHandling {
 	}
 
 	static float[][] get_mymovearr(float[][] mymovearr, int[] selectednames) {
-		int elements = java.lang.reflect.Array.getLength(selectednames);
+		int elements = selectednames.length;
 		float[][] retarr = new float[elements][3];
 		for (int i = 0; i < elements; i++) {
 			retarr[i] = mymovearr[selectednames[i]];
@@ -71,7 +67,7 @@ public class SelectedSubsetHandling {
 	}
 
 	static float[][] get_myposarr(float[][] myposarr, int[] selectednames) {
-		int elements = java.lang.reflect.Array.getLength(selectednames);
+		int elements = selectednames.length;
 		float[][] retarr = new float[elements][3];
 		for (int i = 0; i < elements; i++) {
 			retarr[i] = myposarr[selectednames[i]];
@@ -81,7 +77,7 @@ public class SelectedSubsetHandling {
 
 	static AminoAcidSequence[] get_sequences(AminoAcidSequence[] inaln,
 			int[] selectednames) {
-		int elements = java.lang.reflect.Array.getLength(selectednames);
+		int elements = selectednames.length;
 		AminoAcidSequence[] retarr = new AminoAcidSequence[elements];
 		for (int i = 0; i < elements; i++) {
 			retarr[i] = inaln[selectednames[i]];
@@ -90,7 +86,7 @@ public class SelectedSubsetHandling {
 	}
 
 	static String[] get_namearr(String[] namearr, int[] selectednames) {
-		int elements = java.lang.reflect.Array.getLength(selectednames);
+		int elements = selectednames.length;
 		String[] retarr = new String[elements];
 		for (int i = 0; i < elements; i++) {
 			retarr[i] = namearr[selectednames[i]];
@@ -102,7 +98,7 @@ public class SelectedSubsetHandling {
 		if (weights == null) {
 			return null;
 		}
-		int elements = java.lang.reflect.Array.getLength(selectednames);
+		int elements = selectednames.length;
 		float[] retarr = new float[elements];
 		for (int i = 0; i < elements; i++) {
 			retarr[i] = weights[selectednames[i]];
