@@ -92,7 +92,7 @@ public class makepolygons {
     }//end get
     
     static int[][] getpol(float[][] inarr, float size){
-        int elements=java.lang.reflect.Array.getLength(inarr);
+        int elements = inarr.length;
         int[][] retarr=new int[3][elements];
         for(int i=0;i<elements;i++){
             retarr[0][i]=(int)(inarr[i][0]*size/2);

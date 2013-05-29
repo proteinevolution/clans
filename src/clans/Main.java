@@ -1,12 +1,5 @@
 package clans;
 
-/*
- * Copyright (C) 2004 Tancred Frickey
- * Distributed under the GNU General Public LicenceThis program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as published by the Free Software Foundation. This 
- * program is distributed in the hope that it will be useful,but WITHOUT ANY WARRANTY; without even the implied 
- * warranty ofMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See theGNU General Public License for more details.
- */
 import java.io.*;
 import java.util.*;
 
@@ -333,7 +326,7 @@ public class Main {
 
 				// add only the new matches
 				ArrayList<MinimalHsp> addblasthits = new ArrayList<MinimalHsp>();
-				for (int i = java.lang.reflect.Array.getLength(newblasthits); --i >= 0;) {
+                for (int i = newblasthits.length; --i >= 0;) {
 					if (newblasthits[i].query >= readelements || newblasthits[i].hit >= readelements) {
 						addblasthits.add(newblasthits[i]);
 					}
