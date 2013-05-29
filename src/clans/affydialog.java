@@ -13,7 +13,11 @@ import java.io.*;
  */
 public class affydialog extends javax.swing.JFrame {
     
-    /** Creates new form affydialog */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -4358800283763007044L;
+    
     public affydialog(ClusteringWithGui parent) {
         this.parent=parent;
         initComponents();
@@ -288,11 +292,11 @@ public class affydialog extends javax.swing.JFrame {
         //the currently selected elements are present in selectednames (int[])
         ArrayList<datapoint[]> tmplist=new ArrayList<datapoint[]>();
         String tmpname;
-        if(java.lang.reflect.Array.getLength(parent.data.selectednames)<=0){
+        if(parent.data.selectednames.length<=0){
             javax.swing.JOptionPane.showMessageDialog(this,"No sequences selected");
             return;
         }
-        for(int i=java.lang.reflect.Array.getLength(parent.data.selectednames);--i>=0;){
+        for(int i=parent.data.selectednames.length;--i>=0;){
             tmpname=(parent.data.sequence_names[parent.data.selectednames[i]]).trim();
             if(valhash.containsKey(tmpname)){
                 tmplist.add(valhash.get(tmpname));
@@ -407,12 +411,12 @@ public class affydialog extends javax.swing.JFrame {
         // remove the currently selected replicates from the currently selected wtdata element
         int datanum=datalist.getSelectedIndex();
         int[] currelements=replicatelist.getSelectedIndices();
-        for(int i=java.lang.reflect.Array.getLength(currelements)-1;i>=0;i--){
+        for(int i=currelements.length-1;i>=0;i--){
             ((replicates)datavec.elementAt(datanum)).wtreplicate[currelements[i]]=null;
         }//end for i
-        File[] newreplicates=new File[((replicates)datavec.elementAt(datanum)).replicates-java.lang.reflect.Array.getLength(currelements)];
+        File[] newreplicates=new File[((replicates)datavec.elementAt(datanum)).replicates-currelements.length];
         int counter=0;
-        for(int i=0;i<java.lang.reflect.Array.getLength(newreplicates);i++){
+        for(int i=0;i<newreplicates.length;i++){
             newreplicates[i]=((replicates)datavec.elementAt(datanum)).replicate[i+counter];
             if(newreplicates[i]==null){
                 i--;
@@ -420,7 +424,7 @@ public class affydialog extends javax.swing.JFrame {
             }
         }//end for i
         ((replicates)datavec.elementAt(datanum)).wtreplicate=newreplicates;
-        ((replicates)datavec.elementAt(datanum)).wtreplicates=java.lang.reflect.Array.getLength(newreplicates);
+        ((replicates)datavec.elementAt(datanum)).wtreplicates=newreplicates.length;
         wtreplicatevec.clear();
         for(int j=0;j<((replicates)datavec.elementAt(datanum)).replicates;j++){
             wtreplicatevec.addElement(((replicates)datavec.elementAt(datanum)).wtreplicate[j]);
@@ -441,15 +445,15 @@ public class affydialog extends javax.swing.JFrame {
             if(returnval == JFileChooser.APPROVE_OPTION) {
                 File[] addfiles=fc.getSelectedFiles();
                 replicates myreplicate=(replicates)datavec.elementAt(datanum);
-                File[] newfiles=new File[myreplicate.replicates+java.lang.reflect.Array.getLength(addfiles)];
+                File[] newfiles=new File[myreplicate.replicates+addfiles.length];
                 for(int i=0;i<myreplicate.replicates;i++){
                     newfiles[i]=myreplicate.replicate[i];
                 }//end for i
-                for(int i=0;i<java.lang.reflect.Array.getLength(addfiles);i++){
+                for(int i=0;i<addfiles.length;i++){
                     newfiles[i+myreplicate.replicates]=addfiles[i];
                 }//end for i
                 myreplicate.wtreplicate=newfiles;
-                myreplicate.wtreplicates=java.lang.reflect.Array.getLength(myreplicate.wtreplicate);
+                myreplicate.wtreplicates=myreplicate.wtreplicate.length;
                 //now update with the new data
             }
             repaint();
@@ -460,12 +464,12 @@ public class affydialog extends javax.swing.JFrame {
         // remove the currently selected replicates from the currently selected data element
         int datanum=datalist.getSelectedIndex();
         int[] currelements=replicatelist.getSelectedIndices();
-        for(int i=java.lang.reflect.Array.getLength(currelements)-1;i>=0;i--){
+        for(int i=currelements.length-1;i>=0;i--){
             ((replicates)datavec.elementAt(datanum)).replicate[currelements[i]]=null;
         }//end for i
-        File[] newreplicates=new File[((replicates)datavec.elementAt(datanum)).replicates-java.lang.reflect.Array.getLength(currelements)];
+        File[] newreplicates=new File[((replicates)datavec.elementAt(datanum)).replicates-currelements.length];
         int counter=0;
-        for(int i=0;i<java.lang.reflect.Array.getLength(newreplicates);i++){
+        for(int i=0;i<newreplicates.length;i++){
             newreplicates[i]=((replicates)datavec.elementAt(datanum)).replicate[i+counter];
             if(newreplicates[i]==null){
                 i--;
@@ -473,7 +477,7 @@ public class affydialog extends javax.swing.JFrame {
             }
         }//end for i
         ((replicates)datavec.elementAt(datanum)).replicate=newreplicates;
-        ((replicates)datavec.elementAt(datanum)).replicates=java.lang.reflect.Array.getLength(newreplicates);
+        ((replicates)datavec.elementAt(datanum)).replicates=newreplicates.length;
         replicatevec.clear();
         for(int j=0;j<((replicates)datavec.elementAt(datanum)).replicates;j++){
             replicatevec.addElement(((replicates)datavec.elementAt(datanum)).replicate[j]);
@@ -494,15 +498,15 @@ public class affydialog extends javax.swing.JFrame {
             if(returnval == JFileChooser.APPROVE_OPTION) {
                 File[] addfiles=fc.getSelectedFiles();
                 replicates myreplicate=(replicates)datavec.elementAt(datanum);
-                File[] newfiles=new File[myreplicate.replicates+java.lang.reflect.Array.getLength(addfiles)];
+                File[] newfiles=new File[myreplicate.replicates+addfiles.length];
                 for(int i=0;i<myreplicate.replicates;i++){
                     newfiles[i]=myreplicate.replicate[i];
                 }//end for i
-                for(int i=0;i<java.lang.reflect.Array.getLength(addfiles);i++){
+                for(int i=0;i<addfiles.length;i++){
                     newfiles[i+myreplicate.replicates]=addfiles[i];
                 }//end for i
                 myreplicate.replicate=newfiles;
-                myreplicate.replicates=java.lang.reflect.Array.getLength(myreplicate.replicate);
+                myreplicate.replicates=myreplicate.replicate.length;
                 //now update with the new data
                 
                 
@@ -514,7 +518,7 @@ public class affydialog extends javax.swing.JFrame {
     private void rmdatabuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rmdatabuttonActionPerformed
         // remove an element from the data vector
         int[] currelements=datalist.getSelectedIndices();
-        for(int i=java.lang.reflect.Array.getLength(currelements)-1;i>=0;i--){
+        for(int i=currelements.length-1;i>=0;i--){
             datavec.removeElementAt(currelements[i]);
             datanamesvec.removeElementAt(currelements[i]);
         }//end for i
@@ -537,7 +541,7 @@ public class affydialog extends javax.swing.JFrame {
             File[] addfiles=fc.getSelectedFiles();
             replicates myreplicate=new replicates();
             myreplicate.replicate=addfiles;
-            myreplicate.replicates=java.lang.reflect.Array.getLength(addfiles);
+            myreplicate.replicates=addfiles.length;
             //now get an identifier for these files
             String myname=myreplicate.replicate[0].getName();
             String checkname;
@@ -565,7 +569,7 @@ public class affydialog extends javax.swing.JFrame {
                 addfiles=fc.getSelectedFiles();
                 wtfiles=addfiles;
                 myreplicate.wtreplicate=addfiles;
-                myreplicate.wtreplicates=java.lang.reflect.Array.getLength(addfiles);
+                myreplicate.wtreplicates=addfiles.length;
                 //now get an identifier for the wild-type files
                 myname=myreplicate.wtreplicate[0].getName();
                 for(int i=0;i<myreplicate.wtreplicates;i++){
