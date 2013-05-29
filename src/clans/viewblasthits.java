@@ -1,24 +1,22 @@
-/*
- * viewblasthits.java
- *
- * Created on November 3, 2003, 12:27 PM
- */
 package clans;
+
 import java.util.*;
 import java.awt.*;
-/**
- *
- * @author  tancred
- */
+
 public class viewblasthits extends javax.swing.JDialog {
     
-    /** Creates new form viewblasthits */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5554164100601368922L;
+
     public viewblasthits(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
-    
-    public viewblasthits(ClusteringWithGui parent,hsp[] hsparr,int referenceseqnum,String[] namearr,AminoAcidSequence refseq,HashMap nameshash) {
+
+    public viewblasthits(ClusteringWithGui parent, hsp[] hsparr, int referenceseqnum, String[] namearr,
+            AminoAcidSequence refseq, HashMap<String, Integer> nameshash) {
         //super(parent, false);
         this.parent=parent;
         this.hsparr=hsparr;
@@ -123,7 +121,7 @@ public class viewblasthits extends javax.swing.JDialog {
             draw2.selectednum=seqlength-1;
         }
         xscrollbar.setValue(draw2.selectednum);
-        parent.blastselectseqs=(int[])hitsvec.elementAt(draw2.selectednum);
+        parent.blastselectseqs = hitsvec.elementAt(draw2.selectednum);
         repaint();
         parent.repaint();        
     }//GEN-LAST:event_overviewpanelMouseDragged
@@ -132,7 +130,7 @@ public class viewblasthits extends javax.swing.JDialog {
         // if the mouse is pressed I want to draw the selectedcolumn at the curren tmouse position
         draw2.selectednum=(int)((evt.getX()-(draw2.xoffset))/draw2.unitwidth);
         xscrollbar.setValue(draw2.selectednum);
-        parent.blastselectseqs=(int[])hitsvec.elementAt(draw2.selectednum);
+        parent.blastselectseqs = hitsvec.elementAt(draw2.selectednum);
         repaint();
         parent.repaint();
     }//GEN-LAST:event_overviewpanelMousePressed
@@ -156,14 +154,14 @@ public class viewblasthits extends javax.swing.JDialog {
     int referenceseqnum;
     AminoAcidSequence referenceseq;
     String[] namearr;
-    HashMap nameshash;
+    HashMap<String, Integer> nameshash;
     drawdetail draw1;
     drawoverview draw2;
     AminoAcidSequence refseq;
     int seqlength;
     char[] charseq;
     int[] hitsarr=new int[0];
-    Vector hitsvec=new Vector();
+    Vector<int[]> hitsvec = new Vector<int[]>();
     int maxhsps=0;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -180,7 +178,7 @@ public class viewblasthits extends javax.swing.JDialog {
         //a vector containing integer arrays with the hit sequence numbers
         //always add the query number as first element!
         hitsarr=new int[seqlength];
-        int hspnum=java.lang.reflect.Array.getLength(hsparr);
+        int hspnum=hsparr.length;
         //now loop through the hsp's and remember how many hits which residue had
         int start;
         int end;
@@ -193,7 +191,7 @@ public class viewblasthits extends javax.swing.JDialog {
                 tmparr[i][j]=-1;
             }//end for j
         }//end for i
-        if(java.lang.reflect.Array.getLength(hsparr)==0){
+        if (hsparr.length == 0) {
             System.out.println("no blast hits found");
         }else{
             System.out.println("blast hits for "+hsparr[0].qname);
@@ -203,7 +201,7 @@ public class viewblasthits extends javax.swing.JDialog {
                 end=hsparr[i].qend;
                 for(j=start;j<end;j++){
                     hitsarr[j]++;
-                    tmparr[j][i+1]=((Integer)nameshash.get(hsparr[i].hname)).intValue();
+                    tmparr[j][i + 1] = nameshash.get(hsparr[i].hname).intValue();
                 }
             }//end for i
         }
@@ -255,6 +253,11 @@ public class viewblasthits extends javax.swing.JDialog {
     
     class drawoverview extends javax.swing.JPanel{
         
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -2946625860881426993L;
+
         public drawoverview(){
             this.setBackground(Color.white);
         }
@@ -294,6 +297,11 @@ public class viewblasthits extends javax.swing.JDialog {
     
     class drawdetail extends javax.swing.JPanel{
         
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 7997168794734721075L;
+
         public drawdetail(){
             this.setBackground(Color.white);
         }
