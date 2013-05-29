@@ -1,17 +1,14 @@
-/*
- * shownamedialog.java
- *
- * Created on December 17, 2002, 3:04 PM
- */
 package clans;
+
 import java.util.*;
-/**
- *
- * @author  tancred
- */
+
 public class showblasthitsforselected extends javax.swing.JFrame {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 3816742984172803053L;
     
-    /** Creates new form shownamedialog */
     public showblasthitsforselected(ClusteringWithGui parent, int[] blasthits,int[] selectednames) {
         this.parent=parent;
         this.blasthits=blasthits;
@@ -120,8 +117,8 @@ public class showblasthitsforselected extends javax.swing.JFrame {
         // get the sequence numbers form both lists and set these as selected sequences in the graph
         int[] selectedseqs=seqnamelist.getSelectedIndices();
         int[] blastselectedseqs=blasthitlist.getSelectedIndices();
-        int selectnum=java.lang.reflect.Array.getLength(selectedseqs);
-        int selectblastnum=java.lang.reflect.Array.getLength(blastselectedseqs);
+        int selectnum=selectedseqs.length;
+        int selectblastnum=blastselectedseqs.length;
         int[] retarr=new int[selectnum+selectblastnum];
         for(int i=0;i<selectnum;i++){
             retarr[i]=selectednames[selectedseqs[i]];
@@ -152,7 +149,7 @@ public class showblasthitsforselected extends javax.swing.JFrame {
         String query=getquery();
         int[] selectedseqs=getmatches(query,namesarr);
         int[] blastselectedseqs=getmatches(query,blastnamesarr);
-        if((java.lang.reflect.Array.getLength(blastselectedseqs)==0)||(java.lang.reflect.Array.getLength(selectedseqs)==0)){
+        if ((blastselectedseqs.length == 0) || (selectedseqs.length == 0)) {
             javax.swing.JOptionPane.showMessageDialog(this,"No sequences found for '"+query+"'","ERROR",javax.swing.JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -164,7 +161,7 @@ public class showblasthitsforselected extends javax.swing.JFrame {
     private void okbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okbuttonActionPerformed
         int[] selectedseqs=seqnamelist.getSelectedIndices();
         int[] blastselectedseqs=blasthitlist.getSelectedIndices();
-        int selectnum=java.lang.reflect.Array.getLength(selectedseqs);
+        int selectnum=selectedseqs.length;
         if(selectnum>0){
             int[] tmparr=new int[selectnum];
             for(int i=0;i<selectnum;i++){
@@ -174,7 +171,7 @@ public class showblasthitsforselected extends javax.swing.JFrame {
         }else{
             parent.data.selectednames=selectednames;
         }
-        selectnum=java.lang.reflect.Array.getLength(blastselectedseqs);
+        selectnum=blastselectedseqs.length;
         if(selectnum>0){
             int[] tmparr=new int[selectnum];
             for(int i=0;i<selectnum;i++){
@@ -218,12 +215,12 @@ public class showblasthitsforselected extends javax.swing.JFrame {
     
     void makedata(){
         //initialize all the necessary data objects (namesarr & blastnamesarr)
-        int tmpnum=java.lang.reflect.Array.getLength(selectednames);
+        int tmpnum=selectednames.length;
         namesarr=new String[tmpnum];
         for(int i=0;i<tmpnum;i++){
             namesarr[i]=selectednames[i]+" "+parent.data.sequence_names[selectednames[i]];
         }
-        tmpnum=java.lang.reflect.Array.getLength(blasthits);
+        tmpnum=blasthits.length;
         blastnamesarr=new String[tmpnum];
         for(int i=0;i<tmpnum;i++){
             blastnamesarr[i]=blasthits[i]+" "+parent.data.sequence_names[blasthits[i]];
@@ -243,13 +240,14 @@ public class showblasthitsforselected extends javax.swing.JFrame {
     
     int[] getmatches(String query, String[] mynamesarr){
         //get the index of all names that match query
-        int namesnum=java.lang.reflect.Array.getLength(mynamesarr);
-        Vector tmpvec=new Vector();
+        int namesnum=mynamesarr.length;
+        Vector<Integer> tmpvec = new Vector<Integer>();
         for(int i=0;i<namesnum;i++){
             if(mynamesarr[i].matches(query)){
                 tmpvec.addElement(new Integer(i));
             }
         }//end for i
+        
         int[] retarr=new int[tmpvec.size()];
         for(int i=0;i<tmpvec.size();i++){
             retarr[i]=((Integer)tmpvec.elementAt(i)).intValue();
@@ -260,7 +258,7 @@ public class showblasthitsforselected extends javax.swing.JFrame {
     //--------------------------------------------------------------------------
     /*
     String[] numberarr(String[] innames){
-        int elements=java.lang.reflect.Array.getLength(innames);
+        int elements=innames.length;
         String[] retarr=new String[elements];
         int numlength=(String.valueOf(elements).length())+1;
         StringBuffer tmpstrbuff=new StringBuffer();
@@ -284,8 +282,8 @@ public class showblasthitsforselected extends javax.swing.JFrame {
     void setselected(int[] selectednamesint, boolean showonly){
         seqnamelist.setSelectedIndices(selectednamesint);
         if(showonly){//if I only want to see the selected names
-            selectednames=new String[java.lang.reflect.Array.getLength(selectednamesint)];
-            for(int i=0;i<java.lang.reflect.Array.getLength(selectednames);i++){
+            selectednames=new String[selectednamesint.length];
+            for(int i=0;i<selectednames.length;i++){
                 selectednames[i]=namesarr[selectednamesint[i]];
             }//end for i
             seqnamelist.setListData(selectednames);
@@ -299,13 +297,13 @@ public class showblasthitsforselected extends javax.swing.JFrame {
     
     static int[] getblasthits(minattvals[] myattvals,int[] selectednames,String[] parentnamesarr){
         //get the names of the sequences with blast hits to or from selectednames (but not within)
-        HashMap selectedhash=new HashMap();
-        int selectnum=java.lang.reflect.Array.getLength(selectednames);
+        HashMap<String, Integer> selectedhash=new HashMap<String, Integer>();
+        int selectnum=selectednames.length;
         for(int i=0;i<selectnum;i++){
             selectedhash.put(String.valueOf(selectednames[i]),null);
         }//end for i
-        int attvalnum=java.lang.reflect.Array.getLength(myattvals);
-        HashMap addhash=new HashMap();
+        int attvalnum=myattvals.length;
+        HashMap<String, Integer> addhash=new HashMap<String, Integer>();
         String qname,hname;
         for(int i=0;i<attvalnum;i++){
             qname=String.valueOf(myattvals[i].query);
@@ -323,7 +321,7 @@ public class showblasthitsforselected extends javax.swing.JFrame {
             }
         }//end for i
         Integer[] preretarr=(Integer[])addhash.values().toArray(new Integer[0]);
-        int arrsize=java.lang.reflect.Array.getLength(preretarr);
+        int arrsize = preretarr.length;
         int[] retarr=new int[arrsize];
         for(int i=0;i<arrsize;i++){
             retarr[i]=preretarr[i].intValue();
