@@ -250,7 +250,7 @@ public class shownamedialog extends javax.swing.JFrame {
                 for (int i = myselected.length; --i >= 0;) {
                     myselected[i] = globalselected[myselected[i]];//reassign the sequence number globally
                 }//end for i
-                if (java.lang.reflect.Array.getLength(myselected) < globalselected.length) {
+                if (myselected.length < globalselected.length) {
                     if (parent.data.selectednames.length > 0) {//save the former data
                         selectedvec.addElement(parent.data.selectednames);
                         backbutton.setText("Back (" + selectedvec.size() + ")");
