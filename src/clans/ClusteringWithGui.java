@@ -2014,7 +2014,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }
         // Add your handling code here:
         if (data.selectednames.length > 0) {// if sth. is selected clear the selection
-            data.selectednames = new int[0];
+            
+            set_selected(new ArrayList<Integer>());
+            
             if (shownames != null) {
                 shownames.seqnamelist.setSelectedIndices(data.selectednames);// clear all selected
             }
@@ -2023,12 +2025,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 button_zoom_on_selected.setText("Zoom on selected");
             }
             button_select_all_or_clear.setText("Select All");
+
         } else {// if nothing is selected, select all
-            int alnseqs = data.sequences.length;
-            data.selectednames = new int[alnseqs];
-            for (int i = 0; i < alnseqs; i++) {
-                data.selectednames[i] = i;
+            ArrayList<Integer> all_indices = new ArrayList<Integer>();
+            for (int i = 0; i < data.sequences.length; i++) {
+                all_indices.add(i);
             }
+            
+            set_selected(all_indices);
+            
             if (shownames != null) {
                 shownames.seqnamelist.setSelectedIndices(data.selectednames);
             }
@@ -2730,21 +2735,27 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 tmpselect.add(new Integer(data.selectednames[i]));
             }
         }// end for i
-         // now assign the new selecteds to selectelements and update shownamedialog
-        data.selectednames = new int[tmpselect.size()];
-        for (int i = tmpselect.size() - 1; i >= 0; i--) {
-            data.selectednames[i] = ((Integer) tmpselect.get(i)).intValue();
-        }// end for i
+
+        // now assign the new selecteds to selectelements and update shownamedialog
+        set_selected(tmpselect);
+        
         if (shownames != null) {
-            shownames.setselected(data.selectednames, (shownames.showall == false));
+            shownames.setselected(data.selectednames, !shownames.showall);
         }
         setclearbuttontext();
-        
+    }
+
+    private void set_selected(ArrayList<Integer> new_selecteds) {
+        data.selectednames = new int[new_selecteds.size()];
+        for (int i = 0; i < new_selecteds.size(); i++) {
+            data.selectednames[i] = new_selecteds.get(i).intValue();
+        }
+
         if (myseqgroupwindow != null) { // update the highlighting of groups with selected sequences
             myseqgroupwindow.repaint();
         }
-    }// end updateselected
-
+    }
+    
     void updatetmpselected(int[] tmpreg) {
         // as input this has 4 coordinates
         // what this does is to take all sequences that are within those coordinates
@@ -2809,9 +2820,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             shownames.setselected(tmpselectednames, true);
         }
     }// end updatetmpselected
-
-    // --------------------------------------------------------------------------
-
+    
     void moveselected(int xint, int yint) {
         // move selected sequences by movex and movy in 3d space
         // use the rotmtx to compute the x,y and z coord to move them by
