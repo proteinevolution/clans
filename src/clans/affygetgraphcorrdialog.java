@@ -1,17 +1,14 @@
-/*
- * affygetgraphcorrdialog.java
- *
- * Created on September 19, 2006, 11:12 AM
- */
 package clans;
+
 import java.util.*;
-/**
- *
- * @author  tancred
- */
+
 public class affygetgraphcorrdialog extends javax.swing.JFrame {
     
-    /** Creates new form affygetgraphcorrdialog */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2423870452098304715L;
+
     public affygetgraphcorrdialog(ClusteringWithGui map, affydialog parent) {
         initComponents();
         this.map=map;
@@ -199,7 +196,7 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
         }//end for i
         //now see how each of the genes in the clans map compares to the currently drawn graph.
         getcorrelated(corrmethod,corranticorr,mincorr,vals);
-        if(java.lang.reflect.Array.getLength(map.data.selectednames)==0){
+        if(map.data.selectednames.length==0){
             javax.swing.JOptionPane.showMessageDialog(this,"No correlated expressions found!");
         }else{
             map.repaint();
@@ -228,7 +225,7 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
     ClusteringWithGui map=null;
     affydialog parent=null;
     drawpanel draw1=new drawpanel();
-    Vector datavec=null;
+    Vector<replicates> datavec=null;
     int mousex=0;
     int mousey=0;
     
@@ -253,7 +250,7 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
         float corrval;
         //first see how many conditions I want to look at and convert the vals into datapoints
         int count=0;
-        int conditions=java.lang.reflect.Array.getLength(vals);
+        int conditions=vals.length;
         for(int i=0;i<conditions;i++){
             if(vals[i]!=-1){
                 count++;
@@ -271,8 +268,8 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
         }//end for i
         datapoint[] invals;
         //now take each of the genes in clans in turn and see which correlate with what I drew
-        java.util.ArrayList selected=new java.util.ArrayList();
-        for(int i=java.lang.reflect.Array.getLength(map.data.sequence_names);--i>=0;){
+        java.util.ArrayList<Integer> selected=new java.util.ArrayList<Integer>();
+        for(int i=map.data.sequence_names.length;--i>=0;){
             if(parent.valhash.containsKey(map.data.sequence_names[i])){
                 invals=(datapoint[])(parent.valhash.get(map.data.sequence_names[i]));
                 //now make sure I only compare the same conditions
@@ -297,7 +294,7 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
         //now I know which I want to select
         map.data.selectednames=new int[selected.size()];
         for(int i=selected.size();--i>=0;){
-            map.data.selectednames[i]=((Integer)selected.get(i)).intValue();
+            map.data.selectednames[i]=selected.get(i).intValue();
         }//end for i
     }//end getcorrelated
     
@@ -323,8 +320,8 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
     float pearson(datapoint[] dat1,datapoint[] dat2){
         //get the linear correlation (pearsons) of these two datasets
         double retval=0;
-        int num1=java.lang.reflect.Array.getLength(dat1);
-        if(java.lang.reflect.Array.getLength(dat2)!=num1){
+        int num1=dat1.length;
+        if(dat2.length!=num1){
             System.err.println("unequals number of elements for correlation calculation; skipping");
             return 0;
         }
@@ -351,8 +348,8 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
         //get the spearman rank correlation of these two datasets UNWEIGHTED
         //Rs=(SUM(xi-xavg)*(yi-yavg))/(sqrt(SUM((xi-xavg)**2))*sqrt(SUM(yi-yavg)**2));
         double retval=0;
-        int num=java.lang.reflect.Array.getLength(indat1);
-        if(java.lang.reflect.Array.getLength(indat2)!=num){
+        int num=indat1.length;
+        if(indat2.length!=num){
             System.err.println("unequals number of elements for correlation calculation; skipping");
             return 0;
         }
@@ -386,14 +383,13 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
         int[] retarr=new int[2];
         retarr[0]=0;
         retarr[1]=0;
-        int num=java.lang.reflect.Array.getLength(dat);
+        int num=dat.length;
         float last,addval;
         double countw;
-        int count,lastrank,rank=0;
+        int count;
         //do the y ranking
         java.util.Arrays.sort(dat,new comparatory());
         last=dat[num-1].y;//make sure this is NOT the same as the first value
-        lastrank=0;
         for(int i=0;i<num;i++){
             last=dat[i].y;
             count=0;
@@ -415,7 +411,6 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
         //do the x-ranking
         java.util.Arrays.sort(dat,new comparatorx());
         last=dat[num-1].x;//make sure this is NOT the same as the first value
-        lastrank=0;
         for(int i=0;i<num;i++){
             last=dat[i].x;
             count=0;
@@ -439,15 +434,15 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
     
     float kendall(datapoint[] dat1,datapoint[] dat2){
         //get the kendall-tau rank correlation of these two datasets
-        int num=java.lang.reflect.Array.getLength(dat1);
-        if(java.lang.reflect.Array.getLength(dat2)!=num){
+        int num=dat1.length;
+        if(dat2.length!=num){
             System.err.println("unequals number of elements for correlation calculation; skipping");
             return 0;
         }
         double retval=0;
         int j,k;
         double is=0,n2=0,n1=0;
-        double svar,aa,a2,a1;
+        double aa, a2, a1;
         double addnum=0;
         for(j=0;j<num-1;j++){
             for(k=j+1;k<num;k++){
@@ -480,21 +475,21 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
     
-    static class comparatorx implements java.util.Comparator{
-        public int compare(Object o1, Object o2){
-            float x1=((point)o1).x;
-            float x2=((point)o2).x;
-            return (x1<x2? -1:(x1==x2?0:1));
-        }//end compare
-    }//end class comparator
-    
-    static class comparatory implements java.util.Comparator{
-        public int compare(Object o1, Object o2){
-            float x1=((point)o1).y;
-            float x2=((point)o2).y;
-            return (x1<x2? -1:(x1==x2?0:1));
-        }//end compare
-    }//end class comparator
+    static class comparatorx implements java.util.Comparator<point> {
+        public int compare(point o1, point o2) {
+            float x1 = o1.x;
+            float x2 = o2.x;
+            return (x1 < x2 ? -1 : (x1 == x2 ? 0 : 1));
+        }// end compare
+    }// end class comparator
+
+    static class comparatory implements java.util.Comparator<point> {
+        public int compare(point o1, point o2) {
+            float x1 = o1.y;
+            float x2 = o2.y;
+            return (x1 < x2 ? -1 : (x1 == x2 ? 0 : 1));
+        }// end compare
+    }// end class comparator
     
     class point{
         
@@ -520,8 +515,10 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
     
     class drawpanel extends javax.swing.JPanel{
         
-        public drawpanel(){
-        }
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 4704631183140020399L;
         
         public void init(int con){
             this.conditions=con;
@@ -562,7 +559,7 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
                 replicates myrep;
                 for(int i=0;i<conditions;i++){
                     g.drawLine((int)(i*xfactor)+xoffset,yoffset,(int)(i*xfactor)+xoffset,yoffset+drawheight);
-                    myrep=(replicates)datavec.get(i);
+                    myrep=datavec.get(i);
                     if(myrep.abbreviation==null){
                         g.drawString(String.valueOf(i),(int)(i*xfactor)+xoffset,drawheight+yoffset);
                     }else{
