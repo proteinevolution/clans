@@ -1,5 +1,7 @@
 package clans;
 
+import java.awt.Color;
+import java.awt.Label;
 import java.awt.event.MouseEvent;
 import java.util.*;
 
@@ -47,6 +49,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		buttonpanel = new javax.swing.JPanel();
 		showinparent = new javax.swing.JCheckBox();
 		colornamescheckbox = new javax.swing.JCheckBox();
+		highlight_groups_with_selected_sequences = new javax.swing.JCheckBox();
 		jPanel3 = new javax.swing.JPanel();
 		sizelabel = new javax.swing.JLabel();
 		sizetextfield = new javax.swing.JTextField();
@@ -63,7 +66,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		listpanel = new javax.swing.JPanel();
 		jScrollPane1 = new javax.swing.JScrollPane();
 		groupslist = new javax.swing.JList(parent.data.seqgroupsvec);
-		groupslist.setCellRenderer(new MyCellRenderer());
+		groupslist.setCellRenderer(new MyCellRenderer(this));
 		jPanel2 = new javax.swing.JPanel();
 		typepanel = new javax.swing.JPanel();
 		smallerbutton = new javax.swing.JButton();
@@ -103,7 +106,19 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			}
 		});
 		buttonpanel.add(colornamescheckbox);
+		
+		
+        highlight_groups_with_selected_sequences.setSelected(true);
+        highlight_groups_with_selected_sequences.setText("Highlight groups with selected sequences");
+        highlight_groups_with_selected_sequences.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                highlight_groups_with_selected_sequencesActionPerformed(evt);
+            }
+        });
+        buttonpanel.add(highlight_groups_with_selected_sequences);
 
+        buttonpanel.add(new Label(""));
+        
 		jPanel3.setLayout(new java.awt.GridLayout(1, 0));
 
 		sizelabel.setText("Default size:");
@@ -576,6 +591,10 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		repaint();
 	}// GEN-LAST:event_colornamescheckboxActionPerformed
 
+    private void highlight_groups_with_selected_sequencesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_colornamescheckboxActionPerformed
+        repaint();
+    }
+	
 	private void downbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_downbuttonActionPerformed
 		// move the currently selected object down by one in the vector
 		int currsel = groupslist.getSelectedIndex();
@@ -771,13 +790,6 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		dispose();
 	}// GEN-LAST:event_closeDialog
 
-	/**
-	 * @param args
-	 *            the command line arguments
-	 */
-	// public static void main(String args[]) {
-	// new seqgroupwindow(new javax.swing.JFrame(), true).show();
-	// }
 
 	javax.swing.JColorChooser colorchooser = new javax.swing.JColorChooser();
 	String[] groupnames;
@@ -791,6 +803,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private javax.swing.JPanel buttonpanel;
 	private javax.swing.JButton colorbutton;
 	private javax.swing.JCheckBox colornamescheckbox;
+	private javax.swing.JCheckBox highlight_groups_with_selected_sequences;
 	private javax.swing.JButton delbutton;
 	private javax.swing.JButton downbutton;
 	private javax.swing.JMenuItem extracttofilemenuitem;
@@ -985,50 +998,97 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		 * 
 		 */
 		private static final long serialVersionUID = -4398839558096028331L;
-
+		private WindowEditGroups parent;
+		
+		public MyCellRenderer(WindowEditGroups parent) {
+		    this.parent = parent;
+        }
+		
+		
 		public java.awt.Component getListCellRendererComponent(javax.swing.JList list, Object value, int index,
 				boolean isSelected, boolean cellHasFocus) {
 			if (index == 0) {
-				myfont = parent.draw1.myfont;
-				mybackground = parent.draw1.bgcolor;
-				myforeground = parent.draw1.fgcolor;
+				myfont = parent.parent.draw1.myfont;
+				mybackground = parent.parent.draw1.bgcolor;
+				myforeground = parent.parent.draw1.fgcolor;
 			}
 			
-			SequenceGroup group = (SequenceGroup) value;
+            SequenceGroup group = (SequenceGroup) value;
+
+            setText(get_group_description_text(group));
+
+            // set foreground color
+            if (colornamescheckbox.isSelected()) {
+                setForeground(group.color);
+            } else {
+                setForeground(myforeground);
+            }
+
+			// set background color
 			
-			String s = group.name;
-
-			s += " (" + group.sequences.length + ")";
-
-			if (group.confvals != null) {
-				s += " (cohesion: " + group.confvals + ")";
-			}
-			if (group.hide) {
-				s += " (hidden)";
-			}
-			setText(s);
-			if (colornamescheckbox.isSelected()) {
-				if (isSelected) {
-					setBackground(list.getSelectionBackground());
-					setForeground(group.color);
-				} else {
-					setBackground(mybackground);
-					setForeground(group.color);
-				}
-			} else {
-				if (isSelected) {
-					setBackground(list.getSelectionBackground());
-					setForeground(myforeground);
-				} else {
-					setBackground(mybackground);
-					setForeground(myforeground);
-				}
-			}
+            if (isSelected) {
+                setBackground(list.getSelectionBackground());
+            } else {
+                if (highlight_groups_with_selected_sequences.isSelected() && group_contains_selected_sequences(group)) {
+                    setBackground(new Color(189, 252, 201));
+                } else {
+                    setBackground(mybackground);
+                }
+            }
+			
 			setEnabled(list.isEnabled());
 			setFont(myfont);
 			setOpaque(true);
 			return this;
 		}
+
+        /**
+         * Assembles the string that is used as text in the groups list.
+         * 
+         * @param group
+         *            the group for which the text is needed
+         * @return group description text
+         */
+        public String get_group_description_text(SequenceGroup group) {
+            String s = group.name;
+
+            s += " (" + group.sequences.length + ")";
+
+            if (group.confvals != null) {
+                s += " (cohesion: " + group.confvals + ")";
+            }
+            if (group.hide) {
+                s += " (hidden)";
+            }
+
+            return s;
+        }
+
+        /**
+         * Determines whether sequences in a group are current selected in the main window.
+         * 
+         * @param group
+         *            the group in question
+         * @return true iff at least one sequence in this group is currently selected in the main window
+         */
+        public boolean group_contains_selected_sequences(SequenceGroup group) {
+            if (parent.parent.data.selectednames.length == 0) {
+                return false;
+            }
+
+            List<Integer> selected_sequences = new ArrayList<Integer>();
+            for (int i : parent.parent.data.selectednames) {
+                selected_sequences.add(i);
+            }
+
+            for (int i : group.sequences) {
+                if (selected_sequences.contains(i)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 	}// end class cellrenderer
 
 	// --------------------------------------------------------------------------
