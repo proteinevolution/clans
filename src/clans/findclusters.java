@@ -1,30 +1,19 @@
-/*
- * findclusters.java
- *
- * Created on March 9, 2004, 4:05 PM
- */
 package clans;
 
 import java.util.*;
 
-/**
- * 
- * @author tancred
- */
 public class findclusters {
 
-	/** Creates a new instance of findclusters */
-	public findclusters() {
-	}
-
-	// --------------------------------------------------------------------------
-	// ---------------------linkage
-	// clustering-----------------------------------
-	// --------------------------------------------------------------------------
-	public static Vector<cluster> getlinkage(minattvals[] attvals,
-			int minlinks, int minseqnum, int seqnum) {
-		// form clusters with at least each seq connected by minlinks to the
-		// cluster
+    /**
+     * linkage clustering - form clusters with at least each seq connected by minlinks to the cluster
+     * 
+     * @param attvals
+     * @param minlinks
+     * @param minseqnum
+     * @param seqnum
+     * @return
+     */
+    public static Vector<cluster> getlinkage(minattvals[] attvals, int minlinks, int minseqnum, int seqnum) {
 		Vector<cluster> retvec = new Vector<cluster>();
 		// simple cases, 0 and 1
 		if (minlinks < 1) {// return all sequences
@@ -69,7 +58,7 @@ public class findclusters {
 
 		// make a Hash and an array of strings.
 		// make the corresponding hash containing as value an array of int
-		HashMap clusterhash = new HashMap((int) (seqnum / 0.8) + 1, 0.8f);
+		HashMap<String, int[]> clusterhash = new HashMap<String, int[]>((int) (seqnum / 0.8) + 1, 0.8f);
 		String[] hashkeys = new String[seqnum];
 		int[] tmparr;
 		for (int i = 0; i < seqnum; i++) {
@@ -87,19 +76,11 @@ public class findclusters {
 			clusterhash.put(hashkeys[i], tmparr);// groupvals,
 		}// end for i
 		getmaxnum(attvals, clusterhash, hashkeys, 2);// get the maximum number
-														// of connections for
-														// each sequence
-		// for(int i=0;i<seqnum;i++){
-		// System.out.println(i+" "+((int[])clusterhash.get(hashkeys[i]))[2]);
-		// }//end for i
-		int[] maxnumarr;
-		boolean done = false;
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+														boolean done = false;
 		int[] tmpseqs = new int[minlinks];
 		int[] tmpseqs2;
 		int counter = 1;// because 0 and -1 are used for sth. else
 		cluster newcluster;
-		int[] seqshits = new int[seqnum];
 		int maxconn = 0;// counter for the max number of connections
 		int maxnum = -1;// the sequence number with highest maxconn
 		GETCLUSTER: while (done == false) {
@@ -110,16 +91,16 @@ public class findclusters {
 						|| ((int[]) clusterhash.get(hashkeys[i]))[0] == -3) {
 					((int[]) clusterhash.get(hashkeys[i]))[0] = -1;
 				}
-				if (((int[]) clusterhash.get(hashkeys[i]))[0] == -1
-						&& ((int[]) clusterhash.get(hashkeys[i]))[2] > maxconn) {// if
-																					// this
-																					// sequence
-																					// is
-																					// unassigned
-																					// and
-																					// has
-																					// max
-																					// connections
+                if (((int[]) clusterhash.get(hashkeys[i]))[0] == -1
+                        && ((int[]) clusterhash.get(hashkeys[i]))[2] > maxconn) {// if
+                                                                                 // this
+                                                                                 // sequence
+                                                                                 // is
+                                                                                 // unassigned
+                                                                                 // and
+                                                                                 // has
+                                                                                 // max
+                                                                                 // connections
 					maxconn = ((int[]) clusterhash.get(hashkeys[i]))[2];
 					maxnum = i;
 					// System.out.println("maxconn="+maxconn+" new seed="+maxnum);
@@ -130,7 +111,7 @@ public class findclusters {
 				// System.out.println("seed="+maxnum+" maxconn="+maxconn);
 			System.out.print(".");
 			int[] conarr = getconnecteds(maxnum, clusterhash, hashkeys, attvals);
-			if (java.lang.reflect.Array.getLength(conarr) < minlinks) {// if I
+			if (conarr.length < minlinks) {// if I
 																		// found
 																		// no
 																		// new
@@ -155,13 +136,13 @@ public class findclusters {
 																// sequences to
 																// this group
 			}// end for i
-			for (int i = java.lang.reflect.Array.getLength(conarr) - 1; i >= 0; i--) {
+			for (int i = conarr.length - 1; i >= 0; i--) {
 				// remember which sequences had hits with current seed
 				((int[]) clusterhash.get(hashkeys[conarr[i]]))[1] = 1;// seqshits[maxnumarr[i]]=1;
 			}
 			((int[]) clusterhash.get(hashkeys[maxnum]))[0] = 1;// counter;//groupvals[maxnum]=counter;
 			newcluster = new cluster();
-			while (java.lang.reflect.Array.getLength(newcluster.member) == 0) {
+			while (newcluster.member.length == 0) {
 				// get the minlinks other sequences that share the most hits
 				// with this sequence
 				tmpseqs = getmaxshared(attvals, clusterhash, hashkeys, maxnum,
@@ -184,7 +165,7 @@ public class findclusters {
 						continue GETCLUSTER;
 					}
 				}// end for i
-				for (int i = java.lang.reflect.Array.getLength(tmpseqs) - 1; i >= 0; i--) {
+				for (int i = tmpseqs.length - 1; i >= 0; i--) {
 					((int[]) clusterhash.get(hashkeys[tmpseqs[i]]))[0] = -3;// groupvals[tmpseqs[i]]=-3;//am
 																			// checking,
 																			// remeber
@@ -202,8 +183,8 @@ public class findclusters {
 				tmpseqs2 = getfound(attvals, clusterhash, hashkeys, tmpseqs,
 						minlinks);// get all sequences found by all of the seqs
 									// in tmpseqs
-				// System.out.println("hitseqs="+java.lang.reflect.Array.getLength(tmpseqs2));
-				for (int i = java.lang.reflect.Array.getLength(tmpseqs2) - 1; i >= 0; i--) {
+				// System.out.println("hitseqs="+tmpseqs2.length);
+				for (int i = tmpseqs2.length - 1; i >= 0; i--) {
 					newcluster.add(tmpseqs2[i]);
 					// System.out.println("\tseq:"+tmpseqs2[i]);
 					if (((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] != -2) {
@@ -215,9 +196,8 @@ public class findclusters {
 					// now see if I have members>minlinks
 				int foundnew = 0;
 				int newmembers;
-				while (((newmembers = java.lang.reflect.Array
-						.getLength(newcluster.member)) < minlinks)
-						&& (newmembers != foundnew)) {
+                while (((newmembers = newcluster.member.length) < minlinks)
+                        && (newmembers != foundnew)) {
 					// System.out.println("inwhile");
 					foundnew = newmembers;
 					// System.out.println("in while");
@@ -225,7 +205,7 @@ public class findclusters {
 					// until I do have more than minlinks
 					tmpseqs2 = getfound(attvals, clusterhash, hashkeys,
 							newcluster.member, minlinks);
-					for (int i = java.lang.reflect.Array.getLength(tmpseqs2) - 1; i >= 0; i--) {
+					for (int i = tmpseqs2.length - 1; i >= 0; i--) {
 						if (((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] != 0) {
 							newcluster.add(tmpseqs2[i]);
 							if (((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] != -2) {
@@ -236,8 +216,8 @@ public class findclusters {
 						}
 					}// end for i
 				}// end while newcluster.members<minlinks
-					// System.out.println("newcluster.members="+java.lang.reflect.Array.getLength(newcluster.member));
-				if (java.lang.reflect.Array.getLength(newcluster.member) < minlinks) {
+					// System.out.println("newcluster.members="+newcluster.member.length);
+				if (newcluster.member.length < minlinks) {
 					// System.out.println("setting "+maxnum+" to -2");
 					// if my currnet cluster has less than minlinks elements
 					((int[]) clusterhash.get(hashkeys[maxnum]))[0] = -2;// skip
@@ -257,15 +237,14 @@ public class findclusters {
 				// connections
 			int lastmembers = 0;
 			int newmembers;
-			// System.out.println("startmembers="+java.lang.reflect.Array.getLength(newcluster.member));
-			while ((newmembers = java.lang.reflect.Array
-					.getLength(newcluster.member)) != lastmembers) {
+
+            while ((newmembers = newcluster.member.length) != lastmembers) {
 				lastmembers = newmembers;
-				// System.out.println("in while; members="+newmembers);
+
 				// while I find sequences to add
 				tmpseqs2 = getfound(attvals, clusterhash, hashkeys,
 						newcluster.member, minlinks);
-				for (int i = java.lang.reflect.Array.getLength(tmpseqs2) - 1; i >= 0; i--) {
+				for (int i = tmpseqs2.length - 1; i >= 0; i--) {
 					if (((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] != 0) {
 						newcluster.add(tmpseqs2[i]);
 						((int[]) clusterhash.get(hashkeys[tmpseqs2[i]]))[0] = 0;// groupvals[i]=0;//added
@@ -276,13 +255,13 @@ public class findclusters {
 			}// end while
 				// now I have all sequences I can add in this way
 				// set the groups info
-			for (int i = java.lang.reflect.Array.getLength(newcluster.member) - 1; i >= 0; i--) {
+			for (int i = newcluster.member.length - 1; i >= 0; i--) {
 				// if(((int[])clusterhash.get(hashkeys[newcluster.member[i]]))[0]==0){
 				((int[]) clusterhash.get(hashkeys[newcluster.member[i]]))[0] = counter;
 				// }
 			}// end for i
 			counter++;
-			if (java.lang.reflect.Array.getLength(newcluster.member) > minseqnum) {
+			if (newcluster.member.length > minseqnum) {
 				// System.out.println("adding cluster "+counter);
 				retvec.addElement(newcluster);
 			}
@@ -291,13 +270,13 @@ public class findclusters {
 	}// end multilinkage
 
 	// --------------------------------------------------------------------------
-	static int[] getfound(minattvals[] attvals, HashMap clusterhash,
+	static int[] getfound(minattvals[] attvals, HashMap<String, int[]> clusterhash,
 			String[] hashkeys, int[] tmpseqs, int minlinks) {
 		// get all the sequences found by all of the tmpseqs
-		int attnum = java.lang.reflect.Array.getLength(attvals);
-		HashMap tmphash = new HashMap();
-		int seqnum = java.lang.reflect.Array.getLength(hashkeys);
-		for (int i = java.lang.reflect.Array.getLength(tmpseqs) - 1; i >= 0; i--) {
+		int attnum = attvals.length;
+		HashMap<String, Integer> tmphash = new HashMap<String, Integer>();
+		int seqnum = hashkeys.length;
+		for (int i = tmpseqs.length - 1; i >= 0; i--) {
 			tmphash.put(hashkeys[tmpseqs[i]], null);
 		}// end for i
 			// initialize to zero
@@ -324,15 +303,22 @@ public class findclusters {
 			retarr[i] = ((Integer) tmpvec.elementAt(i)).intValue();
 		}// end for i
 		return retarr;
-	}// end getfound
+	}
 
-	// --------------------------------------------------------------------------
-	static int[] getmaxshared(minattvals[] attvals, HashMap clusterhash,
-			String[] hashkeys, int maxnum, int minlinks) {
-		// get the minlinks-1 other sequences that are connected to maxnum and
-		// have the most connections
+    /**
+     * get the minlinks-1 other sequences that are connected to maxnum and have the most connections
+     * 
+     * @param attvals
+     * @param clusterhash
+     * @param hashkeys
+     * @param maxnum
+     * @param minlinks
+     * @return
+     */
+    static int[] getmaxshared(minattvals[] attvals, HashMap<String, int[]> clusterhash, String[] hashkeys, int maxnum,
+            int minlinks) {
 		int[] retarr = new int[minlinks + 1];
-		int seqnum = java.lang.reflect.Array.getLength(hashkeys);
+		int seqnum = hashkeys.length;
 		retarr[0] = maxnum;
 		int[] maxconn = new int[minlinks + 1];
 		for (int i = 1; i <= minlinks; i++) {
@@ -370,14 +356,20 @@ public class findclusters {
 			}
 		}// end for i
 		return retarr;
-	}// end getmaxshared
+	}
 
-	// --------------------------------------------------------------------------
-	static int[] getconnecteds(int maxnum, HashMap clusterhash,
+	/**
+	 * get the sequences with a connection to maxnum
+	 * @param maxnum
+	 * @param clusterhash
+	 * @param hashkeys
+	 * @param attvals
+	 * @return
+	 */
+    static int[] getconnecteds(int maxnum, HashMap<String, int[]> clusterhash,
 			String[] hashkeys, minattvals[] attvals) {
-		// get the sequences with a connection to maxnum
-		int attnum = java.lang.reflect.Array.getLength(attvals);
-		HashMap tmphash = new HashMap();
+		int attnum = attvals.length;
+		HashMap<String, ?> tmphash = new HashMap<String, Object>();
 		for (int i = 0; i < attnum; i++) {
 			if (attvals[i].query == maxnum) {
 				// System.out.println("found hit:"+attvals[i].query+":"+attvals[i].hit);
@@ -397,7 +389,7 @@ public class findclusters {
 			// connection to maxnum
 		int[] retarr = new int[tmphash.size()];
 		int count = 0;
-		for (int i = java.lang.reflect.Array.getLength(hashkeys) - 1; i >= 0; i--) {
+		for (int i = hashkeys.length - 1; i >= 0; i--) {
 			if (tmphash.containsKey(hashkeys[i])) {
 				retarr[count] = i;
 				count++;
@@ -407,10 +399,10 @@ public class findclusters {
 	}// end for getconnecteds
 
 	// --------------------------------------------------------------------------
-	static void getmaxnum(minattvals[] attvals, HashMap clusterhash,
+	static void getmaxnum(minattvals[] attvals, HashMap<String, int[]> clusterhash,
 			String[] hashkeys, int hashpos) {
 		// get how many connections to others each sequence has
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+		int attnum = attvals.length;
 		for (int i = 0; i < attnum; i++) {
 			((int[]) clusterhash.get(hashkeys[attvals[i].query]))[hashpos]++;
 			((int[]) clusterhash.get(hashkeys[attvals[i].hit]))[hashpos]++;
@@ -429,7 +421,7 @@ public class findclusters {
 		}// end for i
 		boolean foundnew = true;
 		int counter = 0;
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+		int attnum = attvals.length;
 		while (foundnew) {
 			// counter++;
 			foundnew = false;
@@ -461,7 +453,7 @@ public class findclusters {
 			// now sort the clusterarr by cluster size
 		java.util.Arrays.sort(clusterarr, new clustersizecomparator());
 		for (int i = 0; i < counter; i++) {
-			if (java.lang.reflect.Array.getLength(clusterarr[i].member) >= minseqnum) {
+            if (clusterarr[i].member.length >= minseqnum) {
 				retvec.addElement(clusterarr[i]);
 			} else {
 				break;
@@ -505,7 +497,7 @@ public class findclusters {
 		// System.out.println("in getconvex getclusters");
 		Vector<cluster> retvec = new Vector<cluster>();
 		// assign all nodes to one cluster to start out
-		Vector basevec = new Vector(seqnum);
+		Vector<Integer> basevec = new Vector<Integer>(seqnum);
 		String[] hashkeys = new String[seqnum];
 		for (int i = 0; i < seqnum; i++) {
 			hashkeys[i] = String.valueOf(i);
@@ -513,7 +505,7 @@ public class findclusters {
 		}// end for i
 			// then take a node from this base cluster and add all those with
 			// higher affinity to it than to the base
-		Vector currvec = new Vector(seqnum);
+		Vector<Integer> currvec = new Vector<Integer>(seqnum);
 		cluster currcluster;
 		float avgatt = getavgatt(basevec, attvals, hashkeys);// get the average
 																// attraction
@@ -567,7 +559,7 @@ public class findclusters {
 		// now add them back in sorted order and filter for minimum sequence
 		// number
 		for (int i = 0; i < clusterelements; i++) {
-			if (java.lang.reflect.Array.getLength(sortarr[i].member) >= minseqnum) {
+            if (sortarr[i].member.length >= minseqnum) {
 				retvec.addElement(sortarr[i]);
 			} else {
 				break;
@@ -580,8 +572,8 @@ public class findclusters {
 	/*
 	 * static float getavgatt(cluster c1, cluster c2, minattvals[] attvals){
 	 * //get the average attraction between these two clusters int
-	 * seqnum1=java.lang.reflect.Array.getLength(c1.member); int
-	 * seqnum2=java.lang.reflect.Array.getLength(c2.member); float retval=0;
+	 * seqnum1=c1.member.length; int
+	 * seqnum2=c2.member.length; float retval=0;
 	 * float skipped=0;//used in the bootstrapping procedure where some values
 	 * are changed to -1 (removed) for(int i=0;i<seqnum1;i++){ for(int
 	 * j=0;j<seqnum2;j++){ if(attvals[c1.member[i]][c2.member[j]]>=0){
@@ -589,10 +581,10 @@ public class findclusters {
 	 * for j }//end for i return retval/((seqnum1*seqnum2)-skipped); }//end
 	 * getavgatt
 	 */// --------------------------------------------------------------------------
-	static int getmaxatt(Vector invec, minattvals[] attvals, String[] hashkeys) {
+	static int getmaxatt(Vector<Integer> invec, minattvals[] attvals, String[] hashkeys) {
 		// get the sequence with overall highest attvals
 		int elements = invec.size();
-		HashMap tmphash = new HashMap(elements);
+		HashMap<String, Integer> tmphash = new HashMap<String, Integer>(elements);
 		float[] sumvals = new float[elements];
 		for (int i = 0; i < elements; i++) {
 			tmphash.put(hashkeys[((Integer) invec.elementAt(i)).intValue()],
@@ -601,7 +593,7 @@ public class findclusters {
 		}// end for i
 		float maxval = 0;
 		int maxnum = -1;
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+		int attnum = attvals.length;
 		for (int i = 0; i < attnum; i++) {
 			if (tmphash.containsKey(hashkeys[attvals[i].query])) {
 				sumvals[((Integer) tmphash.get(hashkeys[attvals[i].query]))
@@ -622,19 +614,19 @@ public class findclusters {
 	}// end getmaxatt
 
 	// --------------------------------------------------------------------------
-	static void getcluster(int seed, Vector basevec, minattvals[] attvals,
-			Vector currvec, float avgatt, float varatt, float sigmafac,
+	static void getcluster(int seed, Vector<Integer> basevec, minattvals[] attvals,
+			Vector<Integer> currvec, float avgatt, float varatt, float sigmafac,
 			String[] hashkeys) {
 		// split one cluster off basevec and put the representatives in currvec
 		// System.out.println("seed "+seed);//("in getcluster for seed "+seed);//"seed="+seed);
 		currvec.add(basevec.remove(seed));
 		int seednum = ((Integer) currvec.elementAt(0)).intValue();
-		HashMap tmphash = new HashMap();
+		HashMap<String, ?> tmphash = new HashMap<String, Object>();
 		tmphash.put(hashkeys[seednum], null);
 		// now add all those values with attraction to currvec greater than to
 		// basevec.
 		int elements = basevec.size();
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+
 		boolean foundnew = true;
 		float maxatt, curratt;
 		int maxnum = 0;
@@ -675,10 +667,10 @@ public class findclusters {
 	}// end getcluster
 
 	// --------------------------------------------------------------------------
-	static float getavgatt(int newpos, Vector newgroup, minattvals[] attvals,
-			String[] hashkeys, HashMap tmphash) {
+	static float getavgatt(int newpos, Vector<Integer> newgroup, minattvals[] attvals,
+			String[] hashkeys, HashMap<String, ?> tmphash) {
 		int elements = newgroup.size();
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+		int attnum = attvals.length;
 		float retval = 0;
 		float skipped = 0;
 		// now get the average attraction of newpos to the current cluster
@@ -703,17 +695,17 @@ public class findclusters {
 	}// end getavgatt
 
 	// --------------------------------------------------------------------------
-	static float getavgatt(Vector invec, minattvals[] attvals, String[] hashkeys) {
+	static float getavgatt(Vector<Integer> invec, minattvals[] attvals, String[] hashkeys) {
 		// get the average attraction value for all sequences in this vector
 		// note, the attraction values should be symmetrical and only those >=0
 		// should be considered
 		int elements = invec.size();
-		HashMap tmphash = new HashMap(elements);
+		HashMap<String, ?> tmphash = new HashMap<String, Object>(elements);
 		for (int i = 0; i < elements; i++) {
 			tmphash.put(hashkeys[((Integer) invec.elementAt(i)).intValue()],
 					null);
 		}// end for i
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+		int attnum = attvals.length;
 		float sumval = 0;
 		int skipped = 0;
 		for (int i = 0; i < attnum; i++) {
@@ -730,16 +722,16 @@ public class findclusters {
 	}// end getavgatt
 
 	// --------------------------------------------------------------------------
-	static float getvaratt(Vector invec, minattvals[] attvals, float avgval,
+	static float getvaratt(Vector<Integer> invec, minattvals[] attvals, float avgval,
 			String[] hashkeys) {
 		// get the variance of the attraction values for this cluster
 		int elements = invec.size();
-		HashMap tmphash = new HashMap(elements);
+		HashMap<String, ?> tmphash = new HashMap<String, Object>(elements);
 		for (int i = 0; i < elements; i++) {
 			tmphash.put(hashkeys[((Integer) invec.elementAt(i)).intValue()],
 					null);
 		}// end for i
-		int attnum = java.lang.reflect.Array.getLength(attvals);
+		int attnum = attvals.length;
 		float sumval = 0, tmpval;
 		int skipped = 0;
 		for (int i = 0; i < attnum; i++) {
@@ -774,7 +766,7 @@ public class findclusters {
 		}// end for i
 		minattvals tmpdat;
 		float avgval = 0;
-		for (int i = java.lang.reflect.Array.getLength(attvals); --i >= 0;) {
+		for (int i = attvals.length; --i >= 0;) {
 			tmpdat = attvals[i];
 			if (elements[tmpdat.hit].links == null) {
 				elements[tmpdat.hit].links = new ArrayList<element>();
@@ -793,7 +785,7 @@ public class findclusters {
 				avgval /= (seqnum * seqnum);
 			} else {
 				// only divide by the actual number of entries
-				avgval /= java.lang.reflect.Array.getLength(attvals);
+				avgval /= attvals.length;
 			}
 			// now offset all of the values accordingly
 			element myelem;
@@ -813,7 +805,7 @@ public class findclusters {
 		// now assign the entries to clusters and return
 		HashMap<Integer, ArrayList<element>> tmphash = new HashMap<Integer, ArrayList<element>>();
 		Integer currid;
-		for (int i = java.lang.reflect.Array.getLength(elements); --i >= 0;) {
+		for (int i = elements.length; --i >= 0;) {
 			currid = new Integer(elements[i].id);
 			if (tmphash.containsKey(currid)) {
 				tmphash.get(currid).add(elements[i]);
@@ -824,15 +816,14 @@ public class findclusters {
 			}
 		}// end for i
 		ArrayList<element>[] clusters = tmphash.values().toArray(new ArrayList[0]);
-		System.out.println("sorting clusters by size ("
-				+ java.lang.reflect.Array.getLength(clusters) + ")");
+        
+		System.out.println("sorting clusters by size (" + clusters.length + ")");
 		java.util.Arrays.sort(clusters, new sizecomparator());
-		element[] tmparr;
-		int clustercount = 0;
+		
 		Vector<cluster> clustervec = new Vector<cluster>();
 		cluster currcluster;
 		ArrayList<element> tmp;
-		for (int i = java.lang.reflect.Array.getLength(clusters); --i >= 0;) {
+		for (int i = clusters.length; --i >= 0;) {
 			tmp = clusters[i];
 			currcluster = new cluster();
 			currcluster.name = "cluster " + i;
@@ -849,13 +840,12 @@ public class findclusters {
 		return clustervec;
 	}// end getnetwork
 
-	static class sizecomparator implements Comparator {
+	static class sizecomparator implements Comparator<ArrayList<element>> {
 
-		public int compare(Object a1, Object a2) {
-			int a1s = ((ArrayList) a1).size();
-			int a2s = ((ArrayList) a2).size();
-			// parameter are of type Object, so we have to downcast it to
-			// Employee objects
+		public int compare(ArrayList<element> a1, ArrayList<element> a2) {
+            int a1s = a1.size();
+            int a2s = a2.size();
+
 			if (a1s > a2s) {
 				return 1;
 			} else if (a1s < a2s) {
@@ -863,8 +853,8 @@ public class findclusters {
 			} else {
 				return 0;
 			}
-		}// end compare
-	}// end sizecomparator
+		}
+	}
 
 	static public class element {
 
@@ -897,7 +887,7 @@ public class findclusters {
 			changed = false;
 			currround++;
 			System.out.println("Iteration " + currround);
-			for (int i = java.lang.reflect.Array.getLength(elements); --i >= 0;) {
+			for (int i = elements.length; --i >= 0;) {
 				myelement = elements[i];
 				// System.out.println(i + " elementname=" + myelement.name);
 				// now loop through the emission values and get the lowest
@@ -925,7 +915,7 @@ public class findclusters {
 							.toArray(new Integer[0]);
 					maxid = -1;
 					maxval = 0;
-					for (int j = java.lang.reflect.Array.getLength(keys); --j >= 0;) {
+					for (int j = keys.length; --j >= 0;) {
 						checkval = assignhash.get(keys[j]).floatValue();
 						if (checkval > maxval) {
 							maxval = checkval;
@@ -952,7 +942,7 @@ public class findclusters {
 				// elements just continually swap assignments.
 				// I need to take that into account with some sort of reverse
 				// lookup...
-			for (int i = java.lang.reflect.Array.getLength(elements); --i >= 0;) {
+			for (int i = elements.length; --i >= 0;) {
 				myelement = elements[i];
 				// System.err.println(i + "\tid:" + myelement.id + "(" +
 				// myelement.weight + ")\tnewid:" + myelement.newid + "(" +
@@ -1018,217 +1008,14 @@ public class findclusters {
 							+ currround);
 		}
 		// that's it. the elements should have their new id assigned!
-	}// end cluster
+	}
 
-/*	public static void fuzzycluster(element[] elements, int maxrounds) {
-		// go through the elements one by one and assign the id's!
-		// NOTE: this does not fully assign a node to either one group or
-		// another but uses the difference between assignments as its weight (doesn't work very well.)
-		//trying other stuff for the moment
-		//try to get the avg + stdev assignment to each cluster and then take the one with the best overlap?
-		boolean changed = true;
-		int currround = 0;
-		float checkval;
-		int myid, bestlistsize, bestid = -1;
-		float myavg,mystdev,bestavg,beststdev;
-		HashMap<Integer, ArrayList<Float>> assignhash = new HashMap<Integer,ArrayList<Float>>();
-		// now loop while change happens
-		Integer currid;
-		Float currweight;
-		element myelement;
-		float diff;
-		ArrayList<Float> tmplist=null;
-		while (changed && currround <= maxrounds) {
-			changed = false;
-			currround++;
-			System.out.println("Fuzzy iteration " + currround);
-			for (int i = java.lang.reflect.Array.getLength(elements); --i >= 0;) {
-				myelement = elements[i];
-				// System.out.println(i + " elementname=" + myelement.name);
-				// now loop through the emission values and get the lowest
-				// highest emission id
-				assignhash.clear();
-				if (myelement.links != null) {
-					for (int j = myelement.links.size(); --j >= 0;) {
-						currid = new Integer(myelement.links.get(j).id);
-						currweight = new Float(myelement.weights.get(j).floatValue());// make a copy of this as I might otherwise be actually changing the
-						if (assignhash.containsKey(currid)) {
-							assignhash.get(currid).add(currweight);
-						}else{
-							ArrayList<Float> addlist=new ArrayList<Float>();
-							addlist.add(currweight);
-							assignhash.put(currid, addlist);
-						}
-					}// end for j
-					Integer[] keys = assignhash.keySet().toArray(new Integer[0]);
-					//for each of the keys now get the avg + var of the values
-					bestid = -1;
-					bestavg = -1;
-					beststdev = -1;
-					bestlistsize=-1;
-					for (int j = java.lang.reflect.Array.getLength(keys); --j >= 0;) {
-						tmplist=assignhash.get(keys[j]);
-						myid = keys[j].intValue();
-						myavg=0;
-						mystdev=0;
-						for(int k=tmplist.size();--k>=0;){
-							myavg+=tmplist.get(k).floatValue();
-						}
-						myavg/=tmplist.size();
-						for(int k=tmplist.size();--k>=0;){
-							diff=myavg-tmplist.get(k).floatValue();
-							mystdev+=diff*diff;
-						}
-						//special case for tmplist size==1
-						if(tmplist.size()==1){
-							mystdev=-1;
-						}else{
-							mystdev=(float) java.lang.Math.sqrt(mystdev/tmplist.size());
-						}
-						//now see whether this avg and stdev fit my datapoint better that what I already have
-						if(bestid==-1){
-							bestid=myid;
-							bestavg=myavg;
-							beststdev=mystdev;
-							bestlistsize=tmplist.size();
-						}else{
-							//here then see whether the current cluster assignment fits this datapoint better than bestid, bestavg, beststdev
-							//simple approach: divide average by stdev and take that value (kind of a Z-score relative to 0)
-							//this works somewhat ok, but I am sure there is a better way
-							if(beststdev==-1 || mystdev==-1){
-								if(myavg>bestavg){
-									bestid=myid;
-									bestavg=myavg;
-									beststdev=mystdev;
-									bestlistsize=tmplist.size();
-								}
-							}else{
-								if((myavg/mystdev)>(bestavg/beststdev)){
-									bestid=myid;
-									bestavg=myavg;
-									beststdev=mystdev;		
-									bestlistsize=tmplist.size();
-								}								
-							}
-						}
-					}
-					myelement.newid = bestid;
-					myelement.newweight = bestavg*bestlistsize;
-				} else {// i.e. I have no input data whatsoever,
-					myelement.newid = -1;
-					myelement.newweight = -1;
-				}
-			}// end for i
-				// now I know which id I would assign to the relative elements.
-				// now for the difficult part. if I just assign things this way,
-				// elements just continually swap assignments.
-				// I need to take that into account with some sort of reverse
-				// lookup...
-			for (int i = java.lang.reflect.Array.getLength(elements); --i >= 0;) {
-				myelement = elements[i];
-				myid = myelement.id;
-				// now loop through the linked objects and see whether any of
-				// them would change to this id
-				// if they do, subtract their weight from the current assignment
-				// weight.
-				// if the new assignment weight drops below the old one, don't
-				// change the assignment!
-				// NOTE: only do this if the new assignment id is larger than
-				// the old one! (for directionality and controling forever
-				// loops)
-				if (myelement.newid > myid) {
-					for (int j = myelement.links.size(); --j >= 0;) {
-						if (myelement.links.get(j).newid == myid) {
-							// if these two would swap assignments then subtract this weight from the newid weight
-							if ((myelement.weights.get(j)).floatValue() > 0) {
-								myelement.newweight -= (myelement.weights.get(j)).floatValue();
-							}// else don't do anything
-						}
-					}// end for j
-				}
-				if (myelement.newweight > 0	&& myelement.newweight > myelement.weight) {
-					// I need the check for newweight>0 as otherwise unconnected dots get added to a !random cluster.
-					myelement.id = myelement.newid;
-					myelement.weight = myelement.newweight;
-					changed = true;
-				}
-			}// end for i
-		}// end while changed or smaller maxrounds
-		if (changed == false) {
-			System.out.println("NO more chages performed after fuzzy iteration :"+ currround);
-		} else {
-			System.out.println("Stopped fuzzy network clustering because the limit of iterations was reached: "	+ currround);
-		}
-		// that's it. the elements should have their new id assigned!
-	}// end fuzzycluster
-*/
-	/*
-	 * static Vector getnetwork(minattvals[] attvals, int minseqnum, boolean
-	 * dooffset, boolean globalaverage, int seqnum, int maxrounds) { //use a
-	 * "network approach //each element is assigned an input value //it emits
-	 * that value to the next layer which sums the emissions of the same value
-	 * //in the next round each node emits the value of the highest sum it
-	 * encountered //repeat until no more changes int attnum =
-	 * java.lang.reflect.Array.getLength(attvals); netnode[] nodes = new
-	 * netnode[seqnum]; for (int i = 0; i < seqnum; i++) { nodes[i] = new
-	 * netnode(i); }//end for i if (dooffset) { float average = 0; if
-	 * (globalaverage) { //offset the values by the global average attraction
-	 * value for (int i = 0; i < attnum; i++) { average += attvals[i].att;
-	 * }//end for i average /= (seqnum * (seqnum - 1)) / 2; } else { //only get
-	 * the average for the non-null attractions for (int i = 0; i < attnum; i++)
-	 * { average += attvals[i].att; }//end for i average /= attnum; } //now
-	 * assign the individual node objects their respective attractions for (int
-	 * i = 0; i < attnum; i++) { nodes[attvals[i].query].addconn(attvals[i].hit,
-	 * attvals[i].att - average);
-	 * nodes[attvals[i].hit].addconn(attvals[i].query, attvals[i].att -
-	 * average); }//end for i } else { //don't offset the values at all; just
-	 * use as is. for (int i = 0; i < attnum; i++) {
-	 * nodes[attvals[i].query].addconn(attvals[i].hit, attvals[i].att);
-	 * nodes[attvals[i].hit].addconn(attvals[i].query, attvals[i].att); }//end
-	 * for i } int round = 0; boolean changedval = true; int newnum; while
-	 * ((changedval == true) && (round < maxrounds)) {//I don't want to do more
-	 * than 100 rounds System.out.print("r" + round + ";"); round++; changedval
-	 * = false; for (int i = 0; i < seqnum; i++) { newnum = getmax(i,
-	 * nodes);//get the maximum weight cluster for this node if (newnum !=
-	 * nodes[i].number) { changedval = true; if (newnum == nodes[i].oldnumber) {
-	 * if (nodes[i].number < nodes[i].oldnumber) { //don't do anything; needed
-	 * to keep nodes from swapping the same numbers over and over } else {
-	 * nodes[i].oldnumber = nodes[i].number; nodes[i].number = newnum; } } else
-	 * { nodes[i].oldnumber = nodes[i].number; nodes[i].number = newnum; } }
-	 * }//end for i }//end while changedval //now I should have all the groups
-	 * assigned; now convert all the data into a vector of clusters and return
-	 * Vector retvec = new Vector(); changedval = true; int counter = 0; int
-	 * currnum = -1; Vector tmpvec = new Vector(); cluster currcluster; while
-	 * (changedval == true) { changedval = false; for (int i = 0; i < seqnum;
-	 * i++) { if (changedval == false) { if (nodes[i].number != -1) { changedval
-	 * = true; currnum = nodes[i].number; nodes[i].number = -1; if
-	 * (tmpvec.size() > minseqnum) { currcluster = new cluster();
-	 * currcluster.name = "cluster_" + counter; currcluster.member = new
-	 * int[tmpvec.size()]; for (int j = tmpvec.size() - 1; j >= 0; j--) {
-	 * currcluster.member[j] = ((Integer) tmpvec.elementAt(j)).intValue();
-	 * }//end for i retvec.addElement(currcluster); counter++; } tmpvec.clear();
-	 * tmpvec.addElement(new Integer(i)); } } else { if (nodes[i].number ==
-	 * currnum) { nodes[i].number = -1; tmpvec.addElement(new Integer(i)); } }
-	 * }//end for i }//end while if (tmpvec.size() > minseqnum) { currcluster =
-	 * new cluster(); currcluster.member = new int[tmpvec.size()]; for (int j =
-	 * tmpvec.size() - 1; j >= 0; j--) { currcluster.member[j] = ((Integer)
-	 * tmpvec.elementAt(j)).intValue(); }//end for i
-	 * retvec.addElement(currcluster); } int clusterelements = retvec.size();
-	 * cluster[] sortarr = new cluster[clusterelements];
-	 * retvec.copyInto(sortarr); java.util.Arrays.sort(sortarr, new
-	 * clustersizecomparator()); retvec.clear(); //now add them back in sorted
-	 * order and filter for minimum sequence number for (int i = 0; i <
-	 * clusterelements; i++) { if
-	 * (java.lang.reflect.Array.getLength(sortarr[i].member) >= minseqnum) {
-	 * retvec.addElement(sortarr[i]); } else { break; } }//end for i return
-	 * retvec; }//end getnetwork
-	 */// --------------------------------------------------------------------------
 	static int getmax(int pos, netnode[] nodes) {
 		// get the cluster number with maximum attraction for this node
 		netnode main = nodes[pos];
-		Vector conn = main.connections;
+		Vector<float[]> conn = main.connections;
 		float maxnum = -1, maxatt = 0;
-		HashMap tmphash = new HashMap();
+		HashMap<String, float[]> tmphash = new HashMap<String, float[]>();
 		String key;
 		float[] tmparr, newarr;
 		for (int i = conn.size() - 1; i >= 0; i--) {
@@ -1247,7 +1034,7 @@ public class findclusters {
 		}// end for i
 		float[][] retarr = (float[][]) tmphash.values()
 				.toArray(new float[0][2]);
-		for (int i = java.lang.reflect.Array.getLength(retarr) - 1; i >= 0; i--) {
+		for (int i = retarr.length - 1; i >= 0; i--) {
 			if (retarr[i][1] > maxatt) {
 				maxatt = retarr[i][1];
 				maxnum = retarr[i][0];
@@ -1261,12 +1048,12 @@ public class findclusters {
 
 		public netnode(int number) {
 			this.number = number;
-			connections = new Vector();
+			connections = new Vector<float[]>();
 		}
 
 		int number;
 		int oldnumber;
-		Vector connections;
+		Vector<float[]> connections;
 
 		public void addconn(int hit, float conn) {
 			float[] tmparr = new float[2];
@@ -1275,16 +1062,14 @@ public class findclusters {
 			connections.addElement(tmparr);
 		}
 	}// end class netnode
-}// end class
+}
 
-// --------------------------------------------------------------------------
-// --------------------------comparator--------------------------------------
-// --------------------------------------------------------------------------
-class clustersizecomparator implements Comparator {
-	// sort largest first
-	public int compare(Object o1, Object o2) {
-		int num1 = java.lang.reflect.Array.getLength(((cluster) o1).member);
-		int num2 = java.lang.reflect.Array.getLength(((cluster) o2).member);
+class clustersizecomparator implements Comparator<cluster> {
+
+    public int compare(cluster o1, cluster o2) {
+         // sort largest first
+        int num1 = o1.member.length;
+        int num2 = o2.member.length;
 		return (num1 < num2 ? 1 : (num1 == num2 ? 0 : -1));
-	}// end compare
-}// end comparator class
+	}
+}
