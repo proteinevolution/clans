@@ -1,8 +1,3 @@
-/*
- * saverunobject.java
- *
- * Created on September 19, 2003, 4:59 PM
- */
 package clans;
 
 import java.io.BufferedReader;
@@ -11,16 +6,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
 
-/**
- *
- * @author  tancred
- */
 public class saverunobject {
-    
-    /** Creates a new instance of saverunobject */
-    public saverunobject() {
-    }
-    
+
     java.io.File file=null;
     MinimalHsp[] blasthits=null;
     AminoAcidSequence[] inaln=null;
@@ -71,7 +58,7 @@ public class saverunobject {
                 continue;
             }
             tmparr = inline.split("=");
-            if (java.lang.reflect.Array.getLength(tmparr) != 2) {
+            if (tmparr.length != 2) {
                 System.err.println("ERROR reading savefile for line '" + inline + "'");
                 return false;
             }
@@ -231,11 +218,11 @@ public class saverunobject {
                 }
             } else if (tmparr[0].equalsIgnoreCase("colorarr")) {
                 tmparr = tmparr[1].split("\\):");
-                java.awt.Color[] colorarr = new java.awt.Color[java.lang.reflect.Array.getLength(tmparr)];
+                java.awt.Color[] colorarr = new java.awt.Color[tmparr.length];
                 try {
                     String[] tmptmp;
                     int red, green, blue;
-                    for (int i = 0; i < java.lang.reflect.Array.getLength(tmparr); i++) {
+                    for (int i = 0; i < tmparr.length; i++) {
                         tmptmp = tmparr[i].substring(1).split(";");//remove the "(" and split the numbers
                         red = Integer.parseInt(tmptmp[0]);
                         green = Integer.parseInt(tmptmp[1]);
@@ -248,9 +235,9 @@ public class saverunobject {
                 }
             } else if (tmparr[0].equalsIgnoreCase("colorcutoffs")) {
                 tmparr = tmparr[1].split(";");
-                float[] cutoffs = new float[java.lang.reflect.Array.getLength(tmparr)];
+                float[] cutoffs = new float[tmparr.length];
                 try {
-                    for (int i = 0; i < java.lang.reflect.Array.getLength(tmparr); i++) {
+                    for (int i = 0; i < tmparr.length; i++) {
                         cutoffs[i] = Float.parseFloat(tmparr[i]);
                     }//end for i
                     colorcutoffs = cutoffs;
@@ -283,7 +270,7 @@ public class saverunobject {
                 continue;
             }
             tmp = inline.split("';'");
-            if (java.lang.reflect.Array.getLength(tmp) != 2) {
+            if (tmp.length != 2) {
                 System.err.println("ERROR readung mapping data on line '" + inline + "'");
                 return false;
                 }
@@ -350,7 +337,7 @@ public class saverunobject {
                     rep.abbreviation = tmparr[1];
                 } else if (tmparr[0].equalsIgnoreCase("replicate")) {
                     tmparr = tmparr[1].split("';'");
-                    int repnum = java.lang.reflect.Array.getLength(tmparr);
+                    int repnum = tmparr.length;
                     if (repnum != rep.replicates) {
                         System.err.println("unequal number of elements found in replicate; found:" + repnum + " expected:" + rep.replicates);
                     }
@@ -363,7 +350,7 @@ public class saverunobject {
                     }//end for i
                 } else if (tmparr[0].equalsIgnoreCase("wtreplicate")) {
                     tmparr = tmparr[1].split("';'");
-                    int repnum = java.lang.reflect.Array.getLength(tmparr);
+                    int repnum = tmparr.length;
                     if (repnum != rep.wtreplicates) {
                         System.err.println("unequal number of elements found in wtreplicate; found:" + repnum + " expected:" + rep.wtreplicates);
                     }
@@ -392,7 +379,7 @@ public class saverunobject {
             tmpstr += inline;
         }
         String[] tmparr = tmpstr.split(";", 0);
-        if (java.lang.reflect.Array.getLength(tmparr) != 9) {
+        if (tmparr.length != 9) {
             System.err.println("ERROR reading rotation matrix values from '" + tmpstr + "'");
             return false;
             }
@@ -526,7 +513,7 @@ public class saverunobject {
                 continue;
             }
             tmparr = inline.trim().split("\\s+");
-            if (java.lang.reflect.Array.getLength(tmparr) != 4) {
+            if (tmparr.length != 4) {
                 System.err.println("ERROR reading positions from " + inline);
                 return false;
             }
@@ -580,7 +567,7 @@ public class saverunobject {
                 System.err.println("manually truncated file, returning results so far");
                 return false;
             }
-            if (java.lang.reflect.Array.getLength(tmparr) != 2) {
+            if (tmparr.length != 2) {
                 System.err.println("ERROR parsing HSP data from " + inline + " right after line '" + lastline + "'");
                 return false;
             }
@@ -588,7 +575,7 @@ public class saverunobject {
             try {
                 tmpstr = tmparr[1];
                 tmparr = tmparr[0].split("\\s+");
-                if (java.lang.reflect.Array.getLength(tmparr) != 2) {
+                if (tmparr.length != 2) {
                     System.err.println("ERROR, wrong hsp line " + inline);
                     return false;
                 }
@@ -603,19 +590,19 @@ public class saverunobject {
                 //    myj=tmp;
                 //}
                 tmparr = tmpstr.split("\\s+");
-                if (java.lang.reflect.Array.getLength(tmparr) > 0) {
+                if (tmparr.length > 0) {
                     hspkey = myi + "_" + myj;
                     if (hsphash.containsKey(hspkey)) {
                         currhsp = (MinimalHsp) hsphash.get(hspkey);
-                        for (int i = 0; i < java.lang.reflect.Array.getLength(tmparr); i++) {
+                        for (int i = 0; i < tmparr.length; i++) {
                             currhsp.addpval(Double.parseDouble(tmparr[i]));
                         }//end for i
                     } else {
                         currhsp = new MinimalHsp();
                         currhsp.query = myi;
                         currhsp.hit = myj;
-                        currhsp.val = new double[java.lang.reflect.Array.getLength(tmparr)];
-                        for (int i = 0; i < java.lang.reflect.Array.getLength(tmparr); i++) {
+                        currhsp.val = new double[tmparr.length];
+                        for (int i = 0; i < tmparr.length; i++) {
                             currhsp.val[i] = Double.parseDouble(tmparr[i]);
                         }//end for i
                     }
@@ -667,7 +654,7 @@ public class saverunobject {
             } else if (counter % 10 == 0) {
                 System.out.print(".");
             }
-            elements = java.lang.reflect.Array.getLength(tmparr);
+            elements = tmparr.length;
             if (elements != 3) {
                 System.err.println("unable to parse attraction value information from '" + inline + "'");
             }
@@ -702,7 +689,7 @@ public class saverunobject {
                 continue;
             }
             tmparr = inline.split("=");
-            if (java.lang.reflect.Array.getLength(tmparr) != 2) {
+            if (tmparr.length != 2) {
                 System.err.println("ERROR reading from savefile on line '" + inline + "'");
                 return false;
             }
@@ -745,7 +732,7 @@ public class saverunobject {
                     int red = Integer.parseInt(tmparr[0]);
                     int green = Integer.parseInt(tmparr[1]);
                     int blue = Integer.parseInt(tmparr[2]);
-                    if(java.lang.reflect.Array.getLength(tmparr)<4){
+                    if(tmparr.length<4){
                         currgroup.color = new java.awt.Color(red, green, blue);
                     }else{
                         int alpha=Integer.parseInt(tmparr[3]);
@@ -757,7 +744,7 @@ public class saverunobject {
                 }
             } else if (tmparr[0].equalsIgnoreCase("numbers")) {
                 tmparr = tmparr[1].split(";");
-                int num = java.lang.reflect.Array.getLength(tmparr);
+                int num = tmparr.length;
                 int[] retarr = new int[num];
                 currgroup.polygon = makepolygons.get(currgroup.type, currgroup.size);
                 try {
@@ -800,7 +787,7 @@ public class saverunobject {
                 continue;
             }
             tmparr = inline.trim().split(";");
-            if (java.lang.reflect.Array.getLength(tmparr) != expected_sequences) {
+            if (tmparr.length != expected_sequences) {
                 System.err.println("ERROR reading positions from " + inline + "; expecting " + expected_sequences + " values");
                 return false;
             }
