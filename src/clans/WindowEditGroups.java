@@ -690,10 +690,16 @@ public class WindowEditGroups extends javax.swing.JFrame {
 					counter++;
 				}
 			}
-			parent.groupseqs = selecteds;
-			parent.groupseqscolor = parent.data.seqgroupsvec.elementAt(currsel).color;
-			parent.repaint();
+			
+            parent.groupseqs = selecteds;
+            parent.groupseqscolor = parent.data.seqgroupsvec.elementAt(currsel).color;
+
+		} else {
+		    // reset the main window to highlight nothing
+		    parent.groupseqs = null;
 		}
+		
+        parent.repaint();
 	}// GEN-LAST:event_groupslistValueChanged
 
 	private void delbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_delbuttonActionPerformed
