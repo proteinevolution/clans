@@ -609,49 +609,51 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			groupslist.setSelectedIndex(currsel - 1);
 		}
 		repaint();
-	}// GEN-LAST:event_upbuttonActionPerformed
+    }// GEN-LAST:event_upbuttonActionPerformed
 
-	private void setasselectedbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_setasselectedbuttonActionPerformed
-		// replace the current sequence selection with this group
-		int[] selected_groups = groupslist.getSelectedIndices();
+    /**
+     * Select the members of all selected groups in the clustering window.
+     * 
+     * @param evt
+     */
+    private void setasselectedbuttonActionPerformed(java.awt.event.ActionEvent evt) {
+        int[] selected_groups = groupslist.getSelectedIndices();
+
         if (selected_groups.length > 0) {
-			int counter = 0;
-			
-			for (int i = selected_groups.length - 1; i >= 0; i--) {
-				if ((selected_groups[i] > -1) && (selected_groups[i] <= parent.data.seqgroupsvec.size())) {
-					counter += parent.data.seqgroupsvec.elementAt(selected_groups[i]).sequences.length;
-				}
-			}
-			
-			int[] selecteds = new int[counter];
-			SequenceGroup mygroup;
-			counter = 0;
-			for (int i = selected_groups.length - 1; i >= 0; i--) {
-				mygroup = parent.data.seqgroupsvec.elementAt(selected_groups[i]);
-				for (int j = mygroup.sequences.length - 1; j >= 0; j--) {
-					selecteds[counter] = mygroup.sequences[j];
-					counter++;
-				}
-			}
-			parent.data.selectednames = selecteds;
-			parent.button_select_all_or_clear.setText("Clear Selection");
-			if (selected_groups.length == 1) {
-				if (parent.data.seqgroupsvec.elementAt(selected_groups[0]).seqconf != null) {
-					parent.clusterconf = parent.data.seqgroupsvec.elementAt(selected_groups[0]).seqconf;
-				} else {
-					parent.clusterconf = null;
-				}
-			} else {
-				parent.clusterconf = null;
-			}
-		} else {
-			parent.button_select_all_or_clear.setText("Select All");
-		}
-        
-        if (highlight_groups_with_selected_sequences.isSelected()) {
-            repaint(); 
+
+            ArrayList<Integer> new_selecteds = new ArrayList<Integer>();
+            SequenceGroup mygroup;
+
+            for (int i = selected_groups.length - 1; i >= 0; i--) {
+                mygroup = parent.data.seqgroupsvec.elementAt(selected_groups[i]);
+
+                for (int j = mygroup.sequences.length - 1; j >= 0; j--) {
+                    new_selecteds.add(mygroup.sequences[j]);
+                }
+            }
+
+            parent.set_selected(new_selecteds);
+
+            if (selected_groups.length == 1) {
+                if (parent.data.seqgroupsvec.elementAt(selected_groups[0]).seqconf != null) {
+                    parent.clusterconf = parent.data.seqgroupsvec.elementAt(selected_groups[0]).seqconf;
+                } else {
+                    parent.clusterconf = null;
+                }
+            } else {
+                parent.clusterconf = null;
+            }
+
+        } else {
+            parent.deselect_all_entries();
         }
-	}// GEN-LAST:event_setasselectedbuttonActionPerformed
+
+        parent.repaint();
+
+        if (highlight_groups_with_selected_sequences.isSelected()) {
+            repaint();
+        }
+    }
 
 	private void showinparentActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_showinparentActionPerformed
 		// show or don't show the groups

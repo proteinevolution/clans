@@ -68,8 +68,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
         // and now initialize a run
         initgraph();
-
-        button_select_all_or_clear.setText("Select All");
+        
+        set_selection_button_label();
 
         if (data.errbuff.length() > 0) {
             // If I have had errors up to this point
@@ -274,7 +274,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         textfield_info_min_blast_evalue.setToolTipText("evalue limit used for blast");
         drawbuttonpanel.add(textfield_info_min_blast_evalue);
 
-        button_select_all_or_clear.setText("Clear Selection");
+        set_selection_button_label();
         button_select_all_or_clear.setMnemonic(KeyEvent.VK_A);
         button_select_all_or_clear.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2015,7 +2015,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         // Add your handling code here:
         if (data.selectednames.length > 0) {// if sth. is selected clear the selection
             
-            set_selected(new ArrayList<Integer>());
+            deselect_all_entries();
             
             if (shownames != null) {
                 shownames.seqnamelist.setSelectedIndices(data.selectednames);// clear all selected
@@ -2024,7 +2024,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 zoom = false;
                 button_zoom_on_selected.setText("Zoom on selected");
             }
-            button_select_all_or_clear.setText("Select All");
 
         } else {// if nothing is selected, select all
             ArrayList<Integer> all_indices = new ArrayList<Integer>();
@@ -2037,8 +2036,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             if (shownames != null) {
                 shownames.seqnamelist.setSelectedIndices(data.selectednames);
             }
-            button_select_all_or_clear.setText("Clear Selection");
         }
+        
         repaint();
     }// GEN-LAST:event_clearselectbuttonActionPerformed
 
@@ -2742,10 +2741,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         if (shownames != null) {
             shownames.setselected(data.selectednames, !shownames.showall);
         }
-        setclearbuttontext();
     }
 
-    private void set_selected(ArrayList<Integer> new_selecteds) {
+    /**
+     * sets the selected entries and does some housekeeping for that. 
+     * @param new_selecteds the indices of the selected entries
+     */
+    protected void set_selected(ArrayList<Integer> new_selecteds) {
         data.selectednames = new int[new_selecteds.size()];
         for (int i = 0; i < new_selecteds.size(); i++) {
             data.selectednames[i] = new_selecteds.get(i).intValue();
@@ -2754,6 +2756,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         if (myseqgroupwindow != null) { // update the highlighting of groups with selected sequences
             myseqgroupwindow.repaint();
         }
+        
+        set_selection_button_label();
+    }
+    
+    /**
+     * deselects all entries.
+     */
+    protected void deselect_all_entries() {
+        set_selected(new ArrayList<Integer>());
     }
     
     void updatetmpselected(int[] tmpreg) {
@@ -2852,18 +2863,18 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 { ((m[1][0] * m[2][1]) - (m[2][0] * m[1][1])), -((m[0][0] * m[2][1]) - (m[2][0] * m[0][1])),
                         ((m[0][0] * m[1][1]) - (m[1][0] * m[0][1])) } };
         return retmtx;
-    }// end getinvrot
+    }
 
-    // --------------------------------------------------------------------------
-
-    void setclearbuttontext() {
-        // if I have some sequences selected --. text=Clear selection
-        if (data.selectednames.length > 0) {
+    /**
+     * labels the selection button "Clear Selection" or "Select All" depending on whether sequences are selected.
+     */
+    void set_selection_button_label() {
+        if (data != null && data.selectednames != null && data.selectednames.length > 0) {
             button_select_all_or_clear.setText("Clear Selection");
         } else {
             button_select_all_or_clear.setText("Select All");
         }
-    }// end setclearbuttontext
+    }
 
     class drawpanel extends JPanel implements java.awt.print.Printable {
 

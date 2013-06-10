@@ -243,7 +243,7 @@ public class shownamedialog extends javax.swing.JFrame {
         if (myselected.length > 0) {
             if (showall) {
                 parent.data.selectednames = myselected;
-                parent.setclearbuttontext();
+                parent.set_selection_button_label();
                 parent.repaint();
             } else {//If I am only showing a subset of all sequences I need to reassign the correct indices
                 globalselected = parent.data.selectednames;
@@ -266,7 +266,7 @@ public class shownamedialog extends javax.swing.JFrame {
                 seqnamelist.setListData(selectednames);
                 seqnamelist.setSelectedIndices(new int[0]);
                 //now update the parent view
-                parent.setclearbuttontext();
+                parent.set_selection_button_label();
                 parent.repaint();
             }
         }
