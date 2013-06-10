@@ -832,19 +832,26 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         mymapfunctiondialog.setVisible(true);
     }// GEN-LAST:event_mapmanmenuitemActionPerformed
 
-    private void graphpanelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {// GEN-FIRST:event_graphpanelMouseWheelMoved
-        // add zooming ability
-        if (button_select_move.isSelected() == false) {
-            if (evt.isShiftDown()) {
-                if (evt.isControlDown()) {
-                    data.zoomfactor += ((float) evt.getWheelRotation()) / 10;
-                } else {
-                    data.zoomfactor += ((float) evt.getWheelRotation()) / 100;
-                }
-                repaint();
-            }
+    /**
+     * Enables zoom with mousewheel+CTRL (coarse grained) or mousewheel+CTRL+SHIFT (fine grained)
+     * @param evt
+     */
+    private void graphpanelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+
+        if (! evt.isControlDown()) {
+            return;
         }
-    }// GEN-LAST:event_graphpanelMouseWheelMoved
+
+        float oldzoom = data.zoomfactor;
+        
+        if (evt.isShiftDown()) {
+            data.zoomfactor += ((float) -evt.getWheelRotation()) / 100;
+        } else {
+            data.zoomfactor += ((float) -evt.getWheelRotation()) / 10;
+        }
+       
+        this.center_graph(oldzoom);
+    }
 
     private void affymenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_affymenuitemActionPerformed
         if (myaffydialog != null) {
