@@ -737,7 +737,7 @@ public class ClusterData {
                             if (inline.length() == 0) {
                                 continue;
                             }
-                            tmparr = inline.split("=");
+                            tmparr = inline.split("=", 2);
                             
                             if (tmparr.length != 2) {
                                 System.err.println("ERROR reading from savefile on line '" + inline + "'");
