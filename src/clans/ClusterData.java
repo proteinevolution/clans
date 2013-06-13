@@ -1374,11 +1374,6 @@ public class ClusterData {
                 for (i = 0; i < input.seqgroupsvec.size(); i++) {
                     mygroup = (SequenceGroup) input.seqgroupsvec.elementAt(i);
                     
-                    if (mygroup.sequences.length == 0) {
-                        System.err.println("WARNING: seqgroup " + mygroup.name + " has zero elements; skipping save");
-                        continue;
-                    }
-                    
                     outwrite.println("name=" + mygroup.name);
                     outwrite.println("type=" + mygroup.type);
                     outwrite.println("size=" + mygroup.size);
@@ -1789,5 +1784,44 @@ public class ClusterData {
                 }
             }
         }
+    }
+    
+    /**
+     * adds a new group to the set of groups
+     * 
+     * @param name
+     *            the new group's name
+     * @param members
+     *            indices of group members in the list of all entries of the clustering
+     */
+    public void add_group(String name, int[] members) {
+        
+        SequenceGroup group = new SequenceGroup();
+        
+        group.name = name;
+        group.sequences = members;
+
+        // initialize other values with defaults
+        group.color = java.awt.Color.red;
+        group.type = 0;
+        group.size = groupsize;
+
+        seqgroupsvec.addElement(group);
+    }
+    
+    /**
+     * removes the group at position index
+     * 
+     * @param index
+     *            the index of the group to be removed
+     * @throws IndexOutOfBoundsException
+     *             if index > (number of existing SequenceGroups - 1)
+     */
+    public void remove_group(int index) throws IndexOutOfBoundsException {
+        if (index > seqgroupsvec.size()) {
+            throw new IndexOutOfBoundsException("SequenceGroup with index " + index + " cannot be removed as only "
+                    + seqgroupsvec.size() + " groups exist.");
+        }
+        seqgroupsvec.remove(index);
     }
 }

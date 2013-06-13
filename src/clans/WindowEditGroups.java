@@ -76,6 +76,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		groupcohesionmenuitem = new javax.swing.JMenuItem();
 		randcolormenuitem = new javax.swing.JMenuItem();
 		extracttofilemenuitem = new javax.swing.JMenuItem();
+		menuitem_remove_empty_groups = new javax.swing.JMenuItem();
 
 		setTitle("Edit Groups");
 		addWindowListener(new java.awt.event.WindowAdapter() {
@@ -311,6 +312,14 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		});
 		jMenu1.add(extracttofilemenuitem);
 
+		menuitem_remove_empty_groups.setText("Remove empty groups");
+		menuitem_remove_empty_groups.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitem_remove_empty_groups_ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(menuitem_remove_empty_groups);
+		
 		jMenuBar1.add(jMenu1);
 
 		setJMenuBar(jMenuBar1);
@@ -493,6 +502,21 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		}
 	}// GEN-LAST:event_extracttofilemenuitemActionPerformed
 
+    /**
+     * Removes all groups with no members.
+     * 
+     * @param evt
+     */
+    private void menuitem_remove_empty_groups_ActionPerformed(java.awt.event.ActionEvent evt) {
+        for (int i = parent.data.seqgroupsvec.size() - 1; i >= 0; i--) { // start from the end to avoid shifting indices
+            if (parent.data.seqgroupsvec.get(i).size() == 0) {
+                remove_group_and_update_window(i);
+            }
+        }
+        
+        repaint();
+    }
+	
 	private void sizetextfieldActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_sizetextfieldActionPerformed
 		// change the size setting
 		try {
@@ -709,41 +733,46 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		int[] currsel = groupslist.getSelectedIndices();
 		for (int i = currsel.length; --i >= 0;) {
 			if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
-				parent.data.seqgroupsvec.removeElementAt(currsel[i]);
+				remove_group_and_update_window(currsel[i]);
 			}
 		}
-		groupslist.setListData(parent.data.seqgroupsvec);
 		repaint();
 	}// GEN-LAST:event_delbuttonActionPerformed
 
-	private void addbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addbuttonActionPerformed
-		// add the current sequence selection as a new sequence group
+	/**
+	 * removes a group from the list of groups.
+	 * @param index the index of the group in the parents data SequenceGroup list
+	 */
+	private void remove_group_and_update_window(int index) {
+	    parent.data.seqgroupsvec.removeElementAt(index);
+	    groupslist.setListData(parent.data.seqgroupsvec);
+	}
+
+    /**
+     * add the current sequence selection as a new sequence group
+     * 
+     * @param evt
+     */
+    private void addbuttonActionPerformed(java.awt.event.ActionEvent evt) {
+		
 		if (parent.data.selectednames.length == 0) {
-			// don't add a new group
 			javax.swing.JOptionPane.showMessageDialog(this, "No sequences selected", "Error",
 					javax.swing.JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		SequenceGroup newgroup = new SequenceGroup();
-		String newname = "selected sequences";
-		newname = javax.swing.JOptionPane.showInputDialog("Group name:", newname);
+
+		String newname = javax.swing.JOptionPane.showInputDialog("Group name:", "");
 		if (newname == null || newname.length() < 1) {
-			// don't add the unnamed group
-			javax.swing.JOptionPane.showMessageDialog(this, "Warning:Unnamed group; skipping");
+			javax.swing.JOptionPane.showMessageDialog(this, "Warning: cannot add unnamed group.");
 			return;
 		}
-		newgroup.name = newname;
-		newgroup.color = java.awt.Color.red;
-		newgroup.sequences = parent.data.selectednames;
-		newgroup.type = 0;
-		newgroup.size = parent.data.groupsize;
-		parent.data.seqgroupsvec.addElement(newgroup);
-		// removed as this gives me problem with the "show selected sequences" window
-		// parent.selectednames=new int[0];
-		// parent.clearselectbutton.setText("Select All");
+		
+		parent.data.add_group(newname, parent.data.selectednames);
+		
 		groupslist.setListData(parent.data.seqgroupsvec);
+		
 		repaint();
-	}// GEN-LAST:event_addbuttonActionPerformed
+	}
 
 	/**
 	 * Opens a color chooser to let the user pick a new color for all currently selected groups.
@@ -817,6 +846,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private javax.swing.JButton delbutton;
 	private javax.swing.JButton downbutton;
 	private javax.swing.JMenuItem extracttofilemenuitem;
+	private javax.swing.JMenuItem menuitem_remove_empty_groups;
 	private javax.swing.JMenuItem groupcohesionmenuitem;
 	private javax.swing.JList groupslist;
 	private javax.swing.JButton hidebutton;

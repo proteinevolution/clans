@@ -742,20 +742,32 @@ public class saverunobject {
                     System.err.println("ERROR parsing numbers from '" + inline + "'");
                     return false;
                 }
+
             } else if (tmparr[0].equalsIgnoreCase("numbers")) {
+                
+                // allow empty groups
+                if (tmparr[1].length() == 0) {
+                    continue;
+                }
+                
                 tmparr = tmparr[1].split(";");
                 int num = tmparr.length;
                 int[] retarr = new int[num];
-                currgroup.polygon = makepolygons.get(currgroup.type, currgroup.size);
+
                 try {
                     for (int i = 0; i < num; i++) {
                         retarr[i] = Integer.parseInt(tmparr[i]);
-                    }//end for i
+                    }
                 } catch (NumberFormatException ne) {
                     System.err.println("ERROR parsing numbers from '" + inline + "'");
                     return false;
                 }
+                
                 currgroup.sequences = retarr;
+
+                // as "numbers" is the last property of seqgroups, we now also create the groups icon
+                currgroup.polygon = makepolygons.get(currgroup.type, currgroup.size);
+                
             } else {
                 System.err.println("Error reading savefile in line" + inline);
                 return false;
