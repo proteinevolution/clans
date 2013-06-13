@@ -43,5 +43,13 @@ public class SequenceGroup {
             sequences[i] = tmp[i];
         }
     }
+    
+    /**
+     * returns the number of entries in the group
+     * @return number of entries in the group 
+     */
+    public int size() {
+        return sequences.length;
+    }
 
 }
