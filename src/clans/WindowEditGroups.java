@@ -33,6 +33,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		smallerbutton.setText("v (" + (parent.data.groupsize - 1) + ")");
 
 		typepanel.add(draw1);
+		this.setSize(600, 700);
 		repaint();
 	}
 
