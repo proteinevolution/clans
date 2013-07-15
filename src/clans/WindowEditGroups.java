@@ -811,9 +811,11 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		// edit the name for the currently selected sequence group
 		int currsel = groupslist.getSelectedIndex();
 		if ((currsel > -1) && (currsel <= parent.data.seqgroupsvec.size())) {
-			String newname = parent.data.seqgroupsvec.elementAt(currsel).name;
-			newname = javax.swing.JOptionPane.showInputDialog(this, "Group name:", newname);
-			parent.data.seqgroupsvec.elementAt(currsel).name = newname;
+		    String old_name = parent.data.seqgroupsvec.elementAt(currsel).name;
+			String new_name = javax.swing.JOptionPane.showInputDialog(this, "Group name:", old_name);
+			if (new_name != null) {
+			    parent.data.seqgroupsvec.elementAt(currsel).name = new_name;
+			}
 			repaint();
 		}
 	}// GEN-LAST:event_namebuttonActionPerformed
