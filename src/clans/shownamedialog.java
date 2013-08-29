@@ -205,28 +205,43 @@ public class shownamedialog extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_selectednamesbuttonActionPerformed
 
-    private void searchbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchbuttonActionPerformed
-        // Add your handling code here:
-        String query = getquery();
-        if (showall) {
-            int[] selectedseqs = getmatches(query, namesarr);
-            if (selectedseqs.length == 0) {
-                javax.swing.JOptionPane.showMessageDialog(this, "No sequences found for '" + query + "'", "ERROR", javax.swing.JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            //seqnamelist.setSelectedIndices(getmatches(query,namesarr));
-            seqnamelist.setSelectedIndices(selectedseqs);
-        } else {
-            int[] selectedseqs = getmatches(query, selectednames);
-            if (selectedseqs.length == 0) {
-                javax.swing.JOptionPane.showMessageDialog(this, "No sequences found for '" + query + "'", "ERROR", javax.swing.JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            //seqnamelist.setSelectedIndices(getmatches(query,selectednames));
-            seqnamelist.setSelectedIndices(selectedseqs);
-        }
-    }//GEN-LAST:event_searchbuttonActionPerformed
+    /**
+     * 
+     * @param evt
+     */
+    private void searchbuttonActionPerformed(java.awt.event.ActionEvent evt) {
 
+        int[] selected_indices;
+        
+        String query = getsearchtext.get(this);
+        
+        if (query == null) { // the query entry dialog has been quit via the cancel button
+            return;
+        }
+        
+        if (query.length() == 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "no query was entered", "ERROR",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (showall) {
+            selected_indices = getmatches(query, namesarr);
+
+        } else {
+            selected_indices = getmatches(query, selectednames);
+        }
+        
+        if (selected_indices.length == 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "No sequences found for '" + query + "'", "ERROR",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        seqnamelist.setSelectedIndices(selected_indices);
+    }
+
+    
     private void clearbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearbuttonActionPerformed
         seqnamelist.setSelectedIndices(new int[0]);
         if (showall == false) {
@@ -300,20 +315,15 @@ public class shownamedialog extends javax.swing.JFrame {
     public javax.swing.JList seqnamelist;
     // End of variables declaration//GEN-END:variables
 
-    String getquery() {
-        //get the regexp query string
-        //use a text field in which people can either paste full lists or load files.
-        String retstring = getsearchtext.get(this);
-        //String retstring="";
-        //retstring=querydialog.getquery();
-        //retstring=javax.swing.JOptionPane.showInputDialog(this, "Enter a Query:");
-        //System.out.println("query="+retstring);
-        return retstring;
-    }//end getquery
 
-    //--------------------------------------------------------------------------
+    /**
+     * 
+     * @param query a regular expression
+     * @param namesarr the strings against which the query is checked 
+     * @return the indices of all strings matched by the query
+     */
     int[] getmatches(String query, String[] namesarr) {
-        //get the index of all names that match query
+        
         if (query != null && query.length() > 0) {
             String[] tmparr = query.split("\\s\\|\\|\\s");
             if (namesarr == null) {
@@ -322,6 +332,7 @@ public class shownamedialog extends javax.swing.JFrame {
             }
             int namesnum = namesarr.length;
             Vector<Integer> tmpvec = new Vector<Integer>();
+            
             if (tmparr[0].equals("^exact^")) {
                 for (int j = tmparr.length; --j > 0;) {//skip element 0
                     tmparr[j] = tmparr[j].replaceAll("\\|", "\\\\\\|");
@@ -331,13 +342,14 @@ public class shownamedialog extends javax.swing.JFrame {
                     tmparr[j] = tmparr[j].replaceAll("\\)", "\\\\\\)");
                     query = "^\\d+\\s+"+tmparr[j]+"\\s*$";
                     System.out.println("query='" + query + "'");
+
                     for (int i = 0; i < namesnum; i++) {
-                        //System.out.println("namesarr["+i+"]='"+namesarr[i]+"'");
                         if (namesarr[i].matches(query)) {
                             tmpvec.addElement(new Integer(i));
                         }
-                    }//end for i
+                    }
                 }
+                
             } else {//non-exact matching
                 for (int j = tmparr.length; --j >= 0;) {
                     tmparr[j] = tmparr[j].replaceAll("\\|", "\\\\\\|");
@@ -362,14 +374,20 @@ public class shownamedialog extends javax.swing.JFrame {
         } else {
             return new int[0];
         }
-    }//end getmatches
+    }
 
-    //--------------------------------------------------------------------------
+    
+    /**
+     * 
+     * @param innames
+     * @return
+     */
     String[] numberarr(String[] innames) {
         int elements = innames.length;
         String[] retarr = new String[elements];
         int numlength = (String.valueOf(elements).length()) + 1;
         StringBuffer tmpstrbuff = new StringBuffer();
+        
         for (int i = 0; i < elements; i++) {
             tmpstrbuff.setLength(0);
             tmpstrbuff.append(i);
@@ -377,27 +395,42 @@ public class shownamedialog extends javax.swing.JFrame {
                 tmpstrbuff.append(" ");
             }
             retarr[i] = tmpstrbuff + innames[i];
-        }// end for i
+        }
+        
         return retarr;
-    }// end printnames
+    }
 
-    //--------------------------------------------------------------------------
+    
+    /**
+     * Sets the selected names
+     * @param selectednamesint indices of the selected entries
+     */
     void setselected(int[] selectednamesint) {
         seqnamelist.setSelectedIndices(selectednamesint);
-    }//end setselected
+    }
 
+    /**
+     * Sets the selected names and decides whether to show all or only the selected entries
+     * @param selectednamesint
+     * @param showonly if true, only show the selected entries
+     */
     void setselected(int[] selectednamesint, boolean showonly) {
-        seqnamelist.setSelectedIndices(selectednamesint);
+        setselected(selectednamesint);
+        
         if (showonly) {//if I only want to see the selected names
+        
             selectednames = new String[selectednamesint.length];
+            
             for (int i = 0; i < selectednames.length; i++) {
                 selectednames[i] = namesarr[selectednamesint[i]];
-            }//end for i
+            }
+            
             seqnamelist.setListData(selectednames);
             seqnamelist.setSelectedIndices(new int[0]);
+            
             showall = false;
             selectednamesbutton.setText("show all names");
         }
-    }//end setselected
-}//end class
+    }
+}
 

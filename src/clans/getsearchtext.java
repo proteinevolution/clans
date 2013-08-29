@@ -166,7 +166,7 @@ public class getsearchtext extends javax.swing.JDialog {
     }
     
 
-	static String retstr=null;
+	static String retstr="";
     shownamedialog parent;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel buttonpanel;
