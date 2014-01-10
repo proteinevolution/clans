@@ -55,8 +55,15 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		colorbutton = new javax.swing.JButton();
 		addbutton = new javax.swing.JButton();
 		setasselectedbutton = new javax.swing.JButton();
-		upbutton = new javax.swing.JButton();
-		downbutton = new javax.swing.JButton();
+		
+		move_group_up_panel = new javax.swing.JPanel();
+		button_move_up = new javax.swing.JButton();
+		button_move_to_top = new javax.swing.JButton();
+		
+		move_group_down_panel = new javax.swing.JPanel();
+		button_move_down = new javax.swing.JButton();
+		button_move_to_bottom = new javax.swing.JButton();
+		
 		okbutton = new javax.swing.JButton();
 		delbutton = new javax.swing.JButton();
 		jPanel1 = new javax.swing.JPanel();
@@ -172,22 +179,47 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		});
 		buttonpanel.add(setasselectedbutton);
 
-		upbutton.setText("Move up");
-		upbutton.addActionListener(new java.awt.event.ActionListener() {
+		
+			//move_group_up_panel.setLayout(new java.awt.GridLayout(1, 2));
+		button_move_up.setText("Move up");
+		button_move_up.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				upbuttonActionPerformed(evt);
 			}
 		});
-		buttonpanel.add(upbutton);
+		move_group_up_panel.add(button_move_up);
 
-		downbutton.setText("Move down");
-		downbutton.addActionListener(new java.awt.event.ActionListener() {
+		button_move_to_top.setText("Move to top");
+		button_move_to_top.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				move_to_topActionPerformed(evt);
+			}
+		});
+		move_group_up_panel.add(button_move_to_top);
+
+		buttonpanel.add(move_group_up_panel);
+
+		
+		button_move_to_bottom.setText("Move to bottom");
+		button_move_to_bottom.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				move_to_bottomActionPerformed(evt);
+			}
+		});
+		move_group_down_panel.add(button_move_to_bottom);
+
+		button_move_down.setText("Move down");
+		button_move_down.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				downbuttonActionPerformed(evt);
 			}
 		});
-		buttonpanel.add(downbutton);
+		move_group_down_panel.add(button_move_down);
 
+		
+		buttonpanel.add(move_group_down_panel);
+		
+		
 		okbutton.setText("Update");
 		okbutton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -616,25 +648,129 @@ public class WindowEditGroups extends javax.swing.JFrame {
         repaint();
     }
 	
-	private void downbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_downbuttonActionPerformed
-		// move the currently selected object down by one in the vector
-		int currsel = groupslist.getSelectedIndex();
-		if ((currsel > -1) && (currsel < parent.data.seqgroupsvec.size() - 1)) {
-			parent.data.seqgroupsvec.insertElementAt(parent.data.seqgroupsvec.remove(currsel), currsel + 1);
-			groupslist.setSelectedIndex(currsel + 1);
+    /**
+     * moves groups to new positions in the list
+     * @param selected_indices
+     * @param new_indices
+     */
+	private void move_groups(int[] selected_indices, int[] new_indices) {
+		for(int i=0; i<selected_indices.length; i++){
+			parent.data.seqgroupsvec.insertElementAt(parent.data.seqgroupsvec.remove(selected_indices[i]), new_indices[i]);
 		}
+		
+		groupslist.setSelectedIndices(new_indices);
+		
 		repaint();
-	}// GEN-LAST:event_downbuttonActionPerformed
+	}
+    
+	/**
+	 * reverse int[] in-place
+	 * @param input
+	 */
+	private void reverse_order(int[] input){
+		for (int i = 0; i < input.length / 2; i++) {
+			int temp = input[i];
+			input[i] = input[input.length - i - 1];
+			input[input.length - i - 1] = temp;
+		}
+	}
+	
+	/**
+	 * Move all selected sequences downwards by one.
+	 * 
+	 * @param evt
+	 */
+	private void downbuttonActionPerformed(java.awt.event.ActionEvent evt) {
+		int[] selected_indices = groupslist.getSelectedIndices();
 
-	private void upbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_upbuttonActionPerformed
-		// move the currently selected object up by one in the vector
-		int currsel = groupslist.getSelectedIndex();
-		if ((currsel > 0) && (currsel <= parent.data.seqgroupsvec.size())) {
-			parent.data.seqgroupsvec.insertElementAt(parent.data.seqgroupsvec.remove(currsel), currsel - 1);
-			groupslist.setSelectedIndex(currsel - 1);
+		if (selected_indices.length == 0) { // nothing is selected
+			return;
 		}
-		repaint();
-    }// GEN-LAST:event_upbuttonActionPerformed
+
+		reverse_order(selected_indices);
+
+		// compute new indices
+		int[] new_indices = new int[selected_indices.length];
+		for (int i = 0; i < selected_indices.length; i++) {
+			
+			new_indices[i] = Math.min(selected_indices[i] + 1, parent.data.seqgroupsvec.size() - 1);
+			
+			if (i > 0 && (new_indices[i - 1] == new_indices[i])) { // avoid moving too far
+				new_indices[i] -= 1;
+			}
+		}
+
+		move_groups(selected_indices, new_indices);
+	}
+
+	/**
+	 * Moves the selected groups to the bottom of the list.
+	 */
+	private void move_to_bottomActionPerformed(java.awt.event.ActionEvent evt) {
+		
+		int[] selected_indices = groupslist.getSelectedIndices();
+		
+		if (selected_indices.length == 0) { // nothing is selected
+			return;
+		}
+		
+		reverse_order(selected_indices);
+		
+		int[] new_indices = new int[selected_indices.length];
+		for(int i=0; i<selected_indices.length; i++){
+			new_indices[i] = parent.data.seqgroupsvec.size() - 1 - i;
+		}
+		
+		move_groups(selected_indices, new_indices);
+	}
+
+
+	/**
+	 * Moves the selected groups to the top of the list.
+	 */
+	private void move_to_topActionPerformed(java.awt.event.ActionEvent evt) {
+		
+		int[] selected_indices = groupslist.getSelectedIndices();
+		
+		if (selected_indices.length == 0) { // nothing is selected
+			return;
+		}
+		
+		int[] new_indices = new int[selected_indices.length];
+		for(int i=0; i<selected_indices.length; i++){
+			new_indices[i] = i;
+		}
+		
+		move_groups(selected_indices, new_indices);
+	}
+		
+
+	/**
+	 * Move all selected sequences upwards by one.
+	 * 
+	 * @param evt
+	 */
+	private void upbuttonActionPerformed(java.awt.event.ActionEvent evt) {
+		int[] selected_indices = groupslist.getSelectedIndices();
+
+		if (selected_indices.length == 0) { // nothing is selected
+			return;
+		}
+
+		// compute new indices
+		int[] new_indices = new int[selected_indices.length];
+		for (int i = 0; i < selected_indices.length; i++) {
+			
+			new_indices[i] = Math.max(selected_indices[i] - 1, 0);
+			
+			if (i > 0 && (new_indices[i - 1] == new_indices[i])) { // avoid moving too far
+				new_indices[i] += 1;
+			}
+		}
+
+		move_groups(selected_indices, new_indices);
+    }
+	
 
     /**
      * Select the members of all selected groups in the clustering window.
@@ -847,17 +983,21 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private javax.swing.JCheckBox colornamescheckbox;
 	private javax.swing.JCheckBox highlight_groups_with_selected_sequences;
 	private javax.swing.JButton delbutton;
-	private javax.swing.JButton downbutton;
+	private javax.swing.JButton button_move_down;
 	private javax.swing.JMenuItem extracttofilemenuitem;
 	private javax.swing.JMenuItem menuitem_remove_empty_groups;
 	private javax.swing.JMenuItem groupcohesionmenuitem;
-	private javax.swing.JList groupslist;
+	private javax.swing.JList<SequenceGroup> groupslist;
 	private javax.swing.JButton hidebutton;
 	private javax.swing.JMenu jMenu1;
 	private javax.swing.JMenuBar jMenuBar1;
 	private javax.swing.JPanel jPanel1;
 	private javax.swing.JPanel jPanel2;
 	private javax.swing.JPanel jPanel3;
+	
+	private javax.swing.JPanel move_group_up_panel;
+	private javax.swing.JPanel move_group_down_panel;
+	
 	private javax.swing.JScrollPane jScrollPane1;
 	private javax.swing.JButton largerbutton;
 	private javax.swing.JPanel listpanel;
@@ -874,7 +1014,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private javax.swing.JMenuItem sortselcolormenuitem;
 	private javax.swing.JMenuItem sortselnamemenuitem;
 	private javax.swing.JPanel typepanel;
-	private javax.swing.JButton upbutton;
+	private javax.swing.JButton button_move_up;
+	private javax.swing.JButton button_move_to_top;
+	private javax.swing.JButton button_move_to_bottom;
 
 	// End of variables declaration//GEN-END:variables
 
@@ -1190,7 +1332,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			xoffset = (int) (framewidth / 2);
 			yoffset = (int) (frameheight / 2);
 			g.fillRect(0, 0, framewidth, frameheight);
-			tmpposarr = ((int[][]) polygons.get(type));
+			tmpposarr = polygons.get(type);
 			g.setColor(colorbutton.getBackground());
 			
 			if (type != 0) {
