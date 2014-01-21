@@ -3472,7 +3472,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                             g.drawString("-", (5 + i) * fontwidth - xtranslate, fontsize - ytranslate);
                             // draw all the vector elements
                             for (j = vecsize; --j >= 0;) {
-                                currdraw = (int[]) data.draworder.get(i).get(j);
+                                currdraw = data.draworder.get(i).get(j);
                                 // g.drawLine((int)tposarrtmp[currdraw[0]][0],(int)tposarrtmp[currdraw[0]][1],(int)tposarrtmp[currdraw[1]][0],(int)tposarrtmp[currdraw[1]][1]);
                                 g.drawLine(tposarrtmp[currdraw[0]][0], tposarrtmp[currdraw[0]][1],
                                         tposarrtmp[currdraw[1]][0], tposarrtmp[currdraw[1]][1]);
