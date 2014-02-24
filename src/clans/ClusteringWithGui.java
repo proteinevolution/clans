@@ -2,6 +2,7 @@ package clans;
 
 import java.util.*;
 import javax.swing.*;
+
 import java.awt.event.KeyEvent;
 import java.io.*;
 
@@ -1281,18 +1282,42 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }
     }// GEN-LAST:event_printmenuitemActionPerformed
 
-    private void changeselectcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_changeselectcolormenuitemActionPerformed
-        // change color for the selected sequence circles
-        draw1.selectedcolor = JColorChooser.showDialog(this, "Choose a new foreground color", draw1.selectedcolor);
-        repaint();
-    }// GEN-LAST:event_changeselectcolormenuitemActionPerformed
+    
+	protected java.awt.Color safe_change_color_dialog(String title, java.awt.Color current_color) {
 
-    private void changeblastcolorActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_changeblastcolorActionPerformed
-        // change the color of the blast hit circles
-        draw1.blastcirclecolor = JColorChooser
-                .showDialog(this, "Choose a new foreground color", draw1.blastcirclecolor);
-        repaint();
-    }// GEN-LAST:event_changeblastcolorActionPerformed
+		java.awt.Color new_color = null;
+
+		try {
+			new_color = JColorChooser.showDialog(this, "Choose a new foreground color", current_color);
+		} catch (java.awt.HeadlessException e) {
+			System.err.println("HeadlessException!");
+		}
+
+		if (new_color == null) {
+			return current_color;
+		}
+		return new_color;
+	}
+
+	/**
+	 * open and handle color chooser dialog for selected sequence circles
+	 * 
+	 * @param evt
+	 */
+	private void changeselectcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+		draw1.selectedcolor = safe_change_color_dialog("Choose a new foreground color", draw1.selectedcolor);
+		repaint();
+	}
+
+	/**
+	 *open and handle color chooser dialog for blast hit circles
+	 * 
+	 * @param evt
+	 */
+	private void changeblastcolorActionPerformed(java.awt.event.ActionEvent evt) {
+		draw1.blastcirclecolor = safe_change_color_dialog("Choose a new foreground color", draw1.blastcirclecolor);
+		repaint();
+	}
 
     private void button_show_selectedActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_showselectbuttonActionPerformed
         // open the sequences dialog and display the names for only the selected sequences
@@ -1307,17 +1332,25 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         shownames.setVisible(true);
     }// GEN-LAST:event_showselectbuttonActionPerformed
 
-    private void changefgcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_changefgcolormenuitemActionPerformed
-        // change the foreground color
-        draw1.fgcolor = JColorChooser.showDialog(this, "Choose a new foreground color", draw1.fgcolor);
-        repaint();
-    }// GEN-LAST:event_changefgcolormenuitemActionPerformed
+	/**
+	 * open and handle color chooser dialog for foreground color
+	 * 
+	 * @param evt
+	 */
+	private void changefgcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+		draw1.fgcolor = safe_change_color_dialog("Choose a new foreground color", draw1.fgcolor);
+		repaint();
+	}
 
-    private void changebgcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_changebgcolormenuitemActionPerformed
-        // change the background color
-        draw1.bgcolor = JColorChooser.showDialog(this, "Choose a new background color", draw1.bgcolor);
-        repaint();
-    }// GEN-LAST:event_changebgcolormenuitemActionPerformed
+	/**
+	 * open and handle color chooser dialog for background color
+	 * 
+	 * @param evt
+	 */
+	private void changebgcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+		draw1.bgcolor = safe_change_color_dialog("Choose a new background color", draw1.bgcolor);
+		repaint();
+	}
 
     private void save2dmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_save2dmenuitemActionPerformed
         // save the 2d coordinates of the graph points to a file
@@ -1343,14 +1376,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         }
     }// GEN-LAST:event_save2dmenuitemActionPerformed
 
-    private void changenumbercolorActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_changenumbercolorActionPerformed
-        try {
-            draw1.blasthitcolor = JColorChooser.showDialog(this, "Select New Color", draw1.blasthitcolor);
-        } catch (java.awt.HeadlessException e) {
-            javax.swing.JOptionPane.showMessageDialog(this, "HeadlessException");
-            System.err.println("HeadlessException!");
-        }
-    }// GEN-LAST:event_changenumbercolorActionPerformed
+	/**
+	 * open and handle color chooser dialog for BLAST hit numbers
+	 * 
+	 * @param evt
+	 */
+	private void changenumbercolorActionPerformed(java.awt.event.ActionEvent evt) {
+		draw1.blasthitcolor = safe_change_color_dialog("Select New Color", draw1.blasthitcolor);
+		repaint();
+	}
 
     /**
      * When the return key is pressed in the threshold text field, the threshold value will be set.

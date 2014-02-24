@@ -1,7 +1,5 @@
 package clans;
 
-import javax.swing.JColorChooser;
-
 public class DialogChangeConnectionColors extends javax.swing.JDialog {
 
     /**
@@ -226,6 +224,8 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
         } catch (NumberFormatException ne) {
             javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse float from '" + tmpstr + "'");
         }
+        repaint();
+        parent.repaint();
     }//GEN-LAST:event_valgradientbuttonActionPerformed
 
     private void gradientbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gradientbuttonActionPerformed
@@ -244,6 +244,7 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
             colorarr[i] = new java.awt.Color((int) (worstred + (i * redstep)), (int) (worstgreen + (i * greenstep)), (int) (worstblue + (i * bluestep)));
         }
         repaint();
+        parent.repaint();
     }//GEN-LAST:event_gradientbuttonActionPerformed
 
     private void closebuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closebuttonActionPerformed
@@ -563,18 +564,21 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
         parent.repaint();
     }//GEN-LAST:event_updatebuttonActionPerformed
 
-    private void mainpanelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mainpanelMouseReleased
-        // Add your handling code here:
-        int xval = evt.getX();
-        //now see what element that was
-        int colorelement = (int) (xval / draw1.elementwidth);
-        try {
-            colorarr[colorelement] = JColorChooser.showDialog(this, "Select New Color", colorarr[colorelement]);
-        } catch (java.awt.HeadlessException e) {
-            System.err.println("HeadlessException!");
-        }
-        repaint();
-    }//GEN-LAST:event_mainpanelMouseReleased
+	/**
+	 * open and handle color chooser dialog for a clicked element of the color bar
+	 * 
+	 * @param evt
+	 */
+	private void mainpanelMouseReleased(java.awt.event.MouseEvent evt) {
+
+		int xval = evt.getX();
+		int colorelement = (int) (xval / draw1.elementwidth); // determine clicked element
+
+		colorarr[colorelement] = parent.safe_change_color_dialog("Select New Color", colorarr[colorelement]);
+		
+		repaint();
+		parent.repaint();
+	}
 
     private void mainpanelAncestorResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_mainpanelAncestorResized
         // Add your handling code here:
