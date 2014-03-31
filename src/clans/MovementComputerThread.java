@@ -258,8 +258,8 @@ public class MovementComputerThread extends java.lang.Thread {
             }
         }
 
-        this.done = true;
         synchronized (syncon) {
+            this.done = true;
             syncon.notify();
         }
     }
