@@ -1694,11 +1694,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         	}
 		}
 
-		File output_file = new File(output_filename); // for easier temporary filename generation and moving
-
 		try {
-			data.safer_save_to_file(output_file);
-		} catch (IOException | IllegalStateException e) {
+			data.safer_save_to_file(output_filename);
+		} catch (IOException e) {
+			javax.swing.JOptionPane.showMessageDialog(this, e.getMessage() + "\n\n" + warning_data_not_saved_html);
+			return;
+		} catch (IllegalStateException e) {
 			javax.swing.JOptionPane.showMessageDialog(this, e.getMessage() + "\n\n" + warning_data_not_saved_html);
 			return;
 		}

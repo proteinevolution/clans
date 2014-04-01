@@ -881,7 +881,9 @@ public class ClusterData {
 	 *             if the temporary file cannot be created or cannot be moved to its final destination, or if
 	 *             {@code save_to_file} throws it. All lead to unfinished saves.
 	 */
-	public void safer_save_to_file(java.io.File output_file) throws IllegalStateException, IOException {
+	public void safer_save_to_file(String output_filename) throws IllegalStateException, IOException {
+		
+		File output_file = new File(output_filename);
 
 		// generate temporary filename and save to it
 		File temporary_file = null;
@@ -895,18 +897,40 @@ public class ClusterData {
 
 		save_to_file(temporary_file);
 
-		// move temporary file to destination file, overwriting the original if existing
-		try {
-			java.nio.file.Files.move(temporary_file.toPath(), output_file.toPath(),
-					java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
-			throw new IOException("IOException: " + e.getMessage() + "\n\nunable to move temporary save file\n\t" + temporary_file.getPath()
-					+ "\nto its final destination\n\t" + output_file.getPath() + "\n\n" 
+		// move original file to a backup location
+		File backup_file = null;
+		boolean create_backup = output_file.exists();
+		if (create_backup) {
+			try {
+				backup_file = File.createTempFile("###" + output_file.getName() + "_", ".temporary_backup", new File(
+						output_file.getParent()));
+			} catch (IOException e) {
+				throw new IOException("unable to create backup file in folder \"" + output_file.getParent()
+						+ "\":\n" + e.getMessage());
+			}
+			
+			if (!output_file.renameTo(backup_file)) {
+				throw new IOException("IOException: unable to move file \n\t" + output_filename
+						+ "\nto backup location\n\t" + backup_file.getPath());
+			}
+		}
+		
+		// move temporary file to destination
+		if (!temporary_file.renameTo(new File(output_filename))) {
+			throw new IOException("IOException: unable to move temporary save file\n\t" + temporary_file.getPath()
+					+ "\nto its final destination\n\t" + output_filename + "\n\n"
 					+ "The temporary save can be recovered or deleted at the location shown above.");
 		}
 
-		// set output filename as new source filename
-		setInputFilename(output_file.getPath());
+		// set source filename to newly saved file
+		setInputFilename(output_filename);
+		
+		// remove backup file
+		if (create_backup) {
+			if (backup_file.exists()) {
+				backup_file.delete();
+			}
+		}
 	}
 
     /**

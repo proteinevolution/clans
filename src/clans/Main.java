@@ -474,7 +474,10 @@ public class Main {
 		
 		try{
 			myclusterer.data.save_to_file(savefile);
-		} catch (IOException | IllegalStateException e) {
+		} catch (IOException e) {
+			System.err.println(e.getMessage() + "\n\n" + "YOUR DATA WAS NOT SAVED!!!\nTry saving to another location.");
+			return false;
+		} catch (IllegalStateException e) {
 			System.err.println(e.getMessage() + "\n\n" + "YOUR DATA WAS NOT SAVED!!!\nTry saving to another location.");
 			return false;
 		}

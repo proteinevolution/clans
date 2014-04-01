@@ -987,7 +987,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private javax.swing.JMenuItem extracttofilemenuitem;
 	private javax.swing.JMenuItem menuitem_remove_empty_groups;
 	private javax.swing.JMenuItem groupcohesionmenuitem;
-	private javax.swing.JList<SequenceGroup> groupslist;
+	private javax.swing.JList groupslist;
 	private javax.swing.JButton hidebutton;
 	private javax.swing.JMenu jMenu1;
 	private javax.swing.JMenuBar jMenuBar1;
