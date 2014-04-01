@@ -113,6 +113,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         menu_file = new javax.swing.JMenu();
         loadmenuitem = new javax.swing.JMenuItem();
         savemenuitem = new javax.swing.JMenuItem();
+        saveasmenuitem = new javax.swing.JMenuItem();
         saveattvalsmenuitem = new javax.swing.JMenuItem();
         addseqsmenuitem = new javax.swing.JMenuItem();
         savemtxmenuitem = new javax.swing.JMenuItem();
@@ -345,6 +346,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         });
         menu_file.add(savemenuitem);
 
+        saveasmenuitem.setText("Save Run As");
+        saveasmenuitem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveasmenuitemActionPerformed(evt);
+            }
+        });
+        menu_file.add(saveasmenuitem);
+        
         saveattvalsmenuitem.setText("Save attraction values to file");
         saveattvalsmenuitem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1589,40 +1598,126 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                 data.sequences[referenceseqnum], data.nameshash);
         viewblasthitsvec.addElement(myview);
         myview.setVisible(true);
-    }// GEN-LAST:event_getblasthitsmenuitemActionPerformed
+	}// GEN-LAST:event_getblasthitsmenuitemActionPerformed
 
-    private void savemenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	/**
+	 * opens a file chooser dialog that asks the user whether a selected file should be used if it exists
+	 * 
+	 * @return a String with the selected filename or empty string if dialog is canceled or closed
+	 */
+	private String safe_output_file_chooser() {
+		// this line makes using TAB possible to go from Yes to No in the FileChooser. Otherwise pressing Enter ALWAYS
+		// selected YES, irrespective of the currently selected button
+		UIManager.put("Button.defaultButtonFollowsFocus", Boolean.TRUE);
 
-        boolean was_running = false;
+		JFileChooser jFileChooser = new JFileChooser() {
+			/**
+			 * For existing files, ask whether to overwrite or not or cancel the save.
+			 * 
+			 * This code snippet stems from: http://stackoverflow.com/a/3729157/454402
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void approveSelection() {
+				File f = getSelectedFile();
+				if (f.exists() && getDialogType() == SAVE_DIALOG) {
+					int result = JOptionPane.showConfirmDialog(this, "The file exists, overwrite?", "Existing file",
+							JOptionPane.YES_NO_CANCEL_OPTION);
+					switch (result) {
+					case JOptionPane.YES_OPTION:
+						super.approveSelection();
+						return;
+					case JOptionPane.NO_OPTION:
+						return;
+					case JOptionPane.CLOSED_OPTION:
+						return;
+					case JOptionPane.CANCEL_OPTION:
+						cancelSelection();
+						return;
+					}
+				}
+				super.approveSelection();
+			}
+		};
+
+		// set input filename as default output filename
+		if (data.getAbsoluteInputfileName() != null) {
+			jFileChooser.setSelectedFile(new File(data.getAbsoluteInputfileName()));
+		}
+
+		int returnVal = jFileChooser.showSaveDialog(this);
+
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			return jFileChooser.getSelectedFile().getPath();
+		}
+
+		return null; // signal "no file was selected" to caller
+	}
+    
+	/**
+	 * Saves a run to either the source file or to a user chosen file. Users get a file chooser that lets them decide
+	 * whether to overwrite an existing file or not.
+	 * <p>
+	 * Shows message dialogs to inform the user of unsaved data if no temporary file could be created or the temporary
+	 * file cannot be moved to its final destination after writing. A similar message dialog occurs when users cancel or
+	 * close the file chooser.
+	 * 
+	 * @param save_as_mode
+	 *            if false the run will be saved to its source file, if true a file chooser will be opened instead.
+	 */
+	private void save_run(boolean save_as_mode) {
+
+		boolean was_running = false;
         if (is_running(false)) {
             was_running = true;
-            startstopthread(); // stop if running, then restart after setting threshold
+            startstopthread(); // stop if running, then restart after saving
+        }
+        
+		String warning_data_not_saved_html = "<html><font color=red>YOUR DATA WAS NOT SAVED!!!</font></html>\n"
+				+ "Try saving to another location.";
+		        
+        String output_filename = data.getAbsoluteInputfileName();
+        
+        // if no source file is known, force user to pick one. This happens, e.g., when we first loaded blast results
+        if (data.getAbsoluteInputfileName() == null) {
+        	save_as_mode = true;
         }
 
-        JFileChooser jFileChooser = new JFileChooser();
+        if (save_as_mode) {
+        	output_filename = safe_output_file_chooser();
+        	
+        	if (output_filename == null) {
+        		javax.swing.JOptionPane.showMessageDialog(this, "no output file selected\n\n"
+						+ warning_data_not_saved_html);
+				return;
+        	}
+		}
 
-        if (data.getAbsoluteInputfileName() != null) {
-            // input filename is default output filename
-            jFileChooser.setSelectedFile(new File(data.getAbsoluteInputfileName()));
-        }
+		File output_file = new File(output_filename); // for easier temporary filename generation and moving
 
-        int returnVal = jFileChooser.showSaveDialog(this);
+		try {
+			data.safer_save_to_file(output_file);
+		} catch (IOException | IllegalStateException e) {
+			javax.swing.JOptionPane.showMessageDialog(this, e.getMessage() + "\n\n" + warning_data_not_saved_html);
+			return;
+		}
 
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-
-            data.save_to_file(jFileChooser.getSelectedFile());
-
-            // in case the output filename is not the one the file was loaded from
-            data.setInputFilename(jFileChooser.getSelectedFile().getPath());
-
-            this.setTitle("Clustering of " + data.getBaseInputfileName());
-        }
+		setTitle("Clustering of " + data.getBaseInputfileName());
 
         if (was_running) {
             startstopthread(); // restart if previously running
         }
+	}
+	
+    private void savemenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+    	save_run(false);
     }
 
+    private void saveasmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+    	save_run(true);
+    }
+    
     private void loadmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loadmenuitemActionPerformed
         // load my custom format for a run from disk
         if (is_running(false)) {
@@ -2431,6 +2526,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem save2dmenuitem;
     private javax.swing.JMenuItem saveattvalsmenuitem;
     private javax.swing.JMenuItem savemenuitem;
+    private javax.swing.JMenuItem saveasmenuitem;
     private javax.swing.JMenuItem savemtxmenuitem;
     private javax.swing.JToggleButton button_select_move;
     private javax.swing.JMenuItem seqscoloring;

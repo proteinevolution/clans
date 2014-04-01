@@ -471,7 +471,13 @@ public class Main {
 		}
 
 		File savefile = new File(savetoname);
-		myclusterer.data.save_to_file(savefile);
+		
+		try{
+			myclusterer.data.save_to_file(savefile);
+		} catch (IOException | IllegalStateException e) {
+			System.err.println(e.getMessage() + "\n\n" + "YOUR DATA WAS NOT SAVED!!!\nTry saving to another location.");
+			return false;
+		}
 
 		System.out.println("done clustering, saving results to file '" + savefile.getAbsolutePath() + "'");
 		return true;

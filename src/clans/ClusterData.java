@@ -808,11 +808,14 @@ public class ClusterData {
 
     /**
      * Writes a CLANS format output file to disk.
-     * @param output_filename filename for the output
+     * 
+     * @param output_file
+     * @throws IllegalStateException if {@code ClusterData.saverun} throws it
+     * @throws IOException if {@code ClusterData.saverun} throws it
      */
-    public void save_to_file(java.io.File output_filename) {
+	public void save_to_file(java.io.File output_file) throws IllegalStateException, IOException {
         saverunobject myrun = new saverunobject();
-        myrun.file = output_filename;
+        myrun.file = output_file;
         myrun.inaln = sequences;
         myrun.blasthits = blasthits;
         myrun.attvals = myattvals;
@@ -860,6 +863,51 @@ public class ClusterData {
         ClusterData.saverun(myrun, sequence_names, nographics);
         myrun = null;
     }
+    
+	/**
+	 * Safer method to save a run that avoids source file corruption at the cost of temporary doubled disk space.
+	 * <p>
+	 * Internally, this writes to a temporary file in the parent folder of {@code output_file} and finally moves the
+	 * temporary file to its final location, which is an instant operation. The almost instant move operation is very
+	 * likely to prevent the source file from getting corrupted if CLANS crashes or is force-closed during the save
+	 * operation.
+	 * 
+	 * @param output_file
+	 *            the file to which the data should be written. The temporary file will be created in the parent folder
+	 *            of output_file.
+	 * @throws IllegalStateException
+	 *             if {@code save_to_file} throws it
+	 * @throws IOException
+	 *             if the temporary file cannot be created or cannot be moved to its final destination, or if
+	 *             {@code save_to_file} throws it. All lead to unfinished saves.
+	 */
+	public void safer_save_to_file(java.io.File output_file) throws IllegalStateException, IOException {
+
+		// generate temporary filename and save to it
+		File temporary_file = null;
+		try {
+			temporary_file = File.createTempFile("###" + output_file.getName() + "_", ".save_in_progress", new File(
+					output_file.getParent()));
+		} catch (IOException e) {
+			throw new IOException("unable to create temporary save file in folder \"" + output_file.getParent()
+					+ "\":\n" + e.getMessage());
+		}
+
+		save_to_file(temporary_file);
+
+		// move temporary file to destination file, overwriting the original if existing
+		try {
+			java.nio.file.Files.move(temporary_file.toPath(), output_file.toPath(),
+					java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new IOException("IOException: " + e.getMessage() + "\n\nunable to move temporary save file\n\t" + temporary_file.getPath()
+					+ "\nto its final destination\n\t" + output_file.getPath() + "\n\n" 
+					+ "The temporary save can be recovered or deleted at the location shown above.");
+		}
+
+		// set output filename as new source filename
+		setInputFilename(output_file.getPath());
+	}
 
     /**
      * read the seqgroup information from a separate file. the file has to either contain sequence names or numbers. if
@@ -1229,221 +1277,223 @@ public class ClusterData {
         System.out.println("read " + this.seqgroupsvec.size() + " cluster entries");
     }
 
-    /**
-     * Saves tha data to the selected file
-     * 
+	/**
+	 * Saves the data to the selected file
+	 * 
      * @param input
      * @param sequence_names
-     * @param nographics
+     * @param nographics true if the GUI is used, false for commandline-only CLANS
+     * @throws IllegalStateException if neither HSPs nor attraction values are set in {@code input} 
+     * @throws IOException if FileWriter throws it
      */
-    private static void saverun(saverunobject input, String[] sequence_names, boolean nographics) {
-        int i, j;
-        try {
-            PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(input.file)));
+	private static void saverun(saverunobject input, String[] sequence_names, boolean nographics)
+			throws IllegalStateException, IOException {
 
-            outwrite.println("sequences=" + input.inaln.length);
+		// check if necessary data is available
+		if (input.blasthits == null && input.attvals == null) {
+			throw new IllegalStateException("Error while saving run: no attraction values or list of HSPs found");
+		}
 
-            outwrite.println("<param>");
+		PrintWriter outwrite = null;
+		try {
+			outwrite = new PrintWriter(new BufferedWriter(new FileWriter(input.file)));
+		} catch (IOException e) {
+			throw new IOException("cannot open \"" + input.file.getName() + "\":\n" + e.getMessage());
+		}
 
-            outwrite.println("attfactor=" + input.attfactor);
-            outwrite.println("attvalpow=" + input.attvalpow);
-            outwrite.println("avgfoldchange=" + input.avgfoldchange);
+        outwrite.println("sequences=" + input.inaln.length);
 
-            outwrite.println("blastpath=" + input.blastpath);
+        outwrite.println("<param>");
 
-            outwrite.println("cluster2d=" + input.cluster2d);
+        outwrite.println("attfactor=" + input.attfactor);
+        outwrite.println("attvalpow=" + input.attvalpow);
+        outwrite.println("avgfoldchange=" + input.avgfoldchange);
 
-            outwrite.print("colorarr=");
-            for (i = 0; i < input.colorarr.length; i++) {
-                java.awt.Color tmp = input.colorarr[i];
-                outwrite.print("(" + tmp.getRed() + ";" + tmp.getGreen() + ";" + tmp.getBlue() + "):");
+        outwrite.println("blastpath=" + input.blastpath);
+
+        outwrite.println("cluster2d=" + input.cluster2d);
+
+        outwrite.print("colorarr=");
+        for (int i = 0; i < input.colorarr.length; i++) {
+            java.awt.Color tmp = input.colorarr[i];
+            outwrite.print("(" + tmp.getRed() + ";" + tmp.getGreen() + ";" + tmp.getBlue() + "):");
+        }
+        outwrite.println();
+
+        outwrite.print("colorcutoffs=");
+        for (int i = 0; i < input.colorcutoffs.length; i++) {
+            outwrite.print(input.colorcutoffs[i] + ";");
+        }
+        outwrite.println();
+
+        outwrite.println("complexatt=" + input.complexatt);
+        outwrite.println("cooling=" + input.cooling);
+        outwrite.println("currcool=" + input.currcool);
+
+        outwrite.println("dampening=" + input.dampening);
+        outwrite.println("dotsize=" + input.dotsize);
+
+        outwrite.println("formatdbpath=" + input.formatdbpath);
+
+        outwrite.println("groupsize=" + input.groupsize);
+
+        outwrite.println("maxmove=" + input.maxmove);
+        outwrite.println("minattract=" + input.minattract);
+
+        if (input.namesdmp_file != null && input.nodesdmp_file != null) {
+            outwrite.println("namesdmp_file=" + input.namesdmp_file);
+            outwrite.println("nodesdmp_file=" + input.nodesdmp_file);
+        }
+
+        outwrite.println("ovalsize=" + input.ovalsize);
+
+        outwrite.println("pval=" + input.pval);
+
+        outwrite.println("repfactor=" + input.repfactor);
+        outwrite.println("repvalpow=" + input.repvalpow);
+        outwrite.println("rounds_done=" + input.rounds);
+
+        outwrite.println("showinfo=" + input.showinfo);
+
+        outwrite.println("usefoldchange=" + input.usefoldchange);
+        outwrite.println("usescval=" + input.usescval);
+
+        outwrite.println("zoom=" + input.zoom);
+
+        outwrite.println("</param>");
+
+        if ((input.mapfiles != null) && (input.mapfiles.size() > 0)) {
+            outwrite.println("<function>");
+            int num = input.mapfiles.size();
+            for (int i = 0; i < num; i++) {
+                if ((input.lookupfiles != null) && (input.lookupfiles.get(i) != null)) {
+                    outwrite.println(((File) input.mapfiles.get(i)).getAbsolutePath() + "';'"
+                            + ((File) input.lookupfiles.get(i)).getAbsolutePath());
+                } else {
+                    outwrite.println(((File) input.mapfiles.get(i)).getAbsolutePath() + "';'NONE");
+                }
+            }
+            outwrite.println("</function>");
+        }
+        if (input.affyfiles != null) {
+            outwrite.println("<affyfiles>");
+            int repnum = input.affyfiles.size();
+            replicates rep;
+            for (int i = 0; i < repnum; i++) {
+                rep = (replicates) (input.affyfiles.get(i));
+                outwrite.println("<");
+                outwrite.println("abbreviation=" + rep.abbreviation);
+                outwrite.println("replicates=" + rep.replicates);
+                outwrite.println("wtreplicates=" + rep.wtreplicates);
+                outwrite.println("name=" + rep.name);
+                outwrite.println("wtname=" + rep.wtname);
+                outwrite.print("replicate=");
+                for (int j = rep.replicate.length; --j >= 0;) {
+                    outwrite.print(rep.replicate[j].getAbsolutePath() + "';'");
+                }
+                outwrite.println();
+                outwrite.print("wtreplicate=");
+                for (int j = rep.wtreplicate.length; --j >= 0;) {
+                    outwrite.print(rep.wtreplicate[j].getAbsolutePath() + "';'");
+                }
+                outwrite.println();
+                outwrite.println(">");
+            }
+            outwrite.println("</affyfiles>");
+        }
+        outwrite.println("<rotmtx>");
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                outwrite.print(input.rotmtx[i][j] + ";");
             }
             outwrite.println();
+        }
+        outwrite.println("</rotmtx>");
+        // first write the sequences to file
+        outwrite.println("<seq>");
+        for (int i = 0; i < input.inaln.length; i++) {
+            outwrite.println(">" + sequence_names[i]);
+            outwrite.println(input.inaln[i].seq);
+        }
+        outwrite.println("</seq>");
 
-            outwrite.print("colorcutoffs=");
-            for (i = 0; i < input.colorcutoffs.length; i++) {
-                outwrite.print(input.colorcutoffs[i] + ";");
+        // write the sequence weights
+        if (input.weights != null) {
+            outwrite.println("<weight>");
+            for (int i = 0; i < input.weights.length; i++) {
+                outwrite.println(">" + sequence_names[i]);
+                outwrite.println(input.weights[i]);
             }
-            outwrite.println();
-
-            outwrite.println("complexatt=" + input.complexatt);
-            outwrite.println("cooling=" + input.cooling);
-            outwrite.println("currcool=" + input.currcool);
-
-            outwrite.println("dampening=" + input.dampening);
-            outwrite.println("dotsize=" + input.dotsize);
-
-            outwrite.println("formatdbpath=" + input.formatdbpath);
-
-            outwrite.println("groupsize=" + input.groupsize);
-
-            outwrite.println("maxmove=" + input.maxmove);
-            outwrite.println("minattract=" + input.minattract);
-
-            if (input.namesdmp_file != null && input.nodesdmp_file != null) {
-                outwrite.println("namesdmp_file=" + input.namesdmp_file);
-                outwrite.println("nodesdmp_file=" + input.nodesdmp_file);
-            }
-
-            outwrite.println("ovalsize=" + input.ovalsize);
-
-            outwrite.println("pval=" + input.pval);
-
-            outwrite.println("repfactor=" + input.repfactor);
-            outwrite.println("repvalpow=" + input.repvalpow);
-            outwrite.println("rounds_done=" + input.rounds);
-
-            outwrite.println("showinfo=" + input.showinfo);
-
-            outwrite.println("usefoldchange=" + input.usefoldchange);
-            outwrite.println("usescval=" + input.usescval);
-
-            outwrite.println("zoom=" + input.zoom);
-
-            outwrite.println("</param>");
-
-            if ((input.mapfiles != null) && (input.mapfiles.size() > 0)) {
-                outwrite.println("<function>");
-                int num = input.mapfiles.size();
-                for (i = 0; i < num; i++) {
-                    if ((input.lookupfiles != null) && (input.lookupfiles.get(i) != null)) {
-                        outwrite.println(((File) input.mapfiles.get(i)).getAbsolutePath() + "';'"
-                                + ((File) input.lookupfiles.get(i)).getAbsolutePath());
-                    } else {
-                        outwrite.println(((File) input.mapfiles.get(i)).getAbsolutePath() + "';'NONE");
-                    }
+            outwrite.println("</weight>");
+        }
+        
+        // write the sequence groups
+        if ((input.seqgroupsvec != null) && (input.seqgroupsvec.size() > 0)) {
+            outwrite.println("<seqgroups>");
+            SequenceGroup mygroup;
+            for (int i = 0; i < input.seqgroupsvec.size(); i++) {
+                mygroup = input.seqgroupsvec.elementAt(i);
+                
+                outwrite.println("name=" + mygroup.name);
+                outwrite.println("type=" + mygroup.type);
+                outwrite.println("size=" + mygroup.size);
+                
+                if (mygroup.hide == true) {
+                    outwrite.println("hide=1");
+                } else {
+                    outwrite.println("hide=0");
                 }
-                outwrite.println("</function>");
-            }
-            if (input.affyfiles != null) {
-                outwrite.println("<affyfiles>");
-                int repnum = input.affyfiles.size();
-                replicates rep;
-                for (i = 0; i < repnum; i++) {
-                    rep = (replicates) (input.affyfiles.get(i));
-                    outwrite.println("<");
-                    outwrite.println("abbreviation=" + rep.abbreviation);
-                    outwrite.println("replicates=" + rep.replicates);
-                    outwrite.println("wtreplicates=" + rep.wtreplicates);
-                    outwrite.println("name=" + rep.name);
-                    outwrite.println("wtname=" + rep.wtname);
-                    outwrite.print("replicate=");
-                    for (j = rep.replicate.length; --j >= 0;) {
-                        outwrite.print(rep.replicate[j].getAbsolutePath() + "';'");
-                    }
-                    outwrite.println();
-                    outwrite.print("wtreplicate=");
-                    for (j = rep.wtreplicate.length; --j >= 0;) {
-                        outwrite.print(rep.wtreplicate[j].getAbsolutePath() + "';'");
-                    }
-                    outwrite.println();
-                    outwrite.println(">");
-                }
-                outwrite.println("</affyfiles>");
-            }
-            outwrite.println("<rotmtx>");
-            for (i = 0; i < 3; i++) {
-                for (j = 0; j < 3; j++) {
-                    outwrite.print(input.rotmtx[i][j] + ";");
+                
+                outwrite.println("color=" + mygroup.color.getRed() + ";" + mygroup.color.getGreen() + ";"
+                        + mygroup.color.getBlue() + ";" + mygroup.color.getAlpha());
+                outwrite.print("numbers=");
+
+                Arrays.sort(mygroup.sequences);
+                for (int j = 0; j < mygroup.sequences.length; j++) {
+                    outwrite.print(mygroup.sequences[j] + ";");
                 }
                 outwrite.println();
             }
-            outwrite.println("</rotmtx>");
-            // first write the sequences to file
-            outwrite.println("<seq>");
-            for (i = 0; i < input.inaln.length; i++) {
-                outwrite.println(">" + sequence_names[i]);
-                outwrite.println(input.inaln[i].seq);
-            }
-            outwrite.println("</seq>");
-
-            // write the sequence weights
-            if (input.weights != null) {
-                outwrite.println("<weight>");
-                for (i = 0; i < input.weights.length; i++) {
-                    outwrite.println(">" + sequence_names[i]);
-                    outwrite.println(input.weights[i]);
-                }
-                outwrite.println("</weight>");
-            }
-            
-            // write the sequence groups
-            if ((input.seqgroupsvec != null) && (input.seqgroupsvec.size() > 0)) {
-                outwrite.println("<seqgroups>");
-                SequenceGroup mygroup;
-                for (i = 0; i < input.seqgroupsvec.size(); i++) {
-                    mygroup = (SequenceGroup) input.seqgroupsvec.elementAt(i);
-                    
-                    outwrite.println("name=" + mygroup.name);
-                    outwrite.println("type=" + mygroup.type);
-                    outwrite.println("size=" + mygroup.size);
-                    
-                    if (mygroup.hide == true) {
-                        outwrite.println("hide=1");
-                    } else {
-                        outwrite.println("hide=0");
-                    }
-                    
-                    outwrite.println("color=" + mygroup.color.getRed() + ";" + mygroup.color.getGreen() + ";"
-                            + mygroup.color.getBlue() + ";" + mygroup.color.getAlpha());
-                    outwrite.print("numbers=");
-
-                    Arrays.sort(mygroup.sequences);
-                    for (j = 0; j < mygroup.sequences.length; j++) {
-                        outwrite.print(mygroup.sequences[j] + ";");
-                    }
-                    outwrite.println();
-                }
-                outwrite.println("</seqgroups>");
-            }
-            // next write the sequence positions
-            outwrite.println("<pos>");
-            for (i = 0; i < input.inaln.length; i++) {
-                outwrite.println(i + " " + input.posarr[i][0] + " " + input.posarr[i][1] + " " + input.posarr[i][2]);
-            }
-            outwrite.println("</pos>");
-            if (input.blasthits != null) {
-                // next write the blast hsp results
-                outwrite.println("<hsp>");
-                int tmpsize = 0;
-
-                for (i = 0; i < input.blasthits.length; i++) {
-                    outwrite.print(input.blasthits[i].query + " " + input.blasthits[i].hit + ":");
-                    tmpsize = input.blasthits[i].val.length;
-                    
-                    for (j = 0; j < tmpsize; j++) {
-                        outwrite.print(input.blasthits[i].val[j] + " ");
-                    }
-                    
-                    outwrite.println();
-                }
-                outwrite.println("</hsp>");
-                
-            } else if (input.attvals != null) {
-                // write the attvals instead of the hsp's
-                outwrite.println("<att>");
-
-                for (i = 0; i < input.attvals.length; i++) {
-                    outwrite.println(input.attvals[i].query + " " + input.attvals[i].hit + " " + input.attvals[i].att);
-                }
-                
-                outwrite.println("</att>");
-                
-            } else {
-                System.err.println("unable to print attraction values or list of HSP's to file");
-                javax.swing.JOptionPane.showMessageDialog(new javax.swing.JFrame(),
-                        "unable to write attraction values or list of HSP's to file; no data");
-            }
-            outwrite.close();
-            
-        } catch (IOException e) {
-            System.err.println("IOError writing to " + input.file.getName());
-            if (nographics == false) {
-                javax.swing.JOptionPane.showMessageDialog(new javax.swing.JFrame(),
-                        "IOERROR writing to '" + input.file.getName() + "'");
-            }
+            outwrite.println("</seqgroups>");
         }
-    }
+        // next write the sequence positions
+        outwrite.println("<pos>");
+        for (int i = 0; i < input.inaln.length; i++) {
+            outwrite.println(i + " " + input.posarr[i][0] + " " + input.posarr[i][1] + " " + input.posarr[i][2]);
+        }
+        outwrite.println("</pos>");
+
+		if (input.blasthits != null) {
+			// write blast HSPs
+			int tmpsize = 0;
+
+			outwrite.println("<hsp>");
+
+			for (int i = 0; i < input.blasthits.length; i++) {
+				outwrite.print(input.blasthits[i].query + " " + input.blasthits[i].hit + ":");
+				tmpsize = input.blasthits[i].val.length;
+
+				for (int j = 0; j < tmpsize; j++) {
+					outwrite.print(input.blasthits[i].val[j] + " ");
+				}
+				outwrite.println();
+			}
+
+			outwrite.println("</hsp>");
+
+		} else { // we check blasthits == null and attvals == null at the beginning, thus input.attvals is not null here
+			// write attvals
+			outwrite.println("<att>");
+
+			for (int i = 0; i < input.attvals.length; i++) {
+				outwrite.println(input.attvals[i].query + " " + input.attvals[i].hit + " " + input.attvals[i].att);
+			}
+
+			outwrite.println("</att>");
+		}
+
+		outwrite.close();
+	}
 
     /**
      * Saves the attraction values to a file.
