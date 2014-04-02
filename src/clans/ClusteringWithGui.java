@@ -2,7 +2,13 @@ package clans;
 
 import java.util.*;
 import javax.swing.*;
+import javax.swing.Timer;
 
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.*;
 
@@ -13,6 +19,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 */
     private static final long serialVersionUID = -1310615823184297259L;
 
+    private long last_save_time = 0;
+    private float save_successful_message_duration_milliseconds = 3000;
+    
     /**
 	 * 
 	 */
@@ -94,6 +103,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
      */
     private void initComponents() {// GEN-BEGIN:initComponents
 
+    	glass = (JPanel) this.getGlassPane();
+    	GridBagConstraints c = new GridBagConstraints();
+    	c.insets = new java.awt.Insets(100,0,0,0);  // move label down from the center using top padding
+    	glass.setLayout(new GridBagLayout());
+        glassLabel = new JLabel("saved file successfully!");
+        glassLabel.setFont(UIManager.getFont("Label.font").deriveFont(Font.BOLD).deriveFont(16f));
+        glass.add(glassLabel, c);
+		
         graphpanel = new javax.swing.JPanel();
         buttonpanel = new javax.swing.JPanel();
         drawbuttonpanel = new javax.swing.JPanel();
@@ -1706,15 +1723,26 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		setTitle("Clustering of " + data.getBaseInputfileName());
 
-        if (was_running) {
+    	last_save_time = System.currentTimeMillis();
+    	draw1.save_message_timer.start();
+
+    	if (was_running) {
             startstopthread(); // restart if previously running
         }
 	}
-	
-    private void savemenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+
+	/**
+	 * Used for File menu -> "save run"
+	 * @param evt
+	 */
+	private void savemenuitemActionPerformed(java.awt.event.ActionEvent evt) {
     	save_run(false);
     }
 
+	/**
+	 * Used for File menu -> "save run as"
+	 * @param evt
+	 */
     private void saveasmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
     	save_run(true);
     }
@@ -2505,6 +2533,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem getparentmenuitem;
     private javax.swing.JMenuItem getseqsforselectedhits;
     private javax.swing.JMenuItem getseqsmenuitem;
+    private javax.swing.JPanel glass;
+    private JLabel glassLabel;
     private javax.swing.JPanel graphpanel;
     private javax.swing.JMenu menu_help;
     private javax.swing.JMenuItem helpmenuitem;
@@ -3084,6 +3114,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
             originpos[1] = 0;
         }
 
+		ActionListener save_message_animation = new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				handle_save_message();
+			}
+		};
+		Timer save_message_timer = new Timer(50, save_message_animation);
+
         int[] originpos = new int[2];
         int colornum = 10;
 
@@ -3183,7 +3220,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
         // ----------------------------------------------------------------------
 
         public void paintComponent(java.awt.Graphics g) {
-            g.setFont(myfont);
+
+        	g.setFont(myfont);
             if (stereocheckboxmenuitem.isSelected()) {
                 // draw the graph in stereo vision
                 // draw the first picture as normal
@@ -3236,8 +3274,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                             + (float) ((int) (data.myrotmtx[2][2] * 100)) / 100, xadd - xtranslate, yadd + 3 * fontsize
                             - ytranslate);
                 }
-                g.drawString("Round: " + data.rounds, (int) (graphpanel.getWidth() / 2) - xtranslate,
-                        graphpanel.getHeight() - fontsize - ytranslate);
+                
                 recalc = true;
                 // and draw the second image
                 drawwidth = (int) ((graphpanel.getWidth() - xadd - xadd) / 2);
@@ -3301,14 +3338,33 @@ public class ClusteringWithGui extends javax.swing.JFrame {
                             + (float) ((int) (data.myrotmtx[2][2] * 100)) / 100, xadd - xtranslate, yadd + 3 * fontsize
                             - ytranslate);
                 }
-                g.drawString("Round: " + data.rounds, (int) (graphpanel.getWidth() / 2) - xtranslate,
-                        graphpanel.getHeight() - fontsize - ytranslate);
                 recalc = true;
             }
-        }// end paintcomponent
+            
+            g.drawString("Round: " + data.rounds, (int) (graphpanel.getWidth() / 2) - xtranslate,
+                    graphpanel.getHeight() - fontsize - ytranslate);
+            
+            if ((System.currentTimeMillis() - last_save_time) < save_successful_message_duration_milliseconds) {
+            	save_message_timer.start();
+            }
+        }
 
-        // ----------------------------------------------------------------------
+		protected void handle_save_message() {
 
+			long time_since_last_save = System.currentTimeMillis() - last_save_time;
+
+			if (time_since_last_save < save_successful_message_duration_milliseconds) {
+				java.awt.Color save_message_color = new java.awt.Color(0, 128, 255,
+						(int) (255 - 255 * (time_since_last_save / save_successful_message_duration_milliseconds)));
+
+				glassLabel.setForeground(save_message_color);
+				glass.setVisible(true);
+			} else {
+				save_message_timer.stop();
+				glass.setVisible(false);
+			}
+		}
+        
         void getangles() {
             // set alphaxy alphaxz and alphayz and their sin and cos (the rotation angles)
             // first compute the angle xy by taking the last rotaion angles and the last mouse movement
