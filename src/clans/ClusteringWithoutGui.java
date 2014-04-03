@@ -5,6 +5,10 @@
 
 package clans;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.ParseException;
+
 /**
  *
  * @author tancred
@@ -83,17 +87,6 @@ public class ClusteringWithoutGui {
     	data.initialize();
     	setup_cutoffs();
     }
-
-    void loaddata(String input_filename){
-        
-    	if(mythread != null && !mythread.stop){
-            System.err.println("Warning, you should stop the clustering thread before loading another file; stopping thread now");
-            mythread.stop = true;
-        }
-
-        data.load_clans_file(input_filename);
-    }
-
 
     void startstopthread(){
         //does the iteration and the stop for a thread

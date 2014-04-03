@@ -3,10 +3,12 @@ package clans;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -199,21 +201,31 @@ public class ClusterData {
      * the sequence interactions
      * 
      * @param infile the file to load data from
-     * @return
+     * @return a {@code saverunobject} instance containing the loaded data
+     * @throws ParseException If the file is corrupted or has the wrong format
+     * @throws IOException If an I/O error occurs
+     * @throws FileNotFoundException If the file does not exist, cannot be opened, or is a directory  
      */
-    static saverunobject load_run_from_file(File infile) {
+    static saverunobject load_run_from_file(File infile) throws ParseException, IOException, FileNotFoundException{
          
-        saverunobject myrun = new saverunobject();
-        myrun.file = null;// if myrun has a filename all was read ok
-        
-        try {
-            BufferedReader buffered_file_handle = new BufferedReader(new FileReader(infile));
+		System.out.println("LOADING data from '" + infile.getAbsolutePath() + "'");
 
-            System.out.println("LOADING data from '" + infile.getAbsolutePath() + "'");
+		saverunobject myrun = new saverunobject();
+        myrun.file = infile;
 
-            String inline;
-            int expected_sequences = -1;
+        boolean is_biolayout = false;
+		boolean errors_occurred = false;
+		String error_message = "";
+
+		String inline;
+		int expected_sequences = -1;
+		int current_line = 0;
+		
+		BufferedReader buffered_file_handle = new BufferedReader(new FileReader(infile));
+		
+		try {
             while ((inline = buffered_file_handle.readLine()) != null) {
+            	current_line += 1;
                 inline = inline.trim();
                 if (inline.length() == 0) {
                     continue;
@@ -235,88 +247,99 @@ public class ClusterData {
 
                     if (inline.equalsIgnoreCase("<param>")) {
                         if (!myrun.parse_params_block(buffered_file_handle)) {
-                            System.err.println("WARNING: could not parse <param> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <param> block";
                         }
 
                     } else if (inline.equalsIgnoreCase("<function>")) {
                         if (!myrun.parse_function_block(buffered_file_handle)) {
-                            System.err.println("WARNING: could not parse <function> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <function> block";
                         }
 
                     } else if (inline.equalsIgnoreCase("<affyfiles>")) {
                         if (!myrun.parse_affyfiles_block(buffered_file_handle)) {
-                            System.err.println("WARNING: could not parse <affyfiles> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <affyfiles> block";
                         }
 
                     } else if (inline.equalsIgnoreCase("<rotmtx>")) {
                         if (!myrun.parse_rotmtx_block(buffered_file_handle)) {
-                            System.err.println("WARNING: could not parse <rotmtx> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <rotmtx> block";
                         }
 
                     } else if (inline.equalsIgnoreCase("<seq>")) {
                         if (!myrun.parse_seq_block(buffered_file_handle, expected_sequences)) {
-                            System.err.println("WARNING: could not parse <seq> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <seq> block";
                         }
 
                     } else if (inline.equalsIgnoreCase("<weight>")) {
                         if (!myrun.parse_weight_block(buffered_file_handle, expected_sequences)) {
-                            System.err.println("WARNING: could not parse <weight> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <weight> block";
                         }
 
                     } else if (inline.equalsIgnoreCase("<pos>")) {
                         if (!myrun.parse_pos_block(buffered_file_handle, expected_sequences)) {
-                            System.err.println("WARNING: could not parse <pos> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <pos> block";
                         }
 
                     } else if (inline.equalsIgnoreCase("<hsp>")) {
                         if (!myrun.parse_hsp_block(buffered_file_handle)) {
-                            System.err.println("WARNING: could not parse <hsp> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <hsp> block";
                         }
 
                     } else if (inline.equalsIgnoreCase("<att>")) {
                         if (!myrun.parse_att_block(buffered_file_handle)) {
-                            System.err.println("WARNING: could not parse <att> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <att> block";
                         }
 
                     } else if (inline.equalsIgnoreCase("<seqgroups>")) {
                         if (!myrun.parse_seqgroups_block(buffered_file_handle)) {
-                            System.err.println("WARNING: could not parse <seqgroups> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <seqgroups> block";
                         }
 
                     } else if (inline.equalsIgnoreCase("<mtx>")) {
                         if (!myrun.parse_mtx_block(buffered_file_handle, expected_sequences)) {
-                            System.err.println("WARNING: could not parse <mtx> block");
-                            return myrun;
+                        	errors_occurred = true;
+                        	error_message = "could not parse <mtx> block";
                         }
 
                     } else {
-                        System.err.println("ERROR, wrong format! unknown specs on line " + inline);
-                        return myrun;
+                    	errors_occurred = true;
+                    	error_message = "unknown format in line \"" + inline + "\"";
                     }
+
+                    if (errors_occurred) {
+                    	System.err.println(error_message);
+                    	throw new ParseException(error_message, current_line);
+                    }
+
                 } else {
-                    System.out.println("assuming BioLayout format");
-                    buffered_file_handle.close();
-                    myrun = load_biolayout_file(infile);
-                    return myrun;
+                	is_biolayout = true; // let's try and parse it as biolayout file
+                	break;
                 }
             }
 
-            buffered_file_handle.close();
-
         } catch (IOException e) {
-            System.err.println("IOError unable to read from " + infile.getAbsolutePath());
-            return myrun;
+        	error_message = "IOError unable to read from " + infile.getAbsolutePath() + ":\n\t" + e.getMessage();
+        	System.err.println(error_message);
+        	throw new IOException(error_message);
+
+        } finally {
+        	buffered_file_handle.close();
         }
+		
+		if (is_biolayout) {
+            System.out.println("assuming BioLayout format");
+            return load_biolayout_file(infile);
+		}
 
         if (myrun.posarr == null) {
             // give it random values
@@ -329,24 +352,26 @@ public class ClusterData {
             }
         }
 
-        myrun.file = infile; // marker for successful read
         return myrun;
     }
 
     /**
-     * Read data from a CLANS format file.d
+     * Read data from a CLANS format file.
      * @param input_filename the input filename
      */
-    public void load_clans_file(String input_filename) {
 
+    /**
+     * 
+     * @param input_filename
+     * @throws ParseException If {@code ClusterData.load_run_from_file} throws it
+     * @throws IOException If {@code ClusterData.load_run_from_file} throws it
+     * @throws FileNotFoundException If {@code ClusterData.load_run_from_file} throws it
+     */
+    public void load_clans_file(String input_filename) throws ParseException, IOException, FileNotFoundException {
+    	
         saverunobject loaded_data = ClusterData.load_run_from_file(new java.io.File(input_filename));
 
         this.input_filename = input_filename;
-
-        if (loaded_data.file == null) {
-            System.err.println("ERROR reading saved data from '" + input_filename + "'; aborting read");
-            return;
-        }
 
         System.out.println("File loaded:" + input_filename);
 
@@ -457,27 +482,39 @@ public class ClusterData {
         }
     }
 
-    /**
-     * Read data from a biolayout format file. 
-     * @param input_filename the input filename
-     * @return
-     */
-    static saverunobject load_biolayout_file(File input_filename) {
-        saverunobject myrun = new saverunobject();
+	/**
+	 * 
+	 * Read data from a biolayout format file.
+	 * 
+	 * @param input_file
+	 *            The input file.
+	 * @return The loaded data if loading successful.
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 */
+	static saverunobject load_biolayout_file(File input_file) throws ParseException, IOException, FileNotFoundException {
+    	saverunobject myrun = new saverunobject();
         float attval;
         String name1;
         String name2;
+        String error_message;
         ArrayList<String> namelist = new ArrayList<String>();
         ArrayList<minattvals> datlist = new ArrayList<minattvals>();
+        
+        String inline;
+        String[] tmparr;
+        int vals = 0;
+        int seq1num, seq2num, seqnum = 0;
+        int line_number = 0;
+        HashMap<String, Integer> nameshash = new HashMap<String, Integer>();
+       
+        BufferedReader inread = new BufferedReader(new FileReader(input_file));
+
         try {
-            BufferedReader inread = new BufferedReader(new FileReader(input_filename));
-            String inline;
-            String[] tmparr;
-            int vals = 0;
-            int seq1num, seq2num, seqnum = 0;
-            HashMap<String, Integer> nameshash = new HashMap<String, Integer>();
-           
             while ((inline = inread.readLine()) != null) {
+            	line_number += 1;
+            	
                 if (inline.length() == 0) {
                     continue;
               
@@ -491,7 +528,7 @@ public class ClusterData {
                     if (tmparr.length == 2) {
                         if ((vals != 2) && (vals != 0)) {
                             System.out.println("ERROR found 2 elements (expected 3) on line '" + inline + "'");
-                            System.err.println("Mixed 2 and 3 element entries in file " + input_filename.getName()
+                            System.err.println("Mixed 2 and 3 element entries in file " + input_file.getName()
                                     + " the graph layout WILL misrepresent distances");
                             System.err.println("NEVER mix 2 and 3 element entries!");
                         }
@@ -525,7 +562,7 @@ public class ClusterData {
                     } else if (tmparr.length == 3) {
                         if ((vals != 3) && (vals != 0)) {
                             System.out.println("ERROR found 3 elements (expected 2) on line '" + inline + "'");
-                            System.err.println("Mixed 2 and 3 element entries in file " + input_filename.getName()
+                            System.err.println("Mixed 2 and 3 element entries in file " + input_file.getName()
                                     + " the graph layout WILL misrepresent distances");
                             System.err.println("NEVER mix 2 and 3 element entries!");
                         }
@@ -533,13 +570,18 @@ public class ClusterData {
                         vals = 3;
                         name1 = tmparr[0];
                         name2 = tmparr[1];
+                        
                         try {
                             attval = Float.parseFloat(tmparr[2]);
+                        
                         } catch (NumberFormatException ne) {
-                            System.err.println("unable to parse float from '" + tmparr[2] + "' in '" + inline + "'");
-                            inread.close();
-                            return myrun;
+                        	inread.close();
+                        	
+                        	error_message = "unable to parse float from '" + tmparr[2] + "' in '" + inline + "'";
+                        	System.err.println(error_message);
+                            throw new ParseException(error_message, line_number);
                         }
+                        
                         // now see if the names are already known, else, add as new names
                         if (nameshash.containsKey(name1) == false) {
                             namelist.add(name1);
@@ -561,18 +603,28 @@ public class ClusterData {
                         datlist.add(new minattvals(seq1num, seq2num, attval));
 
                     } else {
-                        System.err.println("ERROR: line '" + inline + "' does not correspond to known format");
-                        inread.close();
-                        return myrun;
+                    	inread.close();
+                    	
+                    	error_message = "unkonwn format: \"" + inline + "\"";
+                    	System.err.println(error_message);
+                        throw new ParseException(error_message, line_number);
                     }
                 }
             }
-            inread.close();
-        } catch (IOException ioe) {
-            System.err.println("IOERROR reading from " + input_filename.getName());
-            return myrun;
+        
+        } catch (IOException e) {
+        	error_message = "unable to read file \"" + input_file.getName() + "\"";
+        	System.err.println(error_message);
+            throw new IOException(error_message);
+
+        } finally {
+        	try{
+        		inread.close();
+        	} catch (IOException e) {
+        		
+        	}
         }
-       
+        
         // now make an array out of the arrayList
         myrun.attvals = (minattvals[]) datlist.toArray(new minattvals[0]);
         java.util.Random rand = new java.util.Random(System.currentTimeMillis());
@@ -586,7 +638,7 @@ public class ClusterData {
         }
 
         // now normalize the attraction values and symmetrize the array of attvals
-        myrun.file = input_filename; // marker for successful read
+        myrun.file = input_file; // marker for successful read
         return myrun;
     }
 
@@ -882,6 +934,7 @@ public class ClusterData {
 	 *             {@code save_to_file} throws it. All lead to unfinished saves.
 	 */
 	public void safer_save_to_file(String output_filename) throws IllegalStateException, IOException {
+		String error_message;
 		
 		File output_file = new File(output_filename);
 
@@ -891,8 +944,9 @@ public class ClusterData {
 			temporary_file = File.createTempFile("###" + output_file.getName() + "_", ".save_in_progress", new File(
 					output_file.getParent()));
 		} catch (IOException e) {
-			throw new IOException("unable to create temporary save file in folder \"" + output_file.getParent()
-					+ "\":\n" + e.getMessage());
+			error_message = "unable to create temporary file. " + e.getMessage();
+			System.err.println(error_message);
+			throw new IOException(error_message);
 		}
 
 		save_to_file(temporary_file);
@@ -905,21 +959,24 @@ public class ClusterData {
 				backup_file = File.createTempFile("###" + output_file.getName() + "_", ".temporary_backup", new File(
 						output_file.getParent()));
 			} catch (IOException e) {
-				throw new IOException("unable to create backup file in folder \"" + output_file.getParent()
-						+ "\":\n" + e.getMessage());
+				error_message = "unable to create file: " + e.getMessage();
+				System.err.println(error_message);						
+				throw new IOException(error_message);
 			}
 			
 			if (!output_file.renameTo(backup_file)) {
-				throw new IOException("IOException: unable to move file \n\t" + output_filename
-						+ "\nto backup location\n\t" + backup_file.getPath());
+				error_message = "unable to move file\n\t" + output_filename + "\nto backup location\n\t"
+						+ backup_file.getPath();
+				System.err.println(error_message);
+				throw new IOException(error_message);
 			}
 		}
 		
 		// move temporary file to destination
 		if (!temporary_file.renameTo(new File(output_filename))) {
-			throw new IOException("IOException: unable to move temporary save file\n\t" + temporary_file.getPath()
-					+ "\nto its final destination\n\t" + output_filename + "\n\n"
-					+ "The temporary save can be recovered or deleted at the location shown above.");
+			error_message = "unable to alter " + output_filename;
+			System.err.println(error_message);
+			throw new IOException(error_message);
 		}
 
 		// set source filename to newly saved file

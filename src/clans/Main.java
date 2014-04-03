@@ -1,6 +1,7 @@
 package clans;
 
 import java.io.*;
+import java.text.ParseException;
 import java.util.*;
 
 public class Main {
@@ -267,7 +268,24 @@ public class Main {
 
 			} else if (newseqs.length() > 0) { // load data from olddata and add data from newseqs
 				System.out.println("reading old data");
-				saverunobject readdata = ClusterData.load_run_from_file(new java.io.File(olddata));
+				
+				
+				saverunobject readdata;
+				try {
+					readdata = ClusterData.load_run_from_file(new java.io.File(olddata));
+					
+				} catch (FileNotFoundException e) {
+					System.err.println("file not found: " + olddata);
+					return false;
+					
+				} catch (ParseException e) {
+					System.err.println("line " + e.getErrorOffset() + ": " + e.getMessage());
+					return false;
+					
+				} catch (IOException e) {
+					System.err.println(e.getMessage());
+					return false;
+				}
 
 				System.out.println("reading new sequences");
 				AminoAcidSequence[] newaln = AlignmentHandling.read(newseqs);
@@ -360,7 +378,23 @@ public class Main {
 
 			} else { // load data from olddata
 				System.out.println("Reading old data from " + olddata);
-				saverunobject readdata = ClusterData.load_run_from_file(new java.io.File(olddata));
+				saverunobject readdata;
+				
+				try {
+					readdata = ClusterData.load_run_from_file(new java.io.File(olddata));
+				} catch (FileNotFoundException e) {
+					System.err.println("file not found: " + olddata);
+					return false;
+					
+				} catch (ParseException e) {
+					System.err.println("line " + e.getErrorOffset() + ": " + e.getMessage());
+					return false;
+					
+				} catch (IOException e) {
+					System.err.println(e.getMessage());
+					return false;
+				}
+				
 				int seqnum = readdata.inaln.length;
 				HashMap<String, Integer> sequence_name_internal_mapping = new HashMap<String, Integer>(
 						(int) (seqnum / 0.74), (float) 0.75); // mapping of names to array indices
@@ -445,7 +479,21 @@ public class Main {
 
 		ClusteringWithoutGui myclusterer = new ClusteringWithoutGui(myclusterdata);
 
-		myclusterer.data.load_clans_file(myclusterer.data.getAbsoluteInputfileName());
+		try {
+			myclusterer.data.load_clans_file(myclusterer.data.getAbsoluteInputfileName());
+		} catch (FileNotFoundException e) {
+			System.err.println("file not found: " + myclusterer.data.getAbsoluteInputfileName());
+			return false;
+			
+		} catch (ParseException e) {
+			System.err.println("line " + e.getErrorOffset() + ": " + e.getMessage());
+			return false;
+			
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+			return false;
+		}
+		
 		if (pval != -1) {
 			myclusterer.data.pvalue_threshold = myclusterer.data.pval;
 		}
