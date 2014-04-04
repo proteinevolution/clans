@@ -2,6 +2,7 @@ package clans;
 
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.*;
 
@@ -83,7 +84,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 
 		if (data.getAbsoluteInputfileName() != null) {
-			loaddata(data.getAbsoluteInputfileName());
+			loaddata_threaded(data.getAbsoluteInputfileName());
 		}
 
 		if (new File(data.getIntermediateResultfileName()).canRead()) {
@@ -91,7 +92,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			readsave.parse_intermediate_results(data);
 			data.posarr = data.myposarr;
 		}
-	}// end init
+	}
 
 	/**
 	 * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
@@ -804,7 +805,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Initiates the message overlay.
 	 */
 	private void setupGuiMessageOverlay() {
-		message_overlay = new GuiMessageOverlay((JPanel) this.getGlassPane(), graphpanel);
+		// TODO production versions MUST use GuiMessageOverlay without logging!
+		message_overlay = new GuiMessageOverlayLogged(graphpanel);
+		this.setGlassPane(message_overlay);
 		
 		// whenever the main window changes its size, the overlay must be informed so it can adjust
 		graphpanel.addComponentListener(new ComponentAdapter() {
@@ -1689,22 +1692,19 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 */
 	private void save_run(boolean save_as_mode) {
 
-		String error_message;
-		
 		message_overlay.setSaving();
 
-		boolean was_running = false;
-		if (is_running(false)) {
-			was_running = true;
+		final boolean was_running = is_running(false);
+		if (was_running) {
 			startstopthread(); // stop if running, then restart after saving
 		}
-
-		String output_filename = data.getAbsoluteInputfileName();
 
 		// if no source file is known, force user to pick one. This happens, e.g., when we first loaded blast results
 		if (data.getAbsoluteInputfileName() == null) {
 			save_as_mode = true;
 		}
+		
+		final String output_filename;
 
 		if (save_as_mode) {
 			output_filename = safe_output_file_chooser();
@@ -1713,8 +1713,33 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				message_overlay.setCanceled();
 				return;
 			}
+		} else {
+			output_filename = data.getAbsoluteInputfileName();
 		}
 
+		SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
+			@Override
+			protected Void doInBackground() throws Exception {
+				savedata(output_filename);
+				return null;
+			}
+
+			protected void done() {
+				message_overlay.setCompleted();
+				
+				setTitle("Clustering of " + data.getBaseInputfileName());
+				
+				if (was_running) {
+					startstopthread(); // restart if previously running
+				}
+			}
+		};
+
+		worker.execute();
+	}
+	
+	private void savedata(final String output_filename) {
+		String error_message;
 		try {
 			data.safer_save_to_file(output_filename);
 			
@@ -1729,14 +1754,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			javax.swing.JOptionPane.showMessageDialog(this, error_message);
 			message_overlay.setFailed(error_message);
 			return;
-		}
-
-		setTitle("Clustering of " + data.getBaseInputfileName());
-
-		message_overlay.setCompleted();
-		
-		if (was_running) {
-			startstopthread(); // restart if previously running
 		}
 	}
 
@@ -1770,7 +1787,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			
 			String filename = fc.getSelectedFile().getAbsolutePath();
-			loaddata(filename);
+			loaddata_threaded(filename);
 
 			if (myseqgroupwindow != null) {
 				myseqgroupwindow.setVisible(false);
@@ -2485,6 +2502,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	boolean moveseqs = false;// flag to set if I want to draw sequences in 3d-space
 	boolean recalc = true;// synchronize drawing and calculating
 	drawpanel draw1;
+	final public Object drawLock = new Object();
 	shownamedialog shownames;
 	WindowEditGroups myseqgroupwindow;
 	computethread mythread = new computethread(this);
@@ -2520,9 +2538,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 	ClusterData data = null;
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
-
-	// TODO rename everything to reasonable names
 	private javax.swing.JMenu menu_misc;
 	private javax.swing.JMenuItem aboutmenuitem;
 	private javax.swing.JMenuItem addseqsmenuitem;
@@ -2656,46 +2671,93 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		this.center_graph(-1);
 	}
+	
+	private void loaddata_threaded(final String filename) {
+
+		final Boolean[] return_status = new Boolean[1];
+		return_status[0] = false;
+
+		message_overlay.setLoading();
+
+		SwingWorker<Boolean, Integer> worker = new SwingWorker<Boolean, Integer>() {
+			@Override
+			protected Boolean doInBackground() throws Exception {
+				String error_message = "";
+				boolean had_error = false;
+
+				try {
+					synchronized (drawLock) {
+						loaddata(filename);
+					}
+					return true;
+				
+				} catch (FileNotFoundException e) {
+					error_message = e.getMessage();
+					had_error = true;
+				
+				} catch (ParseException e) {
+					error_message = "line " + e.getErrorOffset() + ": " + e.getMessage();
+					had_error = true;
+
+				} catch (IOException e) {
+					error_message = e.getMessage();
+					had_error = true;
+				}
+				
+				if (had_error) {
+					System.err.println(error_message);
+					message_overlay.setFailed(error_message);
+					return false;
+				}
+				
+				return true;
+			}
+
+			@Override
+			protected void done() {
+				String error_message;
+
+				try {
+					if (get()) { // the return value of doInBackground
+						message_overlay.setCompleted();
+					}
+
+				} catch (InterruptedException e) {
+					error_message = "load thread interrupted";
+					System.err.println(error_message);
+					message_overlay.setFailed(error_message);
+					return;
+
+				} catch (ExecutionException e) {
+					error_message = "loading failed with exception: " + e.getCause();
+					System.err.println(error_message);
+					message_overlay.setFailed(error_message);
+					return;
+				}
+			}
+		};
+
+		worker.execute();
+	}
 
 	/**
 	 * Loads clans run from file.
 	 * 
 	 * @param filename
 	 *            The input file.
+	 * @return true iff loading succeeded.
+	 * @throws IOException 
+	 * @throws ParseException 
+	 * @throws FileNotFoundException 
 	 */
-	boolean loaddata(final String filename){
-		
-		message_overlay.setLoading();
+	void loaddata(String filename) throws FileNotFoundException, ParseException, IOException{
 		
 		if (mythread != null && mythread.didrun == true && mythread.stop != true) {
 			System.err.println("Clustering thread must be stopped before loading a file; stopping thread now!");
 			mythread.stop = true;
 		}
 
-		String message;
-
-		try {
-			data.load_clans_file(filename);
-
-		} catch (FileNotFoundException e) {
-			message = e.getMessage();
-			System.err.println(message);
-			message_overlay.setFailed(message);
-			return false;
-
-		} catch (ParseException e) {
-			message = "line " + e.getErrorOffset() + ": " + e.getMessage();
-			System.err.println(message);
-			message_overlay.setFailed(message);
-			return false;
-
-		} catch (IOException e) {
-			message = e.getMessage();
-			System.err.println(message);
-			message_overlay.setFailed(message);
-			return false;
-		}
-
+		data.load_clans_file(filename);
 
 		textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
 		if (data.blasthits == null) {
@@ -2740,10 +2802,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		this.setTitle("Clustering of " + data.getBaseInputfileName());
 
 		this.center_graph(-1);
-		
-		message_overlay.setCompleted();
-		
-		return true;
 	}
 
 	boolean contains_data() {
@@ -3288,12 +3346,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					// now rotate the graph by the stereoangle along the x-axis
 					mousemove[0] += ((float) stereoangle / 360f) * drawwidth;
 					getangles();
-					if (drawbox == false) {
+					
+					if (contains_data()) {
 						drawdata(g);
-					} else {
-						drawdata(g);
+					}
+
+					if (drawbox) {
 						drawbox(g);
 					}
+					
 					// now rotate back to what it was before
 					mousemove[0] -= ((float) stereoangle / 360f) * (drawwidth);
 				}
@@ -3334,10 +3395,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 				} else {
 					getangles();
-					if (drawbox == false) {
+					
+					if (contains_data()) {
 						drawdata(g);
-					} else {
-						drawdata(g);
+					}
+
+					if (drawbox) {
 						drawbox(g);
 					}
 				}
@@ -3354,10 +3417,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					g.drawString(repaint, (drawwidth / 2) - xtranslate, (drawheight / 2) - ytranslate);
 				} else {
 					getangles();
-					if (drawbox == false) {
+					if (contains_data()) {
 						drawdata(g);
-					} else {
-						drawdata(g);
+					}
+
+					if (drawbox) {
 						drawbox(g);
 					}
 				}
@@ -3393,7 +3457,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			g.drawString("Round: " + data.rounds, (int) (graphpanel.getWidth() / 2) - xtranslate,
 					graphpanel.getHeight() - fontsize - ytranslate);
 
-			message_overlay.show();
+			message_overlay.activate_overlay();
 		}
 
 		void getangles() {
@@ -3650,6 +3714,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		// ---------------------------------------
 
 		void drawdata(java.awt.Graphics g1d) {
+			synchronized (drawLock) {
+				drawdata_synchronized(g1d);
+			}
+		}
+		
+		void drawdata_synchronized(java.awt.Graphics g1d) {
+			
 			java.awt.Graphics2D g = (java.awt.Graphics2D) g1d;
 			if (antialiasingcheckboxmenuitem.isSelected()) {
 				g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
