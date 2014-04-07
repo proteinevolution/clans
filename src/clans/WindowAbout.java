@@ -32,7 +32,7 @@ public class WindowAbout extends javax.swing.JDialog {
 		getContentPane().add(textarea, java.awt.BorderLayout.CENTER);
 
 		topfield.setEditable(false);
-		topfield.setText("CLANS (2013-04-10)");
+		topfield.setText("CLANS (2014-04-07)");
 
 		getContentPane().add(topfield, java.awt.BorderLayout.NORTH);
 
