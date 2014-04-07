@@ -11,7 +11,7 @@ public class getsearchtext extends javax.swing.JDialog {
      */
     private static final long serialVersionUID = 9176398008906892605L;
 
-    public getsearchtext(shownamedialog parent, boolean modal) {
+    public getsearchtext(WindowShowSelectedSequences parent, boolean modal) {
         super(parent, modal);
         this.parent=parent;
         initComponents();
@@ -160,14 +160,14 @@ public class getsearchtext extends javax.swing.JDialog {
     //    new getsearchtext(new javax.swing.JFrame(), true).show();
     //}
     
-    public static String get(shownamedialog parent){
+    public static String get(WindowShowSelectedSequences parent){
 		new getsearchtext(parent,true).setVisible(true);
 		return retstr;
     }
     
 
 	static String retstr="";
-    shownamedialog parent;
+    WindowShowSelectedSequences parent;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel buttonpanel;
     private javax.swing.JButton cancelbutton;

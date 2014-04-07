@@ -2,14 +2,14 @@ package clans;
 
 import java.util.*;
 
-public class shownamedialog extends javax.swing.JFrame {
+public class WindowShowSelectedSequences extends javax.swing.JFrame {
 
     /**
      * 
      */
     private static final long serialVersionUID = -4171611623198735444L;
 
-    public shownamedialog(String[] namesarr, ClusteringWithGui parent) {
+    public WindowShowSelectedSequences(String[] namesarr, ClusteringWithGui parent) {
         this.parent = parent;
         this.namesarr = numberarr(namesarr);
         initComponents();

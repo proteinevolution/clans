@@ -8,6 +8,7 @@ import java.util.Vector;
 
 public class saverunobject {
 
+	int autosaveIntervalMinutes = -1;
     java.io.File file=null;
     MinimalHsp[] blasthits=null;
     AminoAcidSequence[] inaln=null;
@@ -62,7 +63,14 @@ public class saverunobject {
                 System.err.println("ERROR reading savefile for line '" + inline + "'");
                 return false;
             }
-            if (tmparr[0].equalsIgnoreCase("pval")) {
+            if (tmparr[0].equalsIgnoreCase("autosaveinterval")) {
+                try {
+                    autosaveIntervalMinutes = Integer.parseInt(tmparr[1]);
+                } catch (NumberFormatException ne) {
+                    System.err.println("ERROR parsing integer from " + tmparr[1]);
+                    return false;
+                }
+            } else if (tmparr[0].equalsIgnoreCase("pval")) {
                 try {
                     pval = Double.parseDouble(tmparr[1]);
                 } catch (NumberFormatException ne) {

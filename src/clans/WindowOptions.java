@@ -59,7 +59,7 @@ public class WindowOptions extends javax.swing.JFrame {
         coolfield.setToolTipText("value from 0(fast cooling) to 1(no cooling).");
         coolfield.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                coolfieldActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -73,7 +73,7 @@ public class WindowOptions extends javax.swing.JFrame {
         currcoolfield.setToolTipText("current \"temprature\"");
         currcoolfield.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                currcoolfieldActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -86,7 +86,7 @@ public class WindowOptions extends javax.swing.JFrame {
         attfield.setText("10");
         attfield.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                attfieldActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -98,7 +98,7 @@ public class WindowOptions extends javax.swing.JFrame {
         attvalpowtextfield.setText("2");
         attvalpowtextfield.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                attvalpowtextfieldActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -111,7 +111,7 @@ public class WindowOptions extends javax.swing.JFrame {
         repfield.setText("5");
         repfield.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                repfieldActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -123,7 +123,7 @@ public class WindowOptions extends javax.swing.JFrame {
         repvalpowtextfield.setText("1");
         repvalpowtextfield.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                repvalpowtextfieldActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -137,7 +137,7 @@ public class WindowOptions extends javax.swing.JFrame {
         dampfield.setToolTipText("0=add new movement vector to last movement; 1=only use new movement vector");
         dampfield.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                dampfieldActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -150,7 +150,7 @@ public class WindowOptions extends javax.swing.JFrame {
         minattfield.setText("1");
         minattfield.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                minattfieldActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -162,7 +162,7 @@ public class WindowOptions extends javax.swing.JFrame {
         roundstextfield.setText("-1");
         roundstextfield.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                roundstextfieldActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -172,7 +172,7 @@ public class WindowOptions extends javax.swing.JFrame {
         maxrepdistbutton.setToolTipText("Some X-forwarding does not recognize pressing \"return\". In these cases use this button to transmit parameter changes.");
         maxrepdistbutton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                maxrepdistbuttonActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -181,7 +181,7 @@ public class WindowOptions extends javax.swing.JFrame {
         maxmovefield.setText("0.1");
         maxmovefield.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                maxmovefieldActionPerformed(evt);
+            	standardActionPerformed(evt);
             }
         });
 
@@ -192,103 +192,26 @@ public class WindowOptions extends javax.swing.JFrame {
         pack();
     }//GEN-END:initComponents
 
-    private void roundstextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_roundstextfieldActionPerformed
-        // set the number of rounds to cluster at a time
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_roundstextfieldActionPerformed
-
-    private void currcoolfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currcoolfieldActionPerformed
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_currcoolfieldActionPerformed
-
-    private void maxrepdistbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxrepdistbuttonActionPerformed
-        //for X-forwarding; solaris has problems recognizing returns; for this
-        //I therefore use this button to re-read the values entered in the various fields
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_maxrepdistbuttonActionPerformed
-
-    private void maxmovefieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxmovefieldActionPerformed
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_maxmovefieldActionPerformed
-
-    private void minattfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minattfieldActionPerformed
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_minattfieldActionPerformed
-
-    private void dampfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dampfieldActionPerformed
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_dampfieldActionPerformed
-
-    private void repvalpowtextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_repvalpowtextfieldActionPerformed
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_repvalpowtextfieldActionPerformed
-
-    private void repfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_repfieldActionPerformed
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_repfieldActionPerformed
-
-    private void attvalpowtextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attvalpowtextfieldActionPerformed
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_attvalpowtextfieldActionPerformed
-
-    private void attfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attfieldActionPerformed
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_attfieldActionPerformed
-
-    private void coolfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_coolfieldActionPerformed
-        parent.data.changedvals=true;
-        if(parent.is_stopped(false)){//if thread is stopped
-            parent.update_values_from_options_window();
-            parent.repaint();
-        }
-    }//GEN-LAST:event_coolfieldActionPerformed
+	/**
+	 * Inform the parent about changed options.
+	 */
+    private void updateParent() {
+    	
+    	if (parent.isComputing()) { // the computation thread picks this up 
+			parent.data.changedvals = true;
+		
+    	} else { // instant redraw when not running
+			parent.update_values_from_options_window();
+			parent.repaint();
+		}
+    }
     
-    /**
-     * @param args the command line arguments
-     */
-    //public static void main(String args[]) {
-    //    new optionsdialog(new javax.swing.JFrame(), true).show();
-    //}
+	/**
+	 * The standard event, which simply informs the parent about changed options.
+	 */
+    private void standardActionPerformed(java.awt.event.ActionEvent evt) {
+    	updateParent();
+    }
     
     ClusteringWithGui parent=null;
     

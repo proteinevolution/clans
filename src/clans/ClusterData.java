@@ -104,6 +104,9 @@ public class ClusterData {
     int roundslimit = -1;
     boolean moveselectedonly = false;
 
+    // TODO: load/write this from/to CLANS file
+    private int autosaveIntervalMinutes; // the autosave interval in minutes; -1 if value not in input file, 0 = disabled
+
     public ClusterData(MinimalHsp[] blasthits, AminoAcidSequence[] sequences, String[] namearr,
             HashMap<String, Integer> nameshash, double eval, double pval, float scval, int verbose, int cpu,
             boolean save_intermediate_results, String cmd, String blastpath, boolean addblastvbparam,
@@ -193,6 +196,64 @@ public class ClusterData {
     public void resetDrawOrder() {
         draworder = new ArrayList<ArrayList<int[]>>();
     }
+    
+	protected int getTotalNumberOfConnections() {
+		// BLAST HSP data
+		if (blasthits != null) {
+			return blasthits.length;
+		}
+
+		// attvals mode data
+		if (myattvals == null) {
+			return myattvals.length;
+
+		}
+
+		// no data
+		return 0;
+	}
+	
+	protected boolean knowsAutosave() {
+		return autosaveIntervalMinutes != -1;
+	}
+	
+	protected int getAutosaveIntervalMinutes() {
+		return autosaveIntervalMinutes;
+	}
+	
+	protected void setAutosaveIntervalMinutes(int new_value) {
+		autosaveIntervalMinutes = new_value;
+	}
+
+	protected void makeAutosaveAware() {
+		if (!knowsAutosave()) {
+			guessInitialAutosaveInterval();
+		}
+	}
+	
+	/**
+	 * Guesses a default autosave interval for these data based on the number of connections. The rationale is that
+	 * connections contribute most to file size and therefore also to the time it takes to save. These values should be
+	 * relatively long intervals to not annoy users with frequent wait times while saving.
+	 */
+	private void guessInitialAutosaveInterval() {
+		int total_connections = getTotalNumberOfConnections();
+
+		if (total_connections == 0) {
+			autosaveIntervalMinutes = 0;
+			return;
+		}
+
+		if (total_connections < 1000000) { // < 1 million connections -> small file
+			autosaveIntervalMinutes = 10;
+
+		} else if (total_connections < 5000000) { // < 5 million connections -> medium file
+			autosaveIntervalMinutes = 20;
+
+		} else { // large file
+			autosaveIntervalMinutes = 30;
+		}
+	}
 
     /**
      * load stuff from a savefile !!!
@@ -371,9 +432,16 @@ public class ClusterData {
     	
         saverunobject loaded_data = ClusterData.load_run_from_file(new java.io.File(input_filename));
 
-        this.input_filename = input_filename;
+        injectLoadedDataIntoExisting(input_filename, loaded_data);
+    }
+    
+    public void injectLoadedDataIntoExisting(String input_filename, saverunobject loaded_data) {
+        
+    	this.input_filename = input_filename;
 
         System.out.println("File loaded:" + input_filename);
+        
+        this.autosaveIntervalMinutes = loaded_data.autosaveIntervalMinutes;
 
         sequences = ClusterMethods.remove_gaps_from_sequences(loaded_data.inaln);
 
@@ -867,6 +935,7 @@ public class ClusterData {
      */
 	public void save_to_file(java.io.File output_file) throws IllegalStateException, IOException {
         saverunobject myrun = new saverunobject();
+        myrun.autosaveIntervalMinutes = autosaveIntervalMinutes;
         myrun.file = output_file;
         myrun.inaln = sequences;
         myrun.blasthits = blasthits;
@@ -1385,6 +1454,7 @@ public class ClusterData {
 	
 	        outwrite.println("attfactor=" + input.attfactor);
 	        outwrite.println("attvalpow=" + input.attvalpow);
+	        outwrite.println("autosaveinterval=" + input.autosaveIntervalMinutes);
 	        outwrite.println("avgfoldchange=" + input.avgfoldchange);
 	
 	        outwrite.println("blastpath=" + input.blastpath);
