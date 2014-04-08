@@ -1,18 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package clans;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.text.ParseException;
-
-/**
- *
- * @author tancred
- */
 public class ClusteringWithoutGui {
 
 	public ClusterData data=null;
