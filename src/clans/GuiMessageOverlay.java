@@ -108,10 +108,10 @@ public class GuiMessageOverlay extends JComponent {
 	private Component top_spacer; // moves the labels down
 	private JLabel mainLabel; // shows the main message
 	private JLabel detailsLabel; // shows messageDetails
-	private int labelInsetTop;
-	private int labelInsetBottom;
-	private int labelInsetLeftRight;
-	private Color colorLabelBackground;
+	private int labelInsetTop; // used for custom spacing of the labels
+	private int labelInsetBottom; // used for custom spacing of the labels
+	private int labelInsetLeftRight; // used for custom spacing of the labels
+	private Color colorLabelBackground; // the labels background is not translucent for better visibility
 
 	private Timer timer; // draw only every X milliseconds instead of using up one CPU for drawing continuously.
 
@@ -119,17 +119,16 @@ public class GuiMessageOverlay extends JComponent {
 	private long startTime; // time of last state change
 	private State state; // the current state
 	private String currentMessage; // the details of the message, e.g. what went wrong during loading
-	private String messageDetails; // the details of the message, e.g. what went wrong during loading
-	private Color currentColor; // the details of the message, e.g. what went wrong during loading
-	private Duration currentDuration; // the duration for the current mode
+	private int currentDuration; // the duration for the current mode
 	private boolean currentIsFading; // whether the current message fades or abruptly vanishes
-	private boolean currentHasProgressDots; // whether the current message gets appended progress dots
+	private int currentFading; // the fading duration
+	private boolean currentHasProgressDots; // whether the current message gets appended progress-indicating dots
 
-	private String currentDots; // the progress dots on loading and saving
-	private int dotTicks;
-	final private int millisecondsPerDot = 350;
+	private String currentDots; // String representation of the currently required progress-indicating dots (can be "")
+	private int dotTicks; // the number of ticks seen since the last update of currentDots
+	final private int millisecondsPerDot = 350; // milliseconds that must pass for the next different progress display
 	
-	private float alpha;
+	private float alpha; // the transparency of the message overlay
 	
 	private Color colorWorkInProgress; // color for work-in-progress operations
 	private Color colorCompleted; // color for completed operations
@@ -137,7 +136,7 @@ public class GuiMessageOverlay extends JComponent {
 
 	public GuiMessageOverlay() {
 
-		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		
 		colorLabelBackground = new Color(128, 128, 128);
 		
@@ -156,17 +155,21 @@ public class GuiMessageOverlay extends JComponent {
 		detailsLabel = new JLabel();
 		detailsLabel.setFont(UIManager.getFont("Label.font").deriveFont(Font.BOLD).deriveFont(16f));
 		detailsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		detailsLabel.setBorder(BorderFactory.createEmptyBorder(labelInsetTop, labelInsetLeftRight, labelInsetBottom,
+				labelInsetLeftRight));
 		detailsLabel.setOpaque(true);
 		detailsLabel.setBackground(colorLabelBackground);
 
 		// the initial values for top_spacer ARE NOT USED as we overwrite them in updateGlassSize() below
-		top_spacer = Box.createRigidArea(new Dimension(0, 300));
-		this.add(top_spacer);
-		this.add(mainLabel);
+		top_spacer = Box.createRigidArea(new Dimension(1, 1));
+		add(top_spacer);
+		add(mainLabel);
 
-		colorWorkInProgress = new Color(255, 128, 0);
-		colorCompleted = new Color(128, 255, 0);
-		colorFailed = new Color(255, 102, 137);
+		colorWorkInProgress = new Color(255, 128, 0); // an orange
+		colorCompleted = new Color(128, 255, 0); // a green
+		colorFailed = new Color(255, 102, 137); // a red
+		
+		currentFading = Duration.FADING.get(); // this is kept stable for now for consistent fading looks
 
 		int timer_delay = 100; // in milliseconds
 		setupTimer(timer_delay);
@@ -197,15 +200,15 @@ public class GuiMessageOverlay extends JComponent {
 	 * messages is about to be displayed. Disables the message overlay if message duration is over.
 	 */
 	private void invoke() {
-
-		// time since start is also relevant for fading, hence we forward it for faded message (see switch below)
-		long time_since_start = System.currentTimeMillis() - startTime;
-		if (time_since_start > currentDuration.get()) {
-			setOff();
+		
+		if (state == State.OFF) {
 			return;
 		}
-
-		if (state == State.OFF) {
+		
+		// time since start is also relevant for fading, hence we forward it for faded message (see below)
+		long time_since_start = System.currentTimeMillis() - startTime;
+		if (time_since_start > currentDuration) {
+			setOff();
 			return;
 		}
 
@@ -223,70 +226,106 @@ public class GuiMessageOverlay extends JComponent {
 	 * @param message The main message text.
 	 */
 	private void setMessage(String message){
-		this.currentMessage = message;
+		mainLabel.setText(message);
+		currentMessage = message;
 	}
 	
 	/**
 	 * Resets message to none.
 	 */
 	private void resetMessage() {
-		currentMessage = "";
+		setMessage("");
 	}
 	
 	/**
 	 * Sets message details.
+	 * 
+	 * @param details
+	 *            The details message.
 	 */
 	private void setMessageDetails(String details) {
-		messageDetails = details;
-		detailsLabel.setBorder(BorderFactory.createEmptyBorder(labelInsetTop, labelInsetLeftRight, labelInsetBottom,
-				labelInsetLeftRight));
-		this.add(detailsLabel);
+
+		if (details.length() > 70) { // shorten long messages
+			details = details.substring(0, 65) + "[...]";
+		}
+		
+		detailsLabel.setText(details);
+		detailsLabel.setVisible(true);
 	}
 	
 	/**
 	 * Resets detailed message to none.
 	 */
 	private void resetMessageDetails() {
-		messageDetails = "";
-		this.remove(detailsLabel);
-	}
-
-	private void setColor(Color color) {
-		this.currentColor = color;
-	}
-	
-	private void resetColor() {
-		this.currentColor = colorCompleted;
-	}
-	
-	private void setDuration(Duration duration) {
-		this.currentDuration = duration;
-	}
-	
-	private void resetDuration() {
-		this.currentDuration = Duration.INFINITE;
-	}
-	
-	private void enableFading() {
-		this.currentIsFading = true;
-	}
-	
-	private void disableFading() {
-		this.currentIsFading = false;
-	}
-	
-	private void enableProgressDots() {
-		currentDots = "";
-		this.currentHasProgressDots= true;
-	}
-	
-	private void disableProgressDots() {
-		currentDots = "";
-		this.currentHasProgressDots = false;
+		detailsLabel.setVisible(false);//this.remove(detailsLabel);
 	}
 
 	/**
-	 * Resets the transparency of the glass pane.
+	 * Sets the text color for main and details message.
+	 * @param color The new color.
+	 */
+	private void setColor(Color color) {
+		mainLabel.setForeground(color);
+		detailsLabel.setForeground(color);
+	}
+	
+	/**
+	 * Resets text color to default (currently: a green)
+	 */
+	private void resetColor() {
+		setColor(colorCompleted);
+	}
+	
+	/**
+	 * Sets the duration of the current message.
+	 * 
+	 * @param duration
+	 *            The message duration.
+	 */
+	private void setDuration(Duration duration) {
+		currentDuration = duration.get();
+	}
+	
+	/**
+	 * Resets the duration to infinite.
+	 * 
+	 */
+	private void resetDuration() {
+		setDuration(Duration.INFINITE);
+	}
+	
+	/**
+	 * Enables fading for the message.
+	 */
+	private void enableFading() {
+		currentIsFading = true;
+	}
+	
+	/**
+	 * Disables fading for the message.
+	 */
+	private void disableFading() {
+		currentIsFading = false;
+	}
+	
+	/**
+	 * Enables progress-indicating dots for this message.   
+	 */
+	private void enableProgressDots() {
+		currentDots = "";
+		currentHasProgressDots= true;
+	}
+	
+	/**
+	 * Disables progress-indicating dots for this message.   
+	 */
+	private void disableProgressDots() {
+		currentDots = "";
+		currentHasProgressDots = false;
+	}
+
+	/**
+	 * Resets the transparency of the overlay to "not transparent at all".
 	 */
 	private void resetTransparency() {
 		alpha = 1;
@@ -294,25 +333,30 @@ public class GuiMessageOverlay extends JComponent {
 	
 	/**
 	 * Sets the correct number of dots for recurring calls to indicate work in progress.
+	 * 
+	 * @return true if the number of dots changes and hence the main label must be updated, false else.
 	 */
-	private void updateDots() {
-		if (state == State.LOADING || state == State.SAVING) {
-			dotTicks += 1;
-			
-			if (dotTicks * timer.getDelay() > millisecondsPerDot) {
-				if (currentDots.length() < 3) {
-					currentDots += ".";
-				} else {
-					currentDots = "";
-				}
-			
-				dotTicks = 0;
-			} 
+	private boolean updateDots() {
+		dotTicks += 1;
+
+		if (dotTicks * timer.getDelay() > millisecondsPerDot) {
+			if (currentDots.length() < 3) {
+				currentDots += ".";
+			} else {
+				currentDots = "";
+			}
+
+			dotTicks = 0;
+			return true;
+		
+		} else{
+			return false;
 		}
 	}
 	
 	/**
-	 * Switches the overlay off and resets its state. Used once in constructor.
+	 * Switches the overlay off for the time being. Used once in constructor and whenever a message does not need to be
+	 * displayed any more.
 	 */
 	private void setOff() {
 		setVisible(false);
@@ -376,77 +420,65 @@ public class GuiMessageOverlay extends JComponent {
 	}
 
 	/**
-	 * Displays the message in the given color. Message details and progress dots are added if available.
-	 * 
-	 * @param message
-	 *            The main message.
-	 * @param color
-	 *            Text color for the messages.
-	 * @param backgroundColor
-	 *            Background color for the messages.
-	 * @param workInProgressDots
-	 *            Dots to indicate work-in-progress, e.g. during loading
+	 * Displays the message. If applicable, the correct number of progress-indicating dots are set here.
 	 */
 	protected void showMessage() {
-		mainLabel.setForeground(currentColor);
-		
-		
-		if (currentHasProgressDots) {
-			updateDots();
+	
+		if (currentHasProgressDots && updateDots()) {
 			mainLabel.setText(currentMessage + currentDots);
-		
-		} else {
-			mainLabel.setText(currentMessage);
+			repaint();
 		}
 		
-		detailsLabel.setForeground(currentColor);
-		detailsLabel.setText(messageDetails);
-
-		repaint();
-		mainLabel.repaint();
-		detailsLabel.repaint();
 		setVisible(true);
 	}
 
 	/**
 	 * Displays the message (and the message details, if any) and fades the color according to the fraction of time of
-	 * the complete {@code duration} for the message.
+	 * the complete duration for the message.
 	 * 
-	 * @param message
-	 *            Main message.
-	 * @param color
-	 *            Text color.
+	 * @param time_since_start
+	 *            Time that has passes since this message was first shown.
 	 */
 	private void showFadingMessage(long time_since_start) {
-		alpha = 1 - getFadingValue(time_since_start); // fade by reducing visibility for the whole glass pane; see paintComponent below.
+		// fade by reducing visibility for the whole glass pane; see paintComponent below.
+		alpha = 1 - getFadingValue(time_since_start);
+		
 		showMessage();
+		repaint();
 	}
 
 	/**
-	 * Computes the fading value. After an initial delay of (Message duration - {@code Duration.FADING}) seconds in
-	 * which no fading (==0) is returned, the fraction of time already elapsed w.r.t. the complete message duration is
-	 * returned. The speed of fading from 0 -> 1 values is linear.
+	 * Computes the fading value. After an initial delay of (Message duration - fading duration) seconds in which no
+	 * fading (==0) is returned, the fraction of time already elapsed w.r.t. the complete message duration is returned.
+	 * The speed of fading from 0 -> 1 values is linear.
 	 * 
+	 * @param time_since_start
 	 * @return Fraction of duration already passed as value in [0, 1]
 	 */
 	private float getFadingValue(long time_since_start) {
 		
-		float timespan_without_fading = currentDuration.get() - Duration.FADING.get();
+		float timespan_without_fading = currentDuration - currentFading;
 		
-		if (time_since_start < timespan_without_fading) { // make the initial delay period non-transparent
+		// make the initial delay period non-transparent
+		if (time_since_start < timespan_without_fading) {
 			return 0;
 		}
 
-		// fade during duration - Durations.DELAY and make the subtraction negative number proof
-		float fade_fraction = (float) Math.max(time_since_start - timespan_without_fading, 0) / Duration.FADING.get();
+		// fade during the last part the duration and make the subtraction negative number proof
+		float fade_fraction = (float) Math.max(time_since_start - timespan_without_fading, 0) / currentFading;
 		return fade_fraction;
 	}
 
 	/**
-	 * Adjusts the label placement when the glass's parent is resized. Used once in constructor.
+	 * Adjusts the label placement when the overlay's parent is resized by changing the top spacer height. Used once in
+	 * constructor.
+	 * 
+	 * @param new_height
+	 *            The new height of the overlay
 	 */
 	protected void updateGlassSize(int new_height) {
-		remove(0); // top_spacer is the first entry
+		// top_spacer is the first entry
+		remove(0);
 
 		top_spacer = Box.createRigidArea(new Dimension(0, new_height / 3 * 2));
 
@@ -457,7 +489,7 @@ public class GuiMessageOverlay extends JComponent {
 
 
 	/**
-	 * Shows the overlay with its messages if there are any.
+	 * Shows message if there is one, otherwise does nothing.
 	 */
 	protected void activate_overlay() {
 		if (state != State.OFF && !timer.isRunning()) {
@@ -466,12 +498,23 @@ public class GuiMessageOverlay extends JComponent {
 		}
 	}
 
+	/**
+	 * Sets up a message with all available details of the overlay.
+	 * 
+	 * @param state The state of the overlay for this new message.
+	 * @param main_message The main message text.
+	 * @param message_details The message details text.
+	 * @param color The text color.
+	 * @param duration The message duration.
+	 * @param is_fading true if the message is supposed to fade, false else
+	 * @param has_progress_dots true if the message is supposed to have progress-indicating dots.
+	 */
 	private void setupMessage(State state, String main_message, String message_details, Color color,
 			Duration duration, boolean is_fading, boolean has_progress_dots) {
 
 		setState(state);
 		
-		setMessage(main_message);
+		setMessage(main_message);		
 		
 		if (message_details == null) {
 			resetMessageDetails();
@@ -502,15 +545,45 @@ public class GuiMessageOverlay extends JComponent {
 		activate_overlay();
 	}
 	
+	/**
+	 * Sets up a message with progress-indicating dots and no fading.
+	 * 
+	 * @param state
+	 *            The state of the overlay for this new message.
+	 * @param main_message
+	 *            The main message text.
+	 * @param message_details
+	 *            The message details text.
+	 */
 	private void setupProgressMessage(State state, String main_message, String message_details) {
 		setupMessage(state, main_message, message_details, colorWorkInProgress, Duration.INFINITE, false, true);
 	}
 	
+	/**
+	 * Sets up a message with fading and no progress-indicating dots.
+	 * 
+	 * @param state
+	 *            The state of the overlay for this new message.
+	 * @param main_message
+	 *            The main message text.
+	 * @param message_details
+	 *            The message details text.
+	 * @param color
+	 *            The text color.
+	 * @param duration
+	 *            The message duration.
+	 */
 	private void setupFadingMessage(State state, String main_message, String message_details, Color color,
 			Duration duration) {
 		setupMessage(state, main_message, message_details, color, duration, true, false);
 	}
 
+	/**
+	 * Sets up the standard message according to the given state.
+	 * 
+	 * @param state
+	 *            The state for which the standard message should be shown.
+	 */
 	private void setupStandardMessage(State state) {
 		String main_message = Message.valueOf(state.toString()).get();
 
@@ -547,26 +620,51 @@ public class GuiMessageOverlay extends JComponent {
 		}
 	}
 
+	/**
+	 * We change the transparency of the whole overlay during repaints to simulate message fading.
+	 */
 	protected void paintComponent(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
-		// if the parent enables AA, we can do it here to... does not seem necessary, though
-//		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 	}
 	
+	/**
+	 * @return Default color for completed processes.
+	 */
 	protected Color getColorCompleted() {
 		return colorCompleted;
 	}
-	
+
+	/**
+	 * @return The Overlays default color.
+	 */
 	protected Color getColorDefault() {
 		return colorWorkInProgress;
 	}
-	
+
+	/**
+	 * @return Default color for erroneous processes.
+	 */
 	protected Color getColorError() {
 		return colorFailed;
 	}
 	
-	
+	/**
+	 * Sets up a custom message with all available details of the overlay.
+	 * 
+	 * @param main_message
+	 *            The main message text.
+	 * @param message_details
+	 *            The message details text.
+	 * @param color
+	 *            The text color.
+	 * @param duration
+	 *            The message duration.
+	 * @param is_fading
+	 *            true if the message is supposed to fade, false else
+	 * @param has_progress_dots
+	 *            true if the message is supposed to have progress-indicating dots.
+	 */
 	protected void setCustomMessage(String main_message, String message_details, Color color, Duration duration,
 			boolean is_fading, boolean with_progress_dots) {
 		setupMessage(State.CUSTOM, main_message, message_details, color, duration, is_fading, with_progress_dots);
@@ -608,7 +706,6 @@ public class GuiMessageOverlay extends JComponent {
 	}
 
 	/**
-	 * 
 	 * Changes the state to "loading/saving was canceled" depending on previous state.
 	 */
 	protected void setCanceled() {
@@ -633,7 +730,7 @@ public class GuiMessageOverlay extends JComponent {
 	 * Changes the state to "loading/saving has failed" depending on previous state.
 	 */
 	protected void setFailed() {
-		// don't call resetMessageDetails(); here this method is called by setFailed(String)
+		// don't call resetMessageDetails() here as this method is used by setFailed(String)
 
 		switch (state) {
 		case LOADING:
@@ -657,17 +754,15 @@ public class GuiMessageOverlay extends JComponent {
 	 *            A message stating details, e.g. file name or reason for failure.
 	 */
 	protected void setFailed(String details) {
-		if (details.length() > 70) { // shorten long messages
-			details = details.substring(0,  65) + "[...]";
-		}
 		setMessageDetails(details);
 		setFailed();
 	}
 }
 
 /**
- * This class wraps {@code GuiMessageOverlay} for debugging and shows various information in stderr.
  * NEVER USE THIS CLASS IN A PRODUCTION RELEASE!!!
+ * <p>
+ * This class wraps {@code GuiMessageOverlay} for debugging and shows various information in stderr.
  */
 class GuiMessageOverlayLogged extends GuiMessageOverlay {
 	private static final long serialVersionUID = -8396089731118502477L;
@@ -680,7 +775,6 @@ class GuiMessageOverlayLogged extends GuiMessageOverlay {
 		message_count = 0;
 		last_message_time = 0;
 	}
-
 	
 	/**
 	 * Shows state changes.
