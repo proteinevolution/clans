@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.concurrent.CancellationException;
+
+import javax.swing.SwingWorker;
 
 public class saverunobject {
 
@@ -544,7 +547,30 @@ public class saverunobject {
         return true;
 	}
 	
-	public boolean parse_hsp_block(BufferedReader buffered_file_handle) throws IOException {
+	/**
+	 * Convenience method that calls {@code parse_hsp_block(BufferedReader, SwingWorker)} with SwingWorker {@code null}. This
+	 * method should be used in no-GUI mode.
+	 */
+	public boolean parse_hsp_block(BufferedReader buffered_file_handle) throws IOException{
+		return parse_hsp_block(buffered_file_handle, null);
+	}
+
+	/**
+	 * Parses a CLANS file HSP block.
+	 * 
+	 * @param buffered_file_handle
+	 *            The file handle with the first HSP block line ready.
+	 * @param worker
+	 *            If not null, this worker is used on a regular basis to check whether loading should be canceled. This
+	 *            is used by the GUI to act on user aborts.
+	 * @return true if the parsing was completed without errors, false else.
+	 * @throws IOException
+	 * @throws CancellationException
+	 *             If worker is cancelled and loading should therefore be cancelled. In headless (no-GUI) mode this
+	 *             Exception will not occur.
+	 */
+	public boolean parse_hsp_block(BufferedReader buffered_file_handle, SwingWorker<Void, Integer> worker)
+			throws IOException, CancellationException {
         String[] tmparr;
         String tmpstr;
         MinimalHsp currhsp;
@@ -562,12 +588,21 @@ public class saverunobject {
             if (inline.length() == 0) {
                 continue;
             }
+            
             if (count % 1000 == 0) {
                 System.out.print(".");
+                
+				if (count % 10000 == 0) {
+					// checking after every 10000 HSPs seems a good tradeoff between time wasted on checking and
+					// responsiveness of the cancelation
+					ClusterData.checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+				}
+
                 if (count % 100000 == 0) {
                     System.out.print(count);
                 }
             }
+            
             count++;
             tmparr = inline.split(":");
             int myi, myj;

@@ -67,6 +67,21 @@ public class GuiMessageOverlay extends JComponent {
 			return value;
 		}
 	}
+	
+	enum MessageDetails {
+		LOADING("press escape to cancel"),
+		SAVING("press escape to cancel");
+
+		private String value;
+
+		private MessageDetails(String value) {
+			this.value = value;
+		}
+		
+		protected String get() {
+			return value;
+		}
+	}
 
 	/**
 	 * Durations in milliseconds for different message types, e.g. INFO or ERROR.
@@ -148,7 +163,6 @@ public class GuiMessageOverlay extends JComponent {
 		top_spacer = Box.createRigidArea(new Dimension(0, 300));
 		this.add(top_spacer);
 		this.add(mainLabel);
-//		this.add(detailsLabel);
 
 		colorWorkInProgress = new Color(255, 128, 0);
 		colorCompleted = new Color(128, 255, 0);
@@ -510,7 +524,7 @@ public class GuiMessageOverlay extends JComponent {
 			
 		case LOADING:
 		case SAVING:
-			setupProgressMessage(state, main_message, null);
+			setupProgressMessage(state, main_message, MessageDetails.valueOf(state.toString()).get());
 			return;
 			
 		case LOADING_CANCELED:

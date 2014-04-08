@@ -14,6 +14,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.CancellationException;
+
+import javax.swing.SwingWorker;
 
 public class ClusterData {
 
@@ -255,19 +258,37 @@ public class ClusterData {
 		}
 	}
 
-    /**
-     * load stuff from a savefile !!!
-     * NOTE!!!: this was edited so as to combine hsp's with the same query-hit combination irrespective of which
-     * sequence is the query and which the hit this is a valid approach in this case, as I later on anyways symmetrize
-     * the sequence interactions
-     * 
-     * @param infile the file to load data from
-     * @return a {@code saverunobject} instance containing the loaded data
-     * @throws ParseException If the file is corrupted or has the wrong format
-     * @throws IOException If an I/O error occurs
-     * @throws FileNotFoundException If the file does not exist, cannot be opened, or is a directory  
-     */
-    static saverunobject load_run_from_file(File infile) throws ParseException, IOException, FileNotFoundException{
+	/**
+	 * Convenience method that calls {@code load_run_from_file(File, SwingWorker)} with SwingWorker {@code null}. This
+	 * method should be used in no-GUI mode.
+	 */
+	static saverunobject load_run_from_file(File infile) throws ParseException, IOException, FileNotFoundException {
+		return load_run_from_file(infile, null);
+	}
+	
+	/**
+	 * load stuff from a savefile !!! NOTE!!!: this was edited so as to combine hsp's with the same query-hit
+	 * combination irrespective of which sequence is the query and which the hit this is a valid approach in this case,
+	 * as I later on anyways symmetrize the sequence interactions
+	 * 
+	 * @param infile
+	 *            The file to load data from
+	 * @param worker
+	 *            If not null, this worker is used on a regular basis to check whether saving should be canceled. This
+	 *            is used by the GUI to act on user aborts.
+	 * @return A {@code saverunobject} instance containing the loaded data
+	 * @throws ParseException
+	 *             If the file is corrupted or has the wrong format
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws FileNotFoundException
+	 *             If the file does not exist, cannot be opened, or is a directory
+	 * @throws CancellationException
+	 *             If worker is cancelled and loading should therefore be cancelled. In headless (no-GUI) mode this
+	 *             Exception will not occur.
+	 */
+	static saverunobject load_run_from_file(File infile, SwingWorker<Void, Integer> worker) throws ParseException,
+			IOException, FileNotFoundException, CancellationException {
          
 		System.out.println("LOADING data from '" + infile.getAbsolutePath() + "'");
 
@@ -288,11 +309,14 @@ public class ClusterData {
             while ((inline = buffered_file_handle.readLine()) != null) {
             	current_line += 1;
                 inline = inline.trim();
+               
                 if (inline.length() == 0) {
                     continue;
-                } else if (inline.startsWith("#")) {// skip comment lines
+                
+                } else if (inline.startsWith("#")) { // skip comment lines
                     continue;
                 }
+                
                 if (inline.startsWith("sequences=")) {
                     try {
                         expected_sequences = Integer.parseInt(inline.substring(10));
@@ -304,7 +328,10 @@ public class ClusterData {
                     myrun.posarr = new float[expected_sequences][3];
                     myrun.blasthits = new MinimalHsp[0];
                     continue;
+                
                 } else if (expected_sequences != -1) {
+                	
+                	checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
 
                     if (inline.equalsIgnoreCase("<param>")) {
                         if (!myrun.parse_params_block(buffered_file_handle)) {
@@ -349,7 +376,7 @@ public class ClusterData {
                         }
 
                     } else if (inline.equalsIgnoreCase("<hsp>")) {
-                        if (!myrun.parse_hsp_block(buffered_file_handle)) {
+                        if (!myrun.parse_hsp_block(buffered_file_handle, worker)) {
                         	errors_occurred = true;
                         	error_message = "could not parse <hsp> block";
                         }
@@ -387,6 +414,8 @@ public class ClusterData {
                 	break;
                 }
             }
+            
+            checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
 
         } catch (IOException e) {
         	error_message = "IOError unable to read from " + infile.getAbsolutePath() + ":\n\t" + e.getMessage();
@@ -399,7 +428,7 @@ public class ClusterData {
 		
 		if (is_biolayout) {
             System.out.println("assuming BioLayout format");
-            return load_biolayout_file(infile);
+            return load_biolayout_file(infile, worker);
 		}
 
         if (myrun.posarr == null) {
@@ -416,22 +445,39 @@ public class ClusterData {
         return myrun;
     }
 
-    /**
-     * Read data from a CLANS format file.
-     * @param input_filename the input filename
-     */
-
-    /**
-     * 
-     * @param input_filename
-     * @throws ParseException If {@code ClusterData.load_run_from_file} throws it
-     * @throws IOException If {@code ClusterData.load_run_from_file} throws it
-     * @throws FileNotFoundException If {@code ClusterData.load_run_from_file} throws it
-     */
-    public void load_clans_file(String input_filename) throws ParseException, IOException, FileNotFoundException {
+	/**
+	 * Convenience method that calls {@code load_clans_file(String, SwingWorker)} with SwingWorker {@code null}. This
+	 * method should be used in no-GUI mode.
+	 */
+	public void load_clans_file(String input_filename) throws ParseException,
+	IOException, FileNotFoundException {
+		load_clans_file(input_filename, null);
+	}
+	
+	/**
+	 * Read data from a CLANS format file. 
+	 * 
+	 * @param input_filename
+	 *            The input filename.
+	 * @param worker
+	 *            If not null, this worker is used on a regular basis to check whether saving should be canceled. This
+	 *            is used by the GUI to act on user aborts.
+	 * @throws ParseException
+	 *             If {@code ClusterData.load_run_from_file} throws it
+	 * @throws IOException
+	 *             If {@code ClusterData.load_run_from_file} throws it
+	 * @throws FileNotFoundException
+	 *             If {@code ClusterData.load_run_from_file} throws it
+	 * @throws CancellationException
+	 *             If {@code ClusterData.load_run_from_file} throws it
+	 */
+	public void load_clans_file(String input_filename, SwingWorker<Void, Integer> worker) throws ParseException,
+			IOException, FileNotFoundException, CancellationException {
     	
-        saverunobject loaded_data = ClusterData.load_run_from_file(new java.io.File(input_filename));
-
+        saverunobject loaded_data = ClusterData.load_run_from_file(new java.io.File(input_filename), worker);
+        
+        checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+        
         injectLoadedDataIntoExisting(input_filename, loaded_data);
     }
     
@@ -561,7 +607,8 @@ public class ClusterData {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	static saverunobject load_biolayout_file(File input_file) throws ParseException, IOException, FileNotFoundException {
+	static saverunobject load_biolayout_file(File input_file, SwingWorker<Void, Integer> worker) throws ParseException,
+			IOException, FileNotFoundException, CancellationException {
     	saverunobject myrun = new saverunobject();
         float attval;
         String name1;
@@ -590,6 +637,8 @@ public class ClusterData {
                     continue;
                 
                 } else {// if this is contact info
+                	checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+                	
                     // split the line on spaces either in two or three
                     tmparr = inline.split("\\s+");
                     
@@ -926,14 +975,30 @@ public class ClusterData {
         return myrun;
     }
 
-    /**
-     * Writes a CLANS format output file to disk.
-     * 
-     * @param output_file
-     * @throws IllegalStateException if {@code ClusterData.saverun} throws it
-     * @throws IOException if {@code ClusterData.saverun} throws it
-     */
-	public void save_to_file(java.io.File output_file) throws IllegalStateException, IOException {
+	/**
+	 * Convenience method that calls {@code save_to_file(String, SwingWorker)} with SwingWorker {@code null}. This
+	 * method should be used in no-GUI mode.
+	 */
+	public void save_to_file(java.io.File output_file) throws IllegalStateException, IOException, CancellationException {
+		save_to_file(output_file, null);
+	}
+    
+	/**
+	 * Writes a CLANS format output file to disk.
+	 * 
+	 * @param output_file
+	 * @param worker
+	 *            If not null, this worker is used on a regular basis to check whether saving should be canceled. This
+	 *            is used by the GUI to act on user aborts.
+	 * @throws IllegalStateException
+	 *             If {@code ClusterData.saverun} throws it
+	 * @throws IOException
+	 *             If {@code ClusterData.saverun} throws it
+	 * @throws CancellationException
+	 *             If {@code ClusterData.saverun} throws it
+	 */
+	public void save_to_file(java.io.File output_file, SwingWorker<Void, Integer> worker) throws IllegalStateException,
+			IOException, CancellationException {
         saverunobject myrun = new saverunobject();
         myrun.autosaveIntervalMinutes = autosaveIntervalMinutes;
         myrun.file = output_file;
@@ -981,10 +1046,18 @@ public class ClusterData {
 
         myrun.rounds = rounds;
 
-        ClusterData.saverun(myrun, sequence_names, nographics);
+        ClusterData.saverun(myrun, sequence_names, nographics, worker);
         myrun = null;
     }
     
+	/**
+	 * Convenience method that calls {@code safer_save_to_file(String, SwingWorker)} with SwingWorker {@code null}. This
+	 * method should be used in no-GUI mode.
+	 */
+	public void safer_save_to_file(String output_filename) throws IllegalStateException, IOException {
+		safer_save_to_file(output_filename, null);
+	}
+	
 	/**
 	 * Safer method to save a run that avoids source file corruption at the cost of temporary doubled disk space.
 	 * <p>
@@ -996,13 +1069,17 @@ public class ClusterData {
 	 * @param output_file
 	 *            the file to which the data should be written. The temporary file will be created in the parent folder
 	 *            of output_file.
+	 * @param worker
+	 *            If not null, this worker is used on a regular basis to check whether saving should be canceled. This
+	 *            is used by the GUI to act on user aborts.
 	 * @throws IllegalStateException
 	 *             if {@code save_to_file} throws it
 	 * @throws IOException
 	 *             if the temporary file cannot be created or cannot be moved to its final destination, or if
 	 *             {@code save_to_file} throws it. All lead to unfinished saves.
 	 */
-	public void safer_save_to_file(String output_filename) throws IllegalStateException, IOException {
+	public void safer_save_to_file(String output_filename, SwingWorker<Void, Integer> worker)
+			throws IllegalStateException, IOException {
 		String error_message;
 		
 		File output_file = new File(output_filename);
@@ -1018,13 +1095,21 @@ public class ClusterData {
 			throw new IOException(error_message);
 		}
 
-		save_to_file(temporary_file);
+		try {
+			save_to_file(temporary_file, worker);
+
+		} catch (CancellationException e) {
+			temporary_file.delete(); // cleanup temporary file
+			throw e;
+		}
 
 		// move original file to a backup location
 		File backup_file = null;
 		boolean create_backup = output_file.exists();
 		if (create_backup) {
+			
 			try {
+				// create empty temporary file to use its unique filename as backup name
 				backup_file = File.createTempFile("###" + output_file.getName() + "_", ".temporary_backup", new File(
 						output_file.getParent()));
 			} catch (IOException e) {
@@ -1033,11 +1118,30 @@ public class ClusterData {
 				throw new IOException(error_message);
 			}
 			
-			if (!output_file.renameTo(backup_file)) {
+			try {
+				checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+			} catch (CancellationException e) {
+				backup_file.delete(); // cleanup empty backup file
+				throw e;
+			}
+			
+			if (!output_file.renameTo(backup_file)) { // move original file to create backup
 				error_message = "unable to move file\n\t" + output_filename + "\nto backup location\n\t"
 						+ backup_file.getPath();
 				System.err.println(error_message);
 				throw new IOException(error_message);
+			}
+			
+			try {
+				checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+			
+			} catch (CancellationException e) {
+				if (!backup_file.renameTo(output_file)) { // try to restore original file by moving backup back
+					error_message = "unable to move backup file\n\t" + backup_file.getPath() + "\nback to original location\n\t"
+							+ output_filename;
+					System.err.println(error_message);
+				}
+				throw e;
 			}
 		}
 		
@@ -1430,15 +1534,26 @@ public class ClusterData {
 	/**
 	 * Saves the data to the selected file
 	 * 
-     * @param input
-     * @param sequence_names
-     * @param nographics true if the GUI is used, false for commandline-only CLANS
-     * @throws IllegalStateException if neither HSPs nor attraction values are set in {@code input} 
-     * @throws IOException if FileWriter throws it
-     */
-	private static void saverun(saverunobject input, String[] sequence_names, boolean nographics)
-			throws IllegalStateException, IOException {
+	 * @param input
+	 * @param sequence_names
+	 * @param nographics
+	 *            true if the GUI is used, false for commandline-only CLANS
+	 * @param worker
+	 *            If not null, this worker is used on a regular basis to check whether saving should be canceled. This
+	 *            is used by the GUI to act on user aborts.
+	 * @throws IllegalStateException
+	 *             If neither HSPs nor attraction values are set in {@code input}
+	 * @throws IOException
+	 *             If FileWriter throws it
+	 * @throws CancellationException
+	 *             If worker is cancelled and saving should therefore be cancelled. In headless (no-GUI) mode this
+	 *             Exception will not occur.
+	 */
+	private static void saverun(saverunobject input, String[] sequence_names, boolean nographics,
+			SwingWorker<Void, Integer> worker) throws IllegalStateException, IOException, CancellationException {
 
+		checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+		
 		// check if necessary data is available
 		if (input.blasthits == null && input.attvals == null) {
 			throw new IllegalStateException("Error while saving run: no attraction values or list of HSPs found");
@@ -1509,6 +1624,8 @@ public class ClusterData {
 	        outwrite.println("zoom=" + input.zoom);
 	
 	        outwrite.println("</param>");
+	        
+	        checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
 	
 	        if ((input.mapfiles != null) && (input.mapfiles.size() > 0)) {
 	            outwrite.println("<function>");
@@ -1523,6 +1640,9 @@ public class ClusterData {
 	            }
 	            outwrite.println("</function>");
 	        }
+	        
+	        checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+	        
 	        if (input.affyfiles != null) {
 	            outwrite.println("<affyfiles>");
 	            int repnum = input.affyfiles.size();
@@ -1549,6 +1669,9 @@ public class ClusterData {
 	            }
 	            outwrite.println("</affyfiles>");
 	        }
+	        
+	        checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+	        
 	        outwrite.println("<rotmtx>");
 	        for (int i = 0; i < 3; i++) {
 	            for (int j = 0; j < 3; j++) {
@@ -1557,6 +1680,9 @@ public class ClusterData {
 	            outwrite.println();
 	        }
 	        outwrite.println("</rotmtx>");
+	        
+	        checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+	        
 	        // first write the sequences to file
 	        outwrite.println("<seq>");
 	        for (int i = 0; i < input.inaln.length; i++) {
@@ -1565,6 +1691,8 @@ public class ClusterData {
 	        }
 	        outwrite.println("</seq>");
 	
+	        checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+	        
 	        // write the sequence weights
 	        if (input.weights != null) {
 	            outwrite.println("<weight>");
@@ -1574,6 +1702,8 @@ public class ClusterData {
 	            }
 	            outwrite.println("</weight>");
 	        }
+	        
+	        checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
 	        
 	        // write the sequence groups
 	        if ((input.seqgroupsvec != null) && (input.seqgroupsvec.size() > 0)) {
@@ -1604,12 +1734,17 @@ public class ClusterData {
 	            }
 	            outwrite.println("</seqgroups>");
 	        }
+	        
+	        checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+	        
 	        // next write the sequence positions
 	        outwrite.println("<pos>");
 	        for (int i = 0; i < input.inaln.length; i++) {
 	            outwrite.println(i + " " + input.posarr[i][0] + " " + input.posarr[i][1] + " " + input.posarr[i][2]);
 	        }
 	        outwrite.println("</pos>");
+	        
+	        checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
 	
 			if (input.blasthits != null) {
 				// write blast HSPs
@@ -1618,6 +1753,8 @@ public class ClusterData {
 				outwrite.println("<hsp>");
 	
 				for (int i = 0; i < input.blasthits.length; i++) {
+					checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+					
 					outwrite.print(input.blasthits[i].query + " " + input.blasthits[i].hit + ":");
 					tmpsize = input.blasthits[i].val.length;
 	
@@ -1639,6 +1776,9 @@ public class ClusterData {
 	
 				outwrite.println("</att>");
 			}
+			
+			checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+			
 		} finally {
 			outwrite.close();
 		}
@@ -2022,5 +2162,16 @@ public class ClusterData {
                     + seqgroupsvec.size() + " groups exist.");
         }
         seqgroupsvec.remove(index);
+    }
+    
+    /**
+     * Used to indicate worker cancellation. 
+     * @param worker null if no worker is present or the worker
+     * @throws CancellationException If {@code worker} is not {@code null} and the worker is in cancelled state.
+     */
+    protected static void checkWorkerStatus(SwingWorker<Void, Integer> worker) throws CancellationException {
+		if (worker != null && worker.isCancelled()) {
+			throw new CancellationException("worker has been canceled");
+		}
     }
 }
