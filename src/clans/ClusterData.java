@@ -19,6 +19,9 @@ import java.util.concurrent.CancellationException;
 
 import javax.swing.SwingWorker;
 
+/**
+ * Handles the data used in the clustering.
+ */
 public class ClusterData {
 
     // variables initialized on creation
@@ -2062,7 +2065,7 @@ public class ClusterData {
     }
 
     /**
-     * compute "attraction" values for all sequence pairs from the hsp objects and initialize the positions randomly
+     * Resets the graph with random sequence positions and recomputes "attraction" values from HSPs.
      */
     public void initialize() {
         rounds = 0;

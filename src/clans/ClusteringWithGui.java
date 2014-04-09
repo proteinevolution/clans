@@ -17,6 +17,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.*;
 
+/**
+ * Creates and manages the CLANS graphical user interface (GUI).
+ * 
+ * TODO: Currently this class also contains computational code that should eventually be refactored to its own classes.
+ */
 public class ClusteringWithGui extends javax.swing.JFrame {
 
 	/**
@@ -24,6 +29,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 */
 	private static final long serialVersionUID = -1310615823184297259L;
 
+	/**
+	 * The default labels for the start/stop/resume button so that they are consistent.
+	 */
 	enum ButtonStartStopMessage {
 		START("Start run"), RESUME("Resume"), STOP("Stop");
 
@@ -38,21 +46,44 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 
-	private Timer autosaveTimer;
+	/**
+	 * Invokes an autosave every {@code data.getAutosaveIntervalMinutes())} minutes, if autosaving is enabled.
+	 */
+	private Timer autosaveTimer; // if autosaving is enabled this timer executes the autosave after the set interval
+	/**
+	 * If true, postpones the autosave setup to after the first successful save operation. This is necessary as
+	 * sometimes, no filename is associated with {@data}, e.g. when coming directly from parsing BLAST result.
+	 */
 	private boolean autosaveAutoReenable;
+
+	/**
+	 * Runs the load/save operations in their own background thread while keeping the GUI responsive.
+	 */
+	private SwingWorker<Void, Integer> saveLoadWorker;
 	
-	private SwingWorker<Void, Integer>  saveLoadWorker;
-	
+	/**
+	 * If true, disables almost all mouse events as their listeners check this variable. This is used in @{code
+	 * disableUserControls()} and {@code enableUserControls()} to block and reenable user input during, e.g., loading
+	 * and saving.
+	 */
 	private boolean mouseEventsDisabled;
+	/**
+	 * Listens for escape key presses during long running operations and cancels them if the key is pressed. Currently
+	 * used during loading and saving.
+	 */
 	private KeyListener cancelWorkInProgress;
 
 	/**
+	 * Creates the GUI.
 	 * 
 	 * @param data
-	 *            contains information about the command-line parameters
+	 *            The input data. Can be "empty" (i.e. without real data) to start the GUI without immediately loading a
+	 *            file.
 	 */
 	public ClusteringWithGui(ClusterData data) {
 
+		this.data = data;
+		
 		// closing events are handled in a WindowListener with custom windowClosing method
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -62,35 +93,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		initComponents();
 
-		this.data = data;
+		consumeDataAtConstruction();
 
-		data.nographics = false;
-		data.mineval = data.eval;
-		data.pvalue_threshold = data.pval;
-		if (data.scval >= 0) {// in that case use a score cutoff
-			data.pvalue_threshold = data.scval;
-			data.usescval = true;
-			button_cutoff_value.setText("Use SC-vals better than");
-			textfield_cutoff_value.setText("0");
-			evalueitem.setText("SC-value plot");
-			attvalcompcheckbox.setSelected(false);
-		} else {
-			data.usescval = false;
-		}
-
-		data.seqlengths = new float[data.seqnum];
-		float maxlength = 0;
-		for (int i = 0; i < data.seqnum; i++) {
-			data.seqlengths[i] = data.sequences[i].seq.length();
-			if (data.seqlengths[i] > maxlength) {
-				maxlength = data.seqlengths[i];
-			}
-		}// end for i
-		for (int i = 0; i < data.seqnum; i++) {
-			data.seqlengths[i] /= maxlength;
-		}// end for i
-
-		textfield_cutoff_value.setText(String.valueOf(data.pvalue_threshold));
+		textfield_threshold_value.setText(String.valueOf(data.pvalue_threshold));
 		textfield_info_min_blast_evalue.setText(String.valueOf(data.pvalue_threshold));
 
 		// now initialize the stuff
@@ -101,7 +106,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		draw1.init();
 
 		// and now initialize a run
-		initgraph();
+		resetGraph();
 
 		set_selection_button_label();
 
@@ -111,7 +116,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 
 		if (data.getAbsoluteInputfileName() != null) {
-			loaddata_threaded(data.getAbsoluteInputfileName());
+			loadDataClansFormatInBackground(data.getAbsoluteInputfileName());
 		}
 
 		if (new File(data.getIntermediateResultfileName()).canRead()) {
@@ -121,14 +126,19 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 	
+	/**
+	 * Creates a new instance of the computation thread and names it "computation thread".
+	 * <p>
+	 * Note: Named threads are easier to debug! On a command line run command "jps -l" to get the programs process id
+	 * (first column). Then run "jstack <process id>" to see all threads of your process.
+	 */
 	private void initializeComputationThread() {
 		mythread = new computethread(this);
-		mythread.setName("computation thread");
 	}
+
 	/**
-	 * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
-	 * content of this method is always regenerated by the Form Editor.
-	 */
+	 * Initializes the GUI elements. This is called from the constructor.
+	 */ 
 	private void initComponents() {
 		graphpanel = new javax.swing.JPanel();
 		buttonpanel = new javax.swing.JPanel();
@@ -138,7 +148,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		button_show_selected = new javax.swing.JButton();
 		button_select_move = new javax.swing.JToggleButton();
 		button_cutoff_value = new javax.swing.JButton();
-		textfield_cutoff_value = new javax.swing.JTextField();
+		textfield_threshold_value = new javax.swing.JTextField();
 		textfield_info_min_blast_evalue = new javax.swing.JTextField();
 		button_select_all_or_clear = new javax.swing.JButton();
 		checkbox_show_names = new javax.swing.JCheckBox();
@@ -213,7 +223,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		setTitle("3D-View");
 		addWindowListener(new java.awt.event.WindowAdapter() {
 			public void windowClosing(java.awt.event.WindowEvent evt) {
-				exitForm(evt);
+				openReallyExitSafetyDialog();
 			}
 		});
 
@@ -238,12 +248,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 
 			public void ancestorResized(java.awt.event.HierarchyEvent evt) {
-				graphpanelAncestorResized(evt);
+				requestRepaint();
 			}
 		});
 		graphpanel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
 			public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-				graphpanelMouseWheelMoved(evt);
+				zoomUsingMouseWheel(evt);
 			}
 		});
 		graphpanel.setLayout(new javax.swing.BoxLayout(graphpanel, javax.swing.BoxLayout.LINE_AXIS));
@@ -254,11 +264,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		drawbuttonpanel.setLayout(new java.awt.GridLayout(0, 4));
 
 		button_initialize.setText("Initialize");
-		button_initialize.setToolTipText("initialize a new run");
+		button_initialize.setToolTipText("Initialize the graph positions");
 		button_initialize.setMnemonic(KeyEvent.VK_I);
 		button_initialize.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				button_initializeActionPerformed(evt);
+				initializeGraphPositions();
 			}
 		});
 		drawbuttonpanel.add(button_initialize);
@@ -268,7 +278,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		button_start_stop_resume.setMnemonic(KeyEvent.VK_S);
 		button_start_stop_resume.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				button_start_stop_resumeActionPerformed(evt);
+				toggleComputationRunning();
 			}
 		});
 		drawbuttonpanel.add(button_start_stop_resume);
@@ -277,37 +287,37 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		button_show_selected.setMnemonic(KeyEvent.VK_O);
 		button_show_selected.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				button_show_selectedActionPerformed(evt);
+				openShowSelectedSequencesWindow();
 			}
 		});
 		drawbuttonpanel.add(button_show_selected);
 
-		button_select_move.setText("select/MOVE");
-		button_select_move.setToolTipText("Toggle between moving the world and selecting sequences");
+		button_select_move.setToolTipText("Toggles between moving the coordinate system and selecting sequences");
 		button_select_move.setMnemonic(KeyEvent.VK_V);
 		button_select_move.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				button_select_moveActionPerformed(evt);
+				updateSelectMoveButtonLabel();
 			}
 		});
+		updateSelectMoveButtonLabel();
 		drawbuttonpanel.add(button_select_move);
 
-		button_cutoff_value.setText("Use P-values better than:");
+		button_cutoff_value.setText("Use p-values better than:");
 		button_cutoff_value.setMnemonic(KeyEvent.VK_B);
 		button_cutoff_value.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				button_cutoff_valueActionPerformed(evt);
+				buttonSetThresholdPressed();
 			}
 		});
 		drawbuttonpanel.add(button_cutoff_value);
 
-		textfield_cutoff_value.setText("1");
-		textfield_cutoff_value.addActionListener(new java.awt.event.ActionListener() {
+		textfield_threshold_value.setText("1");
+		textfield_threshold_value.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				textfield_cutoff_valueActionPerformed(evt);
+				confirmedThresholdTextfieldValue();
 			}
 		});
-		drawbuttonpanel.add(textfield_cutoff_value);
+		drawbuttonpanel.add(textfield_threshold_value);
 
 		textfield_info_min_blast_evalue.setEditable(false);
 		textfield_info_min_blast_evalue.setText("1");
@@ -318,26 +328,27 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		button_select_all_or_clear.setMnemonic(KeyEvent.VK_A);
 		button_select_all_or_clear.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				button_clear_selectionActionPerformed(evt);
+				button_clear_selectionActionPerformed();
 			}
 		});
 		drawbuttonpanel.add(button_select_all_or_clear);
 
 		checkbox_show_names.setText("show names");
-		checkbox_show_names.setToolTipText("show sequence names");
+		checkbox_show_names.setToolTipText("show sequence names in graph");
 		checkbox_show_names.setMnemonic(KeyEvent.VK_N);
 		checkbox_show_names.addItemListener(new java.awt.event.ItemListener() {
 			public void itemStateChanged(java.awt.event.ItemEvent evt) {
-				checkbox_show_namesItemStateChanged(evt);
+				requestRepaint();
 			}
 		});
 		drawbuttonpanel.add(checkbox_show_names);
 
 		checkbox_show_numbers.setText("show numbers");
+		checkbox_show_numbers.setToolTipText("show sequence numbers in graph");
 		checkbox_show_numbers.setMnemonic(KeyEvent.VK_U);
 		checkbox_show_numbers.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				checkbox_show_numbersActionPerformed(evt);
+				requestRepaint();
 			}
 		});
 		drawbuttonpanel.add(checkbox_show_numbers);
@@ -347,7 +358,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		checkbox_show_connections.setMnemonic(KeyEvent.VK_T);
 		checkbox_show_connections.addItemListener(new java.awt.event.ItemListener() {
 			public void itemStateChanged(java.awt.event.ItemEvent evt) {
-				checkbox_show_connectionsItemStateChanged(evt);
+				requestRepaint();
 			}
 		});
 		drawbuttonpanel.add(checkbox_show_connections);
@@ -356,7 +367,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		button_zoom_on_selected.setMnemonic(KeyEvent.VK_Z);
 		button_zoom_on_selected.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				button_zoom_on_selectedActionPerformed(evt);
+				button_zoom_on_selectedActionPerformed();
 			}
 		});
 		drawbuttonpanel.add(button_zoom_on_selected);
@@ -371,7 +382,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		loadmenuitem.setText("Load Run");
 		loadmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				loadmenuitemActionPerformed(evt);
+				loadDataClansFormat();
 			}
 		});
 		menu_file.add(loadmenuitem);
@@ -395,7 +406,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		saveattvalsmenuitem.setText("Save attraction values to file");
 		saveattvalsmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				saveattvalsmenuitemActionPerformed(evt);
+				saveattvalsmenuitemActionPerformed();
 			}
 		});
 		menu_file.add(saveattvalsmenuitem);
@@ -405,15 +416,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		addseqsmenuitem.setEnabled(false);
 		addseqsmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				addseqsmenuitemActionPerformed(evt);
+				addNewSequences();
 			}
 		});
 		menu_file.add(addseqsmenuitem);
 
-		savemtxmenuitem.setText("Save blast matrix pP-values");
+		savemtxmenuitem.setText("Save blast matrix p-values");
 		savemtxmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				savemtxmenuitemActionPerformed(evt);
+				saveBlastMatrixPValuesAs();
 			}
 		});
 		menu_file.add(savemtxmenuitem);
@@ -421,7 +432,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		save2dmenuitem.setText("Save 2d graph data");
 		save2dmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				save2dmenuitemActionPerformed(evt);
+				save2dGraphDataAs();
 			}
 		});
 		menu_file.add(save2dmenuitem);
@@ -429,7 +440,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		printmenuitem.setText("Print view");
 		printmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				printmenuitemActionPerformed(evt);
+				printDrawArea();
 			}
 		});
 		menu_file.add(printmenuitem);
@@ -437,7 +448,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		loadalternatemenuitem.setText("Load data in matrix format");
 		loadalternatemenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				loadalternatemenuitemActionPerformed(evt);
+				loadDataMatrixFormat();
 			}
 		});
 		menu_file.add(loadalternatemenuitem);
@@ -445,7 +456,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		loadtabsmenuitem.setText("Load tabular data");
 		loadtabsmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				loadtabsmenuitemActionPerformed(evt);
+				loadDataTabularFormat();
 			}
 		});
 		menu_file.add(loadtabsmenuitem);
@@ -453,7 +464,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		loadgroupsmenuitem.setText("Append sequence groups from file");
 		loadgroupsmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				loadgroupsmenuitemActionPerformed(evt);
+				loadSequenceGroupsToAppend();
 			}
 		});
 		menu_file.add(loadgroupsmenuitem);
@@ -466,7 +477,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		getseqsmenuitem.setText("Extract selected sequences");
 		getseqsmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				getseqsmenuitemActionPerformed(evt);
+				openSaveSequenceAsFastaDialog();
 			}
 		});
 		menu_misc.add(getseqsmenuitem);
@@ -474,7 +485,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		remove_selected_sequences_menu_item.setText("Remove selected sequences");
 		remove_selected_sequences_menu_item.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				removeSelectedSequencesMenuItemActionPerformed(evt);
+				removeAllSelectedSequences();
 			}
 		});
 		menu_misc.add(remove_selected_sequences_menu_item);
@@ -482,7 +493,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		hidesingletonsmenuitem.setText("Hide singletons");
 		hidesingletonsmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				hideSingletonsMenuItemActionPerformed(evt);
+				hideSingletonsMenuItemActionPerformed();
 			}
 		});
 		menu_misc.add(hidesingletonsmenuitem);
@@ -490,7 +501,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		getchildmenuitem.setText("Use selected subset");
 		getchildmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				getchildmenuitemActionPerformed(evt);
+				useGraphSubset();
 			}
 		});
 		menu_misc.add(getchildmenuitem);
@@ -499,7 +510,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		getparentmenuitem.setEnabled(false);
 		getparentmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				getparentmenuitemActionPerformed(evt);
+				useGraphSuperset();
 			}
 		});
 		menu_misc.add(getparentmenuitem);
@@ -507,7 +518,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		setrotmenuitem.setText("Set rotation values");
 		setrotmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				setrotmenuitemActionPerformed(evt);
+				openRotationMatrixInputDialog();
 			}
 		});
 		menu_misc.add(setrotmenuitem);
@@ -516,7 +527,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		attvalcompcheckbox.setText("Complex attraction");
 		attvalcompcheckbox.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				attvalcompcheckboxActionPerformed(evt);
+				updateUseComplexAttractionValuesState();
 			}
 		});
 		menu_misc.add(attvalcompcheckbox);
@@ -524,7 +535,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		moveselectedonly.setText("Optimize only selected sequences");
 		moveselectedonly.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				moveselectedonlyActionPerformed(evt);
+				updateOptimizeOnlySelectedSequencesState();
 			}
 		});
 		menu_misc.add(moveselectedonly);
@@ -532,7 +543,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		cluster2dbutton.setText("Cluster in 2D");
 		cluster2dbutton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cluster2dbuttonActionPerformed(evt);
+				cluster2dbuttonActionPerformed();
 			}
 		});
 		menu_misc.add(cluster2dbutton);
@@ -540,7 +551,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		rescalepvaluescheckbox.setText("Rescale attraction values");
 		rescalepvaluescheckbox.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				rescalepvaluescheckboxActionPerformed(evt);
+				updateRescaleAttractionValuesState();
 			}
 		});
 		menu_misc.add(rescalepvaluescheckbox);
@@ -548,7 +559,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		autosaveSetup.setText("setup autosaving");
 		autosaveSetup.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				showAutosaveSetupDialog(evt);
+				openAutosaveSetupDialog();
 			}
 		});
 		menu_misc.add(autosaveSetup);
@@ -566,7 +577,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		skipdrawingrounds.setText("Only draw every Nth round (speedup)");
 		skipdrawingrounds.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				skipdrawingroundsActionPerformed(evt);
+				skipdrawingroundsActionPerformed();
 			}
 		});
 		menu_misc.add(skipdrawingrounds);
@@ -579,7 +590,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		changefontmenuitem.setText("Change Font");
 		changefontmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				changefontmenuitemActionPerformed(evt);
+				openChangeFontDialog();
 			}
 		});
 		menu_draw.add(changefontmenuitem);
@@ -587,7 +598,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		getdotsizemenuitem.setText("Set dot size");
 		getdotsizemenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				getdotsizemenuitemActionPerformed(evt);
+				openChaneDotSizeDialog();
 			}
 		});
 		menu_draw.add(getdotsizemenuitem);
@@ -595,7 +606,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		getovalsizemenuitem.setText("Set selected circle size");
 		getovalsizemenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				getovalsizemenuitemActionPerformed(evt);
+				openChangeSelectedCircleSizeDialog();
 			}
 		});
 		menu_draw.add(getovalsizemenuitem);
@@ -603,7 +614,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		changecolormenuitem.setText("Change color (dot connections)");
 		changecolormenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				changecolormenuitemActionPerformed(evt);
+				openChangeDotConnectionColorDialog();
 			}
 		});
 		menu_draw.add(changecolormenuitem);
@@ -611,7 +622,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		changefgcolormenuitem.setText("Change color (Foreground)");
 		changefgcolormenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				changefgcolormenuitemActionPerformed(evt);
+				openForegroundColorChangeDialog();
 			}
 		});
 		menu_draw.add(changefgcolormenuitem);
@@ -619,7 +630,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		changebgcolormenuitem.setText("Change color (Background)");
 		changebgcolormenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				changebgcolormenuitemActionPerformed(evt);
+				openBackgroundColorChangeDialog();
 			}
 		});
 		menu_draw.add(changebgcolormenuitem);
@@ -627,7 +638,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		changeselectcolormenuitem.setText("Change color (Selecteds)");
 		changeselectcolormenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				changeselectcolormenuitemActionPerformed(evt);
+				openSelectedColorChangeDialog();
 			}
 		});
 		menu_draw.add(changeselectcolormenuitem);
@@ -635,7 +646,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		changenumbercolor.setText("Change color (BLAST hit numbers)");
 		changenumbercolor.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				changenumbercolorActionPerformed(evt);
+				openNumberColorChangeDialog();
 			}
 		});
 		menu_draw.add(changenumbercolor);
@@ -643,7 +654,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		changeblastcolor.setText("Change color (BLAST hit circles)");
 		changeblastcolor.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				changeblastcolorActionPerformed(evt);
+				openBlastColorChangeDialog();
 			}
 		});
 		menu_draw.add(changeblastcolor);
@@ -654,7 +665,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		colorfrustrationcheckbox.setText("Color by edge \"frustration\" (red=too long, blue=too short)");
 		colorfrustrationcheckbox.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				colorfrustrationcheckboxActionPerformed(evt);
+				requestRepaint();
 			}
 		});
 		menu_draw.add(colorfrustrationcheckbox);
@@ -670,7 +681,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		showinfocheckbox.setText("Show info");
 		showinfocheckbox.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				showinfocheckboxActionPerformed(evt);
+				requestRepaint();
 			}
 		});
 		menu_draw.add(showinfocheckbox);
@@ -684,7 +695,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		zoommenuitem.setText("Zoom");
 		zoommenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				zoommenuitemActionPerformed(evt);
+				zoommenuitemActionPerformed();
 			}
 		});
 		menu_draw.add(zoommenuitem);
@@ -692,7 +703,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		centermenuitem.setText("Center graph");
 		centermenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				centermenuitemActionPerformed(evt);
+				centerGraph();
 			}
 		});
 		menu_draw.add(centermenuitem);
@@ -700,7 +711,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		antialiasingcheckboxmenuitem.setText("Antialiasing (slow !)");
 		antialiasingcheckboxmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				antialiasingcheckboxmenuitemActionPerformed(evt);
+				requestRepaint();
 			}
 		});
 		menu_draw.add(antialiasingcheckboxmenuitem);
@@ -708,7 +719,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		stereocheckboxmenuitem.setText("Stereo");
 		stereocheckboxmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				stereocheckboxmenuitemActionPerformed(evt);
+				requestRepaint();
 			}
 		});
 		menu_draw.add(stereocheckboxmenuitem);
@@ -716,7 +727,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		stereoanglemenuitem.setText("Change stereo angle (0-360)");
 		stereoanglemenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				stereoanglemenuitemActionPerformed(evt);
+				openChangeStereoVisionAngleDialog();
 			}
 		});
 		menu_draw.add(stereoanglemenuitem);
@@ -729,7 +740,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		showoptionsmenuitem.setText("Show options window");
 		showoptionsmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				showoptionsmenuitemActionPerformed(evt);
+				openOptionsWindow();
 			}
 		});
 		menu_windows.add(showoptionsmenuitem);
@@ -737,7 +748,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		sequencesitem.setText("Selecteds");
 		sequencesitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				sequencesitemActionPerformed(evt);
+				openShowSelectedSequencesWindow();
 			}
 		});
 		menu_windows.add(sequencesitem);
@@ -745,7 +756,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		evalueitem.setText("P-value plot");
 		evalueitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				evalueitemActionPerformed(evt);
+				openScoreDistributionPlot();
 			}
 		});
 		menu_windows.add(evalueitem);
@@ -753,7 +764,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		getblasthitsmenuitem.setText("Show blast hits for sequence:");
 		getblasthitsmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				getblasthitsmenuitemActionPerformed(evt);
+				openShowBlastHitsForSequenceDialog();
 			}
 		});
 		menu_windows.add(getblasthitsmenuitem);
@@ -761,7 +772,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		clustermenuitem.setText("find clusters");
 		clustermenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				clustermenuitemActionPerformed(evt);
+				openFindClustersWindow();
 			}
 		});
 		menu_windows.add(clustermenuitem);
@@ -769,7 +780,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		getseqsforselectedhits.setText("Get sequence with hits from/to selected");
 		getseqsforselectedhits.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				getseqsforselectedhitsActionPerformed(evt);
+				openGetSequencesConnectedToSelectedsWindow();
 			}
 		});
 		menu_windows.add(getseqsforselectedhits);
@@ -777,7 +788,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		seqscoloring.setText("Edit Groups");
 		seqscoloring.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				seqscoloringActionPerformed(evt);
+				openEditGroupsWindow();
 			}
 		});
 		menu_windows.add(seqscoloring);
@@ -785,7 +796,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		showseqsmenuitem.setText("Show selected sequences as text (copy/pastable)");
 		showseqsmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				showseqsmenuitemActionPerformed(evt);
+				openShowCopyPasteableSequencesWindow();
 			}
 		});
 		menu_windows.add(showseqsmenuitem);
@@ -793,7 +804,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		rotationmenuitem.setText("Rotation");
 		rotationmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				rotationmenuitemActionPerformed(evt);
+				openRotationWindow();
 			}
 		});
 		menu_windows.add(rotationmenuitem);
@@ -801,7 +812,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		affymenuitem.setText("Microarray_data");
 		affymenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				affymenuitemActionPerformed(evt);
+				affymenuitemActionPerformed();
 			}
 		});
 		menu_windows.add(affymenuitem);
@@ -809,7 +820,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		mapmanmenuitem.setText("Functional mapping");
 		mapmanmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				mapmanmenuitemActionPerformed(evt);
+				openFunctionalMappingWindow();
 			}
 		});
 		menu_windows.add(mapmanmenuitem);
@@ -817,7 +828,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		taxonomymenuitem.setText("Taxonomy");
 		taxonomymenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				taxonomymenuitemActionPerformed(evt);
+				openTaxonomyWindow();
 			}
 		});
 		menu_windows.add(taxonomymenuitem);
@@ -830,7 +841,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		aboutmenuitem.setText("About");
 		aboutmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				aboutmenuitemActionPerformed(evt);
+				openAboutWindow();
 			}
 		});
 		menu_help.add(aboutmenuitem);
@@ -838,7 +849,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		helpmenuitem.setText("Help");
 		helpmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				helpmenuitemActionPerformed(evt);
+				openHelpWindow();
 			}
 		});
 		menu_help.add(helpmenuitem);
@@ -848,7 +859,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		setJMenuBar(jMenuBar1);
 
 		originalGlassPane = this.getGlassPane();
-		setupGuiMessageOverlay();
+		activateGuiMessageOverlay();
 		addGuiMessageOverlayResizeListener();
 		
 		createLoadSaveCancelKeyListener();
@@ -857,19 +868,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Initiates the message overlay.
-	 */
-	private void setupGuiMessageOverlay() {
-		// TODO not a todo but a reminder production versions MUST use GuiMessageOverlay, GuiMessageOverlayLogged!
-		message_overlay = new GuiMessageOverlay();
-		message_overlay.updateGlassSize(graphpanel.getHeight());
-
-		this.setGlassPane(message_overlay);
-	}
-	
-	/**
-	 * Whenever the main window changes its size, the overlay must be informed so it can adjust. This adds the listener
-	 * for that to the {@code graphpanel}.
+	 * Adds listener to inform the message overlay of main window size changes.
 	 */
 	private void addGuiMessageOverlayResizeListener() {
 		graphpanel.addComponentListener(new ComponentAdapter() {
@@ -883,7 +882,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 	
 	/**
-	 * Creates the KeyListener that is used to get escape key presses to cancel ongoing load or save operations.
+	 * Creates the KeyListener that is added/removed when the escape key is activated/deactivated for canceling
+	 * long-running operations. Currently used during file loading and saving.
 	 */
 	private void createLoadSaveCancelKeyListener() {
 		cancelWorkInProgress = new KeyListener() {
@@ -905,8 +905,44 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 		};
 	}
+	
+	/**
+	 * Consumes the data and sets some parts of theGUI up.
+	 */
+	private void consumeDataAtConstruction() {
+		data.nographics = false;
 
-	private void loadtabsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loadtabsmenuitemActionPerformed
+		data.mineval = data.eval;
+		data.pvalue_threshold = data.pval;
+
+		if (data.scval >= 0) { // in that case use a score cutoff
+			data.usescval = true;
+
+			data.pvalue_threshold = data.scval;
+			button_cutoff_value.setText("Use SC-vals better than");
+			textfield_threshold_value.setText("0");
+			evalueitem.setText("SC-value plot");
+			attvalcompcheckbox.setSelected(false);
+
+		} else {
+			data.usescval = false;
+		}
+
+		data.seqlengths = new float[data.seqnum];
+		float maxlength = 0;
+		for (int i = 0; i < data.seqnum; i++) {
+			data.seqlengths[i] = data.sequences[i].length();
+			if (data.seqlengths[i] > maxlength) {
+				maxlength = data.seqlengths[i];
+			}
+		}
+
+		for (int i = 0; i < data.seqnum; i++) {
+			data.seqlengths[i] /= maxlength;
+		}
+	}
+
+	private void loadDataTabularFormat() {
 		boolean restart_computation = stopComputation(true);
 
 		groupseqs = null;
@@ -927,14 +963,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (restart_computation) {
 			startComputation();
 		}
-	}// GEN-LAST:event_loadtabsmenuitemActionPerformed
+	}
 
-	private void stereocheckboxmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_stereocheckboxmenuitemActionPerformed
-		repaint();
-	}// GEN-LAST:event_stereocheckboxmenuitemActionPerformed
-
-	private void stereoanglemenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_stereoanglemenuitemActionPerformed
-		// change the angle of stereo vision
+	/**
+	 * Opens a dialog that lets users enter a new stereo vision angle.
+	 */
+	private void openChangeStereoVisionAngleDialog() {
 		String tmpstr = "";
 		try {
 			tmpstr = JOptionPane.showInputDialog(this, "Enter the new angle (int):", String.valueOf(draw1.stereoangle));
@@ -946,23 +980,27 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse integer from '" + tmpstr + "'");
 		}
 		repaint();
-	}// GEN-LAST:event_stereoanglemenuitemActionPerformed
+	}
 
-	private void mapmanmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mapmanmenuitemActionPerformed
+	/**
+	 * Opens a windows that shows functional mapping data.
+	 */
+	private void openFunctionalMappingWindow() {
 		if (mymapfunctiondialog != null) {
 			mymapfunctiondialog.setVisible(false);
 			mymapfunctiondialog.dispose();
 		}
 		mymapfunctiondialog = new mapfunctiondialog_tab(this);
 		mymapfunctiondialog.setVisible(true);
-	}// GEN-LAST:event_mapmanmenuitemActionPerformed
+	}
 
 	/**
 	 * Enables zoom with mousewheel+CTRL (coarse grained) or mousewheel+CTRL+SHIFT (fine grained)
 	 * 
 	 * @param evt
+	 *            The mouse wheel event.
 	 */
-	private void graphpanelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+	private void zoomUsingMouseWheel(java.awt.event.MouseWheelEvent evt) {
 	
 		if (mouseEventsDisabled) {
 			return;
@@ -980,61 +1018,73 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			data.zoomfactor += ((float) -evt.getWheelRotation()) / 10;
 		}
 
-		this.center_graph(oldzoom);
+		this.updateZoom(oldzoom);
 	}
 
-	private void affymenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_affymenuitemActionPerformed
+	/**
+	 * Opens a windows to show microarray data.
+	 */
+	private void affymenuitemActionPerformed() {
 		if (myaffydialog != null) {
 			myaffydialog.setVisible(false);
 			myaffydialog.dispose();
 		}
 		myaffydialog = new affydialog(this);
 		myaffydialog.setVisible(true);
-	}// GEN-LAST:event_affymenuitemActionPerformed
+	}
 
-	private void rotationmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_rotationmenuitemActionPerformed
-		// open a window making specific rotating possible
+	/**
+	 * Opens a window that lets users specify rotations of the graph.
+	 */
+	private void openRotationWindow() {
 		if (myrotationdialog != null) {
 			myrotationdialog.setVisible(false);
 			myrotationdialog.dispose();
 		}
+		
 		myrotationdialog = new rotationdialog(this);
 		myrotationdialog.setVisible(true);
-	}// GEN-LAST:event_rotationmenuitemActionPerformed
+	}
 
-	private void loadgroupsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loadgroupsmenuitemActionPerformed
-		// load additional sequence groups from a file
+	/**
+	 * Loads additional sequence groups from a file.
+	 */
+	private void loadSequenceGroupsToAppend() {
+		
 		int returnVal = fc.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
+		
 			data.append_groups_or_clusters_from_file(fc.getSelectedFile());
+			
 			if (myseqgroupwindow != null) {
 				myseqgroupwindow.setVisible(false);
 				myseqgroupwindow.dispose();
 			}
 			repaint();
 		}
-	}// GEN-LAST:event_loadgroupsmenuitemActionPerformed
+	}
 
-	private void addseqsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addseqsmenuitemActionPerformed
+	private void addNewSequences() {
 		javax.swing.JOptionPane.showMessageDialog(this, "You currently have to do that from the command line");
-	}// GEN-LAST:event_addseqsmenuitemActionPerformed
+	}
 
-	private void showoptionsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_showoptionsmenuitemActionPerformed
-		// show the options window
+	/**
+	 * Opens the options window.
+	 */
+	private void openOptionsWindow() {
 		if (options_window != null) {
 			options_window.setVisible(false);
 			options_window.dispose();
 		}
 		options_window = new WindowOptions(this);
 		options_window.setVisible(true);
-	}// GEN-LAST:event_showoptionsmenuitemActionPerformed
+	}
 
 	/**
-	 * Shows the user the "Setup autosave" dialog to let them decide whether and how often to save automatically.
-	 * 
-	 * @param evt
+	 * Opens the "setup autosave" dialog and handles the user's interaction with it. The dialog lets users decide
+	 * whether to save automatically and how often to do it.
 	 */
-	private void showAutosaveSetupDialog(java.awt.event.ActionEvent evt) {
+	private void openAutosaveSetupDialog() {
 
 		String user_input = (String) JOptionPane.showInputDialog(this,
 				"autosave this file every N minutes (0 = disable autosave)", "setup autosaving for this file",
@@ -1067,6 +1117,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 	
+	/**
+	 * Enables autosaving if it is set up to occur. For loaded data without autosave parameters, a reasonably long
+	 * autosave interval is automatically set up and the user is informed about it in a pop-up dialog.
+	 */
 	private void initializeAutosave() {
 		if (!data.knowsAutosave()) {
 			data.makeAutosaveAware();
@@ -1081,6 +1135,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		
 	}
 
+	/**
+	 * Enables autosaving if an autosave interval is set. Does nothing if the autosave interval is 0.
+	 * 
+	 * @param show_overlay_message
+	 *            If true and if the message overlay is active, the user is informed about the change in an overlay
+	 *            message.
+	 */
 	private void enableAutosave(boolean show_overlay_message) {
 
 		if (data.getAutosaveIntervalMinutes() == 0) {
@@ -1105,6 +1166,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 
+	/**
+	 * Disables autosaving.
+	 * 
+	 * @param show_overlay_message
+	 *            If true and if the message overlay is active, the user is informed about the change in an overlay
+	 *            message.
+	 */
 	private void disableAutosave(boolean show_overlay_message) {
 
 		data.setAutosaveIntervalMinutes(0);
@@ -1124,7 +1192,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	/**
 	 * Stops the autosave timer.
 	 * 
-	 * @return true if a timer exists and it was running, false else
+	 * @return true if a timer exists and it was running, false else.
 	 */
 	private boolean pauseAutosave() {
 		if (autosaveTimer == null || !autosaveTimer.isRunning()){
@@ -1136,7 +1204,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 	
 	/**
-	 * Restarts the autosave timer.
+	 * Restarts the autosave timer. This resets the time until the next autosave to the autosave interval.
 	 */
 	private void restartAutosave() {
 		if (autosaveTimer != null) {
@@ -1144,80 +1212,146 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 	
+	/**
+	 * Toggles whether the message overlay is shown or disabled.
+	 */
 	private void toggleMessageOverlayActive() {
 		
 		if (messageOverlayActive) {
-			this.setGlassPane(originalGlassPane);
-			message_overlay = null;
-
+			deactivateMessageOverlay();
 		} else {
-			setupGuiMessageOverlay();
+			activateGuiMessageOverlay();
 		}
 		
 		messageOverlayActive = !messageOverlayActive;
 	}
 	
+	/**
+	 * Activates the message overlay.
+	 * <p>
+	 * TODO: remember: production versions MUST use GuiMessageOverlay instead of the debugging class
+	 * GuiMessageOverlayLogged!
+	 */
+	private void activateGuiMessageOverlay() {
+		message_overlay = new GuiMessageOverlay();
+		message_overlay.updateGlassSize(graphpanel.getHeight());
+
+		this.setGlassPane(message_overlay);
+	}
+	
+	/**
+	 * Deactivates the message overlay.
+	 */
+	private void deactivateMessageOverlay() {
+		this.setGlassPane(originalGlassPane);
+		message_overlay = null;
+	}
+	
+	/**
+	 * Changes the "enabled" state of all menus in the menubar.
+	 * 
+	 * @param enabled
+	 *            If true all menus will be enabled, if false disabled.
+	 */
 	private void modifyMenusEnabled(boolean enabled) {
 		for (int i=0; i < jMenuBar1.getMenuCount(); i++) {
 			jMenuBar1.getMenu(i).setEnabled(enabled);
 		}
 	}
 
+	/**
+	 * Enables all menus in the menubar.
+	 */
 	private void enableMenus() {
 		modifyMenusEnabled(true);
 	}
 
+	/**
+	 * Disables all menus in the menubar.
+	 */
 	private void disableMenus() {
 		modifyMenusEnabled(false);
 	}
 
+	/**
+	 * Changes the "enabled" state of all buttons in the control bar (bottom of the CLANS window).
+	 * 
+	 * @param enabled
+	 *            If true all buttons will be enabled, if false disabled.
+	 */
 	private void modifyControlButtonsEnabled(boolean enabled) {
 		for (int i = 0; i < drawbuttonpanel.getComponentCount(); i++) {
 			drawbuttonpanel.getComponent(i).setEnabled(enabled);
 		}
 	}
 
+	/**
+	 * Enables all buttons in the control bar (bottom of the CLANS window).
+	 */
 	private void enableControlButtons() {
 		modifyControlButtonsEnabled(true);
 	}
 
+	/**
+	 * Disables all buttons in the control bar (bottom of the CLANS window).
+	 */
 	private void disableControlButtons() {
 		modifyControlButtonsEnabled(false);
 	}
 
-	private void enableMostMouseEvents() {
+	/**
+	 * Enables all mouse event handling in event listeners.
+	 */
+	private void enableMouseEventHandling() {
 		mouseEventsDisabled = false;
 	}
 	
-	private void disableMostMouseEvents() {
+	/**
+	 * Disables all mouse event handling in event listeners.
+	 */
+	private void disableMouseEventHandling() {
 		mouseEventsDisabled = true;
 	}
 	
+	/**
+	 * Enables detecting escape key presses to cancel operations.
+	 */
 	private void enableCancelWorkInProgressKey() {
 		addKeyListener(cancelWorkInProgress);
 	}
 	
+	/**
+	 * Disables detecting escape key presses to cancel operations.
+	 */
 	private void disableCancelWorkInProgressKey() {
 		removeKeyListener(cancelWorkInProgress);
 	}
 	
-
+	/**
+	 * Enables user contols.
+	 */
 	private void enableUserControls() {
 		enableMenus();
 		enableControlButtons();
-		enableMostMouseEvents();
+		enableMouseEventHandling();
 		disableCancelWorkInProgressKey();
 	}
 
+	/**
+	 * Disables user contols. This is useful to block the user from interacting with the GUI in long running operations
+	 * like saving and loading, where he could break s.th. with his input.
+	 */
 	private void disableUserControls() {
 		disableMenus();
 		disableControlButtons();
-		disableMostMouseEvents();
+		disableMouseEventHandling();
 		enableCancelWorkInProgressKey();
 	}
 
-	private void skipdrawingroundsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_skipdrawingroundsActionPerformed
-		// only draw every Nth round
+	/**
+	 * Opens an input dialog where users can choose to only repaint the GUI after every N rounds of calculation.
+	 */
+	private void skipdrawingroundsActionPerformed() {
 		String tmpstr;
 		tmpstr = javax.swing.JOptionPane.showInputDialog(this, "Draw each Nth round. N=", String.valueOf(skiprounds));
 		try {
@@ -1227,74 +1361,80 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		} catch (NumberFormatException ne) {
 			javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse integer from '" + tmpstr + "'");
 		}
-	}// GEN-LAST:event_skipdrawingroundsActionPerformed
+	}
 
-	private void colorfrustrationcheckboxActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_colorfrustrationcheckboxActionPerformed
-		repaint();// rest is done in paintComponent function
-	}// GEN-LAST:event_colorfrustrationcheckboxActionPerformed
-
-	private void helpmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_helpmenuitemActionPerformed
-		// "help" was clicked
+	/**
+	 * Opens the "Help" window.
+	 */
+	private void openHelpWindow() {
 		new WindowHelp(this, true).setVisible(true);
-	}// GEN-LAST:event_helpmenuitemActionPerformed
+	}
 
-	private void aboutmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_aboutmenuitemActionPerformed
-		// the about clans menu was selected
+	/**
+	 * Opens the "About" window.
+	 */
+	private void openAboutWindow() {
 		new WindowAbout(this, true).setVisible(true);
-	}// GEN-LAST:event_aboutmenuitemActionPerformed
+	}
 
-	private void antialiasingcheckboxmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_antialiasingcheckboxmenuitemActionPerformed
-		repaint();
-	}// GEN-LAST:event_antialiasingcheckboxmenuitemActionPerformed
-
-	private void showseqsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_showseqsmenuitemActionPerformed
-		// open a text field with the selected sequences
+	/**
+	 * Opens a window that offers the currently selected sequences in FASTA format as copy & pastable text.
+	 */
+	private void openShowCopyPasteableSequencesWindow() {
 		int seqnum = data.selectednames.length;
 		if (seqnum < 1) {
 			javax.swing.JOptionPane.showMessageDialog(this, "Please select some sequences");
-		} else {
-			StringBuffer outbuff = new StringBuffer();
-			for (int i = 0; i < seqnum; i++) {
-				outbuff.append(">" + data.sequence_names[data.selectednames[i]] + " " + data.selectednames[i] + "\n");
-				outbuff.append(data.sequences[data.selectednames[i]].seq + "\n");
-			}// end for i
-			new ShowCopyPasteableSequences(new javax.swing.JFrame(), outbuff).setVisible(true);
+			return;
+		}
+		
+		StringBuffer outbuff = new StringBuffer();
+		for (int i = 0; i < seqnum; i++) {
+			outbuff.append(">" + data.sequence_names[data.selectednames[i]] + " " + data.selectednames[i] + "\n");
+			outbuff.append(data.sequences[data.selectednames[i]].seq + "\n");
 		}
 
-	}// GEN-LAST:event_showseqsmenuitemActionPerformed
+		new ShowCopyPasteableSequences(new javax.swing.JFrame(), outbuff).setVisible(true);
+	}
 
-	private void center_graph(float old_zoom) {
-		/**
-		 * center the graph
-		 * 
-		 * @param old_zoom
-		 *            : if -1: reset to center the complete graph, else computes the view for the current zoom showing
-		 *            the same part of the graph as with old_zoom.
-		 * @type old_zoom: float
-		 */
+	/**
+	 * Updates the zoom of the view to the currently set zoom value while keeping the same area centered.
+	 * 
+	 * @param old_zoom
+	 *            The previous zoom value.
+	 */
+	private void updateZoom(float old_zoom) {
+
+		if (old_zoom == -1) { // not zoomed before, simply center 
+			centerGraph();
+			return;
+		}
+		
 		int panelwidth = graphpanel.getWidth() - 2 * draw1.xadd;
 		int panelheight = graphpanel.getHeight() - 2 * draw1.yadd;
 
-		if (old_zoom == -1) {
-			draw1.xtranslate = (int) (panelwidth / 2 * (1 - data.zoomfactor));
-			draw1.ytranslate = (int) (panelheight / 2 * (1 - data.zoomfactor));
-		} else {
+		int imagecenterx = (int) ((panelwidth / 2 - draw1.xtranslate) / old_zoom);
+		int imagecentery = (int) ((panelheight / 2 - draw1.ytranslate) / old_zoom);
 
-			int imagecenterx = (int) ((panelwidth / 2 - draw1.xtranslate) / old_zoom);
-			int imagecentery = (int) ((panelheight / 2 - draw1.ytranslate) / old_zoom);
-
-			draw1.xtranslate = (int) (-(imagecenterx * data.zoomfactor) + panelwidth / 2);
-			draw1.ytranslate = (int) (-(imagecentery * data.zoomfactor) + panelheight / 2);
-		}
+		draw1.xtranslate = (int) (-(imagecenterx * data.zoomfactor) + panelwidth / 2);
+		draw1.ytranslate = (int) (-(imagecentery * data.zoomfactor) + panelheight / 2);
 
 		repaint();
 	}
 
-	private void centermenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_centermenuitemActionPerformed
-		this.center_graph(-1);
-	}// GEN-LAST:event_centermenuitemActionPerformed
+	/**
+	 * Centers the graph while maintaining the current zoom level.
+	 */
+	private void centerGraph() {
+		int panelwidth = graphpanel.getWidth() - 2 * draw1.xadd;
+		int panelheight = graphpanel.getHeight() - 2 * draw1.yadd;
 
-	private void zoommenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_zoommenuitemActionPerformed
+		draw1.xtranslate = (int) (panelwidth / 2 * (1 - data.zoomfactor));
+		draw1.ytranslate = (int) (panelheight / 2 * (1 - data.zoomfactor));
+
+		repaint();
+	}
+	
+	private void zoommenuitemActionPerformed() {
 		String tmpstr = "";
 		float oldzoom = data.zoomfactor;
 		try {
@@ -1308,37 +1448,46 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			return;
 		}
 
-		this.center_graph(oldzoom);
-	}// GEN-LAST:event_zoommenuitemActionPerformed
+		updateZoom(oldzoom);
+	}
 
-	private void changefontmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_changefontmenuitemActionPerformed
-		// change the current font
+	/**
+	 * Opens a dialog to let the user change the GUI font.
+	 */
+	private void openChangeFontDialog() {
 		draw1.myfont = fontchooserdialog.getfont("Select Font", draw1.myfont);
 		repaint();
-	}// GEN-LAST:event_changefontmenuitemActionPerformed
+	}
+	
+	/**
+	 * Opens a window in which the user can create and manage custom groups of sequences. These group definitions are
+	 * used to draw differently colored shapes in the draw area instead of simple dots with identical colors.
+	 */
+	private void openEditGroupsWindow() {
 
-	private void seqscoloringActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_seqscoloringActionPerformed
-		// open a window showing the vector containing the selected groups of sequences
 		if (myseqgroupwindow != null) {
 			myseqgroupwindow.setVisible(false);
 			myseqgroupwindow.dispose();
 		}
+		
 		myseqgroupwindow = new WindowEditGroups(this);
 		myseqgroupwindow.setVisible(true);
-	}// GEN-LAST:event_seqscoloringActionPerformed
+	}
 
-	private void getseqsforselectedhitsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getseqsforselectedhitsActionPerformed
-		// get the sequences with hits to or from the selected set of sequences
-		// output in a "sequences" window the currently selected and in a second frame the
-		// sequences with hits to the selected.
+	/**
+	 * Opens a window that lets users see all sequences with connections to the currently selected sequences. Further
+	 * options like the selection of those connected sequences are available to the user.
+	 */
+	private void openGetSequencesConnectedToSelectedsWindow() {
 		int[] blasthitsarr = showblasthitsforselected.getblasthits(data.myattvals, data.selectednames,
-				data.sequence_names);// get the blast hits
+				data.sequence_names);
 		new showblasthitsforselected(this, blasthitsarr, data.selectednames).setVisible(true);
-	}// GEN-LAST:event_getseqsforselectedhitsActionPerformed
+	}
 
-	private void clustermenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_clustermenuitemActionPerformed
-		// detect clusters in this dataset
-		// use minpval and the current attraction values to get the clustering
+	/**
+	 * Opens the "find clusters" window to let the user perform automatic cluster detection on the data.
+	 */
+	private void openFindClustersWindow() {
 		// don't define optionsvec as it contains both strings and numbers in a defined order
 		Vector<String> optionsvec = new Vector<String>();
 		new DialogClusterOptions(this, optionsvec).setVisible(true);
@@ -1448,14 +1597,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		} else {
 			javax.swing.JOptionPane.showMessageDialog(this, "Error in selecting clustering method: " + tmpstr);
 		}
-	}// GEN-LAST:event_clustermenuitemActionPerformed
+	}
 
 	/**
-	 * load data from a file with matrix info (only one value per pair)
-	 * 
-	 * @param evt
+	 * Opens file choice dialog and load data the selected file with matrix info (only one value per pair).
 	 */
-	private void loadalternatemenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void loadDataMatrixFormat() {
 		boolean restart_computation = stopComputation(true);
 
 		groupseqs = null;
@@ -1486,7 +1633,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				data.myattvals = saveddata.attvals;
 				data.myattvals = saveddata.attvals;
 				button_cutoff_value.setText("Use Attraction values better than");
-				textfield_cutoff_value.setText("0");
+				textfield_threshold_value.setText("0");
 				data.elements = data.sequence_names.length;
 				// now symmetrize and normalize the attvals to range from -1 to +1
 				float minval = 0;
@@ -1517,7 +1664,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				data.attvalsimple = true;
 				repaint = null;
 				data.pvalue_threshold = 1;
-				textfield_cutoff_value.setText("1");
+				textfield_threshold_value.setText("1");
 				textfield_info_min_blast_evalue.setText("1");
 			} else {// if the data had errors
 				JOptionPane.showMessageDialog(this, "Error reading data", "Error reading", JOptionPane.ERROR_MESSAGE);
@@ -1547,7 +1694,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		repaint();
 	}
 
-	private void cluster2dbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cluster2dbuttonActionPerformed
+	/**
+	 * Toggles between 2D and 3D clustering mode.
+	 */
+	private void cluster2dbuttonActionPerformed() {
 		// get rid of all z-axis information and set the rotation matrices to 1,1,1 (x,y,z)
 		// set the rotation matrices to 1,1,1
 		data.rotmtx[0][0] = 1;
@@ -1587,9 +1737,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			data.cluster2d = false;
 		}
 		repaint();
-	}// GEN-LAST:event_cluster2dbuttonActionPerformed
+	}
 
-	private void printmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void printDrawArea() {
 		boolean restart_computation = stopComputation(true);
 
 		java.awt.print.PrinterJob printJob = java.awt.print.PrinterJob.getPrinterJob();
@@ -1607,12 +1757,21 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 
+	/**
+	 * Opens a color choice dialog that is safe in keeping the original color if canceled.
+	 * 
+	 * @param title
+	 *            The title of the dialog.
+	 * @param current_color
+	 *            The current color, which is used as starting color.
+	 * @return The picked color or {@code current_color} if the dialog is closed/canceled.
+	 */
 	protected java.awt.Color safe_change_color_dialog(String title, java.awt.Color current_color) {
 
 		java.awt.Color new_color = null;
 
 		try {
-			new_color = JColorChooser.showDialog(this, "Choose a new foreground color", current_color);
+			new_color = JColorChooser.showDialog(this, title, current_color);
 		} catch (java.awt.HeadlessException e) {
 			System.err.println("HeadlessException!");
 		}
@@ -1624,59 +1783,57 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * open and handle color chooser dialog for selected sequence circles
-	 * 
-	 * @param evt
+	 * Opens a color chooser dialog to change the color of selected sequence circles.
 	 */
-	private void changeselectcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void openSelectedColorChangeDialog() {
 		draw1.selectedcolor = safe_change_color_dialog("Choose a new foreground color", draw1.selectedcolor);
 		repaint();
 	}
 
 	/**
-	 * open and handle color chooser dialog for blast hit circles
-	 * 
-	 * @param evt
+	 * Opens a color chooser dialog to change the color of blast hit circles.
 	 */
-	private void changeblastcolorActionPerformed(java.awt.event.ActionEvent evt) {
+	private void openBlastColorChangeDialog() {
 		draw1.blastcirclecolor = safe_change_color_dialog("Choose a new foreground color", draw1.blastcirclecolor);
 		repaint();
 	}
 
-	private void button_show_selectedActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_showselectbuttonActionPerformed
-		// open the sequences dialog and display the names for only the selected sequences
+	/**
+	 * Opens the "selected sequences" windows that displays the names of all selected sequences or of all sequences if
+	 * none are selected.
+	 */
+	private void openShowSelectedSequencesWindow() {
+		
 		if (!this.contains_data(true)) {
 			return;
 		}
+		
 		if (shownames != null) {
 			shownames.setVisible(false);
 			shownames.dispose();
 		}
+		
 		shownames = new WindowShowSelectedSequences(data.sequence_names, this);
 		shownames.setVisible(true);
-	}// GEN-LAST:event_showselectbuttonActionPerformed
+	}
 
 	/**
-	 * open and handle color chooser dialog for foreground color
-	 * 
-	 * @param evt
+	 * Opens a color chooser dialog to change the foreground color.
 	 */
-	private void changefgcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void openForegroundColorChangeDialog() {
 		draw1.fgcolor = safe_change_color_dialog("Choose a new foreground color", draw1.fgcolor);
 		repaint();
 	}
 
 	/**
-	 * open and handle color chooser dialog for background color
-	 * 
-	 * @param evt
+	 * Opens a color chooser dialog to change the background color.
 	 */
-	private void changebgcolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void openBackgroundColorChangeDialog() {
 		draw1.bgcolor = safe_change_color_dialog("Choose a new background color", draw1.bgcolor);
 		repaint();
 	}
 
-	private void save2dmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void save2dGraphDataAs() {
 		boolean restart_computation = stopComputation(true);
 
 		int returnVal = fc.showSaveDialog(this);
@@ -1705,47 +1862,42 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * open and handle color chooser dialog for BLAST hit numbers
-	 * 
-	 * @param evt
+	 * Opens a color chooser dialog to change the background color.
 	 */
-	private void changenumbercolorActionPerformed(java.awt.event.ActionEvent evt) {
+	private void openNumberColorChangeDialog() {
 		draw1.blasthitcolor = safe_change_color_dialog("Select New Color", draw1.blasthitcolor);
 		repaint();
 	}
 
 	/**
-	 * When the return key is pressed in the threshold text field, the threshold value will be set.
-	 * 
-	 * @param evt
+	 * Sets the threshold according to the threshold textfield content when the return key is pressed in the textfield.
 	 */
-	private void textfield_cutoff_valueActionPerformed(java.awt.event.ActionEvent evt) {
+	private void confirmedThresholdTextfieldValue() {
 		double new_threshold;
 		try {
-			new_threshold = Double.parseDouble(textfield_cutoff_value.getText());
+			new_threshold = Double.parseDouble(textfield_threshold_value.getText());
 		} catch (NumberFormatException e) {
 			javax.swing.JOptionPane.showMessageDialog(this, "ERROR; unable to parse double from '"
-					+ textfield_cutoff_value.getText() + "'");
+					+ textfield_threshold_value.getText() + "'");
 			return;
 		}
 		set_threshold(new_threshold);
 	}
 
 	/**
-	 * When the "Use p-values better than" button is pressed, the threshold value will be set.
-	 * 
-	 * @param evt
+	 * Sets the threshold according to the threshold textfield content when the "use values better than" button is
+	 * pressed.
 	 */
-	private void button_cutoff_valueActionPerformed(java.awt.event.ActionEvent evt) {
-		textfield_cutoff_valueActionPerformed(evt);
+	private void buttonSetThresholdPressed() {
+		confirmedThresholdTextfieldValue();
 	}
 
 	/**
-	 * sets the threshold value used for clustering. In case the clustering is running, it is temporarily stopped then
+	 * Sets the threshold used for clustering. In case the clustering is running, it is temporarily stopped then
 	 * resumed.
 	 * 
 	 * @param threshold
-	 *            the new threshold value
+	 *            The new threshold.
 	 */
 	private void set_threshold(double threshold) {
 
@@ -1776,7 +1928,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 
-	private void savemtxmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void saveBlastMatrixPValuesAs() {
 
 		boolean restart_computation = stopComputation(true);
 
@@ -1842,26 +1994,26 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 
-	private void getdotsizemenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getdotsizemenuitemActionPerformed
-		String tmpstr = "";
+	/**
+	 * Opens a dialog that lets users change the size of all dots.
+	 */
+	private void openChaneDotSizeDialog() {
+		String user_input = "";
 		try {
-			tmpstr = JOptionPane.showInputDialog(this, "Enter the new size (int):", String.valueOf(data.dotsize));
-			if (tmpstr != null) {
-				data.dotsize = (int) (Float.parseFloat(tmpstr));// someone might enter a float and it's not time
-																// critical
+			user_input = JOptionPane.showInputDialog(this, "Enter the new size (int):", String.valueOf(data.dotsize));
+			if (user_input != null) {
+				data.dotsize = (int) (Float.parseFloat(user_input));
 			}
 		} catch (NumberFormatException ne) {
-			javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse integer from '" + tmpstr + "'");
+			javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse integer from '" + user_input + "'");
 		}
 		repaint();
-	}// GEN-LAST:event_getdotsizemenuitemActionPerformed
+	}
 
-	private void showinfocheckboxActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_showinfocheckboxActionPerformed
-		repaint();
-	}// GEN-LAST:event_showinfocheckboxActionPerformed
-
-	private void setrotmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_setrotmenuitemActionPerformed
-		// specify the rotation values
+	/**
+	 * Opens a dialog that lets users enter specific rotation matrix values.
+	 */
+	private void openRotationMatrixInputDialog() {
 		String tmpstr = "";
 		try {
 			tmpstr = JOptionPane.showInputDialog(this, "Enter the new rotation values: x , y , z (9 values total)");
@@ -1892,9 +2044,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse double from '" + tmpstr + "'");
 		}
 		repaint();
-	}// GEN-LAST:event_setrotmenuitemActionPerformed
+	}
 
-	private void getovalsizemenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getovalsizemenuitemActionPerformed
+	/**
+	 * Opens a dialog that lets users set the size for circles representing selected sequences.
+	 */
+	private void openChangeSelectedCircleSizeDialog() {
 		// set the size for the circles for selected sequences
 		String tmpstr = "";
 		try {
@@ -1906,33 +2061,38 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse int from '" + tmpstr + "'");
 		}
 		repaint();
-	}// GEN-LAST:event_getovalsizemenuitemActionPerformed
+	}
 
-	private void getblasthitsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getblasthitsmenuitemActionPerformed
-		// this should pop up a sequence selection menu, do a blast run for this sequence against
-		// the present database, extract the hsp's (sequence regions and evalues)
-		// and map it on to the selected sequence.
-		// i.e. region 1-200 hits cluster A, region 210-300 cluster b, ergo 2 domains.
+	/**
+	 * Opens a dialog that lets users pick a sequence for which BLAST is run against the present database. The region
+	 * and e-values of the HSPs are then shown mapped to this sequence.
+	 * <p>
+	 * i.e. region 1-200 hits cluster A, region 210-300 cluster b, ergo 2 domains
+	 */
+	private void openShowBlastHitsForSequenceDialog() {
 		int referenceseqnum = getsinglenamedialog.getrefseq(data.sequence_names);
 		if (referenceseqnum == -1) {
 			javax.swing.JOptionPane.showMessageDialog(this, "Please select a sequence");
 			return;
 		}
+
 		// get the blast hits to this sequence
 		hsp[] thishsp = (new viewblasthitsutils()).gethsps(referenceseqnum, data.sequences, data.cmd,
 				data.formatdbpath, data.blastpath, data.addblastvbparam, data.referencedb, data.mineval,
 				data.pvalue_threshold);
+		
 		// plot these blast hits on to the sequence
 		viewblasthits myview = new viewblasthits(this, thishsp, referenceseqnum, data.sequence_names,
 				data.sequences[referenceseqnum], data.nameshash);
 		viewblasthitsvec.addElement(myview);
+		
 		myview.setVisible(true);
-	}// GEN-LAST:event_getblasthitsmenuitemActionPerformed
+	}
 
 	/**
-	 * opens a file chooser dialog that asks the user whether a selected file should be used if it exists
+	 * Opens a file chooser dialog that asks the user whether a selected file should be overwritten if it exists
 	 * 
-	 * @return a String with the selected filename or empty string if dialog is canceled or closed
+	 * @return The selected filename or "" if the dialog was canceled or closed.
 	 */
 	private String safe_output_file_chooser() {
 		// this line makes using TAB possible to go from Yes to No in the FileChooser. Otherwise pressing Enter ALWAYS
@@ -1985,12 +2145,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Saves a run to either the source file or to a user chosen file. Users get a file chooser that lets them decide
-	 * whether to overwrite an existing file or not.
-	 * <p>
-	 * Shows message dialogs to inform the user of unsaved data if no temporary file could be created or the temporary
-	 * file cannot be moved to its final destination after writing. A similar message dialog occurs when users cancel or
-	 * close the file chooser.
+	 * Saves the run to a CLANS format file and informs the user about progress and success in overlay and STDERR
+	 * messages.
+	 * 
+	 * @param output_filename
+	 *            The file to which the output is written.
 	 */
 	private void threaded_save_run(final String output_filename) {
 
@@ -2106,27 +2265,29 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Gets the filename of the currently loaded file for overwriting it during a "save run" operation.
+	 * Gets the filename associated with the currently open data.
 	 * 
-	 * @return The output filename or null if the file was not loaded from a file but from BLAST results.
+	 * @return The filename or null if the data is not associated with a filename yet.
 	 */
 	private String getSaveFilename() {
 		return data.getAbsoluteInputfileName();
 	}
 
 	/**
-	 * Lets the user pick an output file via a file chooser dialog.
+	 * Opens a file chooser dialog to let the user pick an output file. If the file exists, the user will be asked
+	 * whether to use it or select a different one or cancel.
 	 * 
-	 * @return The output filename or null if the user closed/canceled the input dialog.
+	 * @return The filename or null if the user closed/canceled the input dialog.
 	 */
 	private String getSaveAsFilename() {
 		return safe_output_file_chooser();
 	}
 
 	/**
-	 * Used by menu entry "File->Save Run" to save CLANS format data to the input file. If the data came directly from
-	 * BLAST results instead of a CLANS file, this falls back to "Save Run As" behavior of showing the user a file
-	 * choice dialog. If that dialog is canceled/closed, no save file is created.
+	 * Saves the data in CLANS format to the filename associated with it. Used by menu entry "File->Save Run".
+	 * <p>
+	 * If the data is not associated with a filename (e.g. CLANS parsed BLAST results), this falls back to
+	 * {@code saveRunAs} behavior of showing the user a file choice dialog.
 	 */
 	private void saveRun() {
 		String output_filename = getSaveFilename();
@@ -2143,8 +2304,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Used by menu entry "File->Save Run As" to show the user a dialog to select an output filename to which the data
-	 * is then saved in CLANS format. If the dialog is canceled/closed, no save file is created.
+	 * Saves the data in CLANS format to a user chosen file. Used by menu entry "File->Save Run As". If the file
+	 * selection dialog is canceled/closed, no save file is created.
 	 */
 	private void saveRunAs() {
 		String output_filename = getSaveAsFilename();
@@ -2157,9 +2318,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Used by the autosave feature to save CLANS format data to the input file on a regular basis. If the data came
-	 * directly from BLAST results instead of a CLANS file and hence no filename is available, the autosave feature is
-	 * paused until a manual save is successfully performed.
+	 * Saves the data in CLANS format to its associated file. Used by the autosave feature to save data on a regular
+	 * basis. If the data is not associated with a filename (e.g. CLANS parsed BLAST results), activating the autosave
+	 * feature is postponed until a manual save is successfully performed.
 	 */
 	private void autosave() {
 		String output_filename = getSaveFilename();
@@ -2173,7 +2334,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		threaded_save_run(output_filename);
 	}
 
-	private void loadmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void loadDataClansFormat() {
 
 		groupseqs = null;
 
@@ -2181,7 +2342,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 
 			String filename = fc.getSelectedFile().getAbsolutePath();
-			loaddata_threaded(filename);
+			loadDataClansFormatInBackground(filename);
 
 			if (myseqgroupwindow != null) {
 				myseqgroupwindow.setVisible(false);
@@ -2200,13 +2361,20 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 
-	private void restrictToSelectedSequences(boolean[] sequences_to_keep) {
+	/**
+	 * Permanently deletes sequences based on a selection mask.
+	 * 
+	 * @param keep_mask
+	 *            An array with true at indices of sequences that should be kept and false at indices of sequences that
+	 *            should be deleted.
+	 */
+	private void deleteSequences(boolean[] keep_mask) {
 		int counter = 0;
 		// shift for sequence ids in groups
-		int[] sequence_index_shift = new int[sequences_to_keep.length];
-		for (int i = 0; i < sequences_to_keep.length; i++) {
+		int[] sequence_index_shift = new int[keep_mask.length];
+		for (int i = 0; i < keep_mask.length; i++) {
 			sequence_index_shift[i] = i - counter;
-			if (sequences_to_keep[i]) {
+			if (keep_mask[i]) {
 				counter++;
 			}
 		}
@@ -2291,7 +2459,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			// collect and fix the sequence ids to keep for this group
 			keep_group_sequences = new Vector<Integer>();
 			for (int j = 0; j < current_seqgroup.sequences.length; j++) {
-				if (sequences_to_keep[current_seqgroup.sequences[j]]) {
+				if (keep_mask[current_seqgroup.sequences[j]]) {
 					keep_group_sequences.add(current_seqgroup.sequences[j]
 							- sequence_index_shift[current_seqgroup.sequences[j]]);
 				}
@@ -2315,11 +2483,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Permanently remove all the selected sequences.
-	 * 
-	 * @param evt
+	 * Permanently remove all currently selected sequences from the data.
 	 */
-	private void removeSelectedSequencesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void removeAllSelectedSequences() {
 
 		boolean restart_computation = stopComputation(true);
 
@@ -2346,7 +2512,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 		}
 
-		restrictToSelectedSequences(sequences_to_keep);
+		deleteSequences(sequences_to_keep);
 
 		if (restart_computation) {
 			startComputation();
@@ -2354,11 +2520,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Permanently remove sequences that have no connections at the currently selected P-value cutoff.
-	 * 
-	 * @param evt
+	 * Permanently removes all sequences without connections at the currently selected p-value cutoff.
 	 */
-	private void hideSingletonsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void hideSingletonsMenuItemActionPerformed() {
 
 		boolean restart_computation = stopComputation(true);
 
@@ -2392,7 +2556,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 		}
 
-		restrictToSelectedSequences(sequences_to_keep);
+		deleteSequences(sequences_to_keep);
 
 		if (restart_computation) {
 			startComputation();
@@ -2400,11 +2564,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Go to super-set of currently shown subset (use all sequences from the level before)
-	 * 
-	 * @param evt
+	 * Go to super-set of currently shown subset (use all sequences from the level before).
 	 */
-	private void getparentmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void useGraphSuperset() {
 
 		boolean restart_computation = stopComputation(true);
 
@@ -2484,11 +2646,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Go to sub-set of currently shown sequences (use all sequences from the level before)
-	 * 
-	 * @param evt
+	 * Go to sub-set of currently shown sequences (use all sequences from the level before).
 	 */
-	private void getchildmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void useGraphSubset() {
 
 		boolean restart_computation = stopComputation(true);
 
@@ -2580,12 +2740,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Shows a score distribution plot. The plot differs for similarity data given as scores, p-values, or attraction
-	 * values.
-	 * 
-	 * @param evt
+	 * Opens a windows with a score distribution plot. The plot differs for similarity data given as scores, p-values,
+	 * or attraction values.
 	 */
-	private void evalueitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void openScoreDistributionPlot() {
 		if (data.blasthits != null) {
 			if (data.usescval) { // score mode
 				eplotdialog eplot = new eplotdialog(data.blasthits, data.pvalue_threshold, true);
@@ -2602,25 +2760,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Shows a list with the headers of the selected sequences.
-	 * 
-	 * @param evt
+	 * Saves the currently selected sequences in FASTA format to a user-chosen file.
 	 */
-	private void sequencesitemActionPerformed(java.awt.event.ActionEvent evt) {
-		if (shownames != null) {
-			shownames.setVisible(false);
-			shownames.dispose();
-		}
-		shownames = new WindowShowSelectedSequences(data.sequence_names, this);
-		shownames.setVisible(true);
-	}
-
-	/**
-	 * Save the currently selected sequences to a file chosen by a presented file chooser.
-	 * 
-	 * @param evt
-	 */
-	private void getseqsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void openSaveSequenceAsFastaDialog() {
 
 		boolean restart_computation = stopComputation(true);
 
@@ -2640,32 +2782,17 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Opens dialog for changing connection colors
-	 * 
-	 * @param evt
+	 * Opens a dialog for changing connection colors.
 	 */
-	private void changecolormenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void openChangeDotConnectionColorDialog() {
 		DialogChangeConnectionColors.changecolor(this, data.colorarr);
 		repaint();
 	}
 
 	/**
-	 * Triggers a repaint when the "show numbers" checkbox is clicked.
-	 * 
-	 * @param evt
+	 * Deselects everything if sequences are currently selected or selects all sequences if none are currently selected.
 	 */
-	private void checkbox_show_numbersActionPerformed(java.awt.event.ActionEvent evt) {
-		mousemove[0] = 0;
-		mousemove[1] = 0;
-		repaint();
-	}
-
-	/**
-	 * Clears the selection.
-	 * 
-	 * @param evt
-	 */
-	private void button_clear_selectionActionPerformed(java.awt.event.ActionEvent evt) {
+	private void button_clear_selectionActionPerformed() {
 
 		if (!this.contains_data(true)) {
 			return;
@@ -2701,10 +2828,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 	/**
 	 * Zooms on selected sequences or resets zoom if no sequences are selected.
-	 * 
-	 * @param evt
 	 */
-	private void button_zoom_on_selectedActionPerformed(java.awt.event.ActionEvent evt) {
+	private void button_zoom_on_selectedActionPerformed() {
 
 		if (!this.contains_data(true)) {
 			return;
@@ -2726,15 +2851,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 
 		data.zoomfactor = 1;
-		this.center_graph(-1);
+		this.updateZoom(-1);
 	}
 
+	
 	/**
-	 * Toggles the select/move button label.
-	 * 
-	 * @param evt
+	 * Based on the GUI state, updates the select/move button label.
 	 */
-	private void button_select_moveActionPerformed(java.awt.event.ActionEvent evt) {
+	private void updateSelectMoveButtonLabel() {
 		if (button_select_move.isSelected()) {
 			button_select_move.setText("SELECT/move");
 		} else {
@@ -2747,6 +2871,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * mouse started to move so it's not a click any more but a drag.
 	 * 
 	 * @param evt
+	 *            The mouse event.
 	 */
 	private void graphpanelMousePressed(java.awt.event.MouseEvent evt) {
 	
@@ -2804,6 +2929,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Handles mouse dragging events in the draw area during the dragging.
 	 * 
 	 * @param evt
+	 *            The mouse event.
 	 */
 	private void graphpanelMouseDragged(java.awt.event.MouseEvent evt) {
 	
@@ -2842,18 +2968,19 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		repaint();
 	}
 
-	private void checkbox_show_namesItemStateChanged(java.awt.event.ItemEvent evt) {// GEN-FIRST:event_shownamescheckboxItemStateChanged
+	/**
+	 * Repaints the draw area.
+	 */
+	private void requestRepaint() {
 		mousemove[0] = 0;
 		mousemove[1] = 0;
 		repaint();
-	}// GEN-LAST:event_shownamescheckboxItemStateChanged
+	}
 
 	/**
-	 * Handles the click on the start/stop/resume button by starting stopped or stopping running computations.
-	 * 
-	 * @param evt
+	 * Starts stopped or stops running computations when the start/stop/resume button is activated.
 	 */
-	private void button_start_stop_resumeActionPerformed(java.awt.event.ActionEvent evt) {
+	private void toggleComputationRunning() {
 		if (!this.contains_data(true)) {
 			return;
 		}
@@ -2867,19 +2994,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		repaint();
 	}
 
-	private void checkbox_show_connectionsItemStateChanged(java.awt.event.ItemEvent evt) {// GEN-FIRST:event_showblasthitscheckboxItemStateChanged
-		mousemove[0] = 0;
-		mousemove[1] = 0;
-		repaint();
-	}// GEN-LAST:event_showblasthitscheckboxItemStateChanged
-
-	private void graphpanelAncestorResized(java.awt.event.HierarchyEvent evt) {// GEN-FIRST:event_graphpanelAncestorResized
-		mousemove[0] = 0;
-		mousemove[1] = 0;
-		repaint();
-	}// GEN-LAST:event_graphpanelAncestorResized
-
-	private void button_initializeActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_startbuttonActionPerformed
+	private void initializeGraphPositions() {
 		if (!this.contains_data(true)) {
 			return;
 		}
@@ -2888,10 +3003,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			stopComputation(true);
 		}
 
-		initgraph();
+		resetGraph();
 
 		repaint();
-	}// GEN-LAST:event_startbuttonActionPerformed
+	}
 
 	/**
 	 * Handles complete mouse dragging events in the draw area, i.e. the mouse button has been released after dragging.
@@ -2948,16 +3063,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 	/**
 	 * Shows a prompt whether the user really wants to exit and do so if approved.
-	 * 
-	 * @param evt
 	 */
-	private void exitForm(java.awt.event.WindowEvent evt) {
-		if (reallyExitDialog()) {
-			System.exit(0);
-		}
-	}
-
-	private boolean reallyExitDialog() {
+	private void openReallyExitSafetyDialog() {
 
 		Object[] options = { "Yes", "No"};
 		int result = JOptionPane.showOptionDialog(this, "Really exit CLANS?\nUnsaved changes will be lost!",
@@ -2966,51 +3073,63 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		switch (result) {
 		case 0:
-			return true;
+			System.exit(0);
 		default:
-			return false;
+			return;
 		}
 	}
 
-	private void taxonomymenuitemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_taxonomymenuitemActionPerformed
+	/**
+	 * Opens a window that lets users add taxonomy information to their data.
+	 * <p>
+	 * This feature depends on files from the NCBI taxonomy database that users must supply themselves.
+	 */
+	private void openTaxonomyWindow() {
 		if (taxonomydialog != null) {
 			taxonomydialog.setVisible(false);
 			taxonomydialog.dispose();
 		}
 		taxonomydialog = new ncbitaxonomydialog(this);
 		taxonomydialog.setVisible(true);
-	}// GEN-LAST:event_taxonomymenuitemActionPerformed
+	}
 
-	private void attvalcompcheckboxActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_attvalcompcheckboxActionPerformed
+	/**
+	 * Based on the GUI state, updates the internal state correctly to use complex or simple attraction values.
+	 */
+	private void updateUseComplexAttractionValuesState() {
 		if (attvalcompcheckbox.isSelected()) {
 			data.attvalsimple = false;
 		} else {
 			data.attvalsimple = true;
 		}
-	}// GEN-LAST:event_attvalcompcheckboxActionPerformed
+	}
 
-	private void rescalepvaluescheckboxActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_rescalepvaluescheckboxActionPerformed
+	/**
+	 * Based on the GUI state, updates the internal state correctly to rescale or not attraction values.
+	 */
+	private void updateRescaleAttractionValuesState() {
 		if (rescalepvaluescheckbox.isSelected()) {
 			data.rescalepvalues = true;
 		} else {
 			data.rescalepvalues = false;
 		}
-	}// GEN-LAST:event_rescalepvaluescheckboxActionPerformed
+	}
 
-	private void moveselectedonlyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_moveselectedonlyActionPerformed
+	/**
+	 * Based on the GUI state, updates the internal state correctly to optimize only the selected subset of sequences.
+	 */
+	private void updateOptimizeOnlySelectedSequencesState() {
 		if (moveselectedonly.isSelected()) {
 			data.moveselectedonly = true;
 		} else {
 			data.moveselectedonly = false;
 		}
-	}// GEN-LAST:event_moveselectedonlyActionPerformed
+	}
 
 	/**
-	 * Handles menu clicks to "save attraction values".
-	 * 
-	 * @param evt
+	 * Saves the attraction values to a user-chosen file.
 	 */
-	private void saveattvalsmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void saveattvalsmenuitemActionPerformed() {
 
 		boolean restart_computation = stopComputation(true);
 
@@ -3133,7 +3252,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	private javax.swing.JMenuItem loadtabsmenuitem;
 	private javax.swing.JMenuItem mapmanmenuitem;
 	private javax.swing.JButton button_cutoff_value;
-	private javax.swing.JTextField textfield_cutoff_value;
+	private javax.swing.JTextField textfield_threshold_value;
 	private javax.swing.JTextField textfield_info_min_blast_evalue;
 	private javax.swing.JCheckBoxMenuItem moveselectedonly;
 	private javax.swing.JMenuItem printmenuitem;
@@ -3214,7 +3333,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			return false;
 		}
 
-		update_values_from_options_window();
+		updateOptionValuesFromOptionsWindow();
 
 		initializeComputationThread(); // thread cannot be restarted
 		mythread.start();
@@ -3253,10 +3372,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		return true;
 	}
 
-	void initgraph() {
+	/**
+	 * Resets the graph to random sequence positions. This is used when and equal to just having loaded data off BLAST
+	 * results.
+	 */
+	void resetGraph() {
 		data.changedvals = false;
 
-		update_values_from_options_window();
+		updateOptionValuesFromOptionsWindow();
 
 		if (!isComputing()) {
 			repaint();
@@ -3271,7 +3394,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		mousemove[0] = 0;
 		mousemove[1] = 0;
 
-		this.center_graph(-1);
+		this.updateZoom(-1);
 	}
 
 	/**
@@ -3281,7 +3404,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * @param filename
 	 *            The CLANS file to be loaded.
 	 */
-	private void loaddata_threaded(final String filename) {
+	private void loadDataClansFormatInBackground(final String filename) {
 
 		if (messageOverlayActive) {
 			message_overlay.setLoading();
@@ -3415,17 +3538,17 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
 		if (data.blasthits == null) {
 			button_cutoff_value.setText("Use Attraction values better than");
-			textfield_cutoff_value.setText("0");
+			textfield_threshold_value.setText("0");
 			savemtxmenuitem.setText("Save Attraction values as matrix");
 			evalueitem.setText("Attraction value plot");
 		} else {
 			if (data.usescval) {
 				button_cutoff_value.setText("Use SC-vals better than");
-				textfield_cutoff_value.setText("0");
+				textfield_threshold_value.setText("0");
 				evalueitem.setText("SC-value plot");
 			} else {
 				button_cutoff_value.setText("Use P-values better than");
-				textfield_cutoff_value.setText("1");
+				textfield_threshold_value.setText("1");
 				evalueitem.setText("P-value plot");
 			}
 		}
@@ -3445,7 +3568,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		} else {
 			showinfocheckbox.setSelected(false);
 		}
-		textfield_cutoff_value.setText(String.valueOf(data.pvalue_threshold));
+		textfield_threshold_value.setText(String.valueOf(data.pvalue_threshold));
 
 		if (options_window != null) {
 			options_window.initialize_textfields();
@@ -3454,7 +3577,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
 		this.setTitle("Clustering of " + data.getBaseInputfileName());
 
-		this.center_graph(-1);
+		this.updateZoom(-1);
 	}
 
 	boolean contains_data() {
@@ -3482,7 +3605,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		data.blasthits = blastvec;
 		data.maxmove = maxmove;
 		data.pvalue_threshold = pval;
-		textfield_cutoff_value.setText(String.valueOf(data.pvalue_threshold));
+		textfield_threshold_value.setText(String.valueOf(data.pvalue_threshold));
 		textfield_info_min_blast_evalue.setText(String.valueOf(data.pvalue_threshold));
 		data.selectednames = newnumarr;
 		data.nameshash = allnameshash;
@@ -3532,9 +3655,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}// end getselectedseqs
 
 	/**
-	 * parses the values set in the options dialog and sets them in the data instance
+	 * Updates the data with the values of all available fields of the options window.
 	 */
-	void update_values_from_options_window() {
+	void updateOptionValuesFromOptionsWindow() {
 		if (options_window == null) {
 			return;
 		}
@@ -4743,12 +4866,40 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}// end getfrustration
 	}// end class drawpanel
 
+	/**
+	 * Class that handles the actual iteration computation.
+	 */
 	class computethread extends java.lang.Thread {
 
-		public computethread(ClusteringWithGui parent) {
+		/**
+		 * Creates a new thread instance for computing iterations of the algorithm with custom thread name.
+		 * <p>
+		 * Note: Named threads are easier to debug! On a command line run command "jps -l" to get the programs process
+		 * id (first column). Then run "jstack <process id>" to see all threads of your process.
+		 * 
+		 * @param parent
+		 *            The GUI to which this thread belongs.
+		 * @param name
+		 *            The name of the thread.
+		 */
+		public computethread(ClusteringWithGui parent, String name) {
 			this.parent = parent;
 			this.didrun = false;
 			this.stop = false;
+			this.setName(name);
+		}
+		
+		/**
+		 * Creates a new thread instance for computing iterations of the algorithm with thead name "computation thread".
+		 * <p>
+		 * Note: Named threads are easier to debug! On a command line run command "jps -l" to get the programs process
+		 * id (first column). Then run "jstack <process id>" to see all threads of your process.
+		 * 
+		 * @param parent
+		 *            The GUI to which this thread belongs.
+		 */
+		public computethread(ClusteringWithGui parent) {
+			this(parent, "computation thread");
 		}
 
 		boolean stop = true;
@@ -4793,7 +4944,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				}
 
 				if (data.changedvals) {
-					update_values_from_options_window();
+					updateOptionValuesFromOptionsWindow();
 					data.changedvals = false;
 				}
 

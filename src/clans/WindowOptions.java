@@ -201,7 +201,7 @@ public class WindowOptions extends javax.swing.JFrame {
 			parent.data.changedvals = true;
 		
     	} else { // instant redraw when not running
-			parent.update_values_from_options_window();
+			parent.updateOptionValuesFromOptionsWindow();
 			parent.repaint();
 		}
     }
