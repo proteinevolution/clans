@@ -1,0 +1,78 @@
+>1a05_A IPMDH, IMDH, 3-isopropylmalate dehydrogenase; oxidoreductase, decarboxylating dehydrogenase, leucine biosynthesis; HET: IPM; 2.00A {Acidithiobacillus ferrooxidans} SCOP: c.77.1.1 (0293-0327:0358)[Pfam: clans: CL0270 (Iso_DH); families: PF00180 (Iso_dh)] [Acidithiobacillus ferrooxidans--Acidithiobacillus--Acidithiobacillaceae--Acidithiobacillales--Gammaproteobacteria--Proteobacteria--Bacteria]
+LATILSVAMMLRHSLNAEPWAQRVEAAVQRVLDQG
+>1a17_A Serine/threonine protein phosphatase 5; hydrolase, protein-protein interactions, TPR, S helix; 2.45A {Homo sapiens} SCOP: a.118.8.1 PDB: 2bug_A (0008-0047:0166)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF08321 (PPP5)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+GALKRAEELKTQANDYFKAKDYENAIKFYSQAIELNPSNA
+>1a17_A Serine/threonine protein phosphatase 5; hydrolase, protein-protein interactions, TPR, S helix; 2.45A {Homo sapiens} SCOP: a.118.8.1 PDB: 2bug_A (0047-0083:0166)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF08321 (PPP5)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+AIYYGNRSLAYLRTECYGYALGDATRAIELDKKYIKG
+>1a17_A Serine/threonine protein phosphatase 5; hydrolase, protein-protein interactions, TPR, S helix; 2.45A {Homo sapiens} SCOP: a.118.8.1 PDB: 2bug_A (0081-0115:0166)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF08321 (PPP5)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+IKGYYRRAASNMALGKFRAALRDYETVVKVKPHDK
+>1a17_A Serine/threonine protein phosphatase 5; hydrolase, protein-protein interactions, TPR, S helix; 2.45A {Homo sapiens} SCOP: a.118.8.1 PDB: 2bug_A (0115-0150:0166)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF08321 (PPP5)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+KDAKMKYQECNKIVKQKAFERAIAGDEHKRSVVDSL
+>1ah7_A Phospholipase C; phospholipid hydrolysis, hydrolase; 1.50A {Bacillus cereus} SCOP: a.124.1.1 PDB: 2ffz_A 1p5x_A 1p6d_A* 1p6e_A* 2fgn_A 2huc_A (0090-0123:0245)[Pfam: clans: CL0368 (PhosC-NucP1); families: PF00882 (Zn_dep_PLPC)] [Bacillus cereus--Bacillus--Bacillaceae--Bacillales--Bacilli--Firmicutes--Bacteria]
+GAKYFKLAGESYKNKDMKQAFFYLGLSLHYLGDV
+>1ak0_A P1 nuclease; endonuclease, reaction mechanism, thiophosphory oligonucleotides, glycosylated protein; HET: NAG ADS THS; 1.80A {Penicillium citrinum} SCOP: a.124.1.2 (0086-0121:0270)[Pfam: clans: CL0368 (PhosC-NucP1); families: PF02265 (S1-P1_nuclease)] [Penicillium citrinum--Penicillium--Aspergillaceae--Eurotiales--Eurotiomycetes--Ascomycota--Eukaryota]
+SISAIANYTQRVSDSSLSSENHAEALRFLVHFIGDM
+>1b89_A Protein (clathrin heavy chain); triskelion, coated vesicles, endocytosis, SELF- assembly, alpha-alpha superhelix; 2.60A {Bos taurus} SCOP: a.118.1.3 (0032-0067:0449)[Pfam: clans: CL0020 (TPR); families: PF00637 (Clathrin)] [Bos taurus--Bos--Bovidae--orderNotInDatabase--Mammalia--Chordata--Eukaryota]
+PAVWSQLAKAQLQKGMVKEAIDSYIKADDPSSYMEV
+>1b89_A Protein (clathrin heavy chain); triskelion, coated vesicles, endocytosis, SELF- assembly, alpha-alpha superhelix; 2.60A {Bos taurus} SCOP: a.118.1.3 (0061-0094:0449)[Pfam: clans: CL0020 (TPR); families: PF00637 (Clathrin)] [Bos taurus--Bos--Bovidae--orderNotInDatabase--Mammalia--Chordata--Eukaryota]
+PSSYMEVVQAANTSGNWEELVKYLQMARKKARES
+>1b89_A Protein (clathrin heavy chain); triskelion, coated vesicles, endocytosis, SELF- assembly, alpha-alpha superhelix; 2.60A {Bos taurus} SCOP: a.118.1.3 (0122-0157:0449)[Pfam: clans: CL0020 (TPR); families: PF00637 (Clathrin)] [Bos taurus--Bos--Bovidae--orderNotInDatabase--Mammalia--Chordata--Eukaryota]
+NAHIQQVGDRCYDEKMYDAAKLLYNNVSNFGRLAST
+>1b89_A Protein (clathrin heavy chain); triskelion, coated vesicles, endocytosis, SELF- assembly, alpha-alpha superhelix; 2.60A {Bos taurus} SCOP: a.118.1.3 (0148-0186:0449)[Pfam: clans: CL0020 (TPR); families: PF00637 (Clathrin)] [Bos taurus--Bos--Bovidae--orderNotInDatabase--Mammalia--Chordata--Eukaryota]
+VSNFGRLASTLVHLGEYQAAVDGARKANSTRTWKEVCFA
+>1b89_A Protein (clathrin heavy chain); triskelion, coated vesicles, endocytosis, SELF- assembly, alpha-alpha superhelix; 2.60A {Bos taurus} SCOP: a.118.1.3 (0177-0209:0449)[Pfam: clans: CL0020 (TPR); families: PF00637 (Clathrin)] [Bos taurus--Bos--Bovidae--orderNotInDatabase--Mammalia--Chordata--Eukaryota]
+TRTWKEVCFACVDGKEFRLAQMCGLHIVVHADE
+>1b89_A Protein (clathrin heavy chain); triskelion, coated vesicles, endocytosis, SELF- assembly, alpha-alpha superhelix; 2.60A {Bos taurus} SCOP: a.118.1.3 (0207-0240:0449)[Pfam: clans: CL0020 (TPR); families: PF00637 (Clathrin)] [Bos taurus--Bos--Bovidae--orderNotInDatabase--Mammalia--Chordata--Eukaryota]
+ADELEELINYYQDRGYFEELITMLEAALGLERAH
+>1bgf_A STAT-4; transcription factor, regulation, DNA-binding; 1.45A {Mus musculus} SCOP: a.90.1.1 (0062-0095:0124)[Pfam: clans: None (None); families: PF02865 (STAT_int)] [Mus musculus--Mus--Muridae--Rodentia--Mammalia--Chordata--Eukaryota]
+LIQLDEQLGRVSKEKNLLLIHNLKRIRKVLQGKF
+>1c4o_A DNA nucleotide excision repair enzyme UVRB; uvrabc, helicase, hypertherm protein, replication; HET: DNA BOG; 1.50A {Thermus thermophilus} SCOP: c.37.1.19 c.37.1.19 PDB: 1d2m_A* (0613-0646:0664)[Pfam: clans: CL0023 (P-loop_NTPase), None (None); families: PF00271 (Helicase_C), PF04851 (ResIII), PF12344 (UvrB)] [Thermus thermophilus--Thermus--Thermaceae--Thermales--Deinococci--Deinococcus-Thermus--Bacteria]
+IAELELAMWQAAEALDFERAARLRDEIRALEARL
+>1cnz_A IPMDH, IMDH, protein (3-isopropylmalate dehydrogenase); oxidoreductase, leucine biosynthetic pathway, NAD-dependant enzyme; 1.76A {Salmonella typhimurium} SCOP: c.77.1.1 PDB: 1cm7_A (0299-0333:0363)[Pfam: clans: CL0270 (Iso_DH); families: PF00180 (Iso_dh)] [Salmonella enterica--Salmonella--Enterobacteriaceae--Enterobacteriales--Gammaproteobacteria--Proteobacteria--Bacteria]
+IAQILSLALLLRYSLDANDAATAIEQAINRALEEG
+>1cpq_A Cytochrome C'; electron transport; HET: HEM; 1.72A {Rhodobacter capsulatus} SCOP: a.24.3.2 PDB: 1eky_A 1nbb_A* 1rcp_A* 1cpr_A* (0088-0118:0129)[Pfam: clans: None (None); families: PF01322 (Cytochrom_C_2)] [Rhodobacter capsulatus--Rhodobacter--Rhodobacteraceae--Rhodobacterales--Alphaproteobacteria--Proteobacteria--Bacteria]
+MHEAGGAVIAAANAGDGAAFGAALQKLGGTC
+>1dce_A Protein (RAB geranylgeranyltransferase alpha subunit); 2.0 A resolution, N-formylmethionine, alpha subunit; HET: FME; 2.00A {Rattus norvegicus} SCOP: a.118.6.1 b.7.4.1 c.10.2.2 PDB: 1ltx_A* (0104-0142:0567)[Pfam: clans: CL0022 (LRR), None (None); families: PF00560 (LRR_1), PF01239 (PPTA), PF07711 (RabGGT_insert)] [Rattus norvegicus--Rattus--Muridae--Rodentia--Mammalia--Chordata--Eukaryota]
+PKSYGTWHHRCWLLSRLPEPNWARELELCARFLEADERN
+>1dce_A Protein (RAB geranylgeranyltransferase alpha subunit); 2.0 A resolution, N-formylmethionine, alpha subunit; HET: FME; 2.00A {Rattus norvegicus} SCOP: a.118.6.1 b.7.4.1 c.10.2.2 PDB: 1ltx_A* (0143-0177:0567)[Pfam: clans: CL0022 (LRR), None (None); families: PF00560 (LRR_1), PF01239 (PPTA), PF07711 (RabGGT_insert)] [Rattus norvegicus--Rattus--Muridae--Rodentia--Mammalia--Chordata--Eukaryota]
+FHCWDYRRFVAAQAAVAPAEELAFTDSLITRNFSN
+>1dvk_A PRP18; PRE-mRNA splicing factor, X-RAY crystallography, RNA binding protein; 2.15A {Saccharomyces cerevisiae} SCOP: a.72.1.1 (0081-0112:0173)[Pfam: clans: None (None); families: PF02840 (Prp18)] [Saccharomyces cerevisiae--Saccharomyces--Saccharomycetaceae--Saccharomycetales--Saccharomycetes--Ascomycota--Eukaryota]
+LLISLATVLYHLQQPKEINLAVQSYMKLSIGN
+>1e52_A Excinuclease ABC subunit; DNA excision repair, UVRB, DNA repair, UVRC binding domain; NMR {Escherichia coli} SCOP: a.2.9.1 PDB: 1qoj_A (0026-0059:0063)[Pfam: clans: None (None); families: PF02151 (UVR)] [Escherichia coli--Escherichia--Enterobacteriaceae--Enterobacteriales--Gammaproteobacteria--Proteobacteria--Bacteria]
+IHELEGLMMQHAQNLEFEEAAQIRDQLHQLRELF
+>1eex_G Propanediol dehydratase; coenzyme B12, potassium ION, TIM barrel, lyase; HET: COY; 1.70A {Klebsiella oxytoca} SCOP: a.23.2.1 PDB: 1dio_G* 1egm_G* 1egv_G* 1iwb_G* 1uc4_G* 1uc5_G* 3auj_G* (0083-0112:0173)[Pfam: clans: None (None); families: PF02287 (Dehydratase_SU)] [Klebsiella oxytoca--Klebsiella--Enterobacteriaceae--Enterobacteriales--Gammaproteobacteria--Proteobacteria--Bacteria]
+PETLRLQASIAKDAGRDRLAMNFERAAELT
+>1elr_A TPR2A-domain of HOP; HOP, TPR-domain, peptide-complex, helical repeat, protein binding, chaperone; 1.90A {Homo sapiens} SCOP: a.118.8.1 PDB: 3esk_A 3fwv_A (0001-0038:0131)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+GKQALKEKELGNDAYKKKDFDTALKHYDKAKELDPTNM
+>1elr_A TPR2A-domain of HOP; HOP, TPR-domain, peptide-complex, helical repeat, protein binding, chaperone; 1.90A {Homo sapiens} SCOP: a.118.8.1 PDB: 3esk_A 3fwv_A (0038-0071:0131)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+MTYITNQAAVYFEKGDYNKCRELCEKAIEVGREN
+>1elr_A TPR2A-domain of HOP; HOP, TPR-domain, peptide-complex, helical repeat, protein binding, chaperone; 1.90A {Homo sapiens} SCOP: a.118.8.1 PDB: 3esk_A 3fwv_A (0045-0082:0131)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+AAVYFEKGDYNKCRELCEKAIEVGRENREDYRQIAKAY
+>1elr_A TPR2A-domain of HOP; HOP, TPR-domain, peptide-complex, helical repeat, protein binding, chaperone; 1.90A {Homo sapiens} SCOP: a.118.8.1 PDB: 3esk_A 3fwv_A (0079-0113:0131)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+AKAYARIGNSYFKEEKYKDAIHFYNKSLAEHRTPD
+>1elw_A TPR1-domain of HOP; HOP, TPR-domain, peptide-complex, helical repeat, HSP70, protein binding, chaperone; 1.60A {Homo sapiens} SCOP: a.118.8.1 (0001-0038:0118)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF13181 (TPR_8)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+MEQVNELKEKGNKALSVGNIDDALQCYSEAIKLDPHNH
+>1elw_A TPR1-domain of HOP; HOP, TPR-domain, peptide-complex, helical repeat, HSP70, protein binding, chaperone; 1.60A {Homo sapiens} SCOP: a.118.8.1 (0035-0074:0118)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF13181 (TPR_8)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+PHNHVLYSNRSAAYAKKGDYQKAYEDGCKTVDLKPDWGKG
+>1elw_A TPR1-domain of HOP; HOP, TPR-domain, peptide-complex, helical repeat, HSP70, protein binding, chaperone; 1.60A {Homo sapiens} SCOP: a.118.8.1 (0072-0108:0118)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF13181 (TPR_8)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+GKGYSRKAAALEFLNRFEEAKRTYEEGLKHEANNPQL
+>1eum_A Ferritin 1; ECFTNA, metal binding protein; 2.05A {Escherichia coli} SCOP: a.25.1.1 (0021-0054:0165)[Pfam: clans: CL0044 (Ferritin); families: PF00210 (Ferritin)] [Escherichia coli--Escherichia--Enterobacteriaceae--Enterobacteriales--Gammaproteobacteria--Proteobacteria--Bacteria]
+SLLYQQMSAWCSYHTFEGAAAFLRRHAQEEMTHM
+>1eum_A Ferritin 1; ECFTNA, metal binding protein; 2.05A {Escherichia coli} SCOP: a.25.1.1 (0098-0131:0165)[Pfam: clans: CL0044 (Ferritin); families: PF00210 (Ferritin)] [Escherichia coli--Escherichia--Enterobacteriaceae--Enterobacteriales--Gammaproteobacteria--Proteobacteria--Bacteria]
+TQKINELAHAAMTNQDYPTFNFLQWYVSEQHEEE
+>1f5n_A Interferon-induced guanylate-binding protein 1; GBP, GTP hydrolysis, GDP, GMP, dynamin related, large GTPase family. GMPPNP, GPPNHP.; HET: GNP; 1.70A {Homo sapiens} SCOP: a.114.1.1 c.37.1.8 PDB: 1dg3_A* 2b8w_A* 2b92_A* 2bc9_A* 2d4h_A* (0550-0580:0592)[Pfam: clans: CL0023 (P-loop_NTPase), None (None); families: PF02263 (GBP), PF02841 (GBP_C)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+LALKLQEQEQLLKEGFQKESRIMKNEIQDLQ
+>1f6k_A N-acetylneuraminate lyase; beta barrel; 1.60A {Haemophilus influenzae} SCOP: c.1.10.1 PDB: 1f5z_A 1f6p_A 1f73_A* 1f74_A* 1f7b_A* (0212-0244:0293)[Pfam: clans: CL0036 (TIM_barrel); families: PF00701 (DHDPS)] [Haemophilus influenzae--Haemophilus--Pasteurellaceae--Pasteurellales--Gammaproteobacteria--Proteobacteria--Bacteria]
+NGVRARQIFELTKAGKLKEALEIQHVTNDLIEG
+>1f7u_A Arginyl-tRNA synthetase; RNA-protein complex, aminoacylation; HET: PSU 1MG 2MG H2U M2G 5MC 5MU 1MA ARG; 2.20A {Saccharomyces cerevisiae} SCOP: a.27.1.1 c.26.1.1 d.67.2.1 PDB: 1bs2_A* 1f7v_A* (0531-0563:0607)[Pfam: clans: CL0039 (HUP), CL0258 (DALR), None (None); families: PF00750 (tRNA-synt_1d), PF05746 (DALR_1), PF03485 (Arg_tRNA_synt_N)] [Saccharomyces cerevisiae--Saccharomyces--Saccharomycetaceae--Saccharomycetales--Saccharomycetes--Ascomycota--Eukaryota]
+LGQYPDVLRNAIKTHEPTTVVTYLFKLTHQVSS
+>1fch_A Peroxisomal targeting signal 1 receptor; protein-peptide complex, tetratricopeptide repeat, TPR, helical repeat, signaling protein; 2.20A {Homo sapiens} SCOP: a.118.8.1 PDB: 2j9q_A 3imz_B* 3r9a_B* 2c0m_A 2c0l_A (0021-0059:0368)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF13414 (TPR_11)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+QAELEEMAKRDAEAHPWLSDYDDLTSATYDKGYQFEEEN
+>1fch_A Peroxisomal targeting signal 1 receptor; protein-peptide complex, tetratricopeptide repeat, TPR, helical repeat, signaling protein; 2.20A {Homo sapiens} SCOP: a.118.8.1 PDB: 2j9q_A 3imz_B* 3r9a_B* 2c0m_A 2c0l_A (0064-0098:0368)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF13414 (TPR_11)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+HPQPFEEGLRRLQEGDLPNAVLLFEAAVQQDPKHM
+>1fch_A Peroxisomal targeting signal 1 receptor; protein-peptide complex, tetratricopeptide repeat, TPR, helical repeat, signaling protein; 2.20A {Homo sapiens} SCOP: a.118.8.1 PDB: 2j9q_A 3imz_B* 3r9a_B* 2c0m_A 2c0l_A (0098-0133:0368)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF13414 (TPR_11)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+MEAWQYLGTTQAENEQELLAISALRRCLELKPDNQT
+>1fch_A Peroxisomal targeting signal 1 receptor; protein-peptide complex, tetratricopeptide repeat, TPR, helical repeat, signaling protein; 2.20A {Homo sapiens} SCOP: a.118.8.1 PDB: 2j9q_A 3imz_B* 3r9a_B* 2c0m_A 2c0l_A (0132-0166:0368)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF13414 (TPR_11)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+QTALMALAVSFTNESLQRQACEILRDWLRYTPAYA
+>1fch_A Peroxisomal targeting signal 1 receptor; protein-peptide complex, tetratricopeptide repeat, TPR, helical repeat, signaling protein; 2.20A {Homo sapiens} SCOP: a.118.8.1 PDB: 2j9q_A 3imz_B* 3r9a_B* 2c0m_A 2c0l_A (0182-0216:0368)[Pfam: clans: CL0020 (TPR); families: PF00515 (TPR_1), PF13414 (TPR_11)] [Homo sapiens--Homo--Hominidae--Primates--Mammalia--Chordata--Eukaryota]
+GPSKRILGSLLSDSLFLEVKELFLAAVRLDPTSID

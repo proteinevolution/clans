@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -479,13 +480,13 @@ public class ClusterData {
         checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
         
         injectLoadedDataIntoExisting(input_filename, loaded_data);
+        
+        System.out.println("File loaded:" + input_filename);
     }
     
     public void injectLoadedDataIntoExisting(String input_filename, saverunobject loaded_data) {
         
     	this.input_filename = input_filename;
-
-        System.out.println("File loaded:" + input_filename);
         
         this.autosaveIntervalMinutes = loaded_data.autosaveIntervalMinutes;
 
@@ -582,7 +583,6 @@ public class ClusterData {
 
         rounds = loaded_data.rounds;
 
-        System.out.println("seqnum=" + number_of_sequences);
         seqlengths = new float[number_of_sequences];
         float maxlength = 0;
         for (int i = 0; i < number_of_sequences; i++) {
@@ -1812,11 +1812,10 @@ public class ClusterData {
     public void compute_attraction_values() {
 
         if (blasthits == null) {// possible (if alternate data source was loaded)
-            System.out.println("blasthits is null");
+            System.out.println("cannot compute attraction values; no BLAST HSPs present");
             return;
         }
 
-        System.out.println("blasthits is size:" + blasthits.length);
         ArrayList<minattvals> tmpvec = new ArrayList<minattvals>();
         int number_of_blasthits = blasthits.length;
         HashMap<String, minattvals> myhash = new HashMap<String, minattvals>(number_of_blasthits);
@@ -1876,13 +1875,15 @@ public class ClusterData {
                 }
             } else {
                 for (int i = 0; i < number_of_blasthits; i++) {
-                    if (blasthits[i].query < blasthits[i].hit) {
+                    
+                	if (blasthits[i].query < blasthits[i].hit) {
                         key = blasthits[i].query + "_" + blasthits[i].hit;
                     } else {
                         key = blasthits[i].hit + "_" + blasthits[i].query;
                     }
+                    
                     if (myhash.containsKey(key)) {
-                        curratt = (minattvals) myhash.get(key);
+                        curratt = myhash.get(key);
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
@@ -2050,7 +2051,14 @@ public class ClusterData {
             p2attoffset = minattval;
         }
         myattvals = (minattvals[]) tmpvec.toArray(new minattvals[0]);
-        System.out.println("attvals size=" + myattvals.length);
+        
+		String formatted_used_hsps = String.format("%" + Integer.toString(blasthits.length).length() + "s",
+				myattvals.length);
+		String formatted_pvalue = String.format("%7s", new DecimalFormat("0.###E0").format(pvalue_threshold));
+		String formatted_percentage = String.format("%7s",
+				new DecimalFormat("0.00").format(100 * (float) (myattvals.length) / blasthits.length) + "%");
+		System.out.println("used/total HSPs at threshold " + formatted_pvalue + ": " + formatted_used_hsps + "/"
+				+ blasthits.length + " (" + formatted_percentage + ")");
     }
 
     /**

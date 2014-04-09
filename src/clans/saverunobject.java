@@ -571,99 +571,106 @@ public class saverunobject {
 	 */
 	public boolean parse_hsp_block(BufferedReader buffered_file_handle, SwingWorker<Void, Integer> worker)
 			throws IOException, CancellationException {
-        String[] tmparr;
+        int myi, myj;
+		String[] split_result;
         String tmpstr;
         MinimalHsp currhsp;
         HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
         String hspkey = "";
         String inline;
+        int characters_for_round_number = 9;
+        String format_for_round_number = "%" + characters_for_round_number + "s";
         
         if (pval < 0) {
             pval = 1;
         }
+        
         int count = 0;
         String lastline = "";
         while (((inline = buffered_file_handle.readLine()) != null) && (inline.equalsIgnoreCase("</hsp>") == false)) {
-            //skip empty lines
+        	
+            // skip empty lines
             if (inline.length() == 0) {
                 continue;
             }
             
-            if (count % 1000 == 0) {
+            count++;
+            
+            if (count % 10000 == 0) {
                 System.out.print(".");
                 
-				if (count % 10000 == 0) {
-					// checking after every 10000 HSPs seems a good tradeoff between time wasted on checking and
-					// responsiveness of the cancelation
-					ClusterData.checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
-				}
+				// every 10000 HSPs as tradeoff between time wasted on checking and responsiveness of the cancelation
+                ClusterData.checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
 
-                if (count % 100000 == 0) {
-                    System.out.print(count);
+                if (count % 500000 == 0) {
+                    System.out.println(String.format(format_for_round_number, count));
                 }
             }
-            
-            count++;
-            tmparr = inline.split(":");
-            int myi, myj;
+
+            split_result = inline.split(":");
             if (inline.equalsIgnoreCase("DONE")) {
                 System.err.println("manually truncated file, returning results so far");
                 return false;
             }
-            if (tmparr.length != 2) {
+            
+            if (split_result.length != 2) {
                 System.err.println("ERROR parsing HSP data from " + inline + " right after line '" + lastline + "'");
                 return false;
             }
-            //else
+
+            tmpstr = split_result[1]; // String with one or multiple p-values separated by any whitespace characters
+            split_result = split_result[0].split("\\s+"); // the query and subject identification numbers as Strings
+            
+            if (split_result.length != 2) {
+                System.err.println("ERROR, wrong hsp line " + inline);
+                return false;
+            }
+            
             try {
-                tmpstr = tmparr[1];
-                tmparr = tmparr[0].split("\\s+");
-                if (tmparr.length != 2) {
-                    System.err.println("ERROR, wrong hsp line " + inline);
-                    return false;
-                }
-                myi = Integer.parseInt(tmparr[0]);
-                myj = Integer.parseInt(tmparr[1]);
-                if (myi == myj) {
+                myi = Integer.parseInt(split_result[0]);
+                myj = Integer.parseInt(split_result[1]);
+            
+                if (myi == myj) { // connections to itself are useless
                     continue;
                 }
-                //if(myi>myj){
-                //    int tmp=myi;
-                //    myi=myj;
-                //    myj=tmp;
-                //}
-                tmparr = tmpstr.split("\\s+");
-                if (tmparr.length > 0) {
-                    hspkey = myi + "_" + myj;
-                    if (hsphash.containsKey(hspkey)) {
-                        currhsp = (MinimalHsp) hsphash.get(hspkey);
-                        for (int i = 0; i < tmparr.length; i++) {
-                            currhsp.addpval(Double.parseDouble(tmparr[i]));
-                        }//end for i
-                    } else {
-                        currhsp = new MinimalHsp();
-                        currhsp.query = myi;
-                        currhsp.hit = myj;
-                        currhsp.val = new double[tmparr.length];
-                        for (int i = 0; i < tmparr.length; i++) {
-                            currhsp.val[i] = Double.parseDouble(tmparr[i]);
-                        }//end for i
+
+                split_result = tmpstr.split("\\s+");
+                if (split_result.length == 0) {
+                	continue;
+                }
+                
+                hspkey = myi + "_" + myj;
+                if (hsphash.containsKey(hspkey)) {
+                    currhsp = hsphash.get(hspkey);
+                    for (int i = 0; i < split_result.length; i++) {
+                        currhsp.addpval(Double.parseDouble(split_result[i]));
                     }
+
                 } else {
-                    continue;
+                    currhsp = new MinimalHsp();
+                    currhsp.query = myi;
+                    currhsp.hit = myj;
+                    currhsp.val = new double[split_result.length];
+                    for (int i = 0; i < split_result.length; i++) {
+                        currhsp.val[i] = Double.parseDouble(split_result[i]);
+                    }
                 }
+                
                 hsphash.put(hspkey, currhsp);
+            
             } catch (NumberFormatException Ne) {
                 System.err.println("ERROR, unable to parse int int: double ... from " + inline);
                 return false;
             }
+            
             lastline = inline;
-        }//end while hsp
+        }
         
-        System.out.println(); // add newline to the System.out.print() used before
+        System.out.println(String.format(format_for_round_number, count));
+        System.out.println("total HSPs: " + count);
         
         if (inline.equalsIgnoreCase("</hsp>")) {
-            blasthits = (MinimalHsp[]) hsphash.values().toArray(new MinimalHsp[0]);
+            blasthits = hsphash.values().toArray(new MinimalHsp[0]);
         } else {
             System.err.println("ERROR reading truncated file; <hsp> tag not closed by </hsp>");
         }

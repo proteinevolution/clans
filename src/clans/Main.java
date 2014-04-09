@@ -195,7 +195,7 @@ public class Main {
 		}
 
 		System.out.println("exhaustive=" + exhaustive + "; 0=one way search; 1=backvalidation; 2=redo all blast runs");
-		System.out.println("------------------SETTINGS-------------------");
+		System.out.println("--------------END OF SETTINGS----------------\n");
 	}
 
 	/**

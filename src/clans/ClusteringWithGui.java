@@ -1988,9 +1988,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			return;
 		}
 		
-		disableUserControls();
-
 		final boolean restart_computation = stopComputation(true);
+		
+		disableUserControls();
 
 		if (saveLoadWorker != null) {
 			saveLoadWorker.cancel(true); // kill potentially running old worker
@@ -2151,8 +2151,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 	private void loadmenuitemActionPerformed(java.awt.event.ActionEvent evt) {
 
-		boolean restart_computation = stopComputation(true);
-
 		groupseqs = null;
 
 		int returnVal = fc.showOpenDialog(this);
@@ -2175,10 +2173,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			if (messageOverlayActive) {
 				message_overlay.setCanceled();
 			}
-		}
-
-		if (restart_computation) {
-			startComputation();
 		}
 	}
 
@@ -3270,9 +3264,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		} else {
 			System.out.println("Note: loading can be canceled by pressing escape");
 		}
-		disableUserControls();
-
+		
 		final boolean restart_computation = stopComputation(true);
+		
+		disableUserControls();
 	
 		if (saveLoadWorker != null) {
 			saveLoadWorker.cancel(true); // kill potentially running old worker
@@ -3367,7 +3362,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				}
 
 				System.out.println("loading took " + String.format("%s", (completion_time - start_time) / 1000f)
-						+ " seconds.");
+						+ " seconds.\n");
 
 				enableUserControls();
 			}
