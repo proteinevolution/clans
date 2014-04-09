@@ -38,10 +38,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 
-	enum State {
-		IDLE, SAVING;
-	}
-
 	private Timer autosaveTimer;
 	private boolean autosaveAutoReenable;
 	
@@ -1125,6 +1121,29 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 	
+	/**
+	 * Stops the autosave timer.
+	 * 
+	 * @return true if a timer exists and it was running, false else
+	 */
+	private boolean pauseAutosave() {
+		if (autosaveTimer == null || !autosaveTimer.isRunning()){
+			return false;
+		}
+		
+		autosaveTimer.stop();
+		return true;
+	}
+	
+	/**
+	 * Restarts the autosave timer.
+	 */
+	private void restartAutosave() {
+		if (autosaveTimer != null) {
+			autosaveTimer.restart();
+		}
+	}
+	
 	private void toggleMessageOverlayActive() {
 		
 		if (messageOverlayActive) {
@@ -1989,6 +2008,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 		
 		final boolean restart_computation = stopComputation(true);
+		final boolean restart_autosave = pauseAutosave();
 		
 		disableUserControls();
 
@@ -2071,6 +2091,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						} else {
 							message_overlay.setFailed(error_message);
 						}
+					}
+					
+					if (restart_autosave) {
+						restartAutosave();
 					}
 				}
 
@@ -3266,6 +3290,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 		
 		final boolean restart_computation = stopComputation(true);
+		final boolean restart_autosave = pauseAutosave();
 		
 		disableUserControls();
 	
@@ -3358,6 +3383,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						} else {
 							message_overlay.setFailed(error_message);
 						}
+					}
+					
+					if (restart_autosave) {
+						restartAutosave();
 					}
 				}
 

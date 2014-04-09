@@ -164,6 +164,7 @@ public class GuiMessageOverlay extends JComponent {
 		top_spacer = Box.createRigidArea(new Dimension(1, 1));
 		add(top_spacer);
 		add(mainLabel);
+		add(detailsLabel);
 
 		colorWorkInProgress = new Color(255, 128, 0); // an orange
 		colorCompleted = new Color(128, 255, 0); // a green
@@ -243,7 +244,7 @@ public class GuiMessageOverlay extends JComponent {
 	 * @param details
 	 *            The details message.
 	 */
-	private void setMessageDetails(String details) {
+	protected void setMessageDetails(String details) {
 
 		if (details.length() > 70) { // shorten long messages
 			details = details.substring(0, 65) + "[...]";
@@ -257,7 +258,7 @@ public class GuiMessageOverlay extends JComponent {
 	 * Resets detailed message to none.
 	 */
 	private void resetMessageDetails() {
-		detailsLabel.setVisible(false);//this.remove(detailsLabel);
+		detailsLabel.setVisible(false);
 	}
 
 	/**
@@ -329,6 +330,7 @@ public class GuiMessageOverlay extends JComponent {
 	 */
 	private void resetTransparency() {
 		alpha = 1;
+		repaint();
 	}
 	
 	/**
@@ -426,7 +428,6 @@ public class GuiMessageOverlay extends JComponent {
 	
 		if (currentHasProgressDots && updateDots()) {
 			mainLabel.setText(currentMessage + currentDots);
-			repaint();
 		}
 		
 		setVisible(true);
@@ -525,11 +526,7 @@ public class GuiMessageOverlay extends JComponent {
 		setColor(color);
 		
 		setDuration(duration);
-		
-		if (is_fading) {
-			enableFading();
-		}
-		
+
 		if (is_fading) {
 			enableFading();
 		} else {
@@ -555,7 +552,7 @@ public class GuiMessageOverlay extends JComponent {
 	 * @param message_details
 	 *            The message details text.
 	 */
-	private void setupProgressMessage(State state, String main_message, String message_details) {
+	protected void setupProgressMessage(State state, String main_message, String message_details) {
 		setupMessage(state, main_message, message_details, colorWorkInProgress, Duration.INFINITE, false, true);
 	}
 	
@@ -797,5 +794,11 @@ class GuiMessageOverlayLogged extends GuiMessageOverlay {
 		
 		message_count++;
 		System.err.println("\tmessage refresh No. " + message_count);
+	}
+	
+	protected void setupProgressMessage(State state, String main_message, String message_details) {
+		System.err.println("setupProgressmessage(" + state.toString() + ", \"" + main_message + "\", \""
+				+ message_details + "\")");
+		super.setupProgressMessage(state, main_message, message_details);
 	}
 }
