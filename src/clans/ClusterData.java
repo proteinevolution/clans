@@ -19,6 +19,8 @@ import java.util.concurrent.CancellationException;
 
 import javax.swing.SwingWorker;
 
+import clans.misc.MyMath;
+
 /**
  * Handles the data used in the clustering.
  */
@@ -51,11 +53,11 @@ public class ClusterData {
     float[] seqlengths = null;
     MovementComputerThread[] movethreads = null;
     boolean usescval = false;
-    minattvals[] myattvals = null;
+    minattvals[] attractionValues = null;
 
     // variables I use as part of the clustering
     int rounds = 0;
-    float[][] myposarr = null;
+    float[][] positions = null;
     float[][] posarr = null;
     boolean cluster2d = false;
     float maxmove = 0.1f;
@@ -78,20 +80,25 @@ public class ClusterData {
     boolean avgfoldchange = false;
     String namesdmp_file = "not_spcified";
     String nodesdmp_file = "not_specified";
-    float zoomfactor = 1;
+    float zoomFactor = 1;
     boolean showinfo = false;
-    int[] selectednames = new int[0];
-    int[] selectnames = new int[0];
-    int selnamenum = 0;
-    float[][] lastmovearr = null;
-    float[][] mymovearr = null;
+    int[] selectedSequencesIndices = new int[0];
+    int[] selectedSequencesIndicesStableCopy = new int[0];
+    float[][] movementsLastIteration = null;
+    float[][] movements = null;
     float[][] posarrtmp = null;
     int[][] drawarrtmp = null;
     ArrayList<ArrayList<int[]>> draworder = null;
     static int dimensions = 3;
     int elements = -1;
-    double[][] rotmtx = { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };// the performed rotations
-    double[][] myrotmtx = { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };// new double[3][3];//both of the above together
+    /**
+     * A 3x3 rotation matrix.
+     */
+    double[][] rotmtx = MyMath.create3x3IdentityMatrix();
+    /**
+     * A 3x3 rotation matrix.
+     */
+    double[][] myrotmtx = MyMath.create3x3IdentityMatrix();
     minattvals[] orgattvals = null;
     boolean attvalsimple = false;
     boolean rescalepvalues = false;
@@ -109,9 +116,7 @@ public class ClusterData {
     float[] colorcutoffs = null;
     int roundsdone = 0;
     int roundslimit = -1;
-    boolean moveselectedonly = false;
 
-    // TODO: load/write this from/to CLANS file
     private int autosaveIntervalMinutes; // the autosave interval in minutes; -1 if value not in input file, 0 = disabled
 
     public ClusterData(MinimalHsp[] blasthits, AminoAcidSequence[] sequences, String[] namearr,
@@ -119,7 +124,7 @@ public class ClusterData {
             boolean save_intermediate_results, String cmd, String blastpath, boolean addblastvbparam,
             String formatdbpath, String[] referencedb, StringBuffer errbuff, String input_filename) {
 
-        this.sequences = ClusterMethods.remove_gaps_from_sequences(sequences);
+        this.sequences = ClusterMethods.removeGapsFromSequences(sequences);
 
         this.movethreads = new MovementComputerThread[cpu];
 
@@ -156,7 +161,7 @@ public class ClusterData {
      */
     public void setInputFilename(String new_filename) {
 
-        this.input_filename = new_filename;
+        input_filename = new_filename;
 
         if (new_filename == null) {
             return;
@@ -186,7 +191,7 @@ public class ClusterData {
             return null;
         }
         
-        return new File(this.input_filename).getName();
+        return new File(input_filename).getName();
     }
     
     /**
@@ -211,8 +216,8 @@ public class ClusterData {
 		}
 
 		// attvals mode data
-		if (myattvals == null) {
-			return myattvals.length;
+		if (attractionValues == null) {
+			return attractionValues.length;
 
 		}
 
@@ -493,15 +498,15 @@ public class ClusterData {
         
         this.autosaveIntervalMinutes = loaded_data.autosaveIntervalMinutes;
 
-        sequences = ClusterMethods.remove_gaps_from_sequences(loaded_data.inaln);
+        sequences = ClusterMethods.removeGapsFromSequences(loaded_data.inaln);
 
-        myposarr = loaded_data.posarr;
+        positions = loaded_data.posarr;
         blasthits = loaded_data.blasthits;
         usescval = loaded_data.usescval;
 
         if (blasthits == null) {
             // first time I load myattvals; cannot be anything else; don't need to sync
-            myattvals = loaded_data.attvals;
+            attractionValues = loaded_data.attvals;
         }
 
         complexatt = loaded_data.complexatt;
@@ -532,7 +537,7 @@ public class ClusterData {
             formatdbpath = loaded_data.formatdbpath;
         }
 
-        zoomfactor = loaded_data.zoom;
+        zoomFactor = loaded_data.zoom;
         cluster2d = loaded_data.cluster2d;
         showinfo = loaded_data.showinfo;
         int number_of_sequences = sequences.length;
@@ -547,10 +552,10 @@ public class ClusterData {
             nameshash.put(sequences[i].name, new Integer(i));
         }
         elements = sequence_names.length;
-        selectednames = new int[0];
-        posarr = myposarr;
-        lastmovearr = new float[elements][ClusterData.dimensions];
-        mymovearr = new float[elements][ClusterData.dimensions];
+        selectedSequencesIndices = new int[0];
+        posarr = positions;
+        movementsLastIteration = new float[elements][ClusterData.dimensions];
+        movements = new float[elements][ClusterData.dimensions];
         posarrtmp = new float[elements][ClusterData.dimensions];
         drawarrtmp = new int[elements][ClusterData.dimensions];
         resetDrawOrder();
@@ -1007,8 +1012,8 @@ public class ClusterData {
         myrun.file = output_file;
         myrun.inaln = sequences;
         myrun.blasthits = blasthits;
-        myrun.attvals = myattvals;
-        myrun.posarr = myposarr;
+        myrun.attvals = attractionValues;
+        myrun.posarr = positions;
         myrun.maxmove = maxmove;
         myrun.pval = pvalue_threshold;
         myrun.usescval = usescval;
@@ -1337,7 +1342,7 @@ public class ClusterData {
                             }
                             
                             if (elements > 0) {
-                                this.seqgroupsvec.addElement(mygroup);
+                                seqgroupsvec.addElement(mygroup);
                             }
                             
                         } else if (inline.startsWith("color=")) {
@@ -1518,7 +1523,7 @@ public class ClusterData {
                                     }
                                 }
 
-                                this.seqgroupsvec.add(mycluster);
+                                seqgroupsvec.add(mycluster);
                             }
                         } else {
                             System.out.println("read unknown line '" + inline + "'");
@@ -1531,7 +1536,7 @@ public class ClusterData {
         } catch (IOException ioe) {
             System.err.println("IOERROR; unable to read from file '" + input_filename.getAbsolutePath() + "'");
         }
-        System.out.println("read " + this.seqgroupsvec.size() + " cluster entries");
+        System.out.println("read " + seqgroupsvec.size() + " cluster entries");
     }
 
 	/**
@@ -1795,8 +1800,8 @@ public class ClusterData {
         try {
             PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(output_file)));
             minattvals myatt;
-            for (int i = myattvals.length; --i >= 0;) {
-                myatt = myattvals[i];
+            for (int i = attractionValues.length; --i >= 0;) {
+                myatt = attractionValues[i];
                 outwrite.println(myatt.query + " " + myatt.hit + " " + myatt.att);
             }
             outwrite.close();
@@ -1844,7 +1849,8 @@ public class ClusterData {
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-                            newatt = ClusterMethods.getattvalsimple(blasthits[i].val, elements, pvalue_threshold, this);
+							newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements,
+									pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -1862,8 +1868,8 @@ public class ClusterData {
                             curratt.hit = blasthits[i].query;
                             curratt.query = blasthits[i].hit;
                         }
-                        curratt.att = ClusterMethods
-                                .getattvalsimple(blasthits[i].val, elements, pvalue_threshold, this);
+						curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements,
+								pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
@@ -1890,7 +1896,8 @@ public class ClusterData {
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-                            newatt = ClusterMethods.getattvalmult(blasthits[i].val, elements, pvalue_threshold, this);
+							newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements,
+									pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -1908,7 +1915,8 @@ public class ClusterData {
                             curratt.hit = blasthits[i].query;
                             curratt.query = blasthits[i].hit;
                         }
-                        curratt.att = ClusterMethods.getattvalmult(blasthits[i].val, elements, pvalue_threshold, this);
+						curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements,
+								pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
@@ -1956,7 +1964,7 @@ public class ClusterData {
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-                            newatt = ClusterMethods.getattvalsimple(blasthits[i].val, elements, pvalue_threshold, this);
+                            newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -1975,7 +1983,7 @@ public class ClusterData {
                             curratt.query = blasthits[i].hit;
                         }
                         curratt.att = ClusterMethods
-                                .getattvalsimple(blasthits[i].val, elements, pvalue_threshold, this);
+                                .computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
@@ -2003,7 +2011,7 @@ public class ClusterData {
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-                            newatt = ClusterMethods.getattvalmult(blasthits[i].val, elements, pvalue_threshold, this);
+                            newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -2022,7 +2030,7 @@ public class ClusterData {
                             curratt.hit = blasthits[i].query;
                             curratt.query = blasthits[i].hit;
                         }
-                        curratt.att = ClusterMethods.getattvalmult(blasthits[i].val, elements, pvalue_threshold, this);
+                        curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
@@ -2053,13 +2061,13 @@ public class ClusterData {
             p2attfactor = divval;
             p2attoffset = minattval;
         }
-        myattvals = (minattvals[]) tmpvec.toArray(new minattvals[0]);
+        attractionValues = (minattvals[]) tmpvec.toArray(new minattvals[0]);
         
 		String formatted_used_hsps = String.format("%" + Integer.toString(blasthits.length).length() + "s",
-				myattvals.length);
+				attractionValues.length);
 		String formatted_pvalue = String.format("%7s", new DecimalFormat("0.###E0").format(pvalue_threshold));
 		String formatted_percentage = String.format("%7s",
-				new DecimalFormat("0.00").format(100 * (float) (myattvals.length) / blasthits.length) + "%");
+				new DecimalFormat("0.00").format(100 * (float) (attractionValues.length) / blasthits.length) + "%");
 		System.out.println("used/total HSPs at threshold " + formatted_pvalue + ": " + formatted_used_hsps + "/"
 				+ blasthits.length + " (" + formatted_percentage + ")");
     }
@@ -2071,69 +2079,60 @@ public class ClusterData {
         rounds = 0;
         currcool = 1;
 
-        zoomfactor = 1;
-        this.reset_rotmtx();
+        zoomFactor = 1;
+        reset_rotmtx();
 
-        mymovearr = null;
-        lastmovearr = null;
+        movements = null;
+        movementsLastIteration = null;
 
         elements = sequence_names.length;
 
         if (elements == 0) { // no elements means nothing to do
-            myposarr = new float[0][0];
-            posarr = myposarr;
+            positions = new float[0][0];
+            posarr = positions;
             return;
         }
 
-        myposarr = new float[elements][dimensions];
+        positions = new float[elements][dimensions];
         posarrtmp = new float[elements][dimensions];
         drawarrtmp = new int[elements][dimensions];
         
-        mymovearr = new float[elements][dimensions];
-        lastmovearr = new float[elements][dimensions];
+        movements = new float[elements][dimensions];
+        movementsLastIteration = new float[elements][dimensions];
         for (int i = 0; i < elements; i++) {
             for (int j = 0; j < dimensions; j++) {
-                mymovearr[i][j] = 0;
-                lastmovearr[i][j] = 0;
+                movements[i][j] = 0;
+                movementsLastIteration[i][j] = 0;
             }
         }
 
         // compute the "attraction values"
         if (blasthits != null) {
-            if (myattvals == null) {
+            if (attractionValues == null) {
                 compute_attraction_values();
             }
         }
 
-        for (int i = 0; i < myposarr.length; i++) {
-            for (int j = 0; j < myposarr[j].length; j++) {
+        for (int i = 0; i < positions.length; i++) {
+            for (int j = 0; j < positions[j].length; j++) {
                 
                 if (cluster2d && j > 1) { // leave last entry 0
                     break;
                 }
                 
-                myposarr[i][j] = ClusterMethods.rand.nextFloat() * 2 - 1;
+                positions[i][j] = ClusterMethods.rand.nextFloat() * 2 - 1;
             }
         }
 
-        posarr = myposarr;
+        posarr = positions;
     }
 
     /**
      * Resets the rotation matrix to represent no rotation.
      */
     private void reset_rotmtx() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (i == j) {
-                    rotmtx[i][j] = 1;
-                    myrotmtx[i][j] = 1;
-                } else {
-                    rotmtx[i][j] = 0;
-                    myrotmtx[i][j] = 0;
-                }
-            }
-        }
+    	MyMath.setTo3x3IdentityMatrix(rotmtx);
+    	MyMath.setTo3x3IdentityMatrix(myrotmtx);
     }
     
     /**

@@ -304,13 +304,13 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
     private void mapclansbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mapclansbuttonActionPerformed
         // get the selected sequences from clans and show which functional categories they belong to by selecting them and collapsing the rest
         //see if any sequences are selected in the parent
-        int selectednum=parent.data.selectednames.length;
+        int selectednum=parent.data.selectedSequencesIndices.length;
         if(selectednum>0){
             //find all the tree leaf-nodes corresponding to the selected names
             //set these as selected in the tree (expand branches as necessary)
             String[] selectednames=new String[selectednum];
             for(int i=selectednum;--i>=0;){
-                selectednames[i]=parent.data.sequence_names[parent.data.selectednames[i]].toLowerCase();
+                selectednames[i]=parent.data.sequence_names[parent.data.selectedSequencesIndices[i]].toLowerCase();
             }//end for i
             settreeselected(selectednames);
         }else{
@@ -361,7 +361,7 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
             HashMap<String, String> mylookup = lookuplist.get(selindex);
             TreePath[] tmp=tree.getSelectionPaths();
             if(tmp==null){
-                parent.data.selectednames=new int[0];
+                parent.data.selectedSequencesIndices=new int[0];
                 parent.repaint();
                 return;
             }
@@ -412,9 +412,9 @@ public class mapfunctiondialog_tab extends javax.swing.JFrame {
             if(selnum==0){
                 javax.swing.JOptionPane.showMessageDialog(this,"NO elements of this group found in clans file");
             }
-            parent.data.selectednames=new int[selnum];
+            parent.data.selectedSequencesIndices=new int[selnum];
             for(int i=selnum;--i>=0;){
-                parent.data.selectednames[i]=((Integer)selist.get(i)).intValue();
+                parent.data.selectedSequencesIndices[i]=((Integer)selist.get(i)).intValue();
             }//end for i
             parent.repaint();
         }else{

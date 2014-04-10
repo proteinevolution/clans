@@ -196,7 +196,7 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
         }//end for i
         //now see how each of the genes in the clans map compares to the currently drawn graph.
         getcorrelated(corrmethod,corranticorr,mincorr,vals);
-        if(map.data.selectednames.length==0){
+        if(map.data.selectedSequencesIndices.length==0){
             javax.swing.JOptionPane.showMessageDialog(this,"No correlated expressions found!");
         }else{
             map.repaint();
@@ -292,9 +292,9 @@ public class affygetgraphcorrdialog extends javax.swing.JFrame {
             }
         }//end for i
         //now I know which I want to select
-        map.data.selectednames=new int[selected.size()];
+        map.data.selectedSequencesIndices=new int[selected.size()];
         for(int i=selected.size();--i>=0;){
-            map.data.selectednames[i]=selected.get(i).intValue();
+            map.data.selectedSequencesIndices[i]=selected.get(i).intValue();
         }//end for i
     }//end getcorrelated
     

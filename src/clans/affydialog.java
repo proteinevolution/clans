@@ -285,12 +285,12 @@ public class affydialog extends javax.swing.JFrame {
         //the currently selected elements are present in selectednames (int[])
         ArrayList<datapoint[]> tmplist=new ArrayList<datapoint[]>();
         String tmpname;
-        if(parent.data.selectednames.length<=0){
+        if(parent.data.selectedSequencesIndices.length<=0){
             javax.swing.JOptionPane.showMessageDialog(this,"No sequences selected");
             return;
         }
-        for(int i=parent.data.selectednames.length;--i>=0;){
-            tmpname=(parent.data.sequence_names[parent.data.selectednames[i]]).trim();
+        for(int i=parent.data.selectedSequencesIndices.length;--i>=0;){
+            tmpname=(parent.data.sequence_names[parent.data.selectedSequencesIndices[i]]).trim();
             if(valhash.containsKey(tmpname)){
                 tmplist.add(valhash.get(tmpname));
             }else{

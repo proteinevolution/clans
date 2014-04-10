@@ -126,7 +126,7 @@ public class showblasthitsforselected extends javax.swing.JFrame {
         for(int i=0;i<selectblastnum;i++){
             retarr[i+selectnum]=blasthits[blastselectedseqs[i]];
         }//end for i
-        parent.data.selectednames=retarr;
+        parent.data.selectedSequencesIndices=retarr;
         parent.blastselectseqs=new int[0];
         parent.repaint();
     }//GEN-LAST:event_makeblasthitsselectedActionPerformed
@@ -167,9 +167,9 @@ public class showblasthitsforselected extends javax.swing.JFrame {
             for(int i=0;i<selectnum;i++){
                 tmparr[i]=selectednames[selectedseqs[i]];
             }//end for i
-            parent.data.selectednames=tmparr;
+            parent.data.selectedSequencesIndices=tmparr;
         }else{
-            parent.data.selectednames=selectednames;
+            parent.data.selectedSequencesIndices=selectednames;
         }
         selectnum=blastselectedseqs.length;
         if(selectnum>0){

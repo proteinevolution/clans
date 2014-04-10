@@ -307,7 +307,7 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,"ERROR, you need to load some taxonomy data first! (select the files and press the \"Load data\" button");
             return;
         }
-        int seqnum=parent.data.selectednames.length;
+        int seqnum=parent.data.selectedSequencesIndices.length;
         if(seqnum<1){
             javax.swing.JOptionPane.showMessageDialog(this,"Please select some sequences in the main window");
         }else{
@@ -316,7 +316,7 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
             java.util.regex.Matcher mym=null;
             for(int i=0;i<seqnum;i++){
                 //System.out.println("looking at '"+parent.namearr[parent.selectednames[i]]+"'");
-                mym=patt.matcher(parent.data.sequence_names[parent.data.selectednames[i]]);
+                mym=patt.matcher(parent.data.sequence_names[parent.data.selectedSequencesIndices[i]]);
                 while(mym.find()){
                     //System.out.println("\tspecname is:'"+mym.group(1)+"'");
                     speclist.add(mym.group(1));
@@ -480,7 +480,7 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
         String[] checkarr=mynodes.toArray(new String[0]);
         //now go through all of the sequences in parent and see whether they have a valid TAXID, and then whether they match the tax-class I am looking for
         //also check whether currently I have any sequences selected in the cluster view, then base the search only on these
-        int seqnum=parent.data.selectednames.length;
+        int seqnum=parent.data.selectedSequencesIndices.length;
         String[] alttax;//a single ID may contain multiple taxid's
         ArrayList<String> speclist=new ArrayList<String>();
         java.util.regex.Pattern patt = java.util.regex.Pattern.compile("\\[(.+?)\\]");
@@ -498,7 +498,7 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
         for(int i=seqnum;--i>=0;){
         	//now get each name and see whether this name matches my given tax identifier
         	if(useselected){
-        		myname=parent.data.sequence_names[parent.data.selectednames[i]];
+        		myname=parent.data.sequence_names[parent.data.selectedSequencesIndices[i]];
         	}else{
         		myname=parent.data.sequence_names[i];
         	}
@@ -548,7 +548,7 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
                         if(checkindex<0){
                             //then all elements matched, set this sequence as true and look for the next one
                         	if(useselected){
-                        		poslist.add(new Integer(parent.data.selectednames[i]));                        		
+                        		poslist.add(new Integer(parent.data.selectedSequencesIndices[i]));                        		
                         	}else{
                         		poslist.add(new Integer(i));
                         	}
@@ -562,9 +562,9 @@ public class ncbitaxonomydialog extends javax.swing.JFrame {
         }//end for i
         //now update the parent selectednames
         if(poslist.size()>0){
-            parent.data.selectednames=new int[poslist.size()];
+            parent.data.selectedSequencesIndices=new int[poslist.size()];
             for(int i=poslist.size();--i>=0;){
-                parent.data.selectednames[i]=poslist.get(i).intValue();
+                parent.data.selectedSequencesIndices[i]=poslist.get(i).intValue();
             }//end for i
             parent.repaint();
         }else{

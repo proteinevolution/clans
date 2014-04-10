@@ -59,8 +59,9 @@ public class ClusteringWithoutGui {
                     }
                 }
 
-                ClusterMethods.recluster3d(data);
-                data.posarr=data.myposarr;
+                ClusterMethods.iterateOneRound(data, false);
+                
+                data.posarr=data.positions;
                 tmpcool=(((float)((int)(data.currcool*100000)))/100000);
                 if(tmpcool<=1e-5){
                     stop=true;
@@ -79,7 +80,7 @@ public class ClusteringWithoutGui {
         //does the iteration and the stop for a thread
         if(mythread.didrun==false || mythread.stop==true){//if this thread was never started or stopped
             //String tmpstr="";
-            if(data.mymovearr==null){
+            if(data.movements==null){
                 System.err.println("WARNING: No data currently available; please load some data!");
                 return;
             }

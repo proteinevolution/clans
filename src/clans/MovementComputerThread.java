@@ -2,53 +2,81 @@ package clans;
 
 import java.util.HashMap;
 
-/**
- *
- * @author tancred
- */
 public class MovementComputerThread extends java.lang.Thread {
 
-    public MovementComputerThread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int thread_id, int cpu,
-            HashMap<String, Integer> selectnamehash, int[] selectnames, final Object syncon, ClusterData parent) {
-        this.done = false;
-        this.posarr = myposarr;
-        this.attvals = myattvals;
-        this.movearr = mymovearr;
-        this.thread_id = thread_id;
-        this.cpu = cpu;
-        this.doselected = true;
-        this.tmphash = selectnamehash;
-        this.parent = parent;
-        this.syncon = syncon;
-        this.selectnames = selectnames;
-    }
+	/**
+	 * Crates a MovementComputerThread with name {@code MovementComputerThread#<thread_id>} that only optimizes the
+	 * selected subset of sequences.
+	 * 
+	 * @param data
+	 *            The data
+	 * @param thread_id
+	 *            The numerical identifier for this thread.
+	 * @param informParentOfCompletenessLock
+	 *            The lock on which parents get informed about completed computations in a synchronized manner.
+	 * @param selectedNamesHash
+	 * @param selectedNamesIndices
+	 */
+	public MovementComputerThread(ClusterData data, int thread_id, final Object informParentOfCompletenessLock,
+			HashMap<String, Integer> selectedNamesHash) {
 
-    public MovementComputerThread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int thread_id, int cpu,
-    		final Object syncon, ClusterData parent) {
-        this.done = false;
-        this.posarr = myposarr;
-        this.attvals = myattvals;
-        this.movearr = mymovearr;
-        this.thread_id = thread_id;
-        this.cpu = cpu;
-        this.doselected = false;
-        this.tmphash = null;
-        this.parent = parent;
-        this.syncon = syncon;
-    }
+		this(data, thread_id, informParentOfCompletenessLock);
 
-    boolean done;
-    boolean doselected;
-    float[][] posarr;
-    minattvals[] attvals;
-    float[][] movearr;
-    int thread_id;
-    int cpu;
-    HashMap<String, Integer> tmphash = null;
-    ClusterData parent;
-    final Object syncon;
-    int[] selectnames;// a local copy of parent.selectednames, as that may change during a calculation
+		this.selectedNamesHash = selectedNamesHash;
+		this.selectedNamesIndices = data.selectedSequencesIndicesStableCopy;
+	}
 
+	/**
+	 * Crates a MovementComputerThread with name {@code MovementComputerThread#<thread_id>}.
+	 * 
+	 * @param data
+	 *            The data
+	 * @param thread_id
+	 *            The numerical identifier for this thread.
+	 * @param informParentOfCompletenessLock
+	 *            The lock on which parents get informed about completed computations in a synchronized manner.
+	 */
+	public MovementComputerThread(ClusterData data, int thread_id, final Object informParentOfCompletenessLock) {
+
+		this.setName("MovementComputerThread#" + thread_id);
+		this.threadId = thread_id;
+		this.totalThreads = data.cpu;
+
+		this.data = data;
+		this.informParentOfCompletenessLock = informParentOfCompletenessLock;
+
+		this.positions = data.positions;
+		this.attractions = data.attractionValues;
+		this.movements = data.movements;
+	}
+
+	private int threadId;
+	private int totalThreads;
+
+	private ClusterData data;
+	private final Object informParentOfCompletenessLock;
+
+	private float[][] positions;
+	private minattvals[] attractions;
+	private float[][] movements;
+
+	private HashMap<String, Integer> selectedNamesHash = null;
+	private int[] selectedNamesIndices = null; // a local copy of parent.selectednames, as that may change during a calculation
+
+	/**
+	 * Notifies the parent of completed computations.
+	 * <p>
+	 * Note: Attempts to remove this and instead check .isAlive() of this thread in the parent have failed for unknown
+	 * reasons. isAlive() seems to often return true if checked immediately after executing the last line of the run()
+	 * method, which obviously can cause problems.. Unless you have too much time or know your Java threads very well,
+	 * don't try again ;)
+	 */
+	protected boolean done = false;
+
+	private boolean doSelectedOnly() {
+		return selectedNamesHash != null && selectedNamesIndices != null;
+	}
+    
     /**
      * use the positions of all elements and their attraction/repulsion values to calculate a movement vector for each
      * (take into account the last movement). repulsion doesn't have a specific value as all evalues below a certain
@@ -57,79 +85,79 @@ public class MovementComputerThread extends java.lang.Thread {
     @Override
     public void run() {
 
-        int elements = posarr.length;
+        int elements = positions.length;
         double[] currmoverep = new double[3];
         double[] currmoveatt = new double[3];
         double totaldist = 0;
 
-        int attnum = attvals.length;
-        double minattract = parent.minattract;
-        int repvalpow = parent.repvalpow;
-        int attvalpow = parent.attvalpow;
-        float repfactor = parent.repfactor;
-        float attfactor = parent.attfactor;
-        float maxmove = parent.maxmove;
+        int attnum = attractions.length;
+        double minattract = data.minattract;
+        int repvalpow = data.repvalpow;
+        int attvalpow = data.attvalpow;
+        float repfactor = data.repfactor;
+        float attfactor = data.attfactor;
+        float maxmove = data.maxmove;
 
-        if (doselected) {
-            int selectnames_count = selectnames.length;
+        if (doSelectedOnly()) {
+
             //now get from where to where I should do my calculations
-            int start, end;
-            if (thread_id == (cpu - 1)) {
-                start = thread_id * (int) (selectnames_count / cpu);
-                end = selectnames_count;
+        	int selected_sequences_count = selectedNamesIndices.length;
+            int start = threadId * (int) (selected_sequences_count / totalThreads);
+            int end;
+            if (threadId == (totalThreads - 1)) {
+                end = selected_sequences_count;
             } else {
-                start = thread_id * (int) (selectnames_count / cpu);
-                end = (thread_id + 1) * (int) (selectnames_count / cpu);
+                end = (threadId + 1) * (int) (selected_sequences_count / totalThreads);
             }
             
-            if (parent.cluster2d == true) {
+            if (data.cluster2d == true) {
 
                 //cluster only the selected sequences in 2D
                 for (int i = start; i < end; i++) {
-                    ClusterMethods.add_attraction_towards_origin(posarr[selectnames[i]], currmoveatt, minattract);
-                    movearr[selectnames[i]][0] += currmoveatt[0];
-                    movearr[selectnames[i]][1] += currmoveatt[1];
+                    ClusterMethods.addAttractionTowardsOrigin(positions[selectedNamesIndices[i]], currmoveatt, minattract);
+                    movements[selectedNamesIndices[i]][0] += currmoveatt[0];
+                    movements[selectedNamesIndices[i]][1] += currmoveatt[1];
 
                     for (int j = elements; --j >= 0;) {
-                        ClusterMethods.add_repulsion(posarr[selectnames[i]], posarr[j], currmoverep, repvalpow,
-                                repfactor, ClusterMethods.rand, parent.cluster2d);
-                        movearr[selectnames[i]][0] += currmoverep[0];
-                        movearr[selectnames[i]][1] += currmoverep[1];
+                        ClusterMethods.addRepulsion(positions[selectedNamesIndices[i]], positions[j], currmoverep, repvalpow,
+                                repfactor, ClusterMethods.rand, data.cluster2d);
+                        movements[selectedNamesIndices[i]][0] += currmoverep[0];
+                        movements[selectedNamesIndices[i]][1] += currmoverep[1];
                     }
                 }
                 
-                //now add the attraction values, but only for the query or hit sequences in my part of the selectnames array (assigned in recluster3d)
+                // now add the attraction values, but only for the query or hit sequences for which I am responsible
                 for (int i = attnum; --i >= 0;) {
-                    if ((tmphash.containsKey(String.valueOf(attvals[i].query))) && (tmphash.get(String.valueOf(attvals[i].query)).intValue() == thread_id)) {
-                        ClusterMethods.add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att,
-                                currmoveatt, attvalpow, attfactor, parent.cluster2d);
+                    if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].query))) && (selectedNamesHash.get(String.valueOf(attractions[i].query)).intValue() == threadId)) {
+                        ClusterMethods.addAttraction(positions[attractions[i].query], positions[attractions[i].hit], attractions[i].att,
+                                currmoveatt, attvalpow, attfactor, data.cluster2d);
 
-                        movearr[attvals[i].query][0] += currmoveatt[0];
-                        movearr[attvals[i].query][1] += currmoveatt[1];
+                        movements[attractions[i].query][0] += currmoveatt[0];
+                        movements[attractions[i].query][1] += currmoveatt[1];
                         //movement[attvals[i].query][2]+=currmoveatt[2];
-                        if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == thread_id)) {
-                            movearr[attvals[i].hit][0] -= currmoveatt[0];
-                            movearr[attvals[i].hit][1] -= currmoveatt[1];
+                        if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].hit))) && (selectedNamesHash.get(String.valueOf(attractions[i].hit)).intValue() == threadId)) {
+                            movements[attractions[i].hit][0] -= currmoveatt[0];
+                            movements[attractions[i].hit][1] -= currmoveatt[1];
                             //movement[attvals[i].hit][2]-=currmoveatt[2];
                         }
-                    } else if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == thread_id)) {
-                        ClusterMethods.add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att,
-                                currmoveatt, attvalpow, attfactor, parent.cluster2d);
+                    } else if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].hit))) && (selectedNamesHash.get(String.valueOf(attractions[i].hit)).intValue() == threadId)) {
+                        ClusterMethods.addAttraction(positions[attractions[i].query], positions[attractions[i].hit], attractions[i].att,
+                                currmoveatt, attvalpow, attfactor, data.cluster2d);
 
-                        movearr[attvals[i].hit][0] -= currmoveatt[0];
-                        movearr[attvals[i].hit][1] -= currmoveatt[1];
+                        movements[attractions[i].hit][0] -= currmoveatt[0];
+                        movements[attractions[i].hit][1] -= currmoveatt[1];
                         //movement[attvals[i].hit][2]-=currmoveatt[2];
                     }
                 }//end for i
                 //double totaldistsq;
                 for (int i = start; i < end; i++) {
-                    movearr[selectnames[i]][0] /= elements;
-                    movearr[selectnames[i]][1] /= elements;
-                    movearr[selectnames[i]][2] = 0;
-                    totaldist = java.lang.Math.sqrt((movearr[selectnames[i]][0] * movearr[selectnames[i]][0]) + (movearr[selectnames[i]][1] * movearr[selectnames[i]][1]));
+                    movements[selectedNamesIndices[i]][0] /= elements;
+                    movements[selectedNamesIndices[i]][1] /= elements;
+                    movements[selectedNamesIndices[i]][2] = 0;
+                    totaldist = java.lang.Math.sqrt((movements[selectedNamesIndices[i]][0] * movements[selectedNamesIndices[i]][0]) + (movements[selectedNamesIndices[i]][1] * movements[selectedNamesIndices[i]][1]));
                     if (totaldist > maxmove) {
-                        movearr[selectnames[i]][0] *= maxmove / totaldist;
-                        movearr[selectnames[i]][1] *= maxmove / totaldist;
+                        movements[selectedNamesIndices[i]][0] *= maxmove / totaldist;
+                        movements[selectedNamesIndices[i]][1] *= maxmove / totaldist;
                     }
                 }//end for i
             } else {
@@ -137,52 +165,52 @@ public class MovementComputerThread extends java.lang.Thread {
                 //cluster only the selected sequences in 3D
                 for (int i = start; i < end; i++) {
 
-                    ClusterMethods.add_attraction_towards_origin(posarr[selectnames[i]], currmoveatt, minattract);
-                    movearr[selectnames[i]][0] += currmoveatt[0];
-                    movearr[selectnames[i]][1] += currmoveatt[1];
-                    movearr[selectnames[i]][2] += currmoveatt[2];
+                    ClusterMethods.addAttractionTowardsOrigin(positions[selectedNamesIndices[i]], currmoveatt, minattract);
+                    movements[selectedNamesIndices[i]][0] += currmoveatt[0];
+                    movements[selectedNamesIndices[i]][1] += currmoveatt[1];
+                    movements[selectedNamesIndices[i]][2] += currmoveatt[2];
                     for (int j = elements; --j >= 0;) {
-                        ClusterMethods.add_repulsion(posarr[selectnames[i]], posarr[j], currmoverep, repvalpow, repfactor, ClusterMethods.rand, parent.cluster2d);
+                        ClusterMethods.addRepulsion(positions[selectedNamesIndices[i]], positions[j], currmoverep, repvalpow, repfactor, ClusterMethods.rand, data.cluster2d);
 
-                        movearr[selectnames[i]][0] += currmoverep[0];
-                        movearr[selectnames[i]][1] += currmoverep[1];
-                        movearr[selectnames[i]][2] += currmoverep[2];
+                        movements[selectedNamesIndices[i]][0] += currmoverep[0];
+                        movements[selectedNamesIndices[i]][1] += currmoverep[1];
+                        movements[selectedNamesIndices[i]][2] += currmoverep[2];
                     }//end for j
                 }//end for i
                 
-                //now add the attraction values, but only for the query or hit sequences in my part of the selectnames array (assigned in recluster3d)
+                // now add the attraction values, but only for the query or hit sequences for which I am responsible
                 for (int i = attnum; --i >= 0;) {
-                    if ((tmphash.containsKey(String.valueOf(attvals[i].query))) && (tmphash.get(String.valueOf(attvals[i].query)).intValue() == thread_id)) {
-                        ClusterMethods.add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att,
-                                currmoveatt, attvalpow, attfactor, parent.cluster2d);
+                    if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].query))) && (selectedNamesHash.get(String.valueOf(attractions[i].query)).intValue() == threadId)) {
+                        ClusterMethods.addAttraction(positions[attractions[i].query], positions[attractions[i].hit], attractions[i].att,
+                                currmoveatt, attvalpow, attfactor, data.cluster2d);
 
-                        movearr[attvals[i].query][0] += currmoveatt[0];
-                        movearr[attvals[i].query][1] += currmoveatt[1];
-                        movearr[attvals[i].query][2] += currmoveatt[2];
-                        if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == thread_id)) {
-                            movearr[attvals[i].hit][0] -= currmoveatt[0];
-                            movearr[attvals[i].hit][1] -= currmoveatt[1];
-                            movearr[attvals[i].hit][2] -= currmoveatt[2];
+                        movements[attractions[i].query][0] += currmoveatt[0];
+                        movements[attractions[i].query][1] += currmoveatt[1];
+                        movements[attractions[i].query][2] += currmoveatt[2];
+                        if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].hit))) && (selectedNamesHash.get(String.valueOf(attractions[i].hit)).intValue() == threadId)) {
+                            movements[attractions[i].hit][0] -= currmoveatt[0];
+                            movements[attractions[i].hit][1] -= currmoveatt[1];
+                            movements[attractions[i].hit][2] -= currmoveatt[2];
                         }
-                    } else if ((tmphash.containsKey(String.valueOf(attvals[i].hit))) && (tmphash.get(String.valueOf(attvals[i].hit)).intValue() == thread_id)) {
-                        ClusterMethods.add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att,
-                                currmoveatt, attvalpow, attfactor, parent.cluster2d);
+                    } else if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].hit))) && (selectedNamesHash.get(String.valueOf(attractions[i].hit)).intValue() == threadId)) {
+                        ClusterMethods.addAttraction(positions[attractions[i].query], positions[attractions[i].hit], attractions[i].att,
+                                currmoveatt, attvalpow, attfactor, data.cluster2d);
                         
-                        movearr[attvals[i].hit][0] -= currmoveatt[0];
-                        movearr[attvals[i].hit][1] -= currmoveatt[1];
-                        movearr[attvals[i].hit][2] -= currmoveatt[2];
+                        movements[attractions[i].hit][0] -= currmoveatt[0];
+                        movements[attractions[i].hit][1] -= currmoveatt[1];
+                        movements[attractions[i].hit][2] -= currmoveatt[2];
                     }
                 }//end for i
                 //double totaldistsq;
                 for (int i = start; i < end; i++) {
-                    movearr[selectnames[i]][0] /= elements;
-                    movearr[selectnames[i]][1] /= elements;
-                    movearr[selectnames[i]][2] /= elements;
-                    totaldist = java.lang.Math.sqrt((movearr[selectnames[i]][0] * movearr[selectnames[i]][0]) + (movearr[selectnames[i]][1] * movearr[selectnames[i]][1]) + (movearr[selectnames[i]][2] * movearr[selectnames[i]][2]));
+                    movements[selectedNamesIndices[i]][0] /= elements;
+                    movements[selectedNamesIndices[i]][1] /= elements;
+                    movements[selectedNamesIndices[i]][2] /= elements;
+                    totaldist = java.lang.Math.sqrt((movements[selectedNamesIndices[i]][0] * movements[selectedNamesIndices[i]][0]) + (movements[selectedNamesIndices[i]][1] * movements[selectedNamesIndices[i]][1]) + (movements[selectedNamesIndices[i]][2] * movements[selectedNamesIndices[i]][2]));
                     if (totaldist > maxmove) {
-                        movearr[selectnames[i]][0] *= maxmove / totaldist;
-                        movearr[selectnames[i]][1] *= maxmove / totaldist;
-                        movearr[selectnames[i]][2] *= maxmove / totaldist;
+                        movements[selectedNamesIndices[i]][0] *= maxmove / totaldist;
+                        movements[selectedNamesIndices[i]][1] *= maxmove / totaldist;
+                        movements[selectedNamesIndices[i]][2] *= maxmove / totaldist;
                     }
                 }//end for i
             }
@@ -190,21 +218,21 @@ public class MovementComputerThread extends java.lang.Thread {
 
             // get start and end index of data concerning this thread
             int start, end;
-            if (thread_id == (cpu - 1)) {
+            if (threadId == (totalThreads - 1)) {
                 // do everything from here to the last element to avoid rounding errors
-                start = thread_id * (int) (elements / cpu);
+                start = threadId * (int) (elements / totalThreads);
                 end = elements;
             } else {
-                start = thread_id * (int) (elements / cpu);
-                end = (thread_id + 1) * (int) (elements / cpu);
+                start = threadId * (int) (elements / totalThreads);
+                end = (threadId + 1) * (int) (elements / totalThreads);
             }
             
             // add repulsive movements
             for (int i = start; i < end; i++) {
-                ClusterMethods.add_attraction_towards_origin(posarr[i], currmoveatt, minattract);
+                ClusterMethods.addAttractionTowardsOrigin(positions[i], currmoveatt, minattract);
                 
-                for (int j = 0; j < movearr[i].length; j ++) {
-                    movearr[i][j] += currmoveatt[j];
+                for (int j = 0; j < movements[i].length; j ++) {
+                    movements[i][j] += currmoveatt[j];
                 }
 
                 for (int j = 0; j < elements; j++) {
@@ -212,55 +240,55 @@ public class MovementComputerThread extends java.lang.Thread {
                         continue;
                     } 
 
-                    ClusterMethods.add_repulsion(posarr[i], posarr[j], currmoverep, repvalpow, repfactor, ClusterMethods.rand, parent.cluster2d);
+                    ClusterMethods.addRepulsion(positions[i], positions[j], currmoverep, repvalpow, repfactor, ClusterMethods.rand, data.cluster2d);
                     
-                    for (int k = 0; k < movearr[i].length; k ++) {
-                        movearr[i][k] += currmoverep[k];
+                    for (int k = 0; k < movements[i].length; k ++) {
+                        movements[i][k] += currmoverep[k];
                     }
                 }
             }
             
             // add attractive movements
             for (int i = attnum; --i >= 0;) {
-                if (attvals[i].query >= start && attvals[i].query < end) {
-                    ClusterMethods.add_attraction(posarr[attvals[i].query], posarr[attvals[i].hit], attvals[i].att,
-                            currmoveatt, attvalpow, attfactor, parent.cluster2d);
+                if (attractions[i].query >= start && attractions[i].query < end) {
+                    ClusterMethods.addAttraction(positions[attractions[i].query], positions[attractions[i].hit], attractions[i].att,
+                            currmoveatt, attvalpow, attfactor, data.cluster2d);
                     
-                    for (int j = 0; j < movearr[attvals[i].query].length; j ++) { 
-                        movearr[attvals[i].query][j] += currmoveatt[j];
+                    for (int j = 0; j < movements[attractions[i].query].length; j ++) { 
+                        movements[attractions[i].query][j] += currmoveatt[j];
                     }
                 }
                 
-                if (attvals[i].hit >= start && attvals[i].hit < end) {
-                    ClusterMethods.add_attraction(posarr[attvals[i].hit], posarr[attvals[i].query], attvals[i].att,
-                            currmoveatt, attvalpow, attfactor, parent.cluster2d);
+                if (attractions[i].hit >= start && attractions[i].hit < end) {
+                    ClusterMethods.addAttraction(positions[attractions[i].hit], positions[attractions[i].query], attractions[i].att,
+                            currmoveatt, attvalpow, attfactor, data.cluster2d);
 
-                    for (int j = 0; j < movearr[attvals[i].hit].length; j ++) {
-                        movearr[attvals[i].hit][j] += currmoveatt[j];
+                    for (int j = 0; j < movements[attractions[i].hit].length; j ++) {
+                        movements[attractions[i].hit][j] += currmoveatt[j];
                     }
                 }
             }
 
             // restrict to the maximal allowed move distance
             for (int i = start; i < end; i++) {
-                for (int j = 0; j < movearr[i].length; j ++) {
-                    movearr[i][j] /= elements;
+                for (int j = 0; j < movements[i].length; j ++) {
+                    movements[i][j] /= elements;
                 }
                 
-                totaldist = java.lang.Math.sqrt((movearr[i][0] * movearr[i][0]) + (movearr[i][1] * movearr[i][1])
-                        + (movearr[i][2] * movearr[i][2]));
+                totaldist = java.lang.Math.sqrt((movements[i][0] * movements[i][0]) + (movements[i][1] * movements[i][1])
+                        + (movements[i][2] * movements[i][2]));
                 
                 if (totaldist > maxmove) {
-                    for (int j = 0; j < movearr[i].length; j ++) {
-                        movearr[i][j] *= maxmove / totaldist;
+                    for (int j = 0; j < movements[i].length; j ++) {
+                        movements[i][j] *= maxmove / totaldist;
                     }
                 }
             }
         }
 
-        synchronized (syncon) {
+        synchronized (informParentOfCompletenessLock) {
             this.done = true;
-            syncon.notify();
+            informParentOfCompletenessLock.notify();
         }
     }
 }

@@ -208,7 +208,7 @@ public class ClusterWindow extends javax.swing.JDialog {
             }
             currcount+=mysize;
         }//end for i
-        parent.data.selectednames=newselected;
+        parent.data.selectedSequencesIndices=newselected;
         parent.clusterconf=clusterconf;
         parent.repaint();
     }//GEN-LAST:event_clusterlistValueChanged

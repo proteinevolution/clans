@@ -235,18 +235,18 @@ public class readsave {
                         System.out.println(tmpstr[2]);
                         System.out.println(tmpstr[3]);
                         inread.close();
-                        data.myposarr = posarr;
+                        data.positions = posarr;
                         return;
                     }
                 }//end if readpos
             }//end while reading
             inread.close();
-            data.myposarr = posarr;
+            data.positions = posarr;
             return;
         }catch (IOException e){
             System.err.println("unable to read from " + data.getIntermediateResultfileName());
             e.printStackTrace();
-            data.myposarr = new float[0][0];
+            data.positions = new float[0][0];
             return;
         }
     }//end readpos

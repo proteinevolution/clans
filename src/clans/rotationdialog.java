@@ -232,8 +232,8 @@ public class rotationdialog extends javax.swing.JFrame {
                         ie.printStackTrace();
                     }
                 }
-                parent.mousemove[0]=(int)(((double)xrot*(parent.draw1.drawwidth/2))/(java.lang.Math.PI/2));
-                parent.mousemove[1]=(int)(((double)yrot*(parent.draw1.drawwidth/2))/(java.lang.Math.PI/2));
+                parent.mousemove[0]=(int)(((double)xrot*(parent.draw_area.drawwidth/2))/(java.lang.Math.PI/2));
+                parent.mousemove[1]=(int)(((double)yrot*(parent.draw_area.drawwidth/2))/(java.lang.Math.PI/2));
                 parent.repaint();
                 lasttime=System.currentTimeMillis();
                 //parent.draw1.rotmtx[0][0]=parent.draw1.myrotmtx[0][0];
@@ -254,7 +254,7 @@ public class rotationdialog extends javax.swing.JFrame {
                 parent.data.rotmtx[2][0]=parent.data.myrotmtx[2][0];
                 parent.data.rotmtx[2][1]=parent.data.myrotmtx[2][1];
                 parent.data.rotmtx[2][2]=parent.data.myrotmtx[2][2];
-                parent.draw1.tmprotmtx=new double[3][3];                
+                parent.draw_area.tmprotmtx=new double[3][3];                
             }//end while
             synchronized(this){
                 repaintbutton.setText("Rotate");

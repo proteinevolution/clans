@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import javax.swing.Timer;
 
+import clans.misc.MyMath;
+
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -87,7 +89,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		// closing events are handled in a WindowListener with custom windowClosing method
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-		draw1 = new drawpanel();
+		draw_area = new DrawArea();
 		
 		initializeComputationThread();
 
@@ -103,12 +105,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		mousestart[1] = 0;
 		mousemove[0] = 0;
 		mousemove[1] = 0;
-		draw1.init();
+		draw_area.init();
 
 		// and now initialize a run
 		resetGraph();
 
-		set_selection_button_label();
+		updateSelectionButtonLabel();
 
 		if (data.errbuff.length() > 0) {
 			// If I have had errors up to this point
@@ -122,7 +124,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (new File(data.getIntermediateResultfileName()).canRead()) {
 			System.out.println("reading former data");
 			readsave.parse_intermediate_results(data);
-			data.posarr = data.myposarr;
+			data.posarr = data.positions;
 		}
 	}
 	
@@ -133,7 +135,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * (first column). Then run "jstack <process id>" to see all threads of your process.
 	 */
 	private void initializeComputationThread() {
-		mythread = new computethread(this);
+		iterationComputerThread = new IterationsComputerThread(this);
 	}
 
 	/**
@@ -154,7 +156,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		checkbox_show_names = new javax.swing.JCheckBox();
 		checkbox_show_numbers = new javax.swing.JCheckBox();
 		checkbox_show_connections = new javax.swing.JCheckBox();
-		button_zoom_on_selected = new javax.swing.JButton();
+		button_zoom_on_selected = new javax.swing.JToggleButton();
 		jMenuBar1 = new javax.swing.JMenuBar();
 		menu_file = new javax.swing.JMenu();
 		loadmenuitem = new javax.swing.JMenuItem();
@@ -176,7 +178,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		getparentmenuitem = new javax.swing.JMenuItem();
 		setrotmenuitem = new javax.swing.JMenuItem();
 		attvalcompcheckbox = new javax.swing.JCheckBoxMenuItem();
-		moveselectedonly = new javax.swing.JCheckBoxMenuItem();
+		moveOnlySelectedSequencesCheckbox = new javax.swing.JCheckBoxMenuItem();
 		cluster2dbutton = new javax.swing.JCheckBoxMenuItem();
 		rescalepvaluescheckbox = new javax.swing.JCheckBoxMenuItem();
 		messageOverlayActiveCheckbox = new javax.swing.JCheckBoxMenuItem();
@@ -228,7 +230,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		});
 
 		graphpanel.setPreferredSize(new java.awt.Dimension(640, 480));
-		graphpanel.add(draw1);
+		graphpanel.add(draw_area);
 		graphpanel.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
 			public void mouseDragged(java.awt.event.MouseEvent evt) {
 				graphpanelMouseDragged(evt);
@@ -324,11 +326,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		textfield_info_min_blast_evalue.setToolTipText("evalue limit used for blast");
 		drawbuttonpanel.add(textfield_info_min_blast_evalue);
 
-		set_selection_button_label();
+		updateSelectionButtonLabel();
 		button_select_all_or_clear.setMnemonic(KeyEvent.VK_A);
 		button_select_all_or_clear.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				button_clear_selectionActionPerformed();
+				selectionButtonActivated();
 			}
 		});
 		drawbuttonpanel.add(button_select_all_or_clear);
@@ -363,14 +365,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		});
 		drawbuttonpanel.add(checkbox_show_connections);
 
-		button_zoom_on_selected.setText("Zoom on selected");
 		button_zoom_on_selected.setMnemonic(KeyEvent.VK_Z);
 		button_zoom_on_selected.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				button_zoom_on_selectedActionPerformed();
+				zoomOnSelectedTriggered(true);
 			}
 		});
 		drawbuttonpanel.add(button_zoom_on_selected);
+		updateZoomOnSelectedButtonLabel();
 
 		buttonpanel.add(drawbuttonpanel);
 
@@ -527,13 +529,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		});
 		menu_misc.add(attvalcompcheckbox);
 
-		moveselectedonly.setText("Optimize only selected sequences");
-		moveselectedonly.addActionListener(new java.awt.event.ActionListener() {
+		moveOnlySelectedSequencesCheckbox.setText("Optimize only selected sequences");
+		moveOnlySelectedSequencesCheckbox.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				updateOptimizeOnlySelectedSequencesState();
 			}
 		});
-		menu_misc.add(moveselectedonly);
+		menu_misc.add(moveOnlySelectedSequencesCheckbox);
 
 		cluster2dbutton.setText("Cluster in 2D");
 		cluster2dbutton.addActionListener(new java.awt.event.ActionListener() {
@@ -853,7 +855,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		setJMenuBar(jMenuBar1);
 
-		originalGlassPane = this.getGlassPane();
+		originalGlassPane = getGlassPane();
 		activateMessageOverlay();
 		addGuiMessageOverlayResizeListener();
 		
@@ -969,10 +971,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	private void openChangeStereoVisionAngleDialog() {
 		String tmpstr = "";
 		try {
-			tmpstr = JOptionPane.showInputDialog(this, "Enter the new angle (int):", String.valueOf(draw1.stereoangle));
+			tmpstr = JOptionPane.showInputDialog(this, "Enter the new angle (int):", String.valueOf(draw_area.stereoangle));
 			if (tmpstr != null) {
-				draw1.stereoangle = (int) (Float.parseFloat(tmpstr));// someone might enter a float and it's not time
-																		// critical
+				draw_area.stereoangle = (int) (Float.parseFloat(tmpstr));
 			}
 		} catch (NumberFormatException ne) {
 			javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse integer from '" + tmpstr + "'");
@@ -1008,15 +1009,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			return;
 		}
 
-		float oldzoom = data.zoomfactor;
+		float zoom_factor = data.zoomFactor;
 
 		if (evt.isShiftDown()) {
-			data.zoomfactor += ((float) -evt.getWheelRotation()) / 100;
+			zoom_factor += ((float) -evt.getWheelRotation()) / 100;
 		} else {
-			data.zoomfactor += ((float) -evt.getWheelRotation()) / 10;
+			zoom_factor += ((float) -evt.getWheelRotation()) / 10;
 		}
 
-		this.updateZoom(oldzoom);
+		setZoom(zoom_factor);
 	}
 
 	/**
@@ -1230,14 +1231,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		message_overlay = new GuiMessageOverlay();
 		message_overlay.updateGlassSize(graphpanel.getHeight());
 
-		this.setGlassPane(message_overlay);
+		setGlassPane(message_overlay);
 	}
 	
 	/**
 	 * Deactivates the message overlay.
 	 */
 	private void deactivateMessageOverlay() {
-		this.setGlassPane(originalGlassPane);
+		setGlassPane(originalGlassPane);
 		message_overlay = null;
 	}
 	
@@ -1375,19 +1376,25 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Opens a window that offers the currently selected sequences in FASTA format as copy & pastable text.
 	 */
 	private void openShowCopyPasteableSequencesWindow() {
-		int seqnum = data.selectednames.length;
-		if (seqnum < 1) {
+		if (data.selectedSequencesIndices.length < 1) {
 			javax.swing.JOptionPane.showMessageDialog(this, "Please select some sequences");
 			return;
 		}
 		
 		StringBuffer outbuff = new StringBuffer();
-		for (int i = 0; i < seqnum; i++) {
-			outbuff.append(">" + data.sequence_names[data.selectednames[i]] + " " + data.selectednames[i] + "\n");
-			outbuff.append(data.sequences[data.selectednames[i]].seq + "\n");
+		for (int i = 0; i < data.selectedSequencesIndices.length; i++) {
+			outbuff.append(">" + data.sequence_names[data.selectedSequencesIndices[i]] + " " + data.selectedSequencesIndices[i] + "\n");
+			outbuff.append(data.sequences[data.selectedSequencesIndices[i]].seq + "\n");
 		}
 
 		new ShowCopyPasteableSequences(new javax.swing.JFrame(), outbuff).setVisible(true);
+	}
+	
+	/**
+	 * Returns whether the user wants to zoom in on the selected sequences.
+	 */
+	private boolean isZoomingOnSelectedSequences() {
+		return button_zoom_on_selected.isSelected();
 	}
 
 	/**
@@ -1396,34 +1403,46 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * @param old_zoom
 	 *            The previous zoom value.
 	 */
-	private void updateZoom(float old_zoom) {
-
-		if (old_zoom == -1) { // not zoomed before, simply center 
-			centerGraph();
-			return;
+	private void setZoom(float new_zoom_factor) throws IllegalStateException {
+		if (new_zoom_factor <= 0) {
+			throw new IllegalStateException("the zoom factor must be a float value >= 0");
 		}
 		
-		int panelwidth = graphpanel.getWidth() - 2 * draw1.xadd;
-		int panelheight = graphpanel.getHeight() - 2 * draw1.yadd;
+		float old_zoom_factor = data.zoomFactor;
+		data.zoomFactor = new_zoom_factor;
+		
+		int panelwidth = graphpanel.getWidth() - 2 * draw_area.xadd;
+		int panelheight = graphpanel.getHeight() - 2 * draw_area.yadd;
 
-		int imagecenterx = (int) ((panelwidth / 2 - draw1.xtranslate) / old_zoom);
-		int imagecentery = (int) ((panelheight / 2 - draw1.ytranslate) / old_zoom);
+		int imagecenterx = (int) ((panelwidth / 2 - draw_area.xtranslate) / old_zoom_factor);
+		int imagecentery = (int) ((panelheight / 2 - draw_area.ytranslate) / old_zoom_factor);
 
-		draw1.xtranslate = (int) (-(imagecenterx * data.zoomfactor) + panelwidth / 2);
-		draw1.ytranslate = (int) (-(imagecentery * data.zoomfactor) + panelheight / 2);
+		draw_area.xtranslate = (int) (-(imagecenterx * data.zoomFactor) + panelwidth / 2);
+		draw_area.ytranslate = (int) (-(imagecentery * data.zoomFactor) + panelheight / 2);
 
 		repaint();
+
+	}
+	
+	/**
+	 * Resets the zoom to none.
+	 */
+	private void resetZoom() {
+		data.zoomFactor = 1;
+		centerGraph();
+		button_zoom_on_selected.setSelected(false);
+		updateZoomOnSelectedButtonLabel();
 	}
 
 	/**
 	 * Centers the graph while maintaining the current zoom level.
 	 */
 	private void centerGraph() {
-		int panelwidth = graphpanel.getWidth() - 2 * draw1.xadd;
-		int panelheight = graphpanel.getHeight() - 2 * draw1.yadd;
+		int panelwidth = graphpanel.getWidth() - 2 * draw_area.xadd;
+		int panelheight = graphpanel.getHeight() - 2 * draw_area.yadd;
 
-		draw1.xtranslate = (int) (panelwidth / 2 * (1 - data.zoomfactor));
-		draw1.ytranslate = (int) (panelheight / 2 * (1 - data.zoomfactor));
+		draw_area.xtranslate = (int) (panelwidth / 2 * (1 - data.zoomFactor));
+		draw_area.ytranslate = (int) (panelheight / 2 * (1 - data.zoomFactor));
 
 		repaint();
 	}
@@ -1433,29 +1452,36 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 */
 	private void openChangeZoomFactorDialog() {
 		String user_input = "";
-		float oldzoom = data.zoomfactor;
 
-		try {
-			user_input = javax.swing.JOptionPane.showInputDialog(this, "New zoom factor (in percent)",
-					String.valueOf((int) (data.zoomfactor * 100)));
-			
-			if (user_input != null) {
-				data.zoomfactor = ((float) (Integer.parseInt(user_input))) / 100;
-			}
-		
-		} catch (NumberFormatException ne) {
-			javax.swing.JOptionPane.showMessageDialog(this, "Error; cannot parse float from '" + user_input + "'");
+		user_input = javax.swing.JOptionPane.showInputDialog(this, "New zoom factor (in percent)",
+				String.valueOf((int) (data.zoomFactor * 100)));
+
+		if (user_input == null) {
 			return;
 		}
 
-		updateZoom(oldzoom);
+		float new_zoom_factor;
+		try {
+			new_zoom_factor = Integer.parseInt(user_input) / 100f;
+
+			if (new_zoom_factor <= 0) {
+				throw new NumberFormatException();
+			}
+
+		} catch (NumberFormatException ne) {
+			javax.swing.JOptionPane.showMessageDialog(this, user_input
+					+ " is not a positive integer number; zoom not changed");
+			return;
+		}
+
+		setZoom(new_zoom_factor);
 	}
 
 	/**
 	 * Opens a dialog to let the user change the GUI font.
 	 */
 	private void openChangeFontDialog() {
-		draw1.myfont = fontchooserdialog.getfont("Select Font", draw1.myfont);
+		draw_area.myfont = fontchooserdialog.getfont("Select Font", draw_area.myfont);
 		repaint();
 	}
 	
@@ -1479,9 +1505,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * options like the selection of those connected sequences are available to the user.
 	 */
 	private void openGetSequencesConnectedToSelectedsWindow() {
-		int[] blasthitsarr = showblasthitsforselected.getblasthits(data.myattvals, data.selectednames,
-				data.sequence_names);
-		new showblasthitsforselected(this, blasthitsarr, data.selectednames).setVisible(true);
+		int[] blasthitsarr = showblasthitsforselected.getblasthits(data.attractionValues,
+				data.selectedSequencesIndices, data.sequence_names);
+		new showblasthitsforselected(this, blasthitsarr, data.selectedSequencesIndices).setVisible(true);
 	}
 
 	/**
@@ -1502,8 +1528,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				float sigmafac = Float.parseFloat(tmpstr);
 				tmpstr = (String) optionsvec.remove(0);
 				int minseqnum = Integer.parseInt(tmpstr);
+				
 				System.out.println("searching for convex clusters");
-				Vector<cluster> clustervec = findclusters.getconvex(data.myattvals, sigmafac, minseqnum, data.elements);
+				Vector<cluster> clustervec = findclusters.getconvex(data.attractionValues, sigmafac, minseqnum,
+						data.elements);
+				
 				System.out.println("done searching for clusters; opening window");
 				if (((String) optionsvec.remove(0)).equalsIgnoreCase("true")) {// if do bootstrap
 					didbootstrap = true;
@@ -1514,8 +1543,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					if (remove > 1) {
 						remove /= 100;
 					}
-					if (bootstrapcluster.bootstrapconvex(data.myattvals, clustervec, "convex", replicates, remove,
-							sigmafac, minseqnum, data.elements) == false) {
+					
+					if (bootstrapcluster.bootstrapconvex(data.attractionValues, clustervec, "convex", replicates,
+							remove, sigmafac, minseqnum, data.elements) == false) {
 						javax.swing.JOptionPane.showMessageDialog(this, "ERROR while bootstrapping");
 						return;
 					}
@@ -1531,9 +1561,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				int minlinkage = Integer.parseInt(tmpstr);
 				tmpstr = (String) optionsvec.remove(0);
 				int minseqnum = Integer.parseInt(tmpstr);
+
 				System.out.println("searching for linkage clusters");
-				Vector<cluster> clustervec = findclusters.getlinkage(data.myattvals, minlinkage, minseqnum,
+				Vector<cluster> clustervec = findclusters.getlinkage(data.attractionValues, minlinkage, minseqnum,
 						data.elements);
+				
 				System.out.println("done searching for clusters; opening window");
 				if (((String) optionsvec.remove(0)).equalsIgnoreCase("true")) {// if do bootstrap
 					didbootstrap = true;
@@ -1544,8 +1576,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					if (remove > 1) {
 						remove /= 100;
 					}
-					if (bootstrapcluster.bootstraplinkage(data.myattvals, clustervec, "linkage", replicates, remove,
-							minlinkage, minseqnum, data.elements) == false) {
+					if (bootstrapcluster.bootstraplinkage(data.attractionValues, clustervec, "linkage", replicates,
+							remove, minlinkage, minseqnum, data.elements) == false) {
 						javax.swing.JOptionPane.showMessageDialog(this, "Error while bootstrapping");
 						return;
 					}
@@ -1570,9 +1602,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					globalaverage = true;
 				}
 				int maxrounds = Integer.parseInt(optionsvec.remove(optionsvec.size() - 1));
+
 				System.out.println("searching for network clusters, maxrounds=" + maxrounds);
-				Vector<cluster> clustervec = findclusters.getnetwork(data.myattvals, minseqnum, dooffset,
+				Vector<cluster> clustervec = findclusters.getnetwork(data.attractionValues, minseqnum, dooffset,
 						globalaverage, data.elements, maxrounds);
+				
 				System.out.println("done searching for clusters; opening window");
 				if (((String) optionsvec.remove(0)).equalsIgnoreCase("true")) {// if do bootstrap
 					didbootstrap = true;
@@ -1583,8 +1617,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					if (remove > 1) {
 						remove /= 100;
 					}
-					if (bootstrapcluster.bootstrapnetwork(data.myattvals, clustervec, "network", replicates, remove,
-							minseqnum, dooffset, globalaverage, data.elements, maxrounds) == false) {
+					
+					if (bootstrapcluster.bootstrapnetwork(data.attractionValues, clustervec, "network", replicates,
+							remove, minseqnum, dooffset, globalaverage, data.elements, maxrounds) == false) {
 						javax.swing.JOptionPane.showMessageDialog(this, "Error while bootstrapping");
 						return;
 					}
@@ -1611,53 +1646,53 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			saverunobject saveddata = ClusterData.load_matrix_file(fc.getSelectedFile());
 			if (saveddata.file != null) {// if the data was read all right
 				repaint = "Error Loading Data";
-				data.sequences = ClusterMethods.remove_gaps_from_sequences(saveddata.inaln);
+				data.sequences = ClusterMethods.removeGapsFromSequences(saveddata.inaln);
 				int seqs = data.sequences.length;
 
 				// data.nameshash holds info about which name is which array number
 				data.nameshash = new HashMap<String, Integer>((int) (seqs / 0.75) + 1, (float) 0.75);
 
 				data.sequence_names = new String[seqs];
-				data.myposarr = new float[seqs][3];
+				data.positions = new float[seqs][3];
 				Random rand = ClusterMethods.rand;
 				for (int i = 0; i < seqs; i++) {
 					data.sequence_names[i] = data.sequences[i].name.trim();
 					data.sequences[i].name = new String("sequence" + i);
 					data.nameshash.put(data.sequences[i].name, new Integer(i));
-					data.myposarr[i][0] = rand.nextFloat();
-					data.myposarr[i][1] = rand.nextFloat();
-					data.myposarr[i][2] = rand.nextFloat();
+					data.positions[i][0] = rand.nextFloat();
+					data.positions[i][1] = rand.nextFloat();
+					data.positions[i][2] = rand.nextFloat();
 				}
 				data.blasthits = null;
 				data.orgattvals = null;
-				data.myattvals = saveddata.attvals;
-				data.myattvals = saveddata.attvals;
+				data.attractionValues = saveddata.attvals;
+				data.attractionValues = saveddata.attvals;
 				button_cutoff_value.setText("Use Attraction values better than");
 				textfield_threshold_value.setText("0");
 				data.elements = data.sequence_names.length;
 				// now symmetrize and normalize the attvals to range from -1 to +1
 				float minval = 0;
 				float maxval = 0;
-				for (int i = data.myattvals.length - 1; i >= 0; i--) {
-					if (data.myattvals[i].att > maxval) {
-						maxval = data.myattvals[i].att;
-					} else if (data.myattvals[i].att < minval) {
-						minval = data.myattvals[i].att;
+				for (int i = data.attractionValues.length - 1; i >= 0; i--) {
+					if (data.attractionValues[i].att > maxval) {
+						maxval = data.attractionValues[i].att;
+					} else if (data.attractionValues[i].att < minval) {
+						minval = data.attractionValues[i].att;
 					}
-				}// end for i
+				}
 				if (-minval > maxval) {// decide wether to divide by maxval or -minval
 					maxval = -minval;
 				}
-				for (int i = data.myattvals.length - 1; i >= 0; i--) {
+				for (int i = data.attractionValues.length - 1; i >= 0; i--) {
 					// now normalize the values
-					data.myattvals[i].att /= maxval;
-				}// end for i
+					data.attractionValues[i].att /= maxval;
+				}
 				data.p2attfactor = maxval;
-				data.selectednames = new int[0];
+				data.selectedSequencesIndices = new int[0];
 				data.seqgroupsvec = saveddata.seqgroupsvec;
-				data.posarr = data.myposarr;
-				data.lastmovearr = new float[data.elements][ClusterData.dimensions];
-				data.mymovearr = new float[data.elements][ClusterData.dimensions];
+				data.posarr = data.positions;
+				data.movementsLastIteration = new float[data.elements][ClusterData.dimensions];
+				data.movements = new float[data.elements][ClusterData.dimensions];
 				data.posarrtmp = new float[data.elements][ClusterData.dimensions];
 				data.drawarrtmp = new int[data.elements][ClusterData.dimensions];
 				data.resetDrawOrder();
@@ -1680,11 +1715,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			if (data.seqlengths[i] > maxlength) {
 				maxlength = data.seqlengths[i];
 			}
-		}// end for i
+		}
 		if (maxlength > 0) {
 			for (int i = 0; i < seqnum; i++) {
 				data.seqlengths[i] /= maxlength;
-			}// end for i
+			}
 		}
 
 		if (restart_computation) {
@@ -1698,44 +1733,24 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Toggles between 2 and 3 dimensions for the graph.
 	 */
 	private void toggle2d3dGraph() {
-		// get rid of all z-axis information and set the rotation matrices to 1,1,1 (x,y,z)
-		// set the rotation matrices to 1,1,1
-		data.rotmtx[0][0] = 1;
-		data.rotmtx[0][1] = 0;
-		data.rotmtx[0][2] = 0;
-		data.rotmtx[1][0] = 0;
-		data.rotmtx[1][1] = 1;
-		data.rotmtx[1][2] = 0;
-		data.rotmtx[2][0] = 0;
-		data.rotmtx[2][1] = 0;
-		data.rotmtx[2][2] = 1;
-		draw1.tmprotmtx[0][0] = 1;
-		draw1.tmprotmtx[0][1] = 0;
-		draw1.tmprotmtx[0][2] = 0;
-		draw1.tmprotmtx[1][0] = 0;
-		draw1.tmprotmtx[1][1] = 1;
-		draw1.tmprotmtx[1][2] = 0;
-		draw1.tmprotmtx[2][0] = 0;
-		draw1.tmprotmtx[2][1] = 0;
-		draw1.tmprotmtx[2][2] = 1;
-		data.myrotmtx[0][0] = 1;
-		data.myrotmtx[0][1] = 0;
-		data.myrotmtx[0][2] = 0;
-		data.myrotmtx[1][0] = 0;
-		data.myrotmtx[1][1] = 1;
-		data.myrotmtx[1][2] = 0;
-		data.myrotmtx[2][0] = 0;
-		data.myrotmtx[2][1] = 0;
-		data.myrotmtx[2][2] = 1;
-		// now set all the z-values to "0"
-		for (int i = data.myposarr.length; --i >= 0;) {
-			data.myposarr[i][2] = 0;
-		}// end for i
+
+		// reset rotatation
+		MyMath.setTo3x3IdentityMatrix(data.rotmtx);
+		MyMath.setTo3x3IdentityMatrix(data.myrotmtx);
+		MyMath.setTo3x3IdentityMatrix(draw_area.tmprotmtx);
+
+		// get rid of all z-axis information
+		for (int i = data.positions.length; --i >= 0;) {
+			data.positions[i][2] = 0;
+		}
+		
 		if (cluster2dbutton.isSelected()) {
 			data.cluster2d = true;
+		
 		} else {
 			data.cluster2d = false;
 		}
+		
 		repaint();
 	}
 
@@ -1747,7 +1762,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		boolean restart_autosave = pauseAutosave();
 
 		java.awt.print.PrinterJob printJob = java.awt.print.PrinterJob.getPrinterJob();
-		printJob.setPrintable(draw1);
+		printJob.setPrintable(draw_area);
 		if (printJob.printDialog()) {
 			try {
 				printJob.print();
@@ -1794,7 +1809,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Opens a color chooser dialog to change the color of selected sequence circles.
 	 */
 	private void openSelectedColorChangeDialog() {
-		draw1.selectedcolor = safe_change_color_dialog("Choose a new foreground color", draw1.selectedcolor);
+		draw_area.selectedcolor = safe_change_color_dialog("Choose a new foreground color", draw_area.selectedcolor);
 		repaint();
 	}
 
@@ -1802,7 +1817,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Opens a color chooser dialog to change the color of blast hit circles.
 	 */
 	private void openBlastColorChangeDialog() {
-		draw1.blastcirclecolor = safe_change_color_dialog("Choose a new foreground color", draw1.blastcirclecolor);
+		draw_area.blastcirclecolor = safe_change_color_dialog("Choose a new foreground color", draw_area.blastcirclecolor);
 		repaint();
 	}
 
@@ -1812,7 +1827,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 */
 	private void openShowSelectedSequencesWindow() {
 		
-		if (!this.contains_data(true)) {
+		if (!containsData(true)) {
 			return;
 		}
 		
@@ -1829,7 +1844,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Opens a color chooser dialog to change the foreground color.
 	 */
 	private void openForegroundColorChangeDialog() {
-		draw1.fgcolor = safe_change_color_dialog("Choose a new foreground color", draw1.fgcolor);
+		draw_area.fgcolor = safe_change_color_dialog("Choose a new foreground color", draw_area.fgcolor);
 		repaint();
 	}
 
@@ -1837,7 +1852,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Opens a color chooser dialog to change the background color.
 	 */
 	private void openBackgroundColorChangeDialog() {
-		draw1.bgcolor = safe_change_color_dialog("Choose a new background color", draw1.bgcolor);
+		draw_area.bgcolor = safe_change_color_dialog("Choose a new background color", draw_area.bgcolor);
 		repaint();
 	}
 
@@ -1854,8 +1869,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				outwrite.println("ID\tNAME\tX\tY");
 
 				for (int i = 0; i < namenum; i++) {
-					outwrite.println(i + "\t" + data.sequence_names[i] + "\t" + (data.posarrtmp[i][0] - draw1.xadd)
-							/ draw1.drawwidth + "\t" + (data.posarrtmp[i][1] - draw1.yadd) / draw1.drawheight);
+					outwrite.println(i + "\t" + data.sequence_names[i] + "\t" + (data.posarrtmp[i][0] - draw_area.xadd)
+							/ draw_area.drawwidth + "\t" + (data.posarrtmp[i][1] - draw_area.yadd) / draw_area.drawheight);
 				}
 
 				outwrite.close();
@@ -1873,7 +1888,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Opens a color chooser dialog to change the background color.
 	 */
 	private void openNumberColorChangeDialog() {
-		draw1.blasthitcolor = safe_change_color_dialog("Select New Color", draw1.blasthitcolor);
+		draw_area.blasthitcolor = safe_change_color_dialog("Select New Color", draw_area.blasthitcolor);
 		repaint();
 	}
 
@@ -1909,7 +1924,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 */
 	private void set_threshold(double threshold) {
 
-		if (!this.contains_data(true)) {
+		if (!containsData(true)) {
 			return;
 		}
 
@@ -1918,14 +1933,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		data.pvalue_threshold = threshold;
 
 		if (data.blasthits != null) {
-			synchronized (data.myattvals) {
+			synchronized (data.attractionValues) {
 				data.compute_attraction_values();
 			}
-		} else if (data.myattvals != null) {// remove all attvals below the specified value
+		} else if (data.attractionValues != null) {// remove all attvals below the specified value
 			if (data.orgattvals == null) {
-				data.orgattvals = data.myattvals;
+				data.orgattvals = data.attractionValues;
 			}
-			data.myattvals = ClusterMethods.filter_attraction_values(data.orgattvals, data.pvalue_threshold);
+			data.attractionValues = ClusterMethods.filterAttractionValues(data.orgattvals, data.pvalue_threshold);
 		}
 
 		data.resetDrawOrder();
@@ -1981,7 +1996,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				}
 
 				outwrite.println("<att>");
-				minattvals[] myattvals = data.myattvals;
+				minattvals[] myattvals = data.attractionValues;
 				int datnum = myattvals.length;
 
 				for (int i = 0; i < datnum; i++) {
@@ -2038,7 +2053,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				for (int j = 0; j < 3; j++) {
 					data.myrotmtx[i][j] = Double.parseDouble(tmparr[i * 3 + j]);
 				}
-			}// end for i
+			}
 			data.rotmtx[0][0] = data.myrotmtx[0][0];
 			data.rotmtx[0][1] = data.myrotmtx[0][1];
 			data.rotmtx[0][2] = data.myrotmtx[0][2];
@@ -2387,7 +2402,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 		}
 
-		if (data.selectednames.length < 2) {
+		if (data.selectedSequencesIndices.length < 2) {
 			return;
 		}
 
@@ -2418,42 +2433,38 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		parentnameshash.addElement(data.nameshash);
 
 		// holds info about which name is which array number
-		data.nameshash = new HashMap<String, Integer>((int) (data.selectednames.length / 0.75) + 1, (float) 0.75);
-		for (int i = 0; i < data.selectednames.length; i++) {
-			data.nameshash.put(data.sequences[data.selectednames[i]].name, new Integer(i));
+		data.nameshash = new HashMap<String, Integer>((int) (data.selectedSequencesIndices.length / 0.75) + 1, (float) 0.75);
+		for (int i = 0; i < data.selectedSequencesIndices.length; i++) {
+			data.nameshash.put(data.sequences[data.selectedSequencesIndices[i]].name, new Integer(i));
 		}
 
 		if (data.blasthits != null) {
 			parentblasthits.addElement(data.blasthits);
-			data.blasthits = SelectedSubsetHandling.get_blasthits(data.blasthits, data.selectednames);
+			data.blasthits = SelectedSubsetHandling.get_blasthits(data.blasthits, data.selectedSequencesIndices);
 		} else {
 			if (data.orgattvals == null) {
-				// System.out.println("setting orgattval=myattvals");
-				data.orgattvals = data.myattvals;
+				data.orgattvals = data.attractionValues;
 			}
-			// System.out.println("rmsingletons: newattvals calculation");
 			parent_orgattvals.addElement(data.orgattvals);
-			data.orgattvals = SelectedSubsetHandling.get_myattvals(data.orgattvals, data.selectednames);
+			data.orgattvals = SelectedSubsetHandling.get_myattvals(data.orgattvals, data.selectedSequencesIndices);
 			data.compute_attraction_values();
 		}
 
-		parentmovearr.addElement(data.mymovearr);
-		data.mymovearr = SelectedSubsetHandling.get_mymovearr(data.mymovearr, data.selectednames);
-		if (data.mymovearr.length > 0) {
-			// lastmovearr == previous_movements
-			data.lastmovearr = new float[data.mymovearr.length][data.mymovearr[0].length];
+		parentmovearr.addElement(data.movements);
+		data.movements = SelectedSubsetHandling.get_mymovearr(data.movements, data.selectedSequencesIndices);
+		if (data.movements.length > 0) {
+			data.movementsLastIteration = new float[data.movements.length][data.movements[0].length];
 		}
 
-		// myposarr == positions
-		parentposarr.addElement(data.myposarr);
-		data.myposarr = SelectedSubsetHandling.get_myposarr(data.myposarr, data.selectednames);
+		parentposarr.addElement(data.positions);
+		data.positions = SelectedSubsetHandling.get_myposarr(data.positions, data.selectedSequencesIndices);
 		parentaln.addElement(data.sequences);
-		data.sequences = SelectedSubsetHandling.get_sequences(data.sequences, data.selectednames);
+		data.sequences = SelectedSubsetHandling.get_sequences(data.sequences, data.selectedSequencesIndices);
 		parentnamearr.addElement(data.sequence_names);
-		data.sequence_names = SelectedSubsetHandling.get_namearr(data.sequence_names, data.selectednames);
-		data.selectednames = new int[0];
+		data.sequence_names = SelectedSubsetHandling.get_namearr(data.sequence_names, data.selectedSequencesIndices);
+		data.selectedSequencesIndices = new int[0];
 		if (data.blasthits != null) {
-			synchronized (data.myattvals) {
+			synchronized (data.attractionValues) {
 				data.compute_attraction_values();
 			}
 		}
@@ -2482,7 +2493,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 
 		data.elements = data.sequence_names.length;
-		data.posarr = data.myposarr;
+		data.posarr = data.positions;
 		data.posarrtmp = new float[data.elements][ClusterData.dimensions];
 		data.drawarrtmp = new int[data.elements][ClusterData.dimensions];
 
@@ -2501,8 +2512,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		groupseqs = null;
 
 		int sequences = data.sequence_names.length;
-		int[] sequences_to_remove = data.selectednames.clone();
-		data.selectednames = new int[sequences - data.selectednames.length];
+		int[] sequences_to_remove = data.selectedSequencesIndices.clone();
+		data.selectedSequencesIndices = new int[sequences - data.selectedSequencesIndices.length];
 		boolean[] sequences_to_keep = new boolean[sequences];
 		for (int i = 0; i < sequences; i++) {
 			sequences_to_keep[i] = true;
@@ -2515,7 +2526,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		int counter = 0;
 		for (int i = 0; i < sequences; i++) {
 			if (sequences_to_keep[i]) {
-				data.selectednames[counter] = i;
+				data.selectedSequencesIndices[counter] = i;
 				counter++;
 			}
 		}
@@ -2538,10 +2549,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		int sequence_number = data.sequence_names.length;
 		boolean[] sequences_to_keep = new boolean[sequence_number];
 
-		for (int i = 0; i < data.myattvals.length; i++) {
-			if (data.myattvals[i].att != 0) {
-				sequences_to_keep[data.myattvals[i].query] = true;
-				sequences_to_keep[data.myattvals[i].hit] = true;
+		for (int i = 0; i < data.attractionValues.length; i++) {
+			if (data.attractionValues[i].att != 0) {
+				sequences_to_keep[data.attractionValues[i].query] = true;
+				sequences_to_keep[data.attractionValues[i].hit] = true;
 			}
 		}
 
@@ -2555,11 +2566,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 		}
 
-		data.selectednames = new int[counter];
+		data.selectedSequencesIndices = new int[counter];
 		counter = 0;
 		for (int i = 0; i < sequence_number; i++) {
 			if (sequences_to_keep[i]) {
-				data.selectednames[counter] = i;
+				data.selectedSequencesIndices[counter] = i;
 				counter++;
 			}
 		}
@@ -2608,14 +2619,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		} else {
 			data.orgattvals = (minattvals[]) parent_orgattvals.elementAt(level);
 			parentblasthits.removeElementAt(level);
-			data.myattvals = ClusterMethods.filter_attraction_values(data.orgattvals, data.pvalue_threshold);
+			data.attractionValues = ClusterMethods.filterAttractionValues(data.orgattvals, data.pvalue_threshold);
 		}
-		data.mymovearr = (float[][]) parentmovearr.elementAt(level);
-		if (data.mymovearr.length > 0) {
-			data.lastmovearr = new float[data.mymovearr.length][data.mymovearr[0].length];
+		data.movements = (float[][]) parentmovearr.elementAt(level);
+		if (data.movements.length > 0) {
+			data.movementsLastIteration = new float[data.movements.length][data.movements[0].length];
 		}
 		parentmovearr.removeElementAt(level);
-		data.myposarr = (float[][]) parentposarr.elementAt(level);
+		data.positions = (float[][]) parentposarr.elementAt(level);
 		parentposarr.removeElementAt(level);
 		data.sequences = (AminoAcidSequence[]) parentaln.elementAt(level);
 		parentaln.removeElementAt(level);
@@ -2625,10 +2636,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		parentnameshash.removeElementAt(level);
 		data.weights = (float[]) parentweights.elementAt(level);
 		parentweights.removeElementAt(level);
-		data.selectednames = new int[0];
+		data.selectedSequencesIndices = new int[0];
 		data.elements = data.sequence_names.length;
 		if (data.blasthits != null) {
-			synchronized (data.myattvals) {
+			synchronized (data.attractionValues) {
 				data.compute_attraction_values();
 			}
 		}
@@ -2642,7 +2653,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (mymapfunctiondialog != null) {
 			mymapfunctiondialog.makenameshash();
 		}
-		data.posarr = data.myposarr;
+		data.posarr = data.positions;
 		data.posarrtmp = new float[data.elements][ClusterData.dimensions];
 		data.drawarrtmp = new int[data.elements][ClusterData.dimensions];
 		data.resetDrawOrder();
@@ -2661,7 +2672,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		boolean restart_computation = stopComputation(true);
 
 		groupseqs = null;
-		int selectednum = data.selectednames.length;
+		int selectednum = data.selectedSequencesIndices.length;
 		if (selectednum < 2) {
 			modifyButtonStartStopResume(null, true);
 			return;
@@ -2699,40 +2710,40 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 																									// which array
 																									// number
 		for (int i = 0; i < selectednum; i++) {
-			data.nameshash.put(data.sequences[data.selectednames[i]].name, new Integer(i));
+			data.nameshash.put(data.sequences[data.selectedSequencesIndices[i]].name, new Integer(i));
 		}
 		if (data.blasthits != null) {
 			parentblasthits.addElement(data.blasthits);
-			data.blasthits = SelectedSubsetHandling.get_blasthits(data.blasthits, data.selectednames);
+			data.blasthits = SelectedSubsetHandling.get_blasthits(data.blasthits, data.selectedSequencesIndices);
 		}
-		parentmovearr.addElement(data.mymovearr);
-		data.mymovearr = SelectedSubsetHandling.get_mymovearr(data.mymovearr, data.selectednames);
-		parentposarr.addElement(data.myposarr);
-		data.myposarr = SelectedSubsetHandling.get_myposarr(data.myposarr, data.selectednames);
+		parentmovearr.addElement(data.movements);
+		data.movements = SelectedSubsetHandling.get_mymovearr(data.movements, data.selectedSequencesIndices);
+		parentposarr.addElement(data.positions);
+		data.positions = SelectedSubsetHandling.get_myposarr(data.positions, data.selectedSequencesIndices);
 		parentaln.addElement(data.sequences);
-		data.sequences = SelectedSubsetHandling.get_sequences(data.sequences, data.selectednames);
+		data.sequences = SelectedSubsetHandling.get_sequences(data.sequences, data.selectedSequencesIndices);
 		parentnamearr.addElement(data.sequence_names);
-		data.sequence_names = SelectedSubsetHandling.get_namearr(data.sequence_names, data.selectednames);
+		data.sequence_names = SelectedSubsetHandling.get_namearr(data.sequence_names, data.selectedSequencesIndices);
 		parentweights.addElement(data.weights);
-		data.weights = SelectedSubsetHandling.get_weights(data.weights, data.selectednames);
+		data.weights = SelectedSubsetHandling.get_weights(data.weights, data.selectedSequencesIndices);
 		data.elements = data.sequence_names.length;
 		if (data.blasthits == null) {
 			if (data.orgattvals == null) {
-				data.orgattvals = data.myattvals;
+				data.orgattvals = data.attractionValues;
 			}
 			parent_orgattvals.addElement(data.orgattvals);
-			data.orgattvals = SelectedSubsetHandling.get_myattvals(data.orgattvals, data.selectednames);
-			data.myattvals = ClusterMethods.filter_attraction_values(data.orgattvals, data.pvalue_threshold);
+			data.orgattvals = SelectedSubsetHandling.get_myattvals(data.orgattvals, data.selectedSequencesIndices);
+			data.attractionValues = ClusterMethods.filterAttractionValues(data.orgattvals, data.pvalue_threshold);
 		}
 		parentseqgroups.addElement(data.seqgroupsvec);
 		data.seqgroupsvec = new Vector<SequenceGroup>();
-		data.selectednames = new int[0];
+		data.selectedSequencesIndices = new int[0];
 
-		synchronized (data.myattvals) {
+		synchronized (data.attractionValues) {
 			data.compute_attraction_values();
 		}
 
-		data.posarr = data.myposarr;
+		data.posarr = data.positions;
 		data.posarrtmp = new float[data.elements][ClusterData.dimensions];
 		data.drawarrtmp = new int[data.elements][ClusterData.dimensions];
 		data.resetDrawOrder();
@@ -2762,7 +2773,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				eplot.setVisible(true);
 			}
 		} else { // attraction value mode
-			attplotdialog attplot = new attplotdialog(data.myattvals, data.pvalue_threshold);
+			attplotdialog attplot = new attplotdialog(data.attractionValues, data.pvalue_threshold);
 			attplot.setVisible(true);
 		}
 	}
@@ -2800,35 +2811,21 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	/**
 	 * Deselects everything if sequences are currently selected or selects all sequences if none are currently selected.
 	 */
-	private void button_clear_selectionActionPerformed() {
+	private void selectionButtonActivated() {
 
-		if (!this.contains_data(true)) {
+		if (!containsData(true)) {
 			return;
 		}
 
-		if (data.selectednames.length > 0) {// if sth. is selected clear the selection
-
-			deselect_all_entries();
-
-			if (shownames != null) {
-				shownames.seqnamelist.setSelectedIndices(data.selectednames);// clear all selected
-			}
-			if (zoom) {
-				zoom = false;
-				button_zoom_on_selected.setText("Zoom on selected");
-			}
+		if (data.selectedSequencesIndices.length > 0) {
+			deselectAllSequences();
 
 		} else {// if nothing is selected, select all
-			ArrayList<Integer> all_indices = new ArrayList<Integer>();
-			for (int i = 0; i < data.sequences.length; i++) {
-				all_indices.add(i);
-			}
-
-			set_selected(all_indices);
-
-			if (shownames != null) {
-				shownames.seqnamelist.setSelectedIndices(data.selectednames);
-			}
+			selectAllSequences();
+		}
+		
+		if (shownames != null) {
+			shownames.seqnamelist.setSelectedIndices(data.selectedSequencesIndices);
 		}
 
 		repaint();
@@ -2836,30 +2833,33 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 	/**
 	 * Zooms on selected sequences or resets zoom if no sequences are selected.
+	 * 
+	 * @param show_error_message
+	 *            If true, an error message dialog is shown if no sequences are selected.
 	 */
-	private void button_zoom_on_selectedActionPerformed() {
+	private void zoomOnSelectedTriggered(boolean show_error_message) {
 
-		if (!this.contains_data(true)) {
+		if (!containsData(true)) {
 			return;
 		}
 
-		if (zoom) {
-			button_zoom_on_selected.setText("Zoom on selected");
-			zoom = false;
-
-		} else {
-			button_zoom_on_selected.setText("Show all");
-			zoom = true;
-			if (data.selectednames.length < 1) {
-				zoom = false;
-				JOptionPane.showMessageDialog(null, "Please select some sequences", "Message",
-						JOptionPane.INFORMATION_MESSAGE);
-				button_zoom_on_selected.setText("Zoom on selected");
+		if (button_zoom_on_selected.isSelected()) {
+			
+			if (data.selectedSequencesIndices.length == 0) {
+			
+				if (show_error_message) {
+					JOptionPane.showMessageDialog(null, "Please select some sequences", "Message",
+							JOptionPane.INFORMATION_MESSAGE);
+				}
+					
+				button_zoom_on_selected.setSelected(false);
 			}
 		}
 
-		data.zoomfactor = 1;
-		this.updateZoom(-1);
+		data.zoomFactor = 1;
+		centerGraph();
+		
+		updateZoomOnSelectedButtonLabel();
 	}
 
 	
@@ -2871,6 +2871,28 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			button_select_move.setText("SELECT/move");
 		} else {
 			button_select_move.setText("select/MOVE");
+		}
+	}
+
+	/**
+	 * Based on the GUI state, updates the "select all"/"clear selection" button label.
+	 */
+	void updateSelectionButtonLabel() {
+		if (data != null && data.selectedSequencesIndices != null && data.selectedSequencesIndices.length > 0) {
+			button_select_all_or_clear.setText("Clear Selection");
+		} else {
+			button_select_all_or_clear.setText("Select All");
+		}
+	}
+	
+	/**
+	 * Based on the GUI state, updates the Zoom button label.
+	 */
+	void updateZoomOnSelectedButtonLabel() {
+		if (button_zoom_on_selected.isSelected()) {
+			button_zoom_on_selected.setText("Show all");
+		} else {
+			button_zoom_on_selected.setText("Zoom on selected");
 		}
 	}
 
@@ -2897,26 +2919,26 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			} else if (evt.isShiftDown()) {
 				mousestart[0] = evt.getX();
 				mousestart[1] = evt.getY();
-				translate[0] = draw1.xtranslate;
-				translate[1] = draw1.ytranslate;
+				translate[0] = draw_area.xtranslate;
+				translate[1] = draw_area.ytranslate;
 			} else {
-				draw1.drawbox = true;
+				draw_area.drawbox = true;
 				mousestart[0] = evt.getX();
 				mousestart[1] = evt.getY();
 				// if mouse is inside a certain area rotate x,y; outside rotate z
 				if (stereocheckboxmenuitem.isSelected() == false) {
-					if ((mousestart[0] < draw1.xadd) || (mousestart[0] > draw1.drawwidth + draw1.xadd)
-							|| (mousestart[1] < draw1.yadd) || (mousestart[1] > draw1.drawheight + draw1.yadd)) {
-						draw1.rotatez = true;
+					if ((mousestart[0] < draw_area.xadd) || (mousestart[0] > draw_area.drawwidth + draw_area.xadd)
+							|| (mousestart[1] < draw_area.yadd) || (mousestart[1] > draw_area.drawheight + draw_area.yadd)) {
+						draw_area.rotatez = true;
 					} else {
-						draw1.rotatez = false;
+						draw_area.rotatez = false;
 					}
 				} else {// if in stereo mode
-					if ((mousestart[0] < draw1.xadd) || (mousestart[0] > draw1.drawwidth * 2 + draw1.xadd)
-							|| (mousestart[1] < draw1.yadd) || (mousestart[1] > draw1.drawheight + draw1.yadd)) {
-						draw1.rotatez = true;
+					if ((mousestart[0] < draw_area.xadd) || (mousestart[0] > draw_area.drawwidth * 2 + draw_area.xadd)
+							|| (mousestart[1] < draw_area.yadd) || (mousestart[1] > draw_area.drawheight + draw_area.yadd)) {
+						draw_area.rotatez = true;
 					} else {
-						draw1.rotatez = false;
+						draw_area.rotatez = false;
 					}
 				}
 				mousemove[0] = 0;
@@ -2925,8 +2947,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		} else {
 			mousemove[0] = 0;
 			mousemove[1] = 0;
-			selectstart[0] = evt.getX() - draw1.xtranslate;
-			selectstart[1] = evt.getY() - draw1.ytranslate;
+			selectstart[0] = evt.getX() - draw_area.xtranslate;
+			selectstart[1] = evt.getY() - draw_area.ytranslate;
 			currmousepos[0] = selectstart[0];
 			currmousepos[1] = selectstart[1];
 		}
@@ -2947,8 +2969,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	
 		if (button_select_move.isSelected() == false) {
 			if (evt.isShiftDown()) {
-				draw1.xtranslate = evt.getX() - mousestart[0] + translate[0];
-				draw1.ytranslate = evt.getY() - mousestart[1] + translate[1];
+				draw_area.xtranslate = evt.getX() - mousestart[0] + translate[0];
+				draw_area.ytranslate = evt.getY() - mousestart[1] + translate[1];
 			} else if (moveseqs) {
 
 			} else {
@@ -2964,14 +2986,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				int[] tmpreg = new int[4];
 				tmpreg[0] = selectstart[0];
 				tmpreg[1] = selectstart[1];
-				tmpreg[2] = evt.getX() - draw1.xtranslate;
-				tmpreg[3] = evt.getY() - draw1.ytranslate;
+				tmpreg[2] = evt.getX() - draw_area.xtranslate;
+				tmpreg[3] = evt.getY() - draw_area.ytranslate;
 				updatetmpselected(tmpreg);
 			}
 			mousemove[0] = 0;
 			mousemove[1] = 0;
-			currmousepos[0] = evt.getX() - draw1.xtranslate;
-			currmousepos[1] = evt.getY() - draw1.ytranslate;
+			currmousepos[0] = evt.getX() - draw_area.xtranslate;
+			currmousepos[1] = evt.getY() - draw_area.ytranslate;
 		}
 		repaint();
 	}
@@ -2989,7 +3011,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Starts stopped or stops running computations when the start/stop/resume button is activated.
 	 */
 	private void toggleComputationRunning() {
-		if (!this.contains_data(true)) {
+		if (!containsData(true)) {
 			return;
 		}
 
@@ -3003,7 +3025,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	private void initializeGraphPositions() {
-		if (!this.contains_data(true)) {
+		if (!containsData(true)) {
 			return;
 		}
 		
@@ -3027,7 +3049,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			return;
 		}
 		
-		draw1.drawbox = false;
+		draw_area.drawbox = false;
 		mousemove[0] = 0;
 		mousemove[1] = 0;
 		mouse_is_pressed = false;
@@ -3043,8 +3065,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				int[] tmpreg = new int[4];
 				tmpreg[0] = selectstart[0];
 				tmpreg[1] = selectstart[1];
-				tmpreg[2] = evt.getX() - draw1.xtranslate;
-				tmpreg[3] = evt.getY() - draw1.ytranslate;
+				tmpreg[2] = evt.getX() - draw_area.xtranslate;
+				tmpreg[3] = evt.getY() - draw_area.ytranslate;
 				if (evt.isAltDown() || evt.isControlDown() || evt.isShiftDown()) {
 					// modifier keys indicate deselection instead of selection
 					updateselected(tmpreg, true);
@@ -3064,7 +3086,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			data.rotmtx[2][0] = data.myrotmtx[2][0];
 			data.rotmtx[2][1] = data.myrotmtx[2][1];
 			data.rotmtx[2][2] = data.myrotmtx[2][2];
-			draw1.tmprotmtx = new double[3][3];
+			draw_area.tmprotmtx = new double[3][3];
 		}
 		repaint();
 	}
@@ -3124,14 +3146,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Based on the GUI state, updates the internal state correctly to optimize only the selected subset of sequences.
+	 * If running, switches to "optimize only selected" mode with the next iteration, otherwise sets that mode for
+	 * future calculations.
 	 */
 	private void updateOptimizeOnlySelectedSequencesState() {
-		if (moveselectedonly.isSelected()) {
-			data.moveselectedonly = true;
-		} else {
-			data.moveselectedonly = false;
-		}
+		restartComputation();
 	}
 
 	/**
@@ -3143,7 +3162,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		int returnVal = fc.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			this.setTitle("Clustering of " + fc.getSelectedFile().getName());
+			setTitle("Clustering of " + fc.getSelectedFile().getName());
 			data.save_attraction_values_to_file(fc.getSelectedFile());
 		}
 
@@ -3167,21 +3186,25 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	Vector<viewblasthits> viewblasthitsvec = new Vector<viewblasthits>();
 	Vector<selectclass> selectvec = new Vector<selectclass>();
 
-	boolean zoom = false;
 	boolean mouse_is_pressed = false;
 	boolean moveseqs = false;// flag to set if I want to draw sequences in 3d-space
 	boolean recalc = true;// synchronize drawing and calculating
-	drawpanel draw1;
+	DrawArea draw_area;
 
 	/**
 	 * dataLock prevents the GUI from drawing data that is currently chaning, e.g. while adjusting to new data after
 	 * loading.
 	 */
 	final public Object dataLock = new Object();
+	
+	/**
+	 * Prevents the selection from changing during operations that need a stable selection.
+	 */
+	final public Object selectedSequencesLock = new Object();
 
 	WindowShowSelectedSequences shownames;
 	WindowEditGroups myseqgroupwindow;
-	computethread mythread;
+	IterationsComputerThread iterationComputerThread;
 	final Object computationLock = new Object();
 
 	int skiprounds = 1;
@@ -3263,7 +3286,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	private javax.swing.JButton button_cutoff_value;
 	private javax.swing.JTextField textfield_threshold_value;
 	private javax.swing.JTextField textfield_info_min_blast_evalue;
-	private javax.swing.JCheckBoxMenuItem moveselectedonly;
+
+	/**
+	 * The selection status of this item is forwarded to the computation threads to let them optimize all sequences or
+	 * just a subset.
+	 */
+	private javax.swing.JCheckBoxMenuItem moveOnlySelectedSequencesCheckbox;
+	
 	private javax.swing.JMenuItem printmenuitem;
 	private javax.swing.JCheckBoxMenuItem rescalepvaluescheckbox;
 	private javax.swing.JCheckBoxMenuItem messageOverlayActiveCheckbox;
@@ -3273,6 +3302,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	private javax.swing.JMenuItem savemenuitem;
 	private javax.swing.JMenuItem saveasmenuitem;
 	private javax.swing.JMenuItem savemtxmenuitem;
+	/**
+	 * If selected, we are in SELECT mode, if not selected in MOVE mode.
+	 */
 	private javax.swing.JToggleButton button_select_move;
 	private javax.swing.JMenuItem seqscoloring;
 	private javax.swing.JMenuItem sequencesitem;
@@ -3296,7 +3328,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	private javax.swing.JButton button_start_stop_resume;
 	private javax.swing.JMenuItem taxonomymenuitem;
 	private javax.swing.JMenu menu_windows;
-	private javax.swing.JButton button_zoom_on_selected;
+	private javax.swing.JToggleButton button_zoom_on_selected;
 	private javax.swing.JMenuItem zoommenuitem;
 
 	/**
@@ -3325,7 +3357,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * @return true iff the clustering is running
 	 */
 	protected boolean isComputing() {
-		return mythread != null && mythread.isRunning();
+		return iterationComputerThread != null && iterationComputerThread.isRunning();
 	}
 
 	/**
@@ -3338,14 +3370,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			return true;
 		}
 
-		if (!contains_data(true)) {
+		if (!containsData(true)) {
 			return false;
 		}
 
 		updateOptionValuesFromOptionsWindow();
 
 		initializeComputationThread(); // thread cannot be restarted
-		mythread.start();
+		iterationComputerThread.start();
 
 		modifyButtonStartStopResume(ButtonStartStopMessage.STOP, true);
 
@@ -3355,7 +3387,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	/**
 	 * Stops the computation.
 	 * 
-	 * @return true iff the computation was running.
+	 * @param keep_button_disabled
+	 *            if true, the start/stop/resume button stays disabled after returning, leaving it to the following code
+	 *            to re-enable it. Useful if the button needs to stay disabled during an operation.
+	 * @return true if the computation was running.
 	 */
 	private boolean stopComputation(boolean keep_button_disabled) {
 		if (!isComputing()) {
@@ -3364,7 +3399,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		modifyButtonStartStopResume(null, false);
 
-		mythread.interrupt(); // tell the thread to stop whenever possible next
+		iterationComputerThread.interrupt(); // tell the thread to stop whenever possible next
 		
 		synchronized (computationLock) {
 			try {
@@ -3386,7 +3421,22 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		return true;
 	}
+	
+	private void restartComputation() {
+		if (stopComputation(false)) {
+			startComputation();
+		}
+	}
 
+	/**
+	 * Returns whether all or just the selected subset of sequences should be optimized during calculations.
+	 * 
+	 * @return true if only selected sequences should be optimized, false if all should be optimized.
+	 */
+	private boolean optimizeOnlySelectedSequences() {
+		return moveOnlySelectedSequencesCheckbox.isSelected();
+	}
+	
 	/**
 	 * Resets the graph to random sequence positions. This is used when and equal to just having loaded data off BLAST
 	 * results.
@@ -3409,7 +3459,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		mousemove[0] = 0;
 		mousemove[1] = 0;
 
-		this.updateZoom(-1);
+		centerGraph();
 	}
 
 	/**
@@ -3590,17 +3640,17 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 
 		textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
-		this.setTitle("Clustering of " + data.getBaseInputfileName());
+		setTitle("Clustering of " + data.getBaseInputfileName());
 
-		this.updateZoom(-1);
+		centerGraph();
 	}
 
 	boolean contains_data() {
-		return this.data.mymovearr != null;
+		return data.movements != null;
 	}
 
-	boolean contains_data(boolean showinfo) {
-		if (this.contains_data()) {
+	boolean containsData(boolean showinfo) {
+		if (contains_data()) {
 			return true;
 		}
 
@@ -3616,26 +3666,26 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			boolean useselectedonly) {
 		// initialize the necessary variable for the case where new sequences are added to an existing run.
 		data.sequences = allaln;
-		data.myposarr = allposarr;
+		data.positions = allposarr;
 		data.blasthits = blastvec;
 		data.maxmove = maxmove;
 		data.pvalue_threshold = pval;
 		textfield_threshold_value.setText(String.valueOf(data.pvalue_threshold));
 		textfield_info_min_blast_evalue.setText(String.valueOf(data.pvalue_threshold));
-		data.selectednames = newnumarr;
+		data.selectedSequencesIndices = newnumarr;
 		data.nameshash = allnameshash;
 		data.sequence_names = allnamearr;
 		data.elements = data.sequence_names.length;
-		data.posarr = data.myposarr;
-		data.lastmovearr = new float[data.elements][ClusterData.dimensions];
-		data.mymovearr = new float[data.elements][ClusterData.dimensions];
+		data.posarr = data.positions;
+		data.movementsLastIteration = new float[data.elements][ClusterData.dimensions];
+		data.movements = new float[data.elements][ClusterData.dimensions];
 		data.posarrtmp = new float[data.elements][ClusterData.dimensions];
 		data.drawarrtmp = new int[data.elements][ClusterData.dimensions];
 		data.resetDrawOrder();
 
 		data.compute_attraction_values();
 
-		moveselectedonly.setSelected(useselectedonly);
+		moveOnlySelectedSequencesCheckbox.setSelected(useselectedonly);
 		int seqnum = data.sequences.length;
 		System.out.println("seqnum=" + seqnum);
 		data.seqlengths = new float[seqnum];
@@ -3645,29 +3695,29 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			if (data.seqlengths[i] > maxlength) {
 				maxlength = data.seqlengths[i];
 			}
-		}// end for i
+		}
 		for (int i = 0; i < seqnum; i++) {
 			data.seqlengths[i] /= maxlength;
-		}// end for i
+		}
 
-	}// end initaddedseqs
+	}
 
 	// --------------------------------------------------------------------------
 
 	AminoAcidSequence[] getselectedseqs() {
 		// get the currently selected sequences
 		ArrayList<AminoAcidSequence> tmpvec = new ArrayList<AminoAcidSequence>();
-		int sequences = data.selectednames.length;
+		int sequences = data.selectedSequencesIndices.length;
 		AminoAcidSequence curraaseq;
 		for (int i = 0; i < sequences; i++) {
 			curraaseq = new AminoAcidSequence();
-			curraaseq.name = data.sequence_names[data.selectednames[i]];
-			curraaseq.seq = data.sequences[data.selectednames[i]].seq;
+			curraaseq.name = data.sequence_names[data.selectedSequencesIndices[i]];
+			curraaseq.seq = data.sequences[data.selectedSequencesIndices[i]].seq;
 			tmpvec.add(curraaseq);
 		}
 		AminoAcidSequence[] retarr = (AminoAcidSequence[]) tmpvec.toArray(new AminoAcidSequence[0]);
 		return retarr;
-	}// end getselectedseqs
+	}
 
 	/**
 	 * Updates the data with the values of all available fields of the options window.
@@ -3749,66 +3799,92 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			if ((currpos[i][0] > minx) && (currpos[i][0] < maxx) && (currpos[i][1] > miny) && (currpos[i][1] < maxy)) {
 				tmpselect.add(new Integer(i));
 			}
-		}// end for i
+		}
 			// now select those that are not present in selectednames and deselect those that are
 		int tmparrsize = tmpselect.size();
 		Integer[] tmparr = (Integer[]) tmpselect.toArray(new Integer[0]);
 		tmpselect.clear();
-		int j;
-		int selectedelements = data.selectednames.length;
 		boolean isnew;
-		for (int i = 0; i < tmparrsize; i++) {
-			tmpint = tmparr[i].intValue();
-			isnew = true;
-			for (j = 0; j < selectedelements; j++) {
-				if (data.selectednames[j] == tmpint) {// if this element was already selected
-					isnew = false;// do not add it to the new Vector
-					data.selectednames[j] = -1;// mark this as unselected
-				}
-			}// end for j
-			if (isnew && (deselect == false)) {// if this element should be selected
-				tmpselect.add(tmparr[i]);
-			}
-		}// end for i
-		for (int i = 0; i < selectedelements; i++) {
-			// now add those that were selected before
-			if (data.selectednames[i] > -1) {
-				tmpselect.add(new Integer(data.selectednames[i]));
-			}
-		}// end for i
+		
+		synchronized (selectedSequencesLock) {
 
-		// now assign the new selecteds to selectelements and update shownamedialog
-		set_selected(tmpselect);
+			for (int i = 0; i < tmparrsize; i++) {
+				tmpint = tmparr[i].intValue();
+				isnew = true;
+
+				for (int j = 0; j < data.selectedSequencesIndices.length; j++) {
+					if (data.selectedSequencesIndices[j] == tmpint) { // if this element was already selected
+						isnew = false;// do not add it to the new Vector
+						data.selectedSequencesIndices[j] = -1;// mark this as unselected
+					}
+				}
+
+				if (isnew && (deselect == false)) {// if this element should be selected
+					tmpselect.add(tmparr[i]);
+				}
+			}
+
+			for (int i = 0; i < data.selectedSequencesIndices.length; i++) {
+				// now add those that were selected before
+				if (data.selectedSequencesIndices[i] > -1) {
+					tmpselect.add(new Integer(data.selectedSequencesIndices[i]));
+				}
+			}
+
+			// now assign the new selecteds to selectelements and update shownamedialog
+			setSelectedSequences(tmpselect);
+		}
 
 		if (shownames != null) {
-			shownames.setselected(data.selectednames, !shownames.showall);
+			shownames.setselected(data.selectedSequencesIndices, !shownames.showall);
 		}
 	}
 
 	/**
-	 * sets the selected entries and does some housekeeping for that.
-	 * 
-	 * @param new_selecteds
-	 *            the indices of the selected entries
+	 * Informs other parts of the GUI about changes in selected sequences so that they can act accordingly.
 	 */
-	protected void set_selected(ArrayList<Integer> new_selecteds) {
-		data.selectednames = new int[new_selecteds.size()];
-		for (int i = 0; i < new_selecteds.size(); i++) {
-			data.selectednames[i] = new_selecteds.get(i).intValue();
-		}
+	private void informAboutSequenceSelectionChange() {
+		updateSelectionButtonLabel();
+		zoomOnSelectedTriggered(false);
 
 		if (myseqgroupwindow != null) { // update the highlighting of groups with selected sequences
 			myseqgroupwindow.repaint();
 		}
+	}
+	
+	/**
+	 * Sets the selected entries and does some housekeeping for that.
+	 * 
+	 * @param new_selecteds
+	 *            The indices of the selected entries.
+	 */
+	protected void setSelectedSequences(ArrayList<Integer> new_selecteds) {
+		
+		synchronized (selectedSequencesLock) {
+			data.selectedSequencesIndices = new int[new_selecteds.size()];
+			for (int i = 0; i < new_selecteds.size(); i++) {
+				data.selectedSequencesIndices[i] = new_selecteds.get(i).intValue();
+			}
+		}
 
-		set_selection_button_label();
+		informAboutSequenceSelectionChange();
 	}
 
+	protected void selectAllSequences() {
+		ArrayList<Integer> all_indices = new ArrayList<Integer>();
+		for (int i = 0; i < data.sequences.length; i++) {
+			all_indices.add(i);
+		}
+
+		setSelectedSequences(all_indices);
+	}
+	
 	/**
-	 * deselects all entries.
+	 * Deselects everything.
 	 */
-	protected void deselect_all_entries() {
-		set_selected(new ArrayList<Integer>());
+	protected void deselectAllSequences() {
+		setSelectedSequences(new ArrayList<Integer>());
+		resetZoom();
 	}
 
 	void updatetmpselected(int[] tmpreg) {
@@ -3838,64 +3914,64 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			if ((currpos[i][0] > minx) && (currpos[i][0] < maxx) && (currpos[i][1] > miny) && (currpos[i][1] < maxy)) {
 				tmpselect.add(new Integer(i));
 			}
-		}// end for i
+		}
 			// now select those that are not present in selectednames and deselect those that are
 		int j;
-		int selectedelements = data.selectednames.length;
+		int selectedelements = data.selectedSequencesIndices.length;
 		int[] tmpdeselected = new int[selectedelements];
 		boolean isnew;
 		for (int i = 0; i < tmpselect.size(); i++) {
 			tmpint = ((Integer) tmpselect.get(i)).intValue();
 			isnew = true;
 			for (j = 0; j < selectedelements; j++) {
-				if (data.selectednames[j] == tmpint) {
+				if (data.selectedSequencesIndices[j] == tmpint) {
 					isnew = false;
 					tmpdeselected[j] = 1;
 					break;
 				}
-			}// end for j
+			}
 			if (isnew == false) {
 				tmpselect.remove(i);
 				i--;
 			}
-		}// end for loop through vector
+		}
 			// now add the already selected names
 		for (int i = selectedelements - 1; i >= 0; i--) {
 			// now add those that were selected before
 			if (tmpdeselected[i] != 1) {
-				tmpselect.add(0, new Integer(data.selectednames[i]));
+				tmpselect.add(0, new Integer(data.selectedSequencesIndices[i]));
 			}
-		}// end for i
+		}
 			// now assign the new selecteds to tmpselectelements and update shownamedialog
 		int[] tmpselectednames = new int[tmpselect.size()];
 		for (int i = tmpselect.size() - 1; i >= 0; i--) {
 			tmpselectednames[i] = ((Integer) tmpselect.get(i)).intValue();
-		}// end for i
+		}
 		if (shownames != null) {
 			shownames.setselected(tmpselectednames, true);
 		}
-	}// end updatetmpselected
+	}
 
 	void moveselected(int xint, int yint) {
 		// move selected sequences by movex and movy in 3d space
 		// use the rotmtx to compute the x,y and z coord to move them by
-		float x = (float) ((float) xint / draw1.xscale);
-		float y = (float) ((float) yint / draw1.yscale);
+		float x = (float) ((float) xint / draw_area.xscale);
+		float y = (float) ((float) yint / draw_area.yscale);
 		double[][] invrot = getinvrot(data.rotmtx);
 		float[] move = new float[3];
 		move[0] = (float) (invrot[0][0] * x + invrot[0][1] * y);
 		move[1] = (float) (invrot[1][0] * x + invrot[1][1] * y);
 		move[2] = (float) (invrot[2][0] * x + invrot[2][1] * y);
 		// now move each of the selected seqs by that amount
-		int selectedelements = data.selectednames.length;
+		int selectedelements = data.selectedSequencesIndices.length;
 		// for each of the selected sequences shift it's position in posarr by x,y,z coords.
 		// selectednames is a int[] with the selected sequences indices
 		for (int i = 0; i < selectedelements; i++) {
-			data.myposarr[data.selectednames[i]][0] += move[0];
-			data.myposarr[data.selectednames[i]][1] += move[1];
-			data.myposarr[data.selectednames[i]][2] += move[2];
-		}// end for i
-	}// end moveselected
+			data.positions[data.selectedSequencesIndices[i]][0] += move[0];
+			data.positions[data.selectedSequencesIndices[i]][1] += move[1];
+			data.positions[data.selectedSequencesIndices[i]][2] += move[2];
+		}
+	}
 
 	static double[][] getinvrot(double[][] m) {
 		// get the inverse of a 3x3 matrix inmtx
@@ -3909,27 +3985,16 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		return retmtx;
 	}
 
-	/**
-	 * labels the selection button "Clear Selection" or "Select All" depending on whether sequences are selected.
-	 */
-	void set_selection_button_label() {
-		if (data != null && data.selectednames != null && data.selectednames.length > 0) {
-			button_select_all_or_clear.setText("Clear Selection");
-		} else {
-			button_select_all_or_clear.setText("Select All");
-		}
-	}
-
-	class drawpanel extends JPanel implements java.awt.print.Printable {
+	class DrawArea extends JPanel implements java.awt.print.Printable {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -9084230540557021638L;
 
-		public drawpanel() {
-			this.setOpaque(true);// should be set by default, but can't hurt to re-set
-			this.setDoubleBuffered(true);// should be set by default, but can't hurt to re-set
+		public DrawArea() {
+			setOpaque(true);// should be set by default, but can't hurt to re-set
+			setDoubleBuffered(true);// should be set by default, but can't hurt to re-set
 		}
 
 		void init() {
@@ -3950,7 +4015,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			refdbstring = "";
 			for (int i = 0; i < data.referencedb.length; i++) {
 				refdbstring += data.referencedb[i] + "; ";
-			}// end for i
+			}
 				// set the drawbox coordinates (a box of size 1 in x,y,z space)
 			box = new double[8][3];
 			box[0][0] = 0;
@@ -4030,7 +4095,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		int[] draw = new int[4];// the coordinates of the field selected by the mouse
 		java.awt.Color selectedcolor = new java.awt.Color(1f, 0f, 0f);
-		java.awt.Font myfont = this.getFont();
+		java.awt.Font myfont = getFont();
 		java.awt.Font smallfont = new java.awt.Font("Monospace", 0, 9);
 		int fontsize = myfont.getSize();
 		int fontwidth = (int) (fontsize / 2);
@@ -4066,7 +4131,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 
 			return retarr;
-		}// end makecolors
+		}
 
 		// ----------------------------------------------------------------------
 
@@ -4104,8 +4169,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				g.translate(xtranslate, ytranslate);
 				g.setColor(bgcolor);
 				g.fillRect(xadd - xtranslate, yadd - ytranslate, drawwidth + drawwidth, drawheight);
-				drawwidth *= data.zoomfactor;
-				drawheight *= data.zoomfactor;
+				drawwidth *= data.zoomFactor;
+				drawheight *= data.zoomFactor;
 				g.setColor(fgcolor);
 				if (repaint != null) {// error loadign or similar
 					g.drawString(repaint, (drawwidth / 2) - xtranslate, (drawheight / 2) - ytranslate);
@@ -4156,7 +4221,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				// and draw the second image
 				drawwidth = (int) ((graphpanel.getWidth() - xadd - xadd) / 2);
 				g.translate(xtranslate + drawwidth, ytranslate);
-				drawwidth *= data.zoomfactor;
+				drawwidth *= data.zoomFactor;
 				g.setColor(fgcolor);
 				if (repaint != null) {
 
@@ -4177,8 +4242,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				g.translate(xtranslate, ytranslate);
 				g.setColor(bgcolor);
 				g.fillRect(xadd - xtranslate, yadd - ytranslate, drawwidth, drawheight);
-				drawwidth *= data.zoomfactor;
-				drawheight *= data.zoomfactor;
+				drawwidth *= data.zoomFactor;
+				drawheight *= data.zoomFactor;
 				g.setColor(fgcolor);
 				if (repaint != null) {
 					g.drawString(repaint, (drawwidth / 2) - xtranslate, (drawheight / 2) - ytranslate);
@@ -4268,7 +4333,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				tmprotmtx[2][0] = (sinrotx * -sinrotz);
 				tmprotmtx[2][1] = (sinrotx * cosrotz);
 				tmprotmtx[2][2] = cosrotx;
-			}// end xy rotation
+			}
 			xmove = 0;
 			ymove = 0;
 			zmove = 0;
@@ -4291,7 +4356,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					+ (tmprotmtx[2][2] * data.rotmtx[2][1]);
 			data.myrotmtx[2][2] = (tmprotmtx[2][0] * data.rotmtx[0][2]) + (tmprotmtx[2][1] * data.rotmtx[1][2])
 					+ (tmprotmtx[2][2] * data.rotmtx[2][2]);
-		}// end getangles
+		}
 
 		// -----------------------------------
 
@@ -4378,7 +4443,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					* yfac + yadd));
 			g.drawString("Z", (int) ((boxdata[7][0] + xoffset) * xfac + xadd),
 					(int) ((boxdata[7][1] + yoffset) * yfac + yadd));
-		}// end drawbox
+		}
 
 		// ---------------------------------------
 
@@ -4404,27 +4469,27 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				// tposarrtmp[i][2]=(float)(myrotmtx[2][0]*posarr[i][0]+myrotmtx[2][1]*posarr[i][1]+myrotmtx[2][2]*posarr[i][2]);
 				// now add perspective using posarrtmp[i][2]
 				// maxdiff is the maximum value for any coordinate in the system
-			}// end for i
-			int selectedelements = data.selectednames.length;
-			if ((zoom) && (selectedelements > 0)) {// if zoom=true
+			}
+			int selectedelements = data.selectedSequencesIndices.length;
+			if (isZoomingOnSelectedSequences() && (selectedelements > 0)) {// if zoom=true
 				// only get maxx and maxy and minx and miny from selected sequences
 				// I know I have at least one selected element (checked at zoombuttonactionperformed)
-				maxx = tposarrtmp[data.selectednames[0]][0];
-				maxy = tposarrtmp[data.selectednames[0]][1];
+				maxx = tposarrtmp[data.selectedSequencesIndices[0]][0];
+				maxy = tposarrtmp[data.selectedSequencesIndices[0]][1];
 				minx = maxx;
 				miny = maxy;
 				for (int i = selectedelements; --i >= 0;) {// for (int i=1;i<selectedelements;i++){
-					if (maxx < tposarrtmp[data.selectednames[i]][0]) {
-						maxx = tposarrtmp[data.selectednames[i]][0];
-					} else if (minx > tposarrtmp[data.selectednames[i]][0]) {
-						minx = tposarrtmp[data.selectednames[i]][0];
+					if (maxx < tposarrtmp[data.selectedSequencesIndices[i]][0]) {
+						maxx = tposarrtmp[data.selectedSequencesIndices[i]][0];
+					} else if (minx > tposarrtmp[data.selectedSequencesIndices[i]][0]) {
+						minx = tposarrtmp[data.selectedSequencesIndices[i]][0];
 					}
-					if (maxy < tposarrtmp[data.selectednames[i]][1]) {
-						maxy = tposarrtmp[data.selectednames[i]][1];
-					} else if (miny > tposarrtmp[data.selectednames[i]][1]) {
-						miny = tposarrtmp[data.selectednames[i]][1];
+					if (maxy < tposarrtmp[data.selectedSequencesIndices[i]][1]) {
+						maxy = tposarrtmp[data.selectedSequencesIndices[i]][1];
+					} else if (miny > tposarrtmp[data.selectedSequencesIndices[i]][1]) {
+						miny = tposarrtmp[data.selectedSequencesIndices[i]][1];
 					}
-				}// end for i
+				}
 				xfac = drawwidth / (maxx - minx);
 				yfac = drawheight / (maxy - miny);
 				xoffset = (-minx);
@@ -4438,7 +4503,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					data.drawarrtmp[i][0] = (int) tposarrtmp[i][0];
 					data.drawarrtmp[i][1] = (int) tposarrtmp[i][1];
 					// I don't need to calculate the 3rd dimention
-				}// end for i
+				}
 				originpos[0] = (int) ((xoffset * xfac) + xadd);
 				originpos[1] = (int) ((yoffset * yfac) + yadd);
 			} else {// if I don't want to zoom in on selected sequences
@@ -4457,7 +4522,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					} else if (miny > tposarrtmp[i][1]) {
 						miny = tposarrtmp[i][1];
 					}
-				}// end for i
+				}
 				xfac = drawwidth / (maxx - minx);
 				yfac = drawheight / (maxy - miny);
 				xoffset = (-minx);
@@ -4468,13 +4533,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					data.drawarrtmp[i][0] = (int) tposarrtmp[i][0];
 					data.drawarrtmp[i][1] = (int) tposarrtmp[i][1];
 					// I don't need to calculate the 3rd dimention
-				}// end for i
+				}
 				originpos[0] = (int) ((xoffset * xfac) + xadd);
 				originpos[1] = (int) ((yoffset * yfac) + yadd);
-			}// end if zoom==false
+			}
 			xscale = xfac;
 			yscale = yfac;
-		}// end makedrawdata
+		}
 
 		// ---------------------------------------
 
@@ -4518,7 +4583,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						int[] currdraw;
 						int vecsize;
 						if (data.draworder == null || data.draworder.size() < 1) {
-							data.draworder = get_line_draw_order(data.myattvals, colornum);
+							data.draworder = get_line_draw_order(data.attractionValues, colornum);
 						}
 						for (int i = 0; i < colornum; i++) {
 							vecsize = data.draworder.get(i).size();
@@ -4530,14 +4595,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 								// g.drawLine((int)tposarrtmp[currdraw[0]][0],(int)tposarrtmp[currdraw[0]][1],(int)tposarrtmp[currdraw[1]][0],(int)tposarrtmp[currdraw[1]][1]);
 								g.drawLine(tposarrtmp[currdraw[0]][0], tposarrtmp[currdraw[0]][1],
 										tposarrtmp[currdraw[1]][0], tposarrtmp[currdraw[1]][1]);
-							}// end for j
-						}// end for i
+							}
+						}
 						g.setColor(fgcolor);
 						g.drawString("Worst", -xtranslate, fontsize - ytranslate);
 						g.drawString("Best", ((colornum + 5) * fontwidth) - xtranslate, fontsize - ytranslate);
 					} else {// if colorfrustrationcheckbox.isSelected()
 							// color the lines by their "frustration" (i.e. too long or too short for P-value)
-						frustration = getfrustration(data.myattvals, data.posarr);// get the frustration for each line
+						frustration = getfrustration(data.attractionValues, data.posarr);// get the frustration for each line
 						int j;
 
 						int vecsize;
@@ -4545,7 +4610,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						int[] tmparr;
 						minattvals currfrust;
 						if (data.draworder.size() < 1) {
-							data.draworder = get_line_draw_order(data.myattvals, colornum);// draw the lines in the same
+							data.draworder = get_line_draw_order(data.attractionValues, colornum);// draw the lines in the same
 																							// order as before
 						}
 						for (int i = 0; i < colornum; i++) {
@@ -4569,32 +4634,32 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 								} else {
 									System.err.println("no value for frustration key '" + key + "'");
 								}
-							}// end for j
-						}// end for i
+							}
+						}
 						g.setColor(fgcolor);
 						g.drawString("Worst", -xtranslate, fontsize - ytranslate);
 						g.drawString("Best", ((colornum + 5) * fontwidth) - xtranslate, fontsize - ytranslate);
 					}
 				}
 				if (checkbox_show_names.isSelected()) {
-					int selectednamesnum = data.selectednames.length;
+					int selectednamesnum = data.selectedSequencesIndices.length;
 					String[] namearr = data.sequence_names;
 					if (selectednamesnum == 0) {
 						for (int i = 0; i < elements; i++) {
 							g.drawString(String.valueOf(i) + "-" + namearr[i], (int) tposarrtmp[i][0],
 									(int) tposarrtmp[i][1]);
-						}// end for i
+						}
 					} else {
 						for (int i = 0; i < selectednamesnum; i++) {
-							g.drawString(String.valueOf(i) + "-" + namearr[data.selectednames[i]],
-									(int) tposarrtmp[data.selectednames[i]][0],
-									(int) tposarrtmp[data.selectednames[i]][1]);
-						}// end for i
+							g.drawString(String.valueOf(i) + "-" + namearr[data.selectedSequencesIndices[i]],
+									(int) tposarrtmp[data.selectedSequencesIndices[i]][0],
+									(int) tposarrtmp[data.selectedSequencesIndices[i]][1]);
+						}
 					}
 				} else if (checkbox_show_numbers.isSelected()) {
 					for (int i = 0; i < elements; i++) {
 						g.drawString(String.valueOf(i), (int) tposarrtmp[i][0], (int) tposarrtmp[i][1]);
-					}// end for i
+					}
 				}
 				if (dotsfirst == true) {
 					// now draw the sequence dots
@@ -4623,7 +4688,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						g.fillOval((int) (tposarrtmp[tmpselectclass.selectednames[j]][0] - halfoval),
 								(int) (tposarrtmp[tmpselectclass.selectednames[j]][1] - halfoval), ovalsize, ovalsize);
 					}
-				}// end for i
+				}
 
 				// draw the sequence groups
 				if (data.showseqgroups) {
@@ -4651,7 +4716,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 											+ " is not present in file; removing entry from group");
 									mygroup.remove(j);
 								}
-							}// end for j
+							}
 
 						} else {
 							tmpposarr = mygroup.polygon;
@@ -4682,32 +4747,32 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					for (int i = groupseqs.length; --i >= 0;) {
 						g.fillOval((int) (tposarrtmp[groupseqs[i]][0] - halfoval),
 								(int) (tposarrtmp[groupseqs[i]][1] - halfoval), ovalsize, ovalsize);
-					}// end for i
+					}
 				}
 				// draw the current selection
 				if (clusterconf == null) {
 					g.setColor(selectedcolor);
-					for (int i = data.selectednames.length - 1; i >= 0; i--) {
-						g.fillOval((int) (tposarrtmp[data.selectednames[i]][0] - halfoval),
-								(int) (tposarrtmp[data.selectednames[i]][1] - halfoval), ovalsize, ovalsize);
-					}// end for selected
+					for (int i = data.selectedSequencesIndices.length - 1; i >= 0; i--) {
+						g.fillOval((int) (tposarrtmp[data.selectedSequencesIndices[i]][0] - halfoval),
+								(int) (tposarrtmp[data.selectedSequencesIndices[i]][1] - halfoval), ovalsize, ovalsize);
+					}
 				} else {
-					for (int i = data.selectednames.length - 1; i >= 0; i--) {
+					for (int i = data.selectedSequencesIndices.length - 1; i >= 0; i--) {
 						if (clusterconf[i] < 0) {
 							clusterconf[i] = 0;
 						}
 						g.setColor(new java.awt.Color((int) (selectedcolor.getRed() * clusterconf[i]),
 								(int) (selectedcolor.getGreen() * clusterconf[i]),
 								(int) (selectedcolor.getBlue() * clusterconf[i])));
-						g.fillOval((int) (tposarrtmp[data.selectednames[i]][0] - halfoval),
-								(int) (tposarrtmp[data.selectednames[i]][1] - halfoval), ovalsize, ovalsize);
-					}// end for selected
+						g.fillOval((int) (tposarrtmp[data.selectedSequencesIndices[i]][0] - halfoval),
+								(int) (tposarrtmp[data.selectedSequencesIndices[i]][1] - halfoval), ovalsize, ovalsize);
+					}
 				}
 				g.setColor(fgcolor);
-				for (int i = data.selectednames.length - 1; i >= 0; i--) {
-					g.drawOval((int) (tposarrtmp[data.selectednames[i]][0] - halfoval),
-							(int) (tposarrtmp[data.selectednames[i]][1] - halfoval), ovalsize, ovalsize);
-				}// end for selected
+				for (int i = data.selectedSequencesIndices.length - 1; i >= 0; i--) {
+					g.drawOval((int) (tposarrtmp[data.selectedSequencesIndices[i]][0] - halfoval),
+							(int) (tposarrtmp[data.selectedSequencesIndices[i]][1] - halfoval), ovalsize, ovalsize);
+				}
 				if (blastselectseqs.length > 0) {
 					// draw these sequences as green dots
 					g.setColor(blasthitcolor);
@@ -4716,13 +4781,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						for (int i = blastselectseqs.length - 1; i >= 0; i--) {
 							g.drawString(String.valueOf(blastselectseqs[i]), (int) tposarrtmp[blastselectseqs[i]][0],
 									(int) tposarrtmp[blastselectseqs[i]][1]);
-						}// end for i
-					}// end if show names for blasthits
+						}
+					}
 					g.setColor(blastcirclecolor);
 					for (int i = blastselectseqs.length - 1; i >= 0; i--) {
 						g.fillOval((int) (tposarrtmp[blastselectseqs[i]][0] - halfoval),
 								(int) (tposarrtmp[blastselectseqs[i]][1] - halfoval), ovalsize, ovalsize);
-					}// end for selected
+					}
 						// now draw the blast query
 					g.setColor(java.awt.Color.magenta);
 					g.fillOval((int) (tposarrtmp[blastselectseqs[0]][0] - halfoval),
@@ -4732,7 +4797,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					for (int i = blastselectseqs.length - 1; i >= 0; i--) {
 						g.drawOval((int) (tposarrtmp[blastselectseqs[i]][0] - halfoval),
 								(int) (tposarrtmp[blastselectseqs[i]][1] - halfoval), ovalsize, ovalsize);
-					}// end for selected
+					}
 				}
 				if (dotsfirst == false) {
 					// now draw the sequence dots
@@ -4751,7 +4816,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						}
 					}
 				}
-			}// end if elements>0
+			}
 			if (button_select_move.isSelected() && mouse_is_pressed) {
 				g.setColor(java.awt.Color.orange);
 				if (currmousepos[0] < selectstart[0]) {
@@ -4817,7 +4882,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 
 			return retarr;
-		}// end getdraworder
+		}
 
 		// ----------------------------------------------------------------------
 
@@ -4852,7 +4917,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					avgdist += tmpval;
 					avgatt += att;
 				}
-			}// end for i
+			}
 			avgdist /= counter;
 			avgatt /= counter;
 			tmpfloat = avgatt * avgdist;
@@ -4870,21 +4935,21 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						maxval = -minattarr[i].att;
 					}
 				}
-			}// end for i
+			}
 
 			for (int i = 0; i < seqnum; i++) {
 				if (attvals[i].att > 0) {
 					minattarr[i].att /= maxval;
 				}// else I have a null entry
-			}// end fo ri
+			}
 			return retarr;
-		}// end getfrustration
-	}// end class drawpanel
+		}
+	}
 
 	/**
 	 * Class that handles the actual iteration computation.
 	 */
-	class computethread extends java.lang.Thread {
+	class IterationsComputerThread extends java.lang.Thread {
 
 		/**
 		 * Creates a new thread instance for computing iterations of the algorithm with thead name "computation thread".
@@ -4895,9 +4960,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		 * @param parent
 		 *            The GUI to which this thread belongs.
 		 */
-		public computethread(ClusteringWithGui parent) {
+		public IterationsComputerThread(ClusteringWithGui parent) {
 			this.parent = parent;
-			this.setName("computation thread");
+			setName("computation thread");
 		}
 
 		String tmpstr = "";
@@ -4950,14 +5015,38 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					data.changedvals = false;
 				}
 
-				ClusterMethods.recluster3d(parent.data);
+				boolean optimize_only_selected_sequences;
+				synchronized (selectedSequencesLock) {
+					/**
+					 * Keep this from changing by user GUI interaction while we copy the selected names.
+					 */
+					optimize_only_selected_sequences = optimizeOnlySelectedSequences();
+
+					if (optimize_only_selected_sequences) {
+
+						if ((data.selectedSequencesIndices.length == 0) || (data.selectedSequencesIndices.length == data.elements)) {
+							// nothing or everything selected -> no special treatment necessary
+							optimize_only_selected_sequences = false;
+
+						} else {
+							/**
+							 * Create a copy of the selected entries that will remain stable during this round of
+							 * calculations.
+							 */
+							data.selectedSequencesIndicesStableCopy = new int[data.selectedSequencesIndices.length];
+							System.arraycopy(data.selectedSequencesIndices, 0, data.selectedSequencesIndicesStableCopy, 0, data.selectedSequencesIndices.length);
+						}
+					}
+				}
+
+				ClusterMethods.iterateOneRound(parent.data, optimize_only_selected_sequences);
 
 				if (level == 0 && data.save_intermediate_results) {
 					try {
 						PrintWriter outwriter = new PrintWriter(new BufferedWriter(new FileWriter(
 								data.getIntermediateResultfileName())));
 
-						outwriter.println("sequences: " + data.myposarr.length);
+						outwriter.println("sequences: " + data.positions.length);
 						outwriter.println("values: ");
 						outwriter.println("minattract " + data.minattract);
 						outwriter.println("maxmove " + data.maxmove);
@@ -4970,7 +5059,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						outwriter.println("dampening " + data.dampening);
 						outwriter.println("rounds " + data.rounds);
 
-						printout.save_semicolon_delimited_positions(outwriter, data.myposarr);
+						printout.save_semicolon_delimited_positions(outwriter, data.positions);
 
 						outwriter.flush();
 						outwriter.close();
@@ -4981,7 +5070,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					}
 				}
 
-				data.posarr = data.myposarr;
+				data.posarr = data.positions;
 				tmpcool = (((float) ((int) (data.currcool * 100000))) / 100000);
 				if (options_window != null) {
 					options_window.currcoolfield.setText(String.valueOf(tmpcool));

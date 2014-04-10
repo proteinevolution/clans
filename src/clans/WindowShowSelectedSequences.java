@@ -13,13 +13,13 @@ public class WindowShowSelectedSequences extends javax.swing.JFrame {
         this.parent = parent;
         this.namesarr = numberarr(namesarr);
         initComponents();
-        if (parent.data.selectednames.length > 0) {
+        if (parent.data.selectedSequencesIndices.length > 0) {
             showall = false;
             //show only the selected seqs
             //globalselected=parent.selectednames;
-            selectednames = new String[parent.data.selectednames.length];
+            selectednames = new String[parent.data.selectedSequencesIndices.length];
             for (int i = 0; i < selectednames.length; i++) {
-                selectednames[i] = this.namesarr[parent.data.selectednames[i]];
+                selectednames[i] = this.namesarr[parent.data.selectedSequencesIndices[i]];
             }//end for i
             seqnamelist.setListData(selectednames);
             seqnamelist.setSelectedIndices(new int[0]);
@@ -159,12 +159,12 @@ public class WindowShowSelectedSequences extends javax.swing.JFrame {
         }
         if (showall) {
             globalselected = (int[]) selectedvec.remove(selectedvec.size() - 1);
-            parent.data.selectednames = globalselected;
+            parent.data.selectedSequencesIndices = globalselected;
             seqnamelist.setListData(namesarr);
             seqnamelist.setSelectedIndices(globalselected);
         } else {
             globalselected = (int[]) selectedvec.remove(selectedvec.size() - 1);
-            parent.data.selectednames = globalselected;
+            parent.data.selectedSequencesIndices = globalselected;
             selectednames = new String[globalselected.length];
             int[] myselected = new int[globalselected.length];
             for (int i = 0; i < selectednames.length; i++) {
@@ -189,9 +189,9 @@ public class WindowShowSelectedSequences extends javax.swing.JFrame {
             showall = false;
             //show only the selected seqs
             globalselected = seqnamelist.getSelectedIndices();
-            selectednames = new String[parent.data.selectednames.length];
+            selectednames = new String[parent.data.selectedSequencesIndices.length];
             for (int i = 0; i < selectednames.length; i++) {
-                selectednames[i] = namesarr[parent.data.selectednames[i]];
+                selectednames[i] = namesarr[parent.data.selectedSequencesIndices[i]];
             }//end for i
             seqnamelist.setListData(selectednames);
             seqnamelist.setSelectedIndices(new int[0]);
@@ -257,31 +257,31 @@ public class WindowShowSelectedSequences extends javax.swing.JFrame {
         int[] myselected = seqnamelist.getSelectedIndices();
         if (myselected.length > 0) {
             if (showall) {
-                parent.data.selectednames = myselected;
-                parent.set_selection_button_label();
+                parent.data.selectedSequencesIndices = myselected;
+                parent.updateSelectionButtonLabel();
                 parent.repaint();
             } else {//If I am only showing a subset of all sequences I need to reassign the correct indices
-                globalselected = parent.data.selectednames;
+                globalselected = parent.data.selectedSequencesIndices;
                 for (int i = myselected.length; --i >= 0;) {
                     myselected[i] = globalselected[myselected[i]];//reassign the sequence number globally
                 }//end for i
                 if (myselected.length < globalselected.length) {
-                    if (parent.data.selectednames.length > 0) {//save the former data
-                        selectedvec.addElement(parent.data.selectednames);
+                    if (parent.data.selectedSequencesIndices.length > 0) {//save the former data
+                        selectedvec.addElement(parent.data.selectedSequencesIndices);
                         backbutton.setText("Back (" + selectedvec.size() + ")");
                     }
                 }
-                parent.data.selectednames = myselected;
+                parent.data.selectedSequencesIndices = myselected;
                 globalselected = myselected;
                 //now update this window view
-                selectednames = new String[parent.data.selectednames.length];
+                selectednames = new String[parent.data.selectedSequencesIndices.length];
                 for (int i = 0; i < selectednames.length; i++) {
-                    selectednames[i] = namesarr[parent.data.selectednames[i]];
+                    selectednames[i] = namesarr[parent.data.selectedSequencesIndices[i]];
                 }//end for i
                 seqnamelist.setListData(selectednames);
                 seqnamelist.setSelectedIndices(new int[0]);
                 //now update the parent view
-                parent.set_selection_button_label();
+                parent.updateSelectionButtonLabel();
                 parent.repaint();
             }
         }

@@ -21,9 +21,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	public WindowEditGroups(ClusteringWithGui parent) {
 		this.parent = parent;
 
-		myfont = parent.draw1.myfont;
-		mybackground = parent.draw1.bgcolor;
-		myforeground = parent.draw1.fgcolor;
+		myfont = parent.draw_area.myfont;
+		mybackground = parent.draw_area.bgcolor;
+		myforeground = parent.draw_area.fgcolor;
 
 		initComponents();
 
@@ -487,10 +487,10 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		if ((currsel > -1) && (currsel <= parent.data.seqgroupsvec.size())) {
 			// get the avg and variance within the cluster
 			int[] sequences = parent.data.seqgroupsvec.elementAt(currsel).sequences;
-			float avgval = getavgatt(sequences, parent.data.myattvals);
-			float varval = getvaratt(sequences, parent.data.myattvals, avgval);
-			float outavg = getoutavgatt(sequences, parent.data.myattvals);
-			float outvar = getoutvaratt(sequences, parent.data.myattvals, outavg);
+			float avgval = getavgatt(sequences, parent.data.attractionValues);
+			float varval = getvaratt(sequences, parent.data.attractionValues, avgval);
+			float outavg = getoutavgatt(sequences, parent.data.attractionValues);
+			float outvar = getoutvaratt(sequences, parent.data.attractionValues, outavg);
 			parent.data.seqgroupsvec.elementAt(currsel).confvals = "avg:" + avgval + " var:" + varval + " outavg:"
 					+ outavg + " outvar:" + outvar;
 		} else {
@@ -793,7 +793,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
                 }
             }
 
-            parent.set_selected(new_selecteds);
+            parent.setSelectedSequences(new_selecteds);
 
             if (selected_groups.length == 1) {
                 if (parent.data.seqgroupsvec.elementAt(selected_groups[0]).seqconf != null) {
@@ -806,7 +806,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
             }
 
         } else {
-            parent.deselect_all_entries();
+            parent.deselectAllSequences();
         }
 
         parent.repaint();
@@ -892,7 +892,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
      */
     private void addbuttonActionPerformed(java.awt.event.ActionEvent evt) {
 		
-		if (parent.data.selectednames.length == 0) {
+		if (parent.data.selectedSequencesIndices.length == 0) {
 			javax.swing.JOptionPane.showMessageDialog(this, "No sequences selected", "Error",
 					javax.swing.JOptionPane.ERROR_MESSAGE);
 			return;
@@ -904,7 +904,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			return;
 		}
 		
-		parent.data.add_group(newname, parent.data.selectednames);
+		parent.data.add_group(newname, parent.data.selectedSequencesIndices);
 		
 		groupslist.setListData(parent.data.seqgroupsvec);
 		
@@ -958,7 +958,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 
 	private void okbuttonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_okbuttonActionPerformed
 		// update the view for parent
-		parent.draw1.repaint();
+		parent.draw_area.repaint();
 	}// GEN-LAST:event_okbuttonActionPerformed
 
 	/** Closes the dialog */
@@ -1207,9 +1207,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
         public java.awt.Component getListCellRendererComponent(javax.swing.JList list, Object value, int index,
                 boolean isSelected, boolean cellHasFocus) {
             if (index == 0) {
-                myfont = parent.parent.draw1.myfont;
-                mybackground = parent.parent.draw1.bgcolor;
-                myforeground = parent.parent.draw1.fgcolor;
+                myfont = parent.parent.draw_area.myfont;
+                mybackground = parent.parent.draw_area.bgcolor;
+                myforeground = parent.parent.draw_area.fgcolor;
             }
 
             SequenceGroup group = (SequenceGroup) value;
@@ -1284,12 +1284,12 @@ public class WindowEditGroups extends javax.swing.JFrame {
          * @return true iff at least one sequence in this group is currently selected in the main window
          */
         private boolean group_contains_selected_sequences(SequenceGroup group) {
-            if (parent.parent.data.selectednames.length == 0) {
+            if (parent.parent.data.selectedSequencesIndices.length == 0) {
                 return false;
             }
 
             List<Integer> selected_sequences = new ArrayList<Integer>();
-            for (int i : parent.parent.data.selectednames) {
+            for (int i : parent.parent.data.selectedSequencesIndices) {
                 selected_sequences.add(i);
             }
 
