@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class MovementComputerThread extends java.lang.Thread {
 
     public MovementComputerThread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int thread_id, int cpu,
-            HashMap<String, Integer> selectnamehash, int[] selectnames, String syncon, ClusterData parent) {
+            HashMap<String, Integer> selectnamehash, int[] selectnames, final Object syncon, ClusterData parent) {
         this.done = false;
         this.posarr = myposarr;
         this.attvals = myattvals;
@@ -24,7 +24,7 @@ public class MovementComputerThread extends java.lang.Thread {
     }
 
     public MovementComputerThread(float[][] myposarr, minattvals[] myattvals, float[][] mymovearr, int thread_id, int cpu,
-            String syncon, ClusterData parent) {
+    		final Object syncon, ClusterData parent) {
         this.done = false;
         this.posarr = myposarr;
         this.attvals = myattvals;
@@ -46,7 +46,7 @@ public class MovementComputerThread extends java.lang.Thread {
     int cpu;
     HashMap<String, Integer> tmphash = null;
     ClusterData parent;
-    String syncon;
+    final Object syncon;
     int[] selectnames;// a local copy of parent.selectednames, as that may change during a calculation
 
     /**

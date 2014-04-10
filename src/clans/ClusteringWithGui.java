@@ -91,9 +91,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		
 		initializeComputationThread();
 
-		initComponents();
+		initializeGuiComponents();
 
-		consumeDataAtConstruction();
+		consumeDataDuringConstruction();
 
 		textfield_threshold_value.setText(String.valueOf(data.pvalue_threshold));
 		textfield_info_min_blast_evalue.setText(String.valueOf(data.pvalue_threshold));
@@ -139,7 +139,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	/**
 	 * Initializes the GUI elements. This is called from the constructor.
 	 */ 
-	private void initComponents() {
+	private void initializeGuiComponents() {
 		graphpanel = new javax.swing.JPanel();
 		buttonpanel = new javax.swing.JPanel();
 		drawbuttonpanel = new javax.swing.JPanel();
@@ -406,19 +406,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		saveattvalsmenuitem.setText("Save attraction values to file");
 		saveattvalsmenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				saveattvalsmenuitemActionPerformed();
+				saveAttractionValuesAs();
 			}
 		});
 		menu_file.add(saveattvalsmenuitem);
 
 		addseqsmenuitem.setText("Add Sequences");
-		addseqsmenuitem.setToolTipText("You have to do that from the command line");
+		addseqsmenuitem.setToolTipText("This feature is currently limited to running CLANS in the command line");
 		addseqsmenuitem.setEnabled(false);
-		addseqsmenuitem.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				addNewSequences();
-			}
-		});
 		menu_file.add(addseqsmenuitem);
 
 		savemtxmenuitem.setText("Save blast matrix p-values");
@@ -543,7 +538,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		cluster2dbutton.setText("Cluster in 2D");
 		cluster2dbutton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cluster2dbuttonActionPerformed();
+				toggle2d3dGraph();
 			}
 		});
 		menu_misc.add(cluster2dbutton);
@@ -695,7 +690,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		zoommenuitem.setText("Zoom");
 		zoommenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				zoommenuitemActionPerformed();
+				openChangeZoomFactorDialog();
 			}
 		});
 		menu_draw.add(zoommenuitem);
@@ -812,7 +807,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		affymenuitem.setText("Microarray_data");
 		affymenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				affymenuitemActionPerformed();
+				openMicroarrayWindow();
 			}
 		});
 		menu_windows.add(affymenuitem);
@@ -859,7 +854,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		setJMenuBar(jMenuBar1);
 
 		originalGlassPane = this.getGlassPane();
-		activateGuiMessageOverlay();
+		activateMessageOverlay();
 		addGuiMessageOverlayResizeListener();
 		
 		createLoadSaveCancelKeyListener();
@@ -907,9 +902,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 	
 	/**
-	 * Consumes the data and sets some parts of theGUI up.
+	 * Consumes the data and sets some parts of the GUI up accordingly.
 	 */
-	private void consumeDataAtConstruction() {
+	private void consumeDataDuringConstruction() {
 		data.nographics = false;
 
 		data.mineval = data.eval;
@@ -942,6 +937,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 	}
 
+	/**
+	 * Opens file choice dialog and loads the selected tabular format file.
+	 */
 	private void loadDataTabularFormat() {
 		boolean restart_computation = stopComputation(true);
 
@@ -1022,9 +1020,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Opens a windows to show microarray data.
+	 * Opens the Microarray Data window.
 	 */
-	private void affymenuitemActionPerformed() {
+	private void openMicroarrayWindow() {
 		if (myaffydialog != null) {
 			myaffydialog.setVisible(false);
 			myaffydialog.dispose();
@@ -1047,7 +1045,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Loads additional sequence groups from a file.
+	 * Loads additional sequence groups from a file and appends them to the current ones.
 	 */
 	private void loadSequenceGroupsToAppend() {
 		
@@ -1062,10 +1060,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 			repaint();
 		}
-	}
-
-	private void addNewSequences() {
-		javax.swing.JOptionPane.showMessageDialog(this, "You currently have to do that from the command line");
 	}
 
 	/**
@@ -1220,7 +1214,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (messageOverlayActive) {
 			deactivateMessageOverlay();
 		} else {
-			activateGuiMessageOverlay();
+			activateMessageOverlay();
 		}
 		
 		messageOverlayActive = !messageOverlayActive;
@@ -1232,7 +1226,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * TODO: remember: production versions MUST use GuiMessageOverlay instead of the debugging class
 	 * GuiMessageOverlayLogged!
 	 */
-	private void activateGuiMessageOverlay() {
+	private void activateMessageOverlay() {
 		message_overlay = new GuiMessageOverlay();
 		message_overlay.updateGlassSize(graphpanel.getHeight());
 
@@ -1434,17 +1428,23 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		repaint();
 	}
 	
-	private void zoommenuitemActionPerformed() {
-		String tmpstr = "";
+	/**
+	 * Opens a dialog that lets users choose a new zoom factor.
+	 */
+	private void openChangeZoomFactorDialog() {
+		String user_input = "";
 		float oldzoom = data.zoomfactor;
+
 		try {
-			tmpstr = javax.swing.JOptionPane.showInputDialog(this, "New zoom factor (in percent)",
+			user_input = javax.swing.JOptionPane.showInputDialog(this, "New zoom factor (in percent)",
 					String.valueOf((int) (data.zoomfactor * 100)));
-			if (tmpstr != null) {
-				data.zoomfactor = ((float) (Integer.parseInt(tmpstr))) / 100;
+			
+			if (user_input != null) {
+				data.zoomfactor = ((float) (Integer.parseInt(user_input))) / 100;
 			}
+		
 		} catch (NumberFormatException ne) {
-			javax.swing.JOptionPane.showMessageDialog(this, "Error; cannot parse float from '" + tmpstr + "'");
+			javax.swing.JOptionPane.showMessageDialog(this, "Error; cannot parse float from '" + user_input + "'");
 			return;
 		}
 
@@ -1600,7 +1600,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Opens file choice dialog and load data the selected file with matrix info (only one value per pair).
+	 * Opens file choice dialog and loads the selected matrix format file (only one value per pair).
 	 */
 	private void loadDataMatrixFormat() {
 		boolean restart_computation = stopComputation(true);
@@ -1695,9 +1695,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Toggles between 2D and 3D clustering mode.
+	 * Toggles between 2 and 3 dimensions for the graph.
 	 */
-	private void cluster2dbuttonActionPerformed() {
+	private void toggle2d3dGraph() {
 		// get rid of all z-axis information and set the rotation matrices to 1,1,1 (x,y,z)
 		// set the rotation matrices to 1,1,1
 		data.rotmtx[0][0] = 1;
@@ -1739,8 +1739,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		repaint();
 	}
 
+	/**
+	 * Opens a standard print dialog to print the contents of the draw area.
+	 */
 	private void printDrawArea() {
 		boolean restart_computation = stopComputation(true);
+		boolean restart_autosave = pauseAutosave();
 
 		java.awt.print.PrinterJob printJob = java.awt.print.PrinterJob.getPrinterJob();
 		printJob.setPrintable(draw1);
@@ -1752,6 +1756,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 		}
 
+		if (restart_autosave) {
+			restartAutosave();
+		}
+		
 		if (restart_computation) {
 			startComputation();
 		}
@@ -3129,7 +3137,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	/**
 	 * Saves the attraction values to a user-chosen file.
 	 */
-	private void saveattvalsmenuitemActionPerformed() {
+	private void saveAttractionValuesAs() {
 
 		boolean restart_computation = stopComputation(true);
 
@@ -3174,6 +3182,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	WindowShowSelectedSequences shownames;
 	WindowEditGroups myseqgroupwindow;
 	computethread mythread;
+	final Object computationLock = new Object();
 
 	int skiprounds = 1;
 	int[] mousemove = new int[2];
@@ -3355,14 +3364,20 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		modifyButtonStartStopResume(null, false);
 
-		mythread.interrupt(); // tell the thread to stop whenver possible next
-		try {
-			mythread.join(); // wait for thread to stop
-		} catch (InterruptedException e) {
-			/**
-			 * thrown if the GUI thread is interrupted during the join, which makes the Exception meaningless as the
-			 * whole program dies in that case.
-			 */
+		mythread.interrupt(); // tell the thread to stop whenever possible next
+		
+		synchronized (computationLock) {
+			try {
+				computationLock.wait();
+			
+			} catch (InterruptedException e) {
+				/**
+				 * thrown if the GUI thread is interrupted during the join, which makes the Exception meaningless as the
+				 * whole program dies in that case.
+				 */
+				System.err.println("fatal error: the GUI thread was interrupted!");
+				System.exit(1);
+			}
 		}
 
 		if (!keep_button_disabled) {
@@ -4872,24 +4887,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	class computethread extends java.lang.Thread {
 
 		/**
-		 * Creates a new thread instance for computing iterations of the algorithm with custom thread name.
-		 * <p>
-		 * Note: Named threads are easier to debug! On a command line run command "jps -l" to get the programs process
-		 * id (first column). Then run "jstack <process id>" to see all threads of your process.
-		 * 
-		 * @param parent
-		 *            The GUI to which this thread belongs.
-		 * @param name
-		 *            The name of the thread.
-		 */
-		public computethread(ClusteringWithGui parent, String name) {
-			this.parent = parent;
-			this.didrun = false;
-			this.stop = false;
-			this.setName(name);
-		}
-		
-		/**
 		 * Creates a new thread instance for computing iterations of the algorithm with thead name "computation thread".
 		 * <p>
 		 * Note: Named threads are easier to debug! On a command line run command "jps -l" to get the programs process
@@ -4899,24 +4896,28 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		 *            The GUI to which this thread belongs.
 		 */
 		public computethread(ClusteringWithGui parent) {
-			this(parent, "computation thread");
+			this.parent = parent;
+			this.setName("computation thread");
 		}
 
-		boolean stop = true;
-		boolean didrun = false;
 		String tmpstr = "";
 		float tmpcool = 1;
 		final Object syncon = new Object(); // dummy object to sync on
 		ClusteringWithGui parent;
 
 		protected boolean isRunning() {
-			return this.isAlive();
+			return isAlive();
 		}
 
+		/**
+		 * Starts the computation by either computing itself (if {@code data.cpu}==1) or spawning {@code data.cpu} many
+		 * child threads that do the work.
+		 */
 		@Override
 		public void run() {
-			this.didrun = true;
+
 			data.roundsdone = 0;
+
 			while (!Thread.currentThread().isInterrupted()) {
 				data.rounds++;
 				if (data.roundslimit != -1) {
@@ -4925,12 +4926,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					modifyButtonStartStopResume("STOP (" + data.roundsdone + "/" + data.roundslimit + ")", true);
 
 					if (data.roundsdone >= data.roundslimit) {
-						stop = true;
+						Thread.currentThread().interrupt();
 						synchronized (parent) {
 							parent.notify();
 						}
 					}
 				}
+
 				// first see whether the main window has the focus
 				if (graphpanel.isFocusOwner()) {
 					// mainwindow has the focus, then see whether I am done drawing
@@ -4985,19 +4987,20 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					options_window.currcoolfield.setText(String.valueOf(tmpcool));
 				}
 				if (tmpcool <= 1e-5) {
-					stop = true;
+					Thread.currentThread().interrupt();
 					modifyButtonStartStopResume("DONE (absolute zero)", true);
 				}
 				if (data.rounds % skiprounds == 0 && data.nographics == false) {
 					recalc = false;
 					repaint();
 				}
-			}// end while
-			synchronized (syncon) {
-				modifyButtonStartStopResume(ButtonStartStopMessage.RESUME, true);
 			}
-			parent.repaint();
-		}// end run
 
+			synchronized (computationLock) {
+				computationLock.notify();
+			}
+
+			parent.repaint();
+		}
 	}
 }

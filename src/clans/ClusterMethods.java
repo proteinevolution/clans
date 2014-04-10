@@ -1,20 +1,22 @@
 package clans;
 
 public class ClusterMethods {
-    
-	static final java.util.Random rand=new java.util.Random(System.currentTimeMillis());
 
-    /**
-     * take the hsp objects from indata and compute "attraction" values for all sequence pairs once you have those try
-     * to cluster the data in 2d by "energy minimization" approach. iterative approch, might want to specify maximum
-     * number of iterations use the positions array and the attracion/repulsion values to compute movement vectors for
-     * each object long time=System.currentTimeMillis();
-     * 
-     * @param data
-     */
-     static void recluster3d(ClusterData data){
-        
-        System.arraycopy(data.mymovearr, 0, data.lastmovearr, 0, data.elements);//move all values from mymovearr to lastmovearr
+	static final java.util.Random rand = new java.util.Random(System.currentTimeMillis());
+
+	/**
+	 * take the hsp objects from indata and compute "attraction" values for all sequence pairs once you have those try
+	 * to cluster the data in 2d by "energy minimization" approach. iterative approch, might want to specify maximum
+	 * number of iterations use the positions array and the attracion/repulsion values to compute movement vectors for
+	 * each object long time=System.currentTimeMillis();
+	 * 
+	 * @param data
+	 *            The data for which an interation should be computed.
+	 */
+	static void recluster3d(ClusterData data) {
+		
+		// backup the old movements to later use them along the new ones to arrive at this iteration's movements
+        System.arraycopy(data.mymovearr, 0, data.lastmovearr, 0, data.elements);
 
         float[][] mymovearr = data.mymovearr;
         for (int i = data.mymovearr.length; --i >= 0;) {
@@ -26,15 +28,15 @@ public class ClusterMethods {
         int selnamenum = data.selectednames.length;
         int[] selectnames = new int[selnamenum]; //a copy of the array that won't change during this round of calculations
         System.arraycopy(data.selectednames, 0, data.selectnames, 0, data.selnamenum);
-        String syncme = "syncme";
+        final Object computationThreadLock = new Object();
         
         synchronized(data.myattvals){
 
-            if(data.cpu==1){
+			if (data.cpu == 1) {
                 getmovement(data.myposarr, data.myattvals, data.mymovearr, data.selectnames, data);
                 domove(data.myposarr, data.mymovearr, data.selectnames, data);
 
-            }else{
+			} else {
                 // compute the movements using multiple threads
                 int selectnames_count = data.selectednames.length;
                 if ((data.moveselectedonly) && (selectnames_count > 0) && (selectnames_count < data.elements)) {
@@ -53,43 +55,71 @@ public class ClusterMethods {
 
                     for (int i = 0; i < data.cpu; i++) {
                         data.movethreads[i] = new MovementComputerThread(data.myposarr, data.myattvals, data.mymovearr,
-                                i, data.cpu, tmphash, selectnames, syncme, data);
+                                i, data.cpu, tmphash, selectnames, computationThreadLock, data);
+                        data.movethreads[i].setName("MovementComputerThread#" + i);
                         data.movethreads[i].start();
                     }
                 } else {
                     for (int i = 0; i < data.cpu; i++) {
                         data.movethreads[i] = new MovementComputerThread(data.myposarr, data.myattvals, data.mymovearr,
-                                i, data.cpu, syncme, data);
+                                i, data.cpu, computationThreadLock, data);
+                        data.movethreads[i].setName("MovementComputerThread#" + i);
                         data.movethreads[i].start();
                     }
                 }
 
-                // now wait for all threads to finish
-                boolean alldone = false;
-                try {
-                    synchronized (syncme) {
-                        while (alldone == false) {
-                            alldone = true;
-                            for (int i = 0; i < data.cpu; i++) {
-                                if (data.movethreads[i].done == false) {
-                                    alldone = false;
-                                    break;
-                                }
-                            }
-                            if (alldone == false) {
-                                syncme.wait();
-                            }
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    System.err.println("Interrupted wait in searchblast");
-                    e.printStackTrace();
-                }
+                boolean stop_after_this_round = waitForThreadsToFinish(data, computationThreadLock);
 
                 domove(data.myposarr, data.mymovearr, selectnames, data);
+                
+                if (stop_after_this_round) {
+                	Thread.currentThread().interrupt();
+                }
             }
         }
     }
+	
+	static boolean waitForThreadsToFinish(ClusterData data, final Object computationThreadLock) {
+		boolean alldone = false;
+		boolean stop_after_this_round = false;
+		
+		// this sync object is notified when a child thread finishes its computation which resumes at sync.wait() below
+		synchronized (computationThreadLock) {
+			
+			while (!alldone) {
+				alldone = true;
+
+				for (MovementComputerThread child_thread: data.movethreads) {
+					if (!child_thread.done) {
+						alldone = false;
+						break;
+					}
+				}
+
+				if (alldone) {
+					break;
+				}
+				
+				try {
+					/**
+					 * wait on the sync object pauses this thread until a computation is finished in a child thread,
+					 * which reawakens this thread by sync.notify()
+					 */
+					computationThreadLock.wait();
+
+				} catch (InterruptedException e) {
+					/**
+					 * We want the InterruptedException to inform the thread to stop iterating after this round.
+					 * However, when .wait() throws this Exception, the interrupted state of this thread is reset to
+					 * false. As we want to finish this round, we later need to tell the thread to stop.
+					 */
+					stop_after_this_round = true;
+				}
+			}
+		}
+		
+		return stop_after_this_round;
+	}
 
     /**
      * use the positions of all elements and their attraction/repulsion values to calculate a movement vector for each
