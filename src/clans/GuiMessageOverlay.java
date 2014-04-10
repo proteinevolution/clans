@@ -104,6 +104,23 @@ public class GuiMessageOverlay extends JComponent {
 			return value;
 		}
 	}
+	
+
+	enum TextColor {
+		WORKING(255, 128, 0), // an orange
+		SUCCESS(128, 255, 0), // a green
+		ERROR(160, 0, 0); // a dark red
+
+		private Color value;
+
+		private TextColor(int red, int green, int blue) {
+			this.value = new Color(red, green, blue);
+		}
+		
+		protected Color get() {
+			return value;
+		}
+	}
 
 	private Component top_spacer; // moves the labels down
 	private JLabel mainLabel; // shows the main message
@@ -130,10 +147,6 @@ public class GuiMessageOverlay extends JComponent {
 	
 	private float alpha; // the transparency of the message overlay
 	
-	private Color colorWorkInProgress; // color for work-in-progress operations
-	private Color colorCompleted; // color for completed operations
-	private Color colorFailed; // color for failed operations
-
 	public GuiMessageOverlay() {
 
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -166,10 +179,6 @@ public class GuiMessageOverlay extends JComponent {
 		add(mainLabel);
 		add(detailsLabel);
 
-		colorWorkInProgress = new Color(255, 128, 0); // an orange
-		colorCompleted = new Color(128, 255, 0); // a green
-		colorFailed = new Color(255, 102, 137); // a red
-		
 		currentFading = Duration.FADING.get(); // this is kept stable for now for consistent fading looks
 
 		int timer_delay = 100; // in milliseconds
@@ -274,7 +283,7 @@ public class GuiMessageOverlay extends JComponent {
 	 * Resets text color to default (currently: a green)
 	 */
 	private void resetColor() {
-		setColor(colorCompleted);
+		setColor(TextColor.SUCCESS.get());
 	}
 	
 	/**
@@ -380,45 +389,45 @@ public class GuiMessageOverlay extends JComponent {
 	}
 
 	/**
-	 * Changes the state to "loading has completed".
+	 * Changes the state to "loading has completed". Can contain a detailed message.
 	 */
-	private void setLoadingCompleted() {
-		setupStandardMessage(State.LOADING_COMPLETED);
+	private void setLoadingCompleted(String details) {
+		setupStandardMessage(State.LOADING_COMPLETED, details);
 	}
 
 	/**
-	 * Changes the state to "loading was canceled".
+	 * Changes the state to "loading was canceled". Can contain a detailed message.
 	 */
-	private void setLoadingCanceled() {
-		setupStandardMessage(State.LOADING_CANCELED);
+	private void setLoadingCanceled(String details) {
+		setupStandardMessage(State.LOADING_CANCELED, details);
 	}
 
 	/**
-	 * Changes the state to "loading has failed".
+	 * Changes the state to "loading has failed". Can contain a detailed message.
 	 */
-	private void setLoadingFailed() {
-		setupStandardMessage(State.LOADING_FAILED);
+	private void setLoadingFailed(String details) {
+		setupStandardMessage(State.LOADING_FAILED, details);
 	}
 
 	/**
-	 * Changes the state to "saving has completed".
+	 * Changes the state to "saving has completed". Can contain a detailed message.
 	 */
-	private void setSavingCompleted() {
-		setupStandardMessage(State.SAVING_COMPLETED);
+	private void setSavingCompleted(String details) {
+		setupStandardMessage(State.SAVING_COMPLETED, details);
 	}
 
 	/**
-	 * Changes the state to "saving was canceled".
+	 * Changes the state to "saving was canceled". Can contain a detailed message.
 	 */
-	private void setSavingCanceled() {
-		setupStandardMessage(State.SAVING_CANCELED);
+	private void setSavingCanceled(String details) {
+		setupStandardMessage(State.SAVING_CANCELED, details);
 	}
 
 	/**
-	 * Changes the state to "saving has failed".
+	 * Changes the state to "saving has failed". Can contain a detailed message.
 	 */
-	private void setSavingFailed() {
-		setupStandardMessage(State.SAVING_FAILED);
+	private void setSavingFailed(String details) {
+		setupStandardMessage(State.SAVING_FAILED, details);
 	}
 
 	/**
@@ -553,7 +562,7 @@ public class GuiMessageOverlay extends JComponent {
 	 *            The message details text.
 	 */
 	protected void setupProgressMessage(State state, String main_message, String message_details) {
-		setupMessage(state, main_message, message_details, colorWorkInProgress, Duration.INFINITE, false, true);
+		setupMessage(state, main_message, message_details, TextColor.WORKING.get(), Duration.INFINITE, false, true);
 	}
 	
 	/**
@@ -582,6 +591,16 @@ public class GuiMessageOverlay extends JComponent {
 	 *            The state for which the standard message should be shown.
 	 */
 	private void setupStandardMessage(State state) {
+		setupStandardMessage(state, null);
+	}
+	
+	/**
+	 * Sets up the standard message according to the given state with custom details message.
+	 * 
+	 * @param state
+	 *            The state for which the standard message should be shown.
+	 */
+	private void setupStandardMessage(State state, String details) {
 		String main_message = Message.valueOf(state.toString()).get();
 
 		switch (state) {
@@ -599,17 +618,17 @@ public class GuiMessageOverlay extends JComponent {
 			
 		case LOADING_CANCELED:
 		case SAVING_CANCELED:
-			setupFadingMessage(state, main_message, null, colorWorkInProgress, Duration.INFO);
+			setupFadingMessage(state, main_message, details, TextColor.WORKING.get(), Duration.INFO);
 			return;
 			
 		case LOADING_COMPLETED:
 		case SAVING_COMPLETED:
-			setupFadingMessage(state, main_message, null, colorCompleted, Duration.INFO);
+			setupFadingMessage(state, main_message, details, TextColor.SUCCESS.get(), Duration.INFO);
 			return;
 
 		case LOADING_FAILED:
 		case SAVING_FAILED:
-			setupFadingMessage(state, main_message, null, colorFailed, Duration.ERROR);
+			setupFadingMessage(state, main_message, details, TextColor.ERROR.get(), Duration.ERROR);
 			return;
 
 		default:
@@ -628,22 +647,22 @@ public class GuiMessageOverlay extends JComponent {
 	/**
 	 * @return Default color for completed processes.
 	 */
-	protected Color getColorCompleted() {
-		return colorCompleted;
+	protected Color getColorSuccess() {
+		return TextColor.SUCCESS.get();
 	}
 
 	/**
 	 * @return The Overlays default color.
 	 */
-	protected Color getColorDefault() {
-		return colorWorkInProgress;
+	protected Color getColorWorking() {
+		return TextColor.WORKING.get();
 	}
 
 	/**
 	 * @return Default color for erroneous processes.
 	 */
 	protected Color getColorError() {
-		return colorFailed;
+		return TextColor.ERROR.get();
 	}
 	
 	/**
@@ -685,15 +704,21 @@ public class GuiMessageOverlay extends JComponent {
 	 * Changes the state to "loading/saving has completed" depending on previous state.
 	 */
 	protected void setCompleted() {
-		resetMessageDetails();
+		setCompleted(null);
+	}
+	
+	/**
+	 * Changes the state to "loading/saving has completed" depending on previous state and adds a detailed message.
+	 */
+	protected void setCompleted(String details) {
 
 		switch (state) {
 		case LOADING:
-			setLoadingCompleted();
+			setLoadingCompleted(details);
 			break;
 
 		case SAVING:
-			setSavingCompleted();
+			setSavingCompleted(details);
 			break;
 
 		default:
@@ -706,15 +731,21 @@ public class GuiMessageOverlay extends JComponent {
 	 * Changes the state to "loading/saving was canceled" depending on previous state.
 	 */
 	protected void setCanceled() {
-		resetMessageDetails();
+		setCanceled(null);
+	}
+	
+	/**
+	 * Changes the state to "loading/saving was canceled" depending on previous state and adds a detailed message.
+	 */
+	protected void setCanceled(String details) {
 
 		switch (state) {
 		case LOADING:
-			setLoadingCanceled();
+			setLoadingCanceled(details);
 			break;
 
 		case SAVING:
-			setSavingCanceled();
+			setSavingCanceled(details);
 			break;
 
 		default:
@@ -727,32 +758,30 @@ public class GuiMessageOverlay extends JComponent {
 	 * Changes the state to "loading/saving has failed" depending on previous state.
 	 */
 	protected void setFailed() {
-		// don't call resetMessageDetails() here as this method is used by setFailed(String)
+		setFailed(null);
+	}
 
+	/**
+	 * Changes the state to "loading/saving has failed" depending on previous state and adds a detailed message.
+	 * 
+	 * @param details
+	 *            A message stating details, e.g. file name or reason for failure.
+	 */
+	protected void setFailed(String details) {
+	
 		switch (state) {
 		case LOADING:
-			setLoadingFailed();
+			setLoadingFailed(details);
 			break;
 
 		case SAVING:
-			setSavingFailed();
+			setSavingFailed(details);
 			break;
 
 		default:
 			setOff();
 			break;
 		}
-	}
-
-	/**
-	 * Changes the state to "loading/saving has failed" depending on previous state and adds a more detailed message.
-	 * 
-	 * @param details
-	 *            A message stating details, e.g. file name or reason for failure.
-	 */
-	protected void setFailed(String details) {
-		setMessageDetails(details);
-		setFailed();
 	}
 }
 

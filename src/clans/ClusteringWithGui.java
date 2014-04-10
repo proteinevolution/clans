@@ -1115,13 +1115,20 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	/**
 	 * Enables autosaving if it is set up to occur. For loaded data without autosave parameters, a reasonably long
 	 * autosave interval is automatically set up and the user is informed about it in a pop-up dialog.
+	 * 
+	 * @param show_dialog
+	 *            If true, a dialogs informs about newly added autostart times for previously autostart unaware files.
+	 *            This dialog is used only when the file is first loaded.
 	 */
-	private void initializeAutosave() {
+	private void initializeAutosave(boolean show_dialog) {
 		if (!data.knowsAutosave()) {
 			data.makeAutosaveAware();
-			javax.swing.JOptionPane.showMessageDialog(this, "Autosaving every " + data.getAutosaveIntervalMinutes()
-					+ " minutes has been enabled for this file." + "\nTo change this go to Menu->Misc->"
-					+ autosaveSetupLabel + ".", "autosaving enabled", JOptionPane.INFORMATION_MESSAGE);
+			
+			if (show_dialog) {
+				javax.swing.JOptionPane.showMessageDialog(this, "Autosaving every " + data.getAutosaveIntervalMinutes()
+						+ " minutes has been enabled for this file." + "\nTo change this go to Menu->Misc->"
+						+ autosaveSetupLabel + ".", "autosaving enabled", JOptionPane.INFORMATION_MESSAGE);
+			}
 		}
 
 		if (data.getAutosaveIntervalMinutes() > 0) {
@@ -1130,6 +1137,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		
 	}
 
+	private boolean isAutosaving() {
+		return autosaveTimer != null && autosaveTimer.isRunning();
+	}
+	
 	/**
 	 * Enables autosaving if an autosave interval is set. Does nothing if the autosave interval is 0.
 	 * 
@@ -1143,7 +1154,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			return;
 		}
 
-		if (autosaveTimer != null && autosaveTimer.isRunning()) {
+		if (isAutosaving()) {
 			autosaveTimer.stop();
 		}
 
@@ -1157,7 +1168,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		if (messageOverlayActive && show_overlay_message) {
 			message_overlay.setCustomMessage("autosaving ENABLED", "every " + data.getAutosaveIntervalMinutes()
-					+ " minutes", message_overlay.getColorDefault(), GuiMessageOverlay.Duration.INFO, true, false);
+					+ " minutes", message_overlay.getColorSuccess(), GuiMessageOverlay.Duration.INFO, true, false);
 		}
 	}
 
@@ -1172,14 +1183,14 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		data.setAutosaveIntervalMinutes(0);
 
-		if (autosaveTimer != null && autosaveTimer.isRunning()) {
+		if (isAutosaving()) {
 			autosaveTimer.stop();
 		}
 		autosaveTimer = null;
 		
 
 		if (messageOverlayActive && show_overlay_message) {
-			message_overlay.setCustomMessage("autosaving DISABLED", null, message_overlay.getColorDefault(),
+			message_overlay.setCustomMessage("autosaving DISABLED", null, message_overlay.getColorWorking(),
 					GuiMessageOverlay.Duration.WARNING, true, false);
 		}
 	}
@@ -1190,7 +1201,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * @return true if a timer exists and it was running, false else.
 	 */
 	private boolean pauseAutosave() {
-		if (autosaveTimer == null || !autosaveTimer.isRunning()){
+		if (!isAutosaving()){
 			return false;
 		}
 		
@@ -2238,19 +2249,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					} else {
 						error_message = "unexpected exception: " + e.getMessage();
 					}
-
-					System.err.println(error_message);
-					
-					if (messageOverlayActive){
-						message_overlay.setFailed(error_message);
-					}
 				}
 
 				if (saving_successful) {
 
 					if (autosaveAutoReenable) {
-						data.makeAutosaveAware();
-						enableAutosave(true);
+						initializeAutosave(false);
 						autosaveAutoReenable = false;
 					}
 
@@ -3550,10 +3554,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					// time during user interaction with a dialog opened in that method
 					completion_time = System.currentTimeMillis();
 					
-					initializeAutosave();
+					initializeAutosave(true);
 
 					if (messageOverlayActive) {
-						message_overlay.setCompleted();
+						message_overlay.setCompleted("autsaving every " + data.getAutosaveIntervalMinutes()
+								+ " minutes");
 					}
 
 					if (restart_computation) {
