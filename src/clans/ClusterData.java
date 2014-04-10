@@ -1099,7 +1099,6 @@ public class ClusterData {
 					output_file.getParent()));
 		} catch (IOException e) {
 			error_message = "unable to create temporary file. " + e.getMessage();
-			System.err.println(error_message);
 			throw new IOException(error_message);
 		}
 
@@ -1121,8 +1120,7 @@ public class ClusterData {
 				backup_file = File.createTempFile("###" + output_file.getName() + "_", ".temporary_backup", new File(
 						output_file.getParent()));
 			} catch (IOException e) {
-				error_message = "unable to create file: " + e.getMessage();
-				System.err.println(error_message);						
+				error_message = "unable to create file: " + e.getMessage();					
 				throw new IOException(error_message);
 			}
 			
@@ -1136,7 +1134,6 @@ public class ClusterData {
 			if (!output_file.renameTo(backup_file)) { // move original file to create backup
 				error_message = "unable to move file\n\t" + output_filename + "\nto backup location\n\t"
 						+ backup_file.getPath();
-				System.err.println(error_message);
 				throw new IOException(error_message);
 			}
 			
@@ -1156,7 +1153,6 @@ public class ClusterData {
 		// move temporary file to destination
 		if (!temporary_file.renameTo(new File(output_filename))) {
 			error_message = "unable to alter " + output_filename;
-			System.err.println(error_message);
 			throw new IOException(error_message);
 		}
 
