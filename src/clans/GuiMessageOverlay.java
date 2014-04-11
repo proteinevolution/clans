@@ -722,7 +722,8 @@ public class GuiMessageOverlay extends JComponent {
 			break;
 
 		default:
-			setOff();
+			System.err.println("GuiMessageOverlay.setCompleted not implemented while in state \"" + state.toString()
+					+ "\".");
 			break;
 		}
 	}
@@ -749,7 +750,8 @@ public class GuiMessageOverlay extends JComponent {
 			break;
 
 		default:
-			setOff();
+			System.err.println("GuiMessageOverlay.setCanceled not implemented while in state \"" + state.toString()
+					+ "\".");
 			break;
 		}
 	}
@@ -779,7 +781,8 @@ public class GuiMessageOverlay extends JComponent {
 			break;
 
 		default:
-			setOff();
+			System.err.println("GuiMessageOverlay.setFailed not implemented while in state \"" + state.toString()
+					+ "\".");
 			break;
 		}
 	}
