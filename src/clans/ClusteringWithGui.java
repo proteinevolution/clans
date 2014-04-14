@@ -114,7 +114,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		if (data.errbuff.length() > 0) {
 			// If I have had errors up to this point
-			new errwindow(this, true, data.errbuff.toString()).setVisible(true);
+			new WindowErrorMessages(this, true, data.errbuff.toString()).setVisible(true);
 		}
 
 		if (data.getAbsoluteInputfileName() != null) {
@@ -123,7 +123,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		if (new File(data.getIntermediateResultfileName()).canRead()) {
 			System.out.println("reading former data");
-			readsave.parse_intermediate_results(data);
+			FileHandling2.parse_intermediate_results(data);
 			data.posarr = data.positions;
 		}
 	}
@@ -989,7 +989,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			mymapfunctiondialog.setVisible(false);
 			mymapfunctiondialog.dispose();
 		}
-		mymapfunctiondialog = new mapfunctiondialog_tab(this);
+		mymapfunctiondialog = new WindowMicroarrayFunctionMapping(this);
 		mymapfunctiondialog.setVisible(true);
 	}
 
@@ -1028,7 +1028,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			myaffydialog.setVisible(false);
 			myaffydialog.dispose();
 		}
-		myaffydialog = new affydialog(this);
+		myaffydialog = new WindowAffyMicroarrayData(this);
 		myaffydialog.setVisible(true);
 	}
 
@@ -1041,7 +1041,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			myrotationdialog.dispose();
 		}
 		
-		myrotationdialog = new rotationdialog(this);
+		myrotationdialog = new WindowRotatationAnimantionSetup(this);
 		myrotationdialog.setVisible(true);
 	}
 
@@ -1398,7 +1398,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			outbuff.append(data.sequences[data.selectedSequencesIndices[i]].seq + "\n");
 		}
 
-		new ShowCopyPasteableSequences(new javax.swing.JFrame(), outbuff).setVisible(true);
+		new WindowShowCopyPasteableSequences(new javax.swing.JFrame(), outbuff).setVisible(true);
 	}
 	
 	/**
@@ -1492,7 +1492,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * Opens a dialog to let the user change the GUI font.
 	 */
 	private void openChangeFontDialog() {
-		draw_area.myfont = fontchooserdialog.getfont("Select Font", draw_area.myfont);
+		draw_area.myfont = WindowFontChoice.getfont("Select Font", draw_area.myfont);
 		repaint();
 	}
 	
@@ -1516,9 +1516,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * options like the selection of those connected sequences are available to the user.
 	 */
 	private void openGetSequencesConnectedToSelectedsWindow() {
-		int[] blasthitsarr = showblasthitsforselected.getblasthits(data.attractionValues,
+		int[] blasthitsarr = WindowSelectedsAndTheirMatches.getblasthits(data.attractionValues,
 				data.selectedSequencesIndices, data.sequence_names);
-		new showblasthitsforselected(this, blasthitsarr, data.selectedSequencesIndices).setVisible(true);
+		new WindowSelectedsAndTheirMatches(this, blasthitsarr, data.selectedSequencesIndices).setVisible(true);
 	}
 
 	/**
@@ -1527,7 +1527,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	private void openFindClustersWindow() {
 		// don't define optionsvec as it contains both strings and numbers in a defined order
 		Vector<String> optionsvec = new Vector<String>();
-		new DialogClusterOptions(this, optionsvec).setVisible(true);
+		new WindowAutomaticClusterDetection(this, optionsvec).setVisible(true);
 		if (optionsvec.size() == 0) {// if I canceled
 			return;
 		}
@@ -1541,7 +1541,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				int minseqnum = Integer.parseInt(tmpstr);
 				
 				System.out.println("searching for convex clusters");
-				Vector<cluster> clustervec = findclusters.getconvex(data.attractionValues, sigmafac, minseqnum,
+				Vector<SequenceCluster> clustervec = ClusterDetection.getconvex(data.attractionValues, sigmafac, minseqnum,
 						data.elements);
 				
 				System.out.println("done searching for clusters; opening window");
@@ -1555,13 +1555,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						remove /= 100;
 					}
 					
-					if (bootstrapcluster.bootstrapconvex(data.attractionValues, clustervec, "convex", replicates,
+					if (ClusterDetectionBootstrapping.bootstrapconvex(data.attractionValues, clustervec, "convex", replicates,
 							remove, sigmafac, minseqnum, data.elements) == false) {
 						javax.swing.JOptionPane.showMessageDialog(this, "ERROR while bootstrapping");
 						return;
 					}
 				}
-				new ClusterWindow(this, clustervec, "convex: " + minseqnum + ";" + sigmafac, didbootstrap)
+				new WindowClusterDetectionResults(this, clustervec, "convex: " + minseqnum + ";" + sigmafac, didbootstrap)
 						.setVisible(true);
 			} catch (NumberFormatException ne) {
 				javax.swing.JOptionPane.showMessageDialog(this, "Unable to parse float from " + tmpstr);
@@ -1574,7 +1574,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				int minseqnum = Integer.parseInt(tmpstr);
 
 				System.out.println("searching for linkage clusters");
-				Vector<cluster> clustervec = findclusters.getlinkage(data.attractionValues, minlinkage, minseqnum,
+				Vector<SequenceCluster> clustervec = ClusterDetection.getlinkage(data.attractionValues, minlinkage, minseqnum,
 						data.elements);
 				
 				System.out.println("done searching for clusters; opening window");
@@ -1587,13 +1587,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					if (remove > 1) {
 						remove /= 100;
 					}
-					if (bootstrapcluster.bootstraplinkage(data.attractionValues, clustervec, "linkage", replicates,
+					if (ClusterDetectionBootstrapping.bootstraplinkage(data.attractionValues, clustervec, "linkage", replicates,
 							remove, minlinkage, minseqnum, data.elements) == false) {
 						javax.swing.JOptionPane.showMessageDialog(this, "Error while bootstrapping");
 						return;
 					}
 				}
-				new ClusterWindow(this, clustervec, "linkage: " + minseqnum + ";" + minlinkage, didbootstrap)
+				new WindowClusterDetectionResults(this, clustervec, "linkage: " + minseqnum + ";" + minlinkage, didbootstrap)
 						.setVisible(true);
 			} catch (NumberFormatException ne) {
 				javax.swing.JOptionPane.showMessageDialog(this, "Unable to parse int from " + tmpstr);
@@ -1615,7 +1615,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				int maxrounds = Integer.parseInt(optionsvec.remove(optionsvec.size() - 1));
 
 				System.out.println("searching for network clusters, maxrounds=" + maxrounds);
-				Vector<cluster> clustervec = findclusters.getnetwork(data.attractionValues, minseqnum, dooffset,
+				Vector<SequenceCluster> clustervec = ClusterDetection.getnetwork(data.attractionValues, minseqnum, dooffset,
 						globalaverage, data.elements, maxrounds);
 				
 				System.out.println("done searching for clusters; opening window");
@@ -1629,13 +1629,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						remove /= 100;
 					}
 					
-					if (bootstrapcluster.bootstrapnetwork(data.attractionValues, clustervec, "network", replicates,
+					if (ClusterDetectionBootstrapping.bootstrapnetwork(data.attractionValues, clustervec, "network", replicates,
 							remove, minseqnum, dooffset, globalaverage, data.elements, maxrounds) == false) {
 						javax.swing.JOptionPane.showMessageDialog(this, "Error while bootstrapping");
 						return;
 					}
 				}
-				new ClusterWindow(this, clustervec, "network:" + minseqnum + ";" + dooffset + ";" + globalaverage,
+				new WindowClusterDetectionResults(this, clustervec, "network:" + minseqnum + ";" + dooffset + ";" + globalaverage,
 						didbootstrap).setVisible(true);
 			} catch (NumberFormatException ne) {
 				javax.swing.JOptionPane.showMessageDialog(this, "Unable to parse int from " + tmpstr);
@@ -1654,7 +1654,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		groupseqs = null;
 		int returnVal = fc.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			saverunobject saveddata = ClusterData.load_matrix_file(fc.getSelectedFile());
+			ClusterDataLoadHelper saveddata = ClusterData.load_matrix_file(fc.getSelectedFile());
 			if (saveddata.file != null) {// if the data was read all right
 				repaint = "Error Loading Data";
 				data.sequences = ClusterMethods.removeGapsFromSequences(saveddata.inaln);
@@ -2007,7 +2007,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				}
 
 				outwrite.println("<att>");
-				minattvals[] myattvals = data.attractionValues;
+				MinimalAttractionValue[] myattvals = data.attractionValues;
 				int datnum = myattvals.length;
 
 				for (int i = 0; i < datnum; i++) {
@@ -2104,19 +2104,19 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * i.e. region 1-200 hits cluster A, region 210-300 cluster b, ergo 2 domains
 	 */
 	private void openShowBlastHitsForSequenceDialog() {
-		int referenceseqnum = getsinglenamedialog.getrefseq(data.sequence_names);
+		int referenceseqnum = WindowShowBlastHits.getrefseq(data.sequence_names);
 		if (referenceseqnum == -1) {
 			javax.swing.JOptionPane.showMessageDialog(this, "Please select a sequence");
 			return;
 		}
 
 		// get the blast hits to this sequence
-		hsp[] thishsp = (new viewblasthitsutils()).gethsps(referenceseqnum, data.sequences, data.cmd,
+		HighScoringSegmentPair[] thishsp = BlastHitHandling.gethsps(referenceseqnum, data.sequences, data.cmd,
 				data.formatdbpath, data.blastpath, data.addblastvbparam, data.referencedb, data.mineval,
 				data.pvalue_threshold);
 		
 		// plot these blast hits on to the sequence
-		viewblasthits myview = new viewblasthits(this, thishsp, referenceseqnum, data.sequence_names,
+		WindowShowBlastHitsOnSequence myview = new WindowShowBlastHitsOnSequence(this, thishsp, referenceseqnum, data.sequence_names,
 				data.sequences[referenceseqnum], data.nameshash);
 		viewblasthitsvec.addElement(myview);
 		
@@ -2607,8 +2607,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (viewblasthitsvec.size() > 0) {
 			for (int i = 0; i < viewblasthitsvec.size(); i++) {
 				blastselectseqs = new int[0];
-				((viewblasthits) viewblasthitsvec.elementAt(i)).setVisible(false);
-				((viewblasthits) viewblasthitsvec.elementAt(i)).dispose();
+				((WindowShowBlastHitsOnSequence) viewblasthitsvec.elementAt(i)).setVisible(false);
+				((WindowShowBlastHitsOnSequence) viewblasthitsvec.elementAt(i)).dispose();
 			}
 			viewblasthitsvec.setSize(0);
 		}
@@ -2621,7 +2621,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			data.blasthits = (MinimalHsp[]) parentblasthits.elementAt(level);
 			parentblasthits.removeElementAt(level);
 		} else {
-			data.orgattvals = (minattvals[]) parent_orgattvals.elementAt(level);
+			data.orgattvals = (MinimalAttractionValue[]) parent_orgattvals.elementAt(level);
 			parentblasthits.removeElementAt(level);
 			data.attractionValues = ClusterMethods.filterAttractionValues(data.orgattvals, data.pvalue_threshold);
 		}
@@ -2700,8 +2700,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (viewblasthitsvec.size() > 0) {
 			for (int i = 0; i < viewblasthitsvec.size(); i++) {
 				blastselectseqs = new int[0];
-				((viewblasthits) viewblasthitsvec.elementAt(i)).setVisible(false);
-				((viewblasthits) viewblasthitsvec.elementAt(i)).dispose();
+				((WindowShowBlastHitsOnSequence) viewblasthitsvec.elementAt(i)).setVisible(false);
+				((WindowShowBlastHitsOnSequence) viewblasthitsvec.elementAt(i)).dispose();
 			}
 			viewblasthitsvec.setSize(0);
 		}
@@ -2769,15 +2769,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	private void openScoreDistributionPlot() {
 		if (data.blasthits != null) {
 			if (data.usescval) { // score mode
-				eplotdialog eplot = new eplotdialog(data.blasthits, data.pvalue_threshold, true);
+				WindowPValuePlot eplot = new WindowPValuePlot(data.blasthits, data.pvalue_threshold, true);
 				eplot.setVisible(true);
 
 			} else { // p-value mode
-				eplotdialog eplot = new eplotdialog(data.blasthits, data.pvalue_threshold, false);
+				WindowPValuePlot eplot = new WindowPValuePlot(data.blasthits, data.pvalue_threshold, false);
 				eplot.setVisible(true);
 			}
 		} else { // attraction value mode
-			attplotdialog attplot = new attplotdialog(data.attractionValues, data.pvalue_threshold);
+			WindowAttractionValuePlot attplot = new WindowAttractionValuePlot(data.attractionValues, data.pvalue_threshold);
 			attplot.setVisible(true);
 		}
 	}
@@ -2795,7 +2795,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			if (selectedseqs.length == 0) {
 				javax.swing.JOptionPane.showMessageDialog(this, "Please select some sequences");
 			} else {
-				printout.printfasta(selectedseqs, fc.getSelectedFile());
+				FileHandling.printfasta(selectedseqs, fc.getSelectedFile());
 			}
 		}
 
@@ -3123,7 +3123,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			taxonomydialog.setVisible(false);
 			taxonomydialog.dispose();
 		}
-		taxonomydialog = new ncbitaxonomydialog(this);
+		taxonomydialog = new WindowTaxonomy(this);
 		taxonomydialog.setVisible(true);
 	}
 
@@ -3183,12 +3183,12 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	Vector<HashMap<String, Integer>> parentnameshash = new Vector<HashMap<String, Integer>>();
 
 	Vector<MinimalHsp[]> parentblasthits = new Vector<MinimalHsp[]>();
-	Vector<minattvals[]> parent_orgattvals = new Vector<minattvals[]>();
+	Vector<MinimalAttractionValue[]> parent_orgattvals = new Vector<MinimalAttractionValue[]>();
 	Vector<Vector<SequenceGroup>> parentseqgroups = new Vector<Vector<SequenceGroup>>();
 	Vector<float[]> parentweights = new Vector<float[]>();
 
-	Vector<viewblasthits> viewblasthitsvec = new Vector<viewblasthits>();
-	Vector<selectclass> selectvec = new Vector<selectclass>();
+	Vector<WindowShowBlastHitsOnSequence> viewblasthitsvec = new Vector<WindowShowBlastHitsOnSequence>();
+	Vector<UnusedWeirdClassPreviouslyCalledSelectclass> selectvec = new Vector<UnusedWeirdClassPreviouslyCalledSelectclass>();
 
 	boolean mouse_is_pressed = false;
 	boolean moveseqs = false;// flag to set if I want to draw sequences in 3d-space
@@ -3227,15 +3227,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	String repaint = null;
 
 	WindowOptions options_window = null;
-	rotationdialog myrotationdialog = null;// clans rotation values
-	affydialog myaffydialog = null;// loads/shows affymetrix data
-	mapfunctiondialog_tab mymapfunctiondialog = null;// loads/shows metabolic/functional mapping
-	ncbitaxonomydialog taxonomydialog = null;// show the NCBI taxonomic keywords
+	WindowRotatationAnimantionSetup myrotationdialog = null;// clans rotation values
+	WindowAffyMicroarrayData myaffydialog = null;// loads/shows affymetrix data
+	WindowMicroarrayFunctionMapping mymapfunctiondialog = null;// loads/shows metabolic/functional mapping
+	WindowTaxonomy taxonomydialog = null;// show the NCBI taxonomic keywords
 	String namesdmp_file = null;// "names.dmp";
 	String nodesdmp_file = null;// "nodes.dmp";
 	ArrayList<java.io.File> mapfiles = new ArrayList<java.io.File>();
 	ArrayList<java.io.File> lookupfiles = new ArrayList<java.io.File>();
-	Vector<replicates> affyfiles = null;
+	Vector<Replicates> affyfiles = null;
 	boolean usefoldchange = false;
 	boolean avgfoldchange = false;
 	boolean dotsfirst = false;
@@ -3490,7 +3490,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			saveLoadWorker.cancel(true); // kill potentially running old worker
 		}
 		
-		final saverunobject[] new_data = new saverunobject[1];
+		final ClusterDataLoadHelper[] new_data = new ClusterDataLoadHelper[1];
 		final long start_time = System.currentTimeMillis();
 		
 		saveLoadWorker = new SwingWorker<Void, Integer>() {
@@ -4065,7 +4065,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		boolean drawbox = false;
 
-		HashMap<String, minattvals> frustration;// color code for the frustration of connections
+		HashMap<String, MinimalAttractionValue> frustration;// color code for the frustration of connections
 		java.awt.Color[] frustcolorarr = new java.awt.Color[0];
 		java.awt.Color bgcolor = new java.awt.Color(1f, 1f, 1f);
 		java.awt.Color fgcolor = new java.awt.Color(0, 0, 0);
@@ -4107,7 +4107,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		String refdbstring = "";
 		java.awt.Color blasthitcolor = new java.awt.Color(0.4f, 0.4f, 0.4f);
-		selectclass tmpselectclass;
+		UnusedWeirdClassPreviouslyCalledSelectclass tmpselectclass;
 		int xtranslate = 0;
 		int ytranslate = 0;
 		int[][] tmpposarr;
@@ -4613,7 +4613,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						int vecsize;
 						String key;
 						int[] tmparr;
-						minattvals currfrust;
+						MinimalAttractionValue currfrust;
 						if (data.draworder.size() < 1) {
 							data.draworder = get_line_draw_order(data.attractionValues, colornum);// draw the lines in the same
 																							// order as before
@@ -4626,7 +4626,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 								key = tmparr[0] + "_" + tmparr[1];
 
 								if (frustration.containsKey(key)) {
-									currfrust = (minattvals) frustration.get(key);
+									currfrust = (MinimalAttractionValue) frustration.get(key);
 									if (currfrust.att > 0) {
 										// then the coloring should be in blue(i.e. too short for attval)
 										g.setColor(new java.awt.Color((1 - currfrust.att), (1 - currfrust.att), 1));
@@ -4686,7 +4686,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				// draw the sequences from older selection steps
 				// now draw the elements in the selectvec
 				for (int i = selectvec.size() - 1; i >= 0; i--) {
-					tmpselectclass = (selectclass) selectvec.elementAt(i);
+					tmpselectclass = (UnusedWeirdClassPreviouslyCalledSelectclass) selectvec.elementAt(i);
 					g.setColor(tmpselectclass.color);
 					int tmpelements = tmpselectclass.selectednames.length;
 					for (int j = 0; j < tmpelements; j++) {
@@ -4849,7 +4849,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		 * @param colornum
 		 * @return
 		 */
-		ArrayList<ArrayList<int[]>> get_line_draw_order(minattvals[] myattvals, int colornum) {
+		ArrayList<ArrayList<int[]>> get_line_draw_order(MinimalAttractionValue[] myattvals, int colornum) {
 
 			ArrayList<ArrayList<int[]>> retarr = new ArrayList<ArrayList<int[]>>();
 			for (int i = 0; i < colornum; i++) {
@@ -4891,11 +4891,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		// ----------------------------------------------------------------------
 
-		HashMap<String, minattvals> getfrustration(minattvals[] attvals, float[][] posarr) {
+		HashMap<String, MinimalAttractionValue> getfrustration(MinimalAttractionValue[] attvals, float[][] posarr) {
 			// get wether each connection is longer or shorter than expected based on the attraction value
 			int seqnum = attvals.length;
-			HashMap<String, minattvals> retarr = new HashMap<String, minattvals>((int) (seqnum / 0.8) + 1, 0.8f);
-			minattvals[] minattarr = new minattvals[seqnum];
+			HashMap<String, MinimalAttractionValue> retarr = new HashMap<String, MinimalAttractionValue>((int) (seqnum / 0.8) + 1, 0.8f);
+			MinimalAttractionValue[] minattarr = new MinimalAttractionValue[seqnum];
 			int q, h;
 			float tmpfloat;
 			float att;
@@ -4917,7 +4917,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 					tmpy = posarr[q][1] - posarr[h][1];
 					tmpz = posarr[q][2] - posarr[h][2];
 					tmpval = (float) java.lang.Math.sqrt(tmpx * tmpx + tmpy * tmpy + tmpz * tmpz);
-					minattarr[i] = new minattvals(q, h, tmpval);
+					minattarr[i] = new MinimalAttractionValue(q, h, tmpval);
 					retarr.put(key, minattarr[i]);
 					avgdist += tmpval;
 					avgatt += att;
@@ -5064,7 +5064,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 						outwriter.println("dampening " + data.dampening);
 						outwriter.println("rounds " + data.rounds);
 
-						printout.save_semicolon_delimited_positions(outwriter, data.positions);
+						FileHandling.save_semicolon_delimited_positions(outwriter, data.positions);
 
 						outwriter.flush();
 						outwriter.close();

@@ -245,7 +245,7 @@ public class Main {
 				if (blastpath.contains("blastall") || blastpath.contains("blastpgp")) {
 					isblastplus = false;
 				}
-				searchblastv2 mysearchblast = new searchblastv2(errbuff, addblastvbparam, isblastplus, cpu,
+				BlastVersion2 mysearchblast = new BlastVersion2(errbuff, addblastvbparam, isblastplus, cpu,
 						blastblocks, cmd, blastpath, formatdbpath, eval, pval, coverage, scval, ident, verbose,
 						saveblastname, readblast, sequence_name_internal_mapping);
 				MinimalHsp[] blasthits = mysearchblast.gethits(sequences);
@@ -270,7 +270,7 @@ public class Main {
 				System.out.println("reading old data");
 				
 				
-				saverunobject readdata;
+				ClusterDataLoadHelper readdata;
 				try {
 					readdata = ClusterData.load_run_from_file(new java.io.File(olddata));
 					
@@ -295,7 +295,7 @@ public class Main {
 						System.err.println("ERROR, no referencedb specified, unable to enrich dataset, skipping.");
 					} else {
 						System.out.println("starting sequences=" + newaln.length);
-						newaln = new enrichutils().enrich(newaln, cmd, blastpath, formatdbpath, referencedb, cpu,
+						newaln = new EnrichWithSimilarSequences().enrich(newaln, cmd, blastpath, formatdbpath, referencedb, cpu,
 								gatherseqseval, rmseqseval, maxenrichseqsnum);
 						System.out.println("enriched sequences=" + newaln.length);
 					}
@@ -335,7 +335,7 @@ public class Main {
 				}
 
 				// run BLAST
-				searchblast mysearchblast = new searchblast(errbuff, addblastvbparam);
+				Blast mysearchblast = new Blast(errbuff, addblastvbparam);
 				double mypval = readdata.pval;
 				float mymaxmove = readdata.maxmove;
 				MinimalHsp[] newblasthits = mysearchblast.gethits(readdata.inaln, readdata.blasthits, newaln, cmd,
@@ -378,7 +378,7 @@ public class Main {
 
 			} else { // load data from olddata
 				System.out.println("Reading old data from " + olddata);
-				saverunobject readdata;
+				ClusterDataLoadHelper readdata;
 				
 				try {
 					readdata = ClusterData.load_run_from_file(new java.io.File(olddata));

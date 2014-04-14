@@ -185,7 +185,7 @@ public class ClusterMethods {
 	static void computeMovments(ClusterData data, boolean move_only_selected_sequences) {
     	
     	float[][] posarr = data.positions;
-    	minattvals[] attvals = data.attractionValues;
+    	MinimalAttractionValue[] attvals = data.attractionValues;
     	float[][] movement = data.movements;
     	int[] selected_sequences_indices = data.selectedSequencesIndicesStableCopy; 
 
@@ -771,15 +771,15 @@ public class ClusterMethods {
 	 * @param minpval
 	 * @return
 	 */
-    static minattvals[] filterAttractionValues(minattvals[] attractions, double minpval){
+    static MinimalAttractionValue[] filterAttractionValues(MinimalAttractionValue[] attractions, double minpval){
         // use for filtering attraction values [-1<0<1]; -1 and 1 are max repulse/attract
-        java.util.ArrayList <minattvals>retvec=new java.util.ArrayList<minattvals>();
+        java.util.ArrayList <MinimalAttractionValue>retvec=new java.util.ArrayList<MinimalAttractionValue>();
         for(int i = 0; i < attractions.length; i++){
             if((attractions[i].att >= minpval) || (attractions[i].att <= -minpval)){
                 retvec.add(attractions[i]);
             }
         }
-        minattvals[] retarr=(minattvals[])retvec.toArray(new minattvals[0]);
+        MinimalAttractionValue[] retarr=(MinimalAttractionValue[])retvec.toArray(new MinimalAttractionValue[0]);
         return retarr;
     }
 

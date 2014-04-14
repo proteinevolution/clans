@@ -213,7 +213,7 @@ public class WindowShowSelectedSequences extends javax.swing.JFrame {
 
         int[] selected_indices;
         
-        String query = getsearchtext.get(this);
+        String query = DialogSearchQueryEntry.get(this);
         
         if (query == null) { // the query entry dialog has been quit via the cancel button
             return;

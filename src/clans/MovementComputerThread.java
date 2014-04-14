@@ -57,7 +57,7 @@ public class MovementComputerThread extends java.lang.Thread {
 	private final Object informParentOfCompletenessLock;
 
 	private float[][] positions;
-	private minattvals[] attractions;
+	private MinimalAttractionValue[] attractions;
 	private float[][] movements;
 
 	private HashMap<String, Integer> selectedNamesHash = null;

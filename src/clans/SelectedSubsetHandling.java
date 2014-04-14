@@ -31,11 +31,11 @@ public class SelectedSubsetHandling {
 		return retarr;
 	}
 
-	static minattvals[] get_myattvals(minattvals[] myattvals,
+	static MinimalAttractionValue[] get_myattvals(MinimalAttractionValue[] myattvals,
 			int[] selectednames) {
 		// convert the old sequence numbering to the new and remove all
 		// non-relevant attvals
-		Vector<minattvals> tmpvec = new Vector<minattvals>();
+		Vector<MinimalAttractionValue> tmpvec = new Vector<MinimalAttractionValue>();
 		String qnum, hnum;
 		HashMap<String, Integer> tmphash = new HashMap<String, Integer>(
 				(int) (selectednames.length / 0.8) + 1, 0.8f);
@@ -47,12 +47,12 @@ public class SelectedSubsetHandling {
 			qnum = String.valueOf(myattvals[i].query);
 			hnum = String.valueOf(myattvals[i].hit);
 			if (tmphash.containsKey(qnum) && tmphash.containsKey(hnum)) {
-				tmpvec.addElement(new minattvals(((Integer) tmphash.get(qnum))
+				tmpvec.addElement(new MinimalAttractionValue(((Integer) tmphash.get(qnum))
 						.intValue(), ((Integer) tmphash.get(hnum)).intValue(),
 						myattvals[i].att));
 			}
 		}
-		minattvals[] retarr = new minattvals[tmpvec.size()];
+		MinimalAttractionValue[] retarr = new MinimalAttractionValue[tmpvec.size()];
 		tmpvec.copyInto(retarr);
 		return retarr;
 	}

@@ -53,7 +53,7 @@ public class ClusterData {
     float[] seqlengths = null;
     MovementComputerThread[] movethreads = null;
     boolean usescval = false;
-    minattvals[] attractionValues = null;
+    MinimalAttractionValue[] attractionValues = null;
 
     // variables I use as part of the clustering
     int rounds = 0;
@@ -65,7 +65,7 @@ public class ClusterData {
     double mineval = 1;
     double cooling = 1;
     double currcool = 1;
-    saverunobject saveddata = null;
+    ClusterDataLoadHelper saveddata = null;
     float attfactor = 10f;
     float repfactor = 0.5f;
     int attvalpow = 1;
@@ -75,7 +75,7 @@ public class ClusterData {
     float[] weights = null;
     ArrayList<File> mapfiles = null;
     ArrayList<File> lookupfiles = null;
-    java.util.Vector<replicates> affyfiles = null;
+    java.util.Vector<Replicates> affyfiles = null;
     boolean usefoldchange = false;
     boolean avgfoldchange = false;
     String namesdmp_file = "not_spcified";
@@ -99,7 +99,7 @@ public class ClusterData {
      * A 3x3 rotation matrix.
      */
     double[][] myrotmtx = MyMath.create3x3IdentityMatrix();
-    minattvals[] orgattvals = null;
+    MinimalAttractionValue[] orgattvals = null;
     boolean attvalsimple = false;
     boolean rescalepvalues = false;
     double maxvalfound = 0;
@@ -271,7 +271,7 @@ public class ClusterData {
 	 * Convenience method that calls {@code load_run_from_file(File, SwingWorker)} with SwingWorker {@code null}. This
 	 * method should be used in no-GUI mode.
 	 */
-	static saverunobject load_run_from_file(File infile) throws ParseException, IOException, FileNotFoundException {
+	static ClusterDataLoadHelper load_run_from_file(File infile) throws ParseException, IOException, FileNotFoundException {
 		return load_run_from_file(infile, null);
 	}
 	
@@ -296,12 +296,12 @@ public class ClusterData {
 	 *             If worker is cancelled and loading should therefore be cancelled. In headless (no-GUI) mode this
 	 *             Exception will not occur.
 	 */
-	static saverunobject load_run_from_file(File infile, SwingWorker<Void, Integer> worker) throws ParseException,
+	static ClusterDataLoadHelper load_run_from_file(File infile, SwingWorker<Void, Integer> worker) throws ParseException,
 			IOException, FileNotFoundException, CancellationException {
          
 		System.out.println("LOADING data from '" + infile.getAbsolutePath() + "'");
 
-		saverunobject myrun = new saverunobject();
+		ClusterDataLoadHelper myrun = new ClusterDataLoadHelper();
         myrun.file = infile;
 
         boolean is_biolayout = false;
@@ -483,7 +483,7 @@ public class ClusterData {
 	public void load_clans_file(String input_filename, SwingWorker<Void, Integer> worker) throws ParseException,
 			IOException, FileNotFoundException, CancellationException {
     	
-        saverunobject loaded_data = ClusterData.load_run_from_file(new java.io.File(input_filename), worker);
+        ClusterDataLoadHelper loaded_data = ClusterData.load_run_from_file(new java.io.File(input_filename), worker);
         
         checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
         
@@ -492,7 +492,7 @@ public class ClusterData {
         System.out.println("File loaded:" + input_filename);
     }
     
-    public void injectLoadedDataIntoExisting(String input_filename, saverunobject loaded_data) {
+    public void injectLoadedDataIntoExisting(String input_filename, ClusterDataLoadHelper loaded_data) {
         
     	this.input_filename = input_filename;
         
@@ -575,7 +575,7 @@ public class ClusterData {
         dotsize = loaded_data.dotsize;
         ovalsize = loaded_data.ovalsize;
         groupsize = loaded_data.groupsize;
-        polygons = makepolygons.get(groupsize);
+        polygons = Shapes.get(groupsize);
         seqgroupsvec = loaded_data.seqgroupsvec;
         if (seqgroupsvec.size() > 0) {
             showseqgroups = true;
@@ -615,15 +615,15 @@ public class ClusterData {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	static saverunobject load_biolayout_file(File input_file, SwingWorker<Void, Integer> worker) throws ParseException,
+	static ClusterDataLoadHelper load_biolayout_file(File input_file, SwingWorker<Void, Integer> worker) throws ParseException,
 			IOException, FileNotFoundException, CancellationException {
-    	saverunobject myrun = new saverunobject();
+    	ClusterDataLoadHelper myrun = new ClusterDataLoadHelper();
         float attval;
         String name1;
         String name2;
         String error_message;
         ArrayList<String> namelist = new ArrayList<String>();
-        ArrayList<minattvals> datlist = new ArrayList<minattvals>();
+        ArrayList<MinimalAttractionValue> datlist = new ArrayList<MinimalAttractionValue>();
         
         String inline;
         String[] tmparr;
@@ -682,7 +682,7 @@ public class ClusterData {
                         } else {
                             seq2num = ((Integer) nameshash.get(name2)).intValue();
                         }
-                        datlist.add(new minattvals(seq1num, seq2num, attval));
+                        datlist.add(new MinimalAttractionValue(seq1num, seq2num, attval));
                         
                     } else if (tmparr.length == 3) {
                         if ((vals != 3) && (vals != 0)) {
@@ -725,7 +725,7 @@ public class ClusterData {
                         } else {
                             seq2num = ((Integer) nameshash.get(name2)).intValue();
                         }
-                        datlist.add(new minattvals(seq1num, seq2num, attval));
+                        datlist.add(new MinimalAttractionValue(seq1num, seq2num, attval));
 
                     } else {
                     	inread.close();
@@ -751,7 +751,7 @@ public class ClusterData {
         }
         
         // now make an array out of the arrayList
-        myrun.attvals = (minattvals[]) datlist.toArray(new minattvals[0]);
+        myrun.attvals = (MinimalAttractionValue[]) datlist.toArray(new MinimalAttractionValue[0]);
         java.util.Random rand = new java.util.Random(System.currentTimeMillis());
         myrun.inaln = new AminoAcidSequence[namelist.size()];
         myrun.posarr = new float[namelist.size()][3];
@@ -782,10 +782,10 @@ public class ClusterData {
      * @param input_filename
      * @return
      */
-    static saverunobject load_matrix_file(File input_filename) {
+    static ClusterDataLoadHelper load_matrix_file(File input_filename) {
         System.out.println("reading matrixdata");
       
-        saverunobject myrun = new saverunobject();
+        ClusterDataLoadHelper myrun = new ClusterDataLoadHelper();
         myrun.file = null;// if myrun has a filename all was read ok
         try {
             BufferedReader inread = new BufferedReader(new FileReader(input_filename));
@@ -851,9 +851,9 @@ public class ClusterData {
                         System.out.println("reading matrix");
                         int counter = 0;
                         String[] tmparr;
-                        HashMap<String, minattvals> tmphash = new HashMap<String, minattvals>();
+                        HashMap<String, MinimalAttractionValue> tmphash = new HashMap<String, MinimalAttractionValue>();
                         String key;
-                        minattvals curratt;
+                        MinimalAttractionValue curratt;
                         float tmpval;
                         while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</mtx>") == false)) {
                             // skip empty lines
@@ -877,10 +877,10 @@ public class ClusterData {
                                             key = i + "_" + counter;
                                         }
                                         if (tmphash.containsKey(key)) {
-                                            curratt = (minattvals) tmphash.get(key);
+                                            curratt = (MinimalAttractionValue) tmphash.get(key);
                                             curratt.att += tmpval / 2;
                                         } else {
-                                            curratt = new minattvals();
+                                            curratt = new MinimalAttractionValue();
                                             curratt.query = counter;
                                             curratt.hit = i;
                                             curratt.att = tmpval / 2;
@@ -895,7 +895,7 @@ public class ClusterData {
                             }
                             counter++;
                         }
-                        myrun.attvals = (minattvals[]) (tmphash.values().toArray(new minattvals[0]));
+                        myrun.attvals = (MinimalAttractionValue[]) (tmphash.values().toArray(new MinimalAttractionValue[0]));
                         System.out.println("done reading matrix:" + counter);
                         
                         if (counter != seqs) {
@@ -1007,7 +1007,7 @@ public class ClusterData {
 	 */
 	public void save_to_file(java.io.File output_file, SwingWorker<Void, Integer> worker) throws IllegalStateException,
 			IOException, CancellationException {
-        saverunobject myrun = new saverunobject();
+        ClusterDataLoadHelper myrun = new ClusterDataLoadHelper();
         myrun.autosaveIntervalMinutes = autosaveIntervalMinutes;
         myrun.file = output_file;
         myrun.inaln = sequences;
@@ -1301,7 +1301,7 @@ public class ClusterData {
                             mygroup.color = color;
                             mygroup.hide = hide;
                             mygroup.size = size;
-                            mygroup.polygon = makepolygons.get(mygroup.type, mygroup.size);
+                            mygroup.polygon = Shapes.get(mygroup.type, mygroup.size);
                             color = java.awt.Color.red;
                             // now convert the numbers you read to the numbers used in namearr
                             tmparr = inline.substring(8).trim().split(";");
@@ -1553,7 +1553,7 @@ public class ClusterData {
 	 *             If worker is cancelled and saving should therefore be cancelled. In headless (no-GUI) mode this
 	 *             Exception will not occur.
 	 */
-	private static void saverun(saverunobject input, String[] sequence_names, boolean nographics,
+	private static void saverun(ClusterDataLoadHelper input, String[] sequence_names, boolean nographics,
 			SwingWorker<Void, Integer> worker) throws IllegalStateException, IOException, CancellationException {
 
 		checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
@@ -1650,9 +1650,9 @@ public class ClusterData {
 	        if (input.affyfiles != null) {
 	            outwrite.println("<affyfiles>");
 	            int repnum = input.affyfiles.size();
-	            replicates rep;
+	            Replicates rep;
 	            for (int i = 0; i < repnum; i++) {
-	                rep = (replicates) (input.affyfiles.get(i));
+	                rep = (Replicates) (input.affyfiles.get(i));
 	                outwrite.println("<");
 	                outwrite.println("abbreviation=" + rep.abbreviation);
 	                outwrite.println("replicates=" + rep.replicates);
@@ -1795,7 +1795,7 @@ public class ClusterData {
     public void save_attraction_values_to_file(File output_file) {
         try {
             PrintWriter outwrite = new PrintWriter(new BufferedWriter(new FileWriter(output_file)));
-            minattvals myatt;
+            MinimalAttractionValue myatt;
             for (int i = attractionValues.length; --i >= 0;) {
                 myatt = attractionValues[i];
                 outwrite.println(myatt.query + " " + myatt.hit + " " + myatt.att);
@@ -1820,13 +1820,13 @@ public class ClusterData {
             return;
         }
 
-        ArrayList<minattvals> tmpvec = new ArrayList<minattvals>();
+        ArrayList<MinimalAttractionValue> tmpvec = new ArrayList<MinimalAttractionValue>();
         int number_of_blasthits = blasthits.length;
-        HashMap<String, minattvals> myhash = new HashMap<String, minattvals>(number_of_blasthits);
+        HashMap<String, MinimalAttractionValue> myhash = new HashMap<String, MinimalAttractionValue>(number_of_blasthits);
         float newatt;
         String key;
         float maxattval = 0;
-        minattvals curratt = null;
+        MinimalAttractionValue curratt = null;
         maxvalfound = 0;// init to zero, is assigned value in getattvalsimple or mult
         // NOTE: this is not necessarily a symmetrical array. compute all values
         // and then symmetrize computing the average values
@@ -1841,7 +1841,7 @@ public class ClusterData {
                         key = blasthits[i].hit + "_" + blasthits[i].query;
                     }
                     if (myhash.containsKey(key)) {
-                        curratt = (minattvals) myhash.get(key);
+                        curratt = (MinimalAttractionValue) myhash.get(key);
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
@@ -1856,7 +1856,7 @@ public class ClusterData {
                         }
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt = new minattvals();
+                        curratt = new MinimalAttractionValue();
                         if (blasthits[i].query < blasthits[i].hit) {
                             curratt.query = blasthits[i].query;
                             curratt.hit = blasthits[i].hit;
@@ -1903,7 +1903,7 @@ public class ClusterData {
                         }
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt = new minattvals();
+                        curratt = new MinimalAttractionValue();
                         if (blasthits[i].query < blasthits[i].hit) {
                             curratt.query = blasthits[i].query;
                             curratt.hit = blasthits[i].hit;
@@ -1931,11 +1931,11 @@ public class ClusterData {
             // note, this does NOT symmetrize the attractions
             if (usescval == false) {
                 for (int i = tmpvec.size() - 1; i >= 0; i--) {
-                    if (((minattvals) tmpvec.get(i)).att == -1) {
-                        ((minattvals) tmpvec.get(i)).att = 1;
+                    if (((MinimalAttractionValue) tmpvec.get(i)).att == -1) {
+                        ((MinimalAttractionValue) tmpvec.get(i)).att = 1;
 
                     } else {
-                        ((minattvals) tmpvec.get(i)).att /= maxattval;
+                        ((MinimalAttractionValue) tmpvec.get(i)).att /= maxattval;
                     }
                 }
                 
@@ -1956,7 +1956,7 @@ public class ClusterData {
                         key = blasthits[i].hit + "_" + blasthits[i].query;
                     }
                     if (myhash.containsKey(key)) {
-                        curratt = (minattvals) myhash.get(key);
+                        curratt = (MinimalAttractionValue) myhash.get(key);
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
@@ -1970,7 +1970,7 @@ public class ClusterData {
                         }
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt = new minattvals();
+                        curratt = new MinimalAttractionValue();
                         if (blasthits[i].query < blasthits[i].hit) {
                             curratt.query = blasthits[i].query;
                             curratt.hit = blasthits[i].hit;
@@ -2003,7 +2003,7 @@ public class ClusterData {
                         key = blasthits[i].hit + "_" + blasthits[i].query;
                     }
                     if (myhash.containsKey(key)) {
-                        curratt = (minattvals) myhash.get(key);
+                        curratt = (MinimalAttractionValue) myhash.get(key);
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
@@ -2018,7 +2018,7 @@ public class ClusterData {
 
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt = new minattvals();
+                        curratt = new MinimalAttractionValue();
                         if (blasthits[i].query < blasthits[i].hit) {
                             curratt.query = blasthits[i].query;
                             curratt.hit = blasthits[i].hit;
@@ -2047,17 +2047,17 @@ public class ClusterData {
             // and divide all vals by maxattval and offset by minattval(-->range: 0-1)
             float divval = maxattval - minattval;
             for (int i = tmpvec.size() - 1; i >= 0; i--) {
-                if (((minattvals) tmpvec.get(i)).att == -1) {
-                    ((minattvals) tmpvec.get(i)).att = 1;
+                if (((MinimalAttractionValue) tmpvec.get(i)).att == -1) {
+                    ((MinimalAttractionValue) tmpvec.get(i)).att = 1;
                 } else {
-                    ((minattvals) tmpvec.get(i)).att = (((minattvals) tmpvec.get(i)).att - minattval) / divval;
+                    ((MinimalAttractionValue) tmpvec.get(i)).att = (((MinimalAttractionValue) tmpvec.get(i)).att - minattval) / divval;
                 }
             }
 
             p2attfactor = divval;
             p2attoffset = minattval;
         }
-        attractionValues = (minattvals[]) tmpvec.toArray(new minattvals[0]);
+        attractionValues = (MinimalAttractionValue[]) tmpvec.toArray(new MinimalAttractionValue[0]);
         
 		String formatted_used_hsps = String.format("%" + Integer.toString(blasthits.length).length() + "s",
 				attractionValues.length);

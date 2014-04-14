@@ -573,7 +573,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				for (i = currsel.length; --i >= 0;) {
 					if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 						parent.data.seqgroupsvec.elementAt(currsel[i]).size = refsize;
-						parent.data.seqgroupsvec.elementAt(currsel[i]).polygon = makepolygons.get(
+						parent.data.seqgroupsvec.elementAt(currsel[i]).polygon = Shapes.get(
 								parent.data.seqgroupsvec.elementAt(currsel[i]).type,
 								parent.data.seqgroupsvec.elementAt(currsel[i]).size);
 					}
@@ -599,7 +599,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 				for (i = currsel.length; --i >= 0;) {
 					if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 						parent.data.seqgroupsvec.elementAt(currsel[i]).size = refsize;
-						parent.data.seqgroupsvec.elementAt(currsel[i]).polygon = makepolygons.get(
+						parent.data.seqgroupsvec.elementAt(currsel[i]).polygon = Shapes.get(
 								parent.data.seqgroupsvec.elementAt(currsel[i]).type,
 								parent.data.seqgroupsvec.elementAt(currsel[i]).size);
 					}
@@ -632,7 +632,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 			for (int i = currsel.length - 1; i >= 0; i--) {
 				if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
 					parent.data.seqgroupsvec.elementAt(currsel[i]).type = draw1.type;
-					parent.data.seqgroupsvec.elementAt(currsel[i]).polygon = makepolygons.get(draw1.type,
+					parent.data.seqgroupsvec.elementAt(currsel[i]).polygon = Shapes.get(draw1.type,
 							parent.data.seqgroupsvec.elementAt(currsel[i]).size);
 				}
 			}
@@ -1027,7 +1027,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
      * @param attvals
      * @return
      */
-    float getavgatt(int[] seqs, minattvals[] attvals) {
+    float getavgatt(int[] seqs, MinimalAttractionValue[] attvals) {
         float sumval = 0;
 		int seqnum = seqs.length;
 		int attnum = attvals.length;
@@ -1058,7 +1058,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
      * @param avg
      * @return
      */
-    float getvaratt(int[] seqs, minattvals[] attvals, float avg) {
+    float getvaratt(int[] seqs, MinimalAttractionValue[] attvals, float avg) {
 		float varval = 0;
 		float diff;
 		int q, h, j;
@@ -1090,7 +1090,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
      * @param attvals
      * @return
      */
-    float getoutavgatt(int[] seqs, minattvals[] attvals) {
+    float getoutavgatt(int[] seqs, MinimalAttractionValue[] attvals) {
 		int elements = attvals.length;
 		int seqnum = seqs.length;
 		int attnum = attvals.length;
@@ -1129,7 +1129,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
      * @param avg
      * @return
      */
-    float getoutvaratt(int[] seqs, minattvals[] attvals, float avg) {
+    float getoutvaratt(int[] seqs, MinimalAttractionValue[] attvals, float avg) {
 	    int elements = attvals.length;
 		int seqnum = seqs.length;
 		int attnum = attvals.length;
@@ -1318,7 +1318,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		int framewidth = 50;
 		int frameheight = 50;
 		int size = 25;
-		ArrayList<int[][]> polygons = makepolygons.get(size);
+		ArrayList<int[][]> polygons = Shapes.get(size);
 		int[][] tmpposarr;
 		int[] xposarr, yposarr;
 		int posnum;
