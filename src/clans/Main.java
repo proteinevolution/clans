@@ -4,6 +4,17 @@ import java.io.*;
 import java.text.ParseException;
 import java.util.*;
 
+import clans.algorithms.EnrichWithSimilarSequences;
+import clans.gui.ClusteringWithGui;
+import clans.headless.ClusteringWithoutGui;
+import clans.io.AlignmentHandling;
+import clans.io.Blast;
+import clans.io.BlastVersion2;
+import clans.io.ClusterDataLoadHelper;
+import clans.model.ClusterData;
+import clans.model.proteins.AminoAcidSequence;
+import clans.model.proteins.MinimalHsp;
+
 public class Main {
 
 	public static void main(String[] args) {

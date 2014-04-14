@@ -29,7 +29,7 @@ public class UnusedWeirdClassPreviouslyCalledSelectclass {
         this.name=name;
     }
     
-    String name="no name set";
-    int[] selectednames=new int[0];
-    java.awt.Color color=new java.awt.Color(0.5f,0.5f,0.5f);
+    public String name="no name set";
+    public int[] selectednames=new int[0];
+    public java.awt.Color color=new java.awt.Color(0.5f,0.5f,0.5f);
 }
