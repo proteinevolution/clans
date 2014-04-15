@@ -265,11 +265,13 @@ public class Main {
 				// start the GUI
 				if (nographics == false) {
 					System.out.println("...reading data");
+					
 					ClusterData myclusterdata = new ClusterData(blasthits, sequences, sequence_names,
 							sequence_name_internal_mapping, eval, pval, scval, verbose, cpu, save_intermediate_results,
 							cmd, blastpath, addblastvbparam, formatdbpath, referencedb, errbuff, input_filename);
-					myclusterdata.roundslimit = dorounds;// set the limit of how
-															// often to run this
+					
+					myclusterdata.setRoundsLimit(dorounds);// set the limit of how often to run this
+					
 					ClusteringWithGui myclusterer = new ClusteringWithGui(myclusterdata);
 					myclusterer.setVisible(true);
 
@@ -377,11 +379,15 @@ public class Main {
 							new String[0], new HashMap<String, Integer>(), eval, pval, scval, verbose, cpu,
 							save_intermediate_results, cmd, blastpath, addblastvbparam, formatdbpath, referencedb,
 							errbuff, input_filename);
-					myclusterdata.roundslimit = dorounds;// set the limit of how often to run this
+					
+					myclusterdata.setRoundsLimit(dorounds); // set the limit of how often to run this
+					
 					ClusteringWithGui myclusterer = new ClusteringWithGui(myclusterdata);
+					
 					myclusterer.initaddedseqs(blasthits, sequences, sequence_names, sequence_name_internal_mapping,
 							newnumarr, allposarr, mymaxmove, mypval, true);
 					readdata = null;
+					
 					myclusterer.setVisible(true);
 				} else {
 					System.out.println("DONE. To visualize results restart program with the -nographics F option");
@@ -425,13 +431,15 @@ public class Main {
 							save_intermediate_results, cmd, blastpath, addblastvbparam, formatdbpath, referencedb,
 							errbuff, input_filename);
 
-					myclusterdata.roundslimit = dorounds;
+					myclusterdata.setRoundsLimit(dorounds);
 
 					ClusteringWithGui myclusterer = new ClusteringWithGui(myclusterdata);
+					
 					myclusterer.initaddedseqs(readdata.blasthits, readdata.inaln, sequence_names,
 							sequence_name_internal_mapping, new int[0], readdata.posarr, readdata.maxmove,
 							readdata.pval, false);
 					readdata = null;
+					
 					myclusterer.setVisible(true);
 				} else {
 					System.out.println("DONE. To visualize results restart program with the -nographics F option");
@@ -455,9 +463,10 @@ public class Main {
 							save_intermediate_results, cmd, blastpath, addblastvbparam, formatdbpath, referencedb,
 							errbuff, input_filename);
 
-					myclusterdata.roundslimit = dorounds;
+					myclusterdata.setRoundsLimit(dorounds);
 
 					ClusteringWithGui myclusterer = new ClusteringWithGui(myclusterdata);
+					
 					myclusterer.setVisible(true);
 
 				} else { // pretty useless case that's only educational to the user
@@ -486,7 +495,7 @@ public class Main {
 				new HashMap<String, Integer>(), eval, pval, scval, verbose, cpu, save_intermediate_results, cmd,
 				blastpath, addblastvbparam, formatdbpath, referencedb, errbuff, input_filename);
 
-		myclusterdata.roundslimit = dorounds;
+		myclusterdata.setRoundsLimit(dorounds);
 
 		ClusteringWithoutGui myclusterer = new ClusteringWithoutGui(myclusterdata);
 
@@ -519,7 +528,7 @@ public class Main {
 		int waittime = 15000;// 15 seconds
 		synchronized (myclusterer) {
 			while (myclusterer.mythread.stop == false) {
-				System.out.println("done clustering round " + myclusterer.data.roundsdone);
+				System.out.println("done clustering round " + myclusterer.data.roundsCompleted);
 				try {
 					myclusterer.wait(waittime);
 				} catch (InterruptedException ie) {

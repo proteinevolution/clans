@@ -48,13 +48,13 @@ public class ClusteringWithoutGui {
         @Override
         public void run(){
             this.didrun=true;
-            data.roundsdone=0;
+            data.roundsCompleted=0;
             while (stop==false){
                 data.rounds++;
-                if(data.roundslimit!=-1){
-                    data.roundsdone++;
+				if (data.hasRoundsLimit()) {
+                    data.roundsCompleted++;
                   
-                    if(data.roundsdone>=data.roundslimit){
+					if (data.roundsCompleted >= data.getRoundsLimit()) {
                         stop=true;
                         synchronized(parent){
                             parent.notify();

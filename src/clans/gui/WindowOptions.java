@@ -16,7 +16,7 @@ public class WindowOptions extends javax.swing.JFrame {
         this.parent=parent;
         this.setTitle("CLANS options");
         initComponents();
-        initialize_textfields();
+        refreshValuesFromModel();
         repaint();
     }
     
@@ -239,7 +239,7 @@ public class WindowOptions extends javax.swing.JFrame {
     private javax.swing.JPanel settingpanel;
     // End of variables declaration//GEN-END:variables
     
-    void initialize_textfields(){
+    protected void refreshValuesFromModel(){
      //read the parameters from the parent
         attfield.setText(String.valueOf(parent.data.attfactor));
         repfield.setText(String.valueOf(parent.data.repfactor));
@@ -250,7 +250,18 @@ public class WindowOptions extends javax.swing.JFrame {
         maxmovefield.setText(String.valueOf(parent.data.maxmove));
         attvalpowtextfield.setText(String.valueOf(parent.data.attvalpow));
         repvalpowtextfield.setText(String.valueOf(parent.data.repvalpow));
-        roundstextfield.setText(String.valueOf(parent.data.roundslimit));
+        
+        updateRoundsLimitFromModel();
+    }
+    
+	/**
+	 * Sets the "Cluster for rounds" input text to the value found in the data.
+	 * 
+	 * @param limit
+	 *            The limit for the number of rounds before stopping automatically.
+	 */
+    private void updateRoundsLimitFromModel() {
+		roundstextfield.setText(String.valueOf(parent.data.getRoundsLimit()));
     }
     
 }

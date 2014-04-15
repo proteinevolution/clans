@@ -666,6 +666,27 @@ public class GuiMessageOverlay extends JComponent {
 	}
 	
 	/**
+	 * @return Default duration for information-type messages.
+	 */
+	protected Duration getDurationInfo() {
+		return Duration.INFO;
+	}
+	
+	/**
+	 * @return Default duration for information-type messages.
+	 */
+	protected Duration getDurationWarning() {
+		return Duration.WARNING;
+	}
+	
+	/**
+	 * @return Default duration for information-type messages.
+	 */
+	protected Duration getDurationError() {
+		return Duration.ERROR;
+	}
+	
+	/**
 	 * Sets up a custom message with all available details of the overlay.
 	 * 
 	 * @param main_message

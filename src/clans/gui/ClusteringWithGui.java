@@ -17,6 +17,7 @@ import clans.io.ClusterDataLoadHelper;
 import clans.io.FileHandling;
 import clans.io.FileHandling2;
 import clans.misc.MyMath;
+import clans.misc.ReporterThread;
 import clans.model.ClusterData;
 import clans.model.SelectedSubsetHandling;
 import clans.model.SequenceCluster;
@@ -43,9 +44,6 @@ import java.io.*;
  */
 public class ClusteringWithGui extends javax.swing.JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1310615823184297259L;
 
 	/**
@@ -152,7 +150,8 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * (first column). Then run "jstack <process id>" to see all threads of your process.
 	 */
 	private void initializeComputationThread() {
-		iterationComputerThread = new IterationsComputerThread(this);
+		reporterThread = new ReporterThread(this, new IterationsComputerThread(this),
+				reporterWaitForIteratorThreadStartLock, computationLock, "computationHasStopped", "ReporterThread");
 	}
 
 	/**
@@ -292,7 +291,6 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		});
 		drawbuttonpanel.add(button_initialize);
 
-		modifyButtonStartStopResume(ButtonStartStopMessage.STOP, true);
 		button_start_stop_resume.setToolTipText("start/resume/stop the current run");
 		button_start_stop_resume.setMnemonic(KeyEvent.VK_S);
 		button_start_stop_resume.addActionListener(new java.awt.event.ActionListener() {
@@ -301,6 +299,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			}
 		});
 		drawbuttonpanel.add(button_start_stop_resume);
+		updateButtonStartStopResumeLabel();
 
 		button_show_selected.setText("Show selected");
 		button_show_selected.setMnemonic(KeyEvent.VK_O);
@@ -1371,6 +1370,27 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		enableCancelWorkInProgressKey();
 	}
 
+	/**
+	 * Setup the number of rounds as chosen in the options window.
+	 * 
+	 * @param new_limit
+	 *            The new rounds number limit.
+	 * @return true if the options window needs to refresh its input field values from the model.
+	 */
+	private boolean setRoundsLimit(int new_limit) {
+		if (new_limit > 1) {
+			data.setRoundsLimit(new_limit);
+			updateButtonStartStopResumeLabel();
+			return false;
+		}
+		
+		data.disableRoundsLimit();
+		updateButtonStartStopResumeLabel();
+
+		// disabling might change user input e.g. from -5 to -1, hence we need to update the option window values
+		return true;
+	}
+	
 	/**
 	 * Opens an input dialog where users can choose to only repaint the GUI after every N rounds of calculation.
 	 */
@@ -2695,7 +2715,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		groupseqs = null;
 		int selectednum = data.selectedSequencesIndices.length;
 		if (selectednum < 2) {
-			modifyButtonStartStopResume(null, true);
+			enableButtonStartStopResume();
 			return;
 		}
 		if (shownames != null) {
@@ -3225,6 +3245,10 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 	WindowShowSelectedSequences shownames;
 	WindowEditGroups myseqgroupwindow;
+	
+	ReporterThread reporterThread;
+	final Object reporterWaitForIteratorThreadStartLock = new Object();
+	
 	IterationsComputerThread iterationComputerThread;
 	final Object computationLock = new Object();
 
@@ -3346,12 +3370,53 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	private javax.swing.JButton button_initialize;
 	private javax.swing.JMenuItem stereoanglemenuitem;
 	private javax.swing.JCheckBoxMenuItem stereocheckboxmenuitem;
+	
 	private javax.swing.JButton button_start_stop_resume;
+	private boolean reenableButtonAfterStoppingComputation;
+	
 	private javax.swing.JMenuItem taxonomymenuitem;
 	private javax.swing.JMenu menu_windows;
 	private javax.swing.JToggleButton button_zoom_on_selected;
 	private javax.swing.JMenuItem zoommenuitem;
+	
+	/**
+	 * Based on the GUI state, updates the start/stop/resume button label.
+	 */
+	private void updateButtonStartStopResumeLabel() {
+		
+		if (data == null) {
+			modifyButtonStartStopResume("no data", false);
+			return;
+		}
 
+		Object message = null;
+
+		if (data.hasRoundsLimit()) {
+
+			if (isComputing()) {
+				message = String
+						.format("STOP (%" + String.valueOf(data.getRoundsLimit()).length() + "s/"
+								+ data.getRoundsLimit() + ")", data.roundsCompleted);
+
+			} else { // reached previous round limit or just set one up
+				message = ButtonStartStopMessage.START + " for " + data.getRoundsLimit() + " rounds";
+			}
+
+		} else { // without round limit
+			if (isComputing()) {
+				message = ButtonStartStopMessage.STOP;
+
+			} else if (data.rounds == 0) {
+				message = ButtonStartStopMessage.START;
+
+			} else {
+				message = ButtonStartStopMessage.RESUME;
+			}
+		}
+
+		modifyButtonStartStopResume(message, true);
+	}
+	
 	/**
 	 * Changes label and availability state of the start/resume/stop button.
 	 * 
@@ -3371,6 +3436,20 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 
 		button_start_stop_resume.setEnabled(enabled);
 	}
+	
+	/**
+	 * Enables the start/stop/resume button.
+	 */
+	private void enableButtonStartStopResume() {
+		button_start_stop_resume.setEnabled(true);
+	}
+
+	/**
+	 * Disables the start/stop/resume button.
+	 */
+	private void disableButtonStartStopResume() {
+		button_start_stop_resume.setEnabled(false);
+	}
 
 	/**
 	 * Checks if we are currently computing new iterations of the clustering.
@@ -3378,9 +3457,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	 * @return true iff the clustering is running
 	 */
 	protected boolean isComputing() {
-		return iterationComputerThread != null && iterationComputerThread.isRunning();
+		return reporterThread != null && reporterThread.hasRunningIterationsComputerThread();
 	}
-
+	
 	/**
 	 * Starts the computation.
 	 * 
@@ -3394,13 +3473,34 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (!containsData(true)) {
 			return false;
 		}
+		
+		reenableButtonAfterStoppingComputation = true;
 
 		updateOptionValuesFromOptionsWindow();
 
 		initializeComputationThread(); // thread cannot be restarted
-		iterationComputerThread.start();
+		
+		/**
+		 * we need to wait for the iterator thread to start, otherwise the start/stop/resume button will not get a
+		 * "STOP" label, as the threads status is checked there.
+		 */
+		synchronized (reporterWaitForIteratorThreadStartLock) {
+			reporterThread.start();
+			
+			while(!reporterThread.hasRunningIterationsComputerThread()) {
+				
+				try {
+					reporterWaitForIteratorThreadStartLock.wait();
+				
+				} catch (InterruptedException e) {
+					System.err.println("fatal error: GUI was interrupted while waiting for iterator thread!");
+					e.printStackTrace();
+					System.exit(11);
+				}
+			}
+		}
 
-		modifyButtonStartStopResume(ButtonStartStopMessage.STOP, true);
+		updateButtonStartStopResumeLabel();
 
 		return false;
 	}
@@ -3417,28 +3517,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (!isComputing()) {
 			return false;
 		}
-
-		modifyButtonStartStopResume(null, false);
-
-		iterationComputerThread.interrupt(); // tell the thread to stop whenever possible next
 		
-		synchronized (computationLock) {
-			try {
-				computationLock.wait();
-			
-			} catch (InterruptedException e) {
-				/**
-				 * thrown if the GUI thread is interrupted during the join, which makes the Exception meaningless as the
-				 * whole program dies in that case.
-				 */
-				System.err.println("fatal error: the GUI thread was interrupted!");
-				System.exit(1);
-			}
-		}
+		reenableButtonAfterStoppingComputation = !keep_button_disabled;
 
-		if (!keep_button_disabled) {
-			modifyButtonStartStopResume(ButtonStartStopMessage.RESUME, true);
-		}
+		disableButtonStartStopResume();
+
+		reporterThread.stopChild();
+		reporterThread.joinChild();
 
 		return true;
 	}
@@ -3446,6 +3531,19 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 	private void restartComputation() {
 		if (stopComputation(false)) {
 			startComputation();
+		}
+	}
+	
+	/**
+	 * Inform the GUI that the iteration computations have stopped and housekeeping can start. This method is called by
+	 * the {@code reporterThread} once a started {@code iterationComputerThread} has died.
+	 * <p>
+	 * Note: Further housekeeping after stopping can be done here easily.
+	 */
+	public void computationHasStopped() {
+		// WARNING: if this method is ever renamed, its name also has to be changed in initializeComputationThread 
+		if (reenableButtonAfterStoppingComputation) {
+			updateButtonStartStopResumeLabel();
 		}
 	}
 
@@ -3476,7 +3574,9 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		if (options_window != null) {
 			options_window.currcoolfield.setText(String.valueOf(data.currcool));
 		}
-		modifyButtonStartStopResume(ButtonStartStopMessage.START, true);
+
+		updateButtonStartStopResumeLabel();
+
 		mousemove[0] = 0;
 		mousemove[1] = 0;
 
@@ -3658,7 +3758,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		textfield_threshold_value.setText(String.valueOf(data.pvalue_threshold));
 
 		if (options_window != null) {
-			options_window.initialize_textfields();
+			options_window.refreshValuesFromModel();
 		}
 
 		textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
@@ -3750,7 +3850,7 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		}
 
 		String tmpstr = "";
-
+		boolean refresh_values_from_model = false;
 		try {
 			tmpstr = options_window.attfield.getText();
 			data.attfactor = Float.parseFloat(tmpstr);
@@ -3780,10 +3880,15 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 			data.repvalpow = Integer.parseInt(tmpstr);
 
 			tmpstr = options_window.roundstextfield.getText();
-			data.roundslimit = Integer.parseInt(tmpstr);
-
+			int new_rounds_limit = Integer.parseInt(tmpstr);
+			refresh_values_from_model = setRoundsLimit(new_rounds_limit);
+					
 		} catch (NumberFormatException e) {
 			javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse number from '" + tmpstr + "'");
+		}
+
+		if (refresh_values_from_model) {
+			options_window.refreshValuesFromModel();
 		}
 	}
 
@@ -4984,17 +5089,13 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		 */
 		public IterationsComputerThread(ClusteringWithGui parent) {
 			this.parent = parent;
-			setName("computation thread");
+			setName("IterationsComputerThread");
 		}
 
 		String tmpstr = "";
 		float tmpcool = 1;
 		final Object syncon = new Object(); // dummy object to sync on
 		ClusteringWithGui parent;
-
-		protected boolean isRunning() {
-			return isAlive();
-		}
 
 		/**
 		 * Starts the computation by either computing itself (if {@code data.cpu}==1) or spawning {@code data.cpu} many
@@ -5003,20 +5104,32 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 		@Override
 		public void run() {
 
-			data.roundsdone = 0;
-
+			data.roundsCompleted = 0;
+			
 			while (!Thread.currentThread().isInterrupted()) {
 				data.rounds++;
-				if (data.roundslimit != -1) {
-					data.roundsdone++;
+				if (data.hasRoundsLimit()) {
+					data.roundsCompleted++;
 
-					modifyButtonStartStopResume("STOP (" + data.roundsdone + "/" + data.roundslimit + ")", true);
+					if (data.roundsCompleted < data.getRoundsLimit()) {
+						updateButtonStartStopResumeLabel();
 
-					if (data.roundsdone >= data.roundslimit) {
+					} else {
 						Thread.currentThread().interrupt();
-						synchronized (parent) {
-							parent.notify();
+//						synchronized (parent) {
+//							parent.notify();
+//						}
+						
+						String completion_message = "completed the planned " + data.getRoundsLimit() + " rounds";
+						if (messageOverlayActive) {
+							message_overlay.setCustomMessage(completion_message, null,
+									message_overlay.getColorSuccess(), message_overlay.getDurationInfo(), true, false);
+						} else {
+							System.out.println(completion_message);
 						}
+						
+//						updateButtonStartStopResumeLabel();
+						break;
 					}
 				}
 
@@ -5107,11 +5220,11 @@ public class ClusteringWithGui extends javax.swing.JFrame {
 				}
 			}
 
+			parent.repaint();
+			
 			synchronized (computationLock) {
 				computationLock.notify();
 			}
-
-			parent.repaint();
 		}
 	}
 }

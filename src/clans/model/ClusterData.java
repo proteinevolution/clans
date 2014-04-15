@@ -125,8 +125,15 @@ public class ClusterData {
     public boolean changedvals = false;
     public java.awt.Color[] colorarr = null;
     public float[] colorcutoffs = null;
-    public int roundsdone = 0;
-    public int roundslimit = -1;
+    /**
+	 * The number of rounds completed since the last press of the start/stop/resume button. This is used for running a
+	 * fixed number of rounds as chosen by the user in the options window.
+	 */
+    public int roundsCompleted = 0;
+    /**
+	 * The number of rounds to run before stopping automatically. If set to -1, automatic stopping is disabled.
+	 */
+    private int roundsLimitBeforeStopping = -1;
 
     private int autosaveIntervalMinutes; // the autosave interval in minutes; -1 if value not in input file, 0 = disabled
 
@@ -2084,6 +2091,7 @@ public class ClusterData {
      */
     public void initialize() {
         rounds = 0;
+        
         currcool = 1;
 
         zoomFactor = 1;
@@ -2180,6 +2188,38 @@ public class ClusterData {
         }
         seqgroupsvec.remove(index);
     }
+    
+	/**
+	 * @return true if the user set up a limit for the number of rounds to run before stopping automatically.
+	 */
+	public boolean hasRoundsLimit() {
+		return roundsLimitBeforeStopping > 0;
+	}
+	
+	/**
+	 * @return the number of rounds to run before stopping automatically or -1 if no limit is currently in place.
+	 */
+	public int getRoundsLimit() {
+		return roundsLimitBeforeStopping;
+	}
+	
+	/**
+	 * Sets the number of rounds to run before stopping automatically.
+	 * 
+	 * @param new_limit
+	 *            The number of rounds to run before stopping.
+	 */
+	public void setRoundsLimit(int new_limit) {
+		roundsLimitBeforeStopping = new_limit;
+		roundsCompleted = 0;
+	}
+	
+	/**
+	 * Disables automatic stopping after a fixed number of rounds.
+	 */
+	public void disableRoundsLimit() {
+		setRoundsLimit(-1);
+	}
     
     /**
      * Used to indicate worker cancellation. 
