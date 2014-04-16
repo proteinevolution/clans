@@ -103,7 +103,7 @@ public class DialogSearchQueryEntry extends javax.swing.JDialog {
     private void loadbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadbuttonActionPerformed
         String filename="no_name";
         try{
-            javax.swing.JFileChooser fc=ClusteringWithGui.fc;
+            javax.swing.JFileChooser fc=ProgramWindow.fc;
             int retval=fc.showOpenDialog(this);
             
             if(retval==JFileChooser.APPROVE_OPTION){

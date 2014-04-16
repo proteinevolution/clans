@@ -21,8 +21,8 @@ import java.util.concurrent.CancellationException;
 
 import javax.swing.SwingWorker;
 
-import clans.algorithms.ClusterMethods;
-import clans.algorithms.MovementComputerThread;
+import clans.algorithms.fruchtermanreingold.ClusterMethods;
+import clans.algorithms.fruchtermanreingold.MovementComputerThread;
 import clans.gui.Shapes;
 import clans.io.ClusterDataLoadHelper;
 import clans.io.ComfortableBufferedWriter;
@@ -91,7 +91,6 @@ public class ClusterData {
     public boolean avgfoldchange = false;
     public String namesdmp_file = "not_spcified";
     public String nodesdmp_file = "not_specified";
-    public float zoomFactor = 1;
     public boolean showinfo = false;
     public int[] selectedSequencesIndices = new int[0];
     public int[] selectedSequencesIndicesStableCopy = new int[0];
@@ -121,7 +120,7 @@ public class ClusterData {
     public int groupsize = 4;
     public java.util.Vector<SequenceGroup> seqgroupsvec = new java.util.Vector<SequenceGroup>();
     public ArrayList<int[][]> polygons = null;
-    public boolean showseqgroups = false;
+    public boolean showSequenceGroups = false;
     public boolean changedvals = false;
     public java.awt.Color[] colorarr = null;
     public float[] colorcutoffs = null;
@@ -555,7 +554,6 @@ public class ClusterData {
             formatdbpath = loaded_data.formatdbpath;
         }
 
-        zoomFactor = loaded_data.zoom;
         cluster2d = loaded_data.cluster2d;
         showinfo = loaded_data.showinfo;
         int number_of_sequences = sequences.length;
@@ -596,7 +594,7 @@ public class ClusterData {
         polygons = clans.gui.Shapes.get(groupsize);
         seqgroupsvec = loaded_data.seqgroupsvec;
         if (seqgroupsvec.size() > 0) {
-            showseqgroups = true;
+            showSequenceGroups = true;
         }
         changedvals = true;
 
@@ -2094,7 +2092,6 @@ public class ClusterData {
         
         currcool = 1;
 
-        zoomFactor = 1;
         reset_rotmtx();
 
         movements = null;

@@ -13,7 +13,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
      */
     private static final long serialVersionUID = 8677383220559650947L;
 
-    ClusteringWithGui parent;
+    ProgramWindow parent;
     Vector<SequenceCluster> clusters;
     String[] clusternames;
     boolean didbootstrap = false;
@@ -27,7 +27,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
     private javax.swing.JScrollPane scrollpanel;
     // End of variables declaration//GEN-END:variables
     
-    public WindowClusterDetectionResults(ClusteringWithGui parent, Vector<SequenceCluster> clusters, String label, boolean didbootstrap) {
+    public WindowClusterDetectionResults(ProgramWindow parent, Vector<SequenceCluster> clusters, String label, boolean didbootstrap) {
         this.parent = parent;
         this.clusters = clusters;
         this.didbootstrap = didbootstrap;

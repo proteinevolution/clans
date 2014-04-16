@@ -9,7 +9,7 @@ public class WindowRotatationAnimantionSetup extends javax.swing.JFrame {
     private static final long serialVersionUID = -4229599705833513486L;
     
     
-    public WindowRotatationAnimantionSetup(ClusteringWithGui parent) {
+    public WindowRotatationAnimantionSetup(ProgramWindow parent) {
         this.parent=parent;
         this.setTitle("Rotation");
         initComponents();
@@ -169,7 +169,7 @@ public class WindowRotatationAnimantionSetup extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_repaintbuttonActionPerformed
         
-    ClusteringWithGui parent=null;
+    ProgramWindow parent=null;
     float xrot=0;
     float yrot=0;
     long minms=0;
@@ -232,8 +232,8 @@ public class WindowRotatationAnimantionSetup extends javax.swing.JFrame {
                         ie.printStackTrace();
                     }
                 }
-                parent.mousemove[0]=(int)(((double)xrot*(parent.draw_area.drawwidth/2))/(java.lang.Math.PI/2));
-                parent.mousemove[1]=(int)(((double)yrot*(parent.draw_area.drawwidth/2))/(java.lang.Math.PI/2));
+                parent.mousemove[0]=(int)(((double)xrot*(parent.draw_area.drawWidth/2))/(java.lang.Math.PI/2));
+                parent.mousemove[1]=(int)(((double)yrot*(parent.draw_area.drawWidth/2))/(java.lang.Math.PI/2));
                 parent.repaint();
                 lasttime=System.currentTimeMillis();
                 //parent.draw1.rotmtx[0][0]=parent.draw1.myrotmtx[0][0];

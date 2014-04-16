@@ -1,6 +1,6 @@
 package clans.headless;
 
-import clans.algorithms.ClusterMethods;
+import clans.algorithms.fruchtermanreingold.ClusterMethods;
 import clans.model.ClusterData;
 
 public class ClusteringWithoutGui {

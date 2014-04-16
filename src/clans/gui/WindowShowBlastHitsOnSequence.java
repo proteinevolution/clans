@@ -18,7 +18,7 @@ public class WindowShowBlastHitsOnSequence extends javax.swing.JDialog {
         initComponents();
     }
 
-    public WindowShowBlastHitsOnSequence(ClusteringWithGui parent, HighScoringSegmentPair[] hsparr, int referenceseqnum, String[] namearr,
+    public WindowShowBlastHitsOnSequence(ProgramWindow parent, HighScoringSegmentPair[] hsparr, int referenceseqnum, String[] namearr,
             AminoAcidSequence refseq, HashMap<String, Integer> nameshash) {
         //super(parent, false);
         this.parent=parent;
@@ -152,7 +152,7 @@ public class WindowShowBlastHitsOnSequence extends javax.swing.JDialog {
     //    new viewblasthits(new javax.swing.JFrame(), true).show();
     //}
     
-    ClusteringWithGui parent;
+    ProgramWindow parent;
     HighScoringSegmentPair[] hsparr;
     int referenceseqnum;
     AminoAcidSequence referenceseq;

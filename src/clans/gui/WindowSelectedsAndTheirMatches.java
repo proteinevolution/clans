@@ -11,7 +11,7 @@ public class WindowSelectedsAndTheirMatches extends javax.swing.JFrame {
      */
     private static final long serialVersionUID = 3816742984172803053L;
     
-    public WindowSelectedsAndTheirMatches(ClusteringWithGui parent, int[] blasthits,int[] selectednames) {
+    public WindowSelectedsAndTheirMatches(ProgramWindow parent, int[] blasthits,int[] selectednames) {
         this.parent=parent;
         this.blasthits=blasthits;
         this.selectednames=selectednames;
@@ -195,7 +195,7 @@ public class WindowSelectedsAndTheirMatches extends javax.swing.JFrame {
     
     String[] namesarr;
     String[] blastnamesarr;
-    ClusteringWithGui parent;
+    ProgramWindow parent;
     boolean showall=true;
     int[] selectednames;
     int[] globalselected=new int[0];

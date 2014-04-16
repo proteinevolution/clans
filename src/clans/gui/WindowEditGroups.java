@@ -7,7 +7,7 @@ import java.util.*;
 
 import javax.swing.JColorChooser;
 
-import clans.algorithms.ClusterMethods;
+import clans.algorithms.fruchtermanreingold.ClusterMethods;
 import clans.model.SequenceGroup;
 import clans.model.proteins.MinimalAttractionValue;
 
@@ -22,16 +22,16 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	 * 
 	 * @param parent
 	 */
-	public WindowEditGroups(ClusteringWithGui parent) {
+	public WindowEditGroups(ProgramWindow parent) {
 		this.parent = parent;
 
 		myfont = parent.draw_area.myfont;
-		mybackground = parent.draw_area.bgcolor;
-		myforeground = parent.draw_area.fgcolor;
+		mybackground = parent.draw_area.innerAreaBackgroundColor;
+		myforeground = parent.draw_area.mainColor;
 
 		initComponents();
 
-		showinparent.setSelected(parent.data.showseqgroups);
+		showinparent.setSelected(parent.data.showSequenceGroups);
 
 		largerbutton.setText("^ (" + (parent.data.groupsize + 1) + ")");
 		smallerbutton.setText("v (" + (parent.data.groupsize - 1) + ")");
@@ -508,10 +508,10 @@ public class WindowEditGroups extends javax.swing.JFrame {
 		// first get the directory to write to
 		int[] currsel = groupslist.getSelectedIndices();
 		if (currsel.length > 0) {
-			ClusteringWithGui.fc.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
-			int returnVal = ClusteringWithGui.fc.showOpenDialog(this);
+			ProgramWindow.fc.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+			int returnVal = ProgramWindow.fc.showOpenDialog(this);
 			if (returnVal == javax.swing.JFileChooser.APPROVE_OPTION) {
-				java.io.File currdir = (ClusteringWithGui.fc.getSelectedFile());
+				java.io.File currdir = (ProgramWindow.fc.getSelectedFile());
 				SequenceGroup mygroup;
 				for (int i = currsel.length - 1; i >= 0; i--) {
 					if ((currsel[i] > -1) && (currsel[i] <= parent.data.seqgroupsvec.size())) {
@@ -533,7 +533,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 					}
 				}
 			}
-			ClusteringWithGui.fc.setFileSelectionMode(javax.swing.JFileChooser.FILES_ONLY);
+			ProgramWindow.fc.setFileSelectionMode(javax.swing.JFileChooser.FILES_ONLY);
 		} else {
 			javax.swing.JOptionPane.showMessageDialog(this, "You need to select at least one group");
 		}
@@ -823,9 +823,9 @@ public class WindowEditGroups extends javax.swing.JFrame {
 	private void showinparentActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_showinparentActionPerformed
 		// show or don't show the groups
 		if (showinparent.isSelected()) {
-			parent.data.showseqgroups = true;
+			parent.data.showSequenceGroups = true;
 		} else {
-			parent.data.showseqgroups = false;
+			parent.data.showSequenceGroups = false;
 		}
 		parent.repaint();
 	}// GEN-LAST:event_showinparentActionPerformed
@@ -975,7 +975,7 @@ public class WindowEditGroups extends javax.swing.JFrame {
 
 	javax.swing.JColorChooser colorchooser = new javax.swing.JColorChooser();
 	String[] groupnames;
-	ClusteringWithGui parent;
+	ProgramWindow parent;
 	java.awt.Font myfont;
 	java.awt.Color mybackground;
 	java.awt.Color myforeground;
@@ -1212,8 +1212,8 @@ public class WindowEditGroups extends javax.swing.JFrame {
                 boolean isSelected, boolean cellHasFocus) {
             if (index == 0) {
                 myfont = parent.parent.draw_area.myfont;
-                mybackground = parent.parent.draw_area.bgcolor;
-                myforeground = parent.parent.draw_area.fgcolor;
+                mybackground = parent.parent.draw_area.innerAreaBackgroundColor;
+                myforeground = parent.parent.draw_area.mainColor;
             }
 
             SequenceGroup group = (SequenceGroup) value;

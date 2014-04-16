@@ -9,7 +9,7 @@ public class WindowShowSelectedSequences extends javax.swing.JFrame {
      */
     private static final long serialVersionUID = -4171611623198735444L;
 
-    public WindowShowSelectedSequences(String[] namesarr, ClusteringWithGui parent) {
+    public WindowShowSelectedSequences(String[] namesarr, ProgramWindow parent) {
         this.parent = parent;
         this.namesarr = numberarr(namesarr);
         initComponents();
@@ -296,7 +296,7 @@ public class WindowShowSelectedSequences extends javax.swing.JFrame {
 
 
     String[] namesarr;
-    ClusteringWithGui parent;
+    ProgramWindow parent;
     boolean showall = true;
     String[] selectednames;
     int[] globalselected = new int[0];

@@ -10,7 +10,7 @@ public class WindowTaxonomy extends javax.swing.JFrame {
      */
     private static final long serialVersionUID = 8114400353377055870L;
 
-    public WindowTaxonomy(ClusteringWithGui parent) {
+    public WindowTaxonomy(ProgramWindow parent) {
         this.parent=parent;
         initComponents();
         if(parent.namesdmp_file!=null){
@@ -588,7 +588,7 @@ public class WindowTaxonomy extends javax.swing.JFrame {
     //    });
     //}
 
-    ClusteringWithGui parent=null;
+    ProgramWindow parent=null;
     static final javax.swing.JFileChooser fc=new javax.swing.JFileChooser(new File("."));
     HashMap <String,String[]> nameshash=new HashMap<String,String[]>();//lookup names--> nodes and nodes--> nodes and nodes--> names
     boolean didload=false;

@@ -7,7 +7,7 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
      */
     private static final long serialVersionUID = 1895643871437384612L;
 
-    public DialogChangeConnectionColors(ClusteringWithGui parent, boolean modal) {
+    public DialogChangeConnectionColors(ProgramWindow parent, boolean modal) {
         super(parent, modal);
         this.parent = parent;
         this.colornum = colorarr.length;
@@ -599,12 +599,12 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
     static java.awt.Color[] colorarr = new java.awt.Color[2];
     drawpanel draw1;
     javax.swing.JColorChooser colorchooser = new javax.swing.JColorChooser();
-    ClusteringWithGui parent;
+    ProgramWindow parent;
     int colornum;
     static double ln10 = java.lang.Math.log(10);
     boolean data2d = false;//has parent loaded in 2d
 
-    public static void changecolor(ClusteringWithGui parent, java.awt.Color[] incolorarr) {
+    public static void changecolor(ProgramWindow parent, java.awt.Color[] incolorarr) {
         //this should replace the colors in colorarr with new ones
         colorarr = incolorarr;
         new DialogChangeConnectionColors(parent, false).setVisible(true);

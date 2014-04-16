@@ -16,7 +16,7 @@ public class WindowAffyMicroarrayData extends javax.swing.JFrame {
      */
     private static final long serialVersionUID = -4358800283763007044L;
     
-    public WindowAffyMicroarrayData(ClusteringWithGui parent) {
+    public WindowAffyMicroarrayData(ProgramWindow parent) {
         this.parent=parent;
         initComponents();
         if(parent.avgfoldchange==true){
@@ -614,7 +614,7 @@ public class WindowAffyMicroarrayData extends javax.swing.JFrame {
     //    new affydialog().show();
     //}
     
-    public ClusteringWithGui parent;
+    public ProgramWindow parent;
     JFileChooser fc=new JFileChooser(new File("."));
     public File[] wtfiles=null;
     Vector<String> datanamesvec = new Vector<String>();// names for the data elements

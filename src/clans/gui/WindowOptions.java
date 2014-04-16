@@ -12,7 +12,7 @@ public class WindowOptions extends javax.swing.JFrame {
      */
     private static final long serialVersionUID = -3176609803781991304L;
 
-    public WindowOptions(ClusteringWithGui parent) {
+    public WindowOptions(ProgramWindow parent) {
         this.parent=parent;
         this.setTitle("CLANS options");
         initComponents();
@@ -213,7 +213,7 @@ public class WindowOptions extends javax.swing.JFrame {
     	updateParent();
     }
     
-    ClusteringWithGui parent=null;
+    ProgramWindow parent=null;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JTextField attfield;

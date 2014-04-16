@@ -5,7 +5,7 @@ import java.text.ParseException;
 import java.util.*;
 
 import clans.algorithms.EnrichWithSimilarSequences;
-import clans.gui.ClusteringWithGui;
+import clans.gui.ProgramWindow;
 import clans.headless.ClusteringWithoutGui;
 import clans.io.AlignmentHandling;
 import clans.io.Blast;
@@ -272,7 +272,7 @@ public class Main {
 					
 					myclusterdata.setRoundsLimit(dorounds);// set the limit of how often to run this
 					
-					ClusteringWithGui myclusterer = new ClusteringWithGui(myclusterdata);
+					ProgramWindow myclusterer = new ProgramWindow(myclusterdata);
 					myclusterer.setVisible(true);
 
 				} else {
@@ -382,7 +382,7 @@ public class Main {
 					
 					myclusterdata.setRoundsLimit(dorounds); // set the limit of how often to run this
 					
-					ClusteringWithGui myclusterer = new ClusteringWithGui(myclusterdata);
+					ProgramWindow myclusterer = new ProgramWindow(myclusterdata);
 					
 					myclusterer.initaddedseqs(blasthits, sequences, sequence_names, sequence_name_internal_mapping,
 							newnumarr, allposarr, mymaxmove, mypval, true);
@@ -433,7 +433,7 @@ public class Main {
 
 					myclusterdata.setRoundsLimit(dorounds);
 
-					ClusteringWithGui myclusterer = new ClusteringWithGui(myclusterdata);
+					ProgramWindow myclusterer = new ProgramWindow(myclusterdata);
 					
 					myclusterer.initaddedseqs(readdata.blasthits, readdata.inaln, sequence_names,
 							sequence_name_internal_mapping, new int[0], readdata.posarr, readdata.maxmove,
@@ -465,7 +465,7 @@ public class Main {
 
 					myclusterdata.setRoundsLimit(dorounds);
 
-					ClusteringWithGui myclusterer = new ClusteringWithGui(myclusterdata);
+					ProgramWindow myclusterer = new ProgramWindow(myclusterdata);
 					
 					myclusterer.setVisible(true);
 

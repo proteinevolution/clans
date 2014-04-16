@@ -1,4 +1,4 @@
-package clans.algorithms;
+package clans.algorithms.fruchtermanreingold;
 
 import java.util.HashMap;
 

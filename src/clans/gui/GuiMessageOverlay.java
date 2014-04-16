@@ -647,7 +647,7 @@ public class GuiMessageOverlay extends JComponent {
 	/**
 	 * @return Default color for completed processes.
 	 */
-	protected Color getColorSuccess() {
+	public Color getColorSuccess() {
 		return TextColor.SUCCESS.get();
 	}
 
@@ -668,7 +668,7 @@ public class GuiMessageOverlay extends JComponent {
 	/**
 	 * @return Default duration for information-type messages.
 	 */
-	protected Duration getDurationInfo() {
+	public Duration getDurationInfo() {
 		return Duration.INFO;
 	}
 	
@@ -702,7 +702,7 @@ public class GuiMessageOverlay extends JComponent {
 	 * @param has_progress_dots
 	 *            true if the message is supposed to have progress-indicating dots.
 	 */
-	protected void setCustomMessage(String main_message, String message_details, Color color, Duration duration,
+	public void setCustomMessage(String main_message, String message_details, Color color, Duration duration,
 			boolean is_fading, boolean with_progress_dots) {
 		setupMessage(State.CUSTOM, main_message, message_details, color, duration, is_fading, with_progress_dots);
 	}

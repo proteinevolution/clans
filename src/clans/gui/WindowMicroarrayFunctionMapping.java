@@ -18,7 +18,7 @@ public class WindowMicroarrayFunctionMapping extends javax.swing.JFrame {
      */
     private static final long serialVersionUID = -561248779145267780L;
 
-    public WindowMicroarrayFunctionMapping(ClusteringWithGui parent) {
+    public WindowMicroarrayFunctionMapping(ProgramWindow parent) {
         this.parent=parent;
         initComponents();
         makenameshash();
@@ -452,7 +452,7 @@ public class WindowMicroarrayFunctionMapping extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     
-    ClusteringWithGui parent=null;
+    ProgramWindow parent=null;
     JFileChooser fc=new JFileChooser(new File("."));
 
     ArrayList<MicroarrayMapnode> maplist=new ArrayList<MicroarrayMapnode>();

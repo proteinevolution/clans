@@ -12,7 +12,7 @@ public class WindowAffyDrawExpressionPlot extends javax.swing.JFrame {
      */
     private static final long serialVersionUID = -2423870452098304715L;
 
-    public WindowAffyDrawExpressionPlot(ClusteringWithGui map, WindowAffyMicroarrayData parent) {
+    public WindowAffyDrawExpressionPlot(ProgramWindow map, WindowAffyMicroarrayData parent) {
         initComponents();
         this.map=map;
         this.parent=parent;
@@ -225,7 +225,7 @@ public class WindowAffyDrawExpressionPlot extends javax.swing.JFrame {
     //    new affygetgraphcorrdialog().show();
     //}
     
-    ClusteringWithGui map=null;
+    ProgramWindow map=null;
     WindowAffyMicroarrayData parent=null;
     drawpanel draw1=new drawpanel();
     Vector<Replicates> datavec=null;
