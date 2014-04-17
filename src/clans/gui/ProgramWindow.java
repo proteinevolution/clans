@@ -1358,7 +1358,11 @@ public class ProgramWindow extends javax.swing.JFrame {
 	 */
 	private void enableUserControls() {
 		enableMenus();
+		
 		enableControlButtons();
+		updateStartStopResumeButtonLabel();
+		updateZoomOnSelectedButtonLabel();
+		
 		enableMouseEventHandling();
 		disableCancelWorkInProgressKey();
 	}
@@ -2864,7 +2868,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 			return;
 		}
 
-		if (zoomOnSelectedButton.isSelected()) {
+		if (isZoomingOnSelectedSequences()) {
 			
 			if (!hasSelectedSequences()) {
 			
@@ -2872,7 +2876,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 					JOptionPane.showMessageDialog(null, "Please select some sequences", "Message",
 							JOptionPane.INFORMATION_MESSAGE);
 				}
-					
+
 				zoomOnSelectedButton.setSelected(false);
 			}
 		}
@@ -2907,6 +2911,16 @@ public class ProgramWindow extends javax.swing.JFrame {
 	private boolean hasSelectedSequences() {
 		return data != null && data.selectedSequencesIndices != null && data.selectedSequencesIndices.length > 0;
 	}
+	
+	/**
+	 * @return the number of selected sequences
+	 */
+	private int getNumberOfSelectedSequences() {
+		if (!hasSelectedSequences()) {
+			return 0;
+		}
+		return data.selectedSequencesIndices.length;
+	}
 
 	/**
 	 * Based on the GUI state, updates the "select all"/"clear selection" button label.
@@ -2925,12 +2939,11 @@ public class ProgramWindow extends javax.swing.JFrame {
 	void updateZoomOnSelectedButtonLabel() {
 		if (zoomOnSelectedButton.isSelected()) {
 			zoomOnSelectedButton.setText("Show all");
+			zoomOnSelectedButton.setEnabled(true);
+			
 		} else {
-			if (hasSelectedSequences()) {
-				zoomOnSelectedButton.setText("Zoom on selected");
-			} else {
-				zoomOnSelectedButton.setEnabled(false);
-			}
+			zoomOnSelectedButton.setText("Zoom on selected");
+			zoomOnSelectedButton.setEnabled(getNumberOfSelectedSequences() > 1);
 		}
 	}
 
