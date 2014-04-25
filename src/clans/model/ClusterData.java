@@ -27,6 +27,7 @@ import clans.gui.Shapes;
 import clans.io.ClusterDataLoadHelper;
 import clans.io.ComfortableBufferedWriter;
 import clans.misc.MyMath;
+import clans.misc.OsUtils;
 import clans.model.microarray.Replicates;
 import clans.model.proteins.AminoAcidSequence;
 import clans.model.proteins.MinimalAttractionValue;
@@ -1113,6 +1114,7 @@ public class ClusterData {
 		try {
 			temporary_file = File.createTempFile("###" + output_file.getName() + "_", ".save_in_progress", new File(
 					output_file.getParent()));
+		
 		} catch (IOException e) {
 			error_message = "unable to create temporary file. " + e.getMessage();
 			throw new IOException(error_message);
@@ -1122,7 +1124,11 @@ public class ClusterData {
 			save_to_file(temporary_file, worker);
 
 		} catch (CancellationException e) {
-			temporary_file.delete(); // cleanup temporary file
+			// cleanup temporary file
+			if (temporary_file.exists() && !temporary_file.delete()) {
+				System.err.println("Failed to delete the temporary save file. "
+						+ "This is not critical but leaves a file in your CLANS folder.");
+			}
 			throw e;
 		}
 
@@ -1135,15 +1141,26 @@ public class ClusterData {
 				// create empty temporary file to use its unique filename as backup name
 				backup_file = File.createTempFile("###" + output_file.getName() + "_", ".temporary_backup", new File(
 						output_file.getParent()));
+
 			} catch (IOException e) {
-				error_message = "unable to create file: " + e.getMessage();					
+				error_message = "unable to create file: " + e.getMessage();
 				throw new IOException(error_message);
+
+			} finally {
+				/**
+				 * Remove the empty file created by createTempFile if running on a Windows OS as the call to
+				 * File.renameTo below fails on Windows if an empty file exists at the target location. On Linux and
+				 * MacOS, this is not necessary.
+				 */
+				if (OsUtils.isWindows() && backup_file.exists() && !backup_file.delete()) {
+					throw new IOException("Failed to delete the empty backup file, which is necessary on Windows.");
+				}
 			}
 			
 			try {
 				checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
+			
 			} catch (CancellationException e) {
-				backup_file.delete(); // cleanup empty backup file
 				throw e;
 			}
 			
@@ -1177,8 +1194,9 @@ public class ClusterData {
 		
 		// remove backup file
 		if (create_backup) {
-			if (backup_file.exists()) {
-				backup_file.delete();
+			if (backup_file.exists() && !backup_file.delete()) {
+				System.err.println("Failed to delete the backup save file. "
+						+ "This is not critical but leaves a file in your CLANS folder.");
 			}
 		}
 	}
