@@ -500,74 +500,57 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 			// now add perspective using posarrtmp[i][2]
 			// maxdiff is the maximum value for any coordinate in the system
 		}
-
+		
+		// we can use the same code for zoom-on-selected and normal display if we set considered_sequences to the range
+		// 0..<data.elements> in the normal case
+		int[] considered_sequences;
 		if (parent.isZoomingOnSelectedSequences() && (parent.getNumberOfSelectedSequences() > 1)) {
-			// only get maxx and maxy and minx and miny from selected sequences
-			// I know I have at least one selected element (checked at zoombuttonactionperformed)
-			maxX = tposarrtmp[data.selectedSequencesIndices[0]][0];
-			maxY = tposarrtmp[data.selectedSequencesIndices[0]][1];
-			minX = maxX;
-			minY = maxY;
-			for (int i = parent.getNumberOfSelectedSequences(); --i >= 0;) {
-				if (maxX < tposarrtmp[data.selectedSequencesIndices[i]][0]) {
-					maxX = tposarrtmp[data.selectedSequencesIndices[i]][0];
-				} else if (minX > tposarrtmp[data.selectedSequencesIndices[i]][0]) {
-					minX = tposarrtmp[data.selectedSequencesIndices[i]][0];
-				}
-				if (maxY < tposarrtmp[data.selectedSequencesIndices[i]][1]) {
-					maxY = tposarrtmp[data.selectedSequencesIndices[i]][1];
-				} else if (minY > tposarrtmp[data.selectedSequencesIndices[i]][1]) {
-					minY = tposarrtmp[data.selectedSequencesIndices[i]][1];
-				}
+			considered_sequences = data.selectedSequencesIndices;
+
+		} else {
+			considered_sequences = new int[data.elements];
+			for (int i = 0; i < considered_sequences.length; i++) {
+				considered_sequences[i] = i;
 			}
-			
-			xfac = drawWidth / (maxX - minX);
-			yfac = drawHeight / (maxY - minY);
-			xoffset = (-minX);
-			yoffset = (-minY);
-			if (maxX - minX == 0) {
-				System.out.println("isZero (in Zoom)!");
-			}
-			for (int i = 0; i < data.elements; i++) {
-				tposarrtmp[i][0] = (float) (((tposarrtmp[i][0] + xoffset) * xfac));
-				tposarrtmp[i][1] = (float) (((tposarrtmp[i][1] + yoffset) * yfac));
-				data.drawarrtmp[i][0] = (int) tposarrtmp[i][0];
-				data.drawarrtmp[i][1] = (int) tposarrtmp[i][1];
-				// I don't need to calculate the 3rd dimention
-			}
-			originpos[0] = (int) ((xoffset * xfac));
-			originpos[1] = (int) ((yoffset * yfac));
-		} else {// if I don't want to zoom in on selected sequences
-			maxX = tposarrtmp[0][0];
-			maxY = tposarrtmp[0][1];
-			minX = maxX;
-			minY = maxY;
-			for (int i = data.elements; --i >= 0;) {// for (int i=1;i<edelements;i++){
-				if (maxX < tposarrtmp[i][0]) {
-					maxX = tposarrtmp[i][0];
-				} else if (minX > tposarrtmp[i][0]) {
-					minX = tposarrtmp[i][0];
-				}
-				if (maxY < tposarrtmp[i][1]) {
-					maxY = tposarrtmp[i][1];
-				} else if (minY > tposarrtmp[i][1]) {
-					minY = tposarrtmp[i][1];
-				}
-			}
-			xfac = drawWidth / (maxX - minX);
-			yfac = drawHeight / (maxY - minY);
-			xoffset = (-minX);
-			yoffset = (-minY);
-			for (int i = data.elements; --i >= 0;) {
-				tposarrtmp[i][0] = (float) (((tposarrtmp[i][0] + xoffset) * xfac));
-				tposarrtmp[i][1] = (float) (((tposarrtmp[i][1] + yoffset) * yfac));
-				data.drawarrtmp[i][0] = (int) tposarrtmp[i][0];
-				data.drawarrtmp[i][1] = (int) tposarrtmp[i][1];
-				// I don't need to calculate the 3rd dimention
-			}
-			originpos[0] = (int) ((xoffset * xfac));
-			originpos[1] = (int) ((yoffset * yfac));
 		}
+		
+		// determine the X and Y range we need to consider
+		maxX = tposarrtmp[considered_sequences[0]][0];
+		maxY = tposarrtmp[considered_sequences[0]][1];
+		minX = maxX;
+		minY = maxY;
+		for (int i = considered_sequences.length; --i >= 0;) {
+			if (maxX < tposarrtmp[considered_sequences[i]][0]) {
+				maxX = tposarrtmp[considered_sequences[i]][0];
+			} else if (minX > tposarrtmp[considered_sequences[i]][0]) {
+				minX = tposarrtmp[considered_sequences[i]][0];
+			}
+			if (maxY < tposarrtmp[considered_sequences[i]][1]) {
+				maxY = tposarrtmp[considered_sequences[i]][1];
+			} else if (minY > tposarrtmp[considered_sequences[i]][1]) {
+				minY = tposarrtmp[considered_sequences[i]][1];
+			}
+		}
+		
+		xfac = drawWidth / (maxX - minX);
+		yfac = drawHeight / (maxY - minY);
+		xoffset = (-minX);
+		yoffset = (-minY);
+		if (maxX - minX == 0) {
+			System.out.println("isZero (in Zoom)!");
+		}
+		
+		// even though we might be zoomed in on selected, unselected sequences must be shown, too
+		for (int i = 0; i < data.elements; i++) {
+			tposarrtmp[i][0] = (float) (((tposarrtmp[i][0] + xoffset) * xfac));
+			tposarrtmp[i][1] = (float) (((tposarrtmp[i][1] + yoffset) * yfac));
+			data.drawarrtmp[i][0] = (int) tposarrtmp[i][0];
+			data.drawarrtmp[i][1] = (int) tposarrtmp[i][1];
+			// our projection ignores the 3rd dimension
+		}
+		originpos[0] = (int) ((xoffset * xfac));
+		originpos[1] = (int) ((yoffset * yfac));
+		
 		xscale = xfac;
 		yscale = yfac;
 	}
