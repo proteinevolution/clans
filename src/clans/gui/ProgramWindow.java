@@ -31,6 +31,7 @@ import clans.model.proteins.MinimalHsp;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -161,10 +162,12 @@ public class ProgramWindow extends javax.swing.JFrame {
 	 */
 	private void initializeGuiComponents() {
 		// graphpanelxx = new javax.swing.JPanel();
-		buttonpanel = new javax.swing.JPanel();
 		drawbuttonpanel = new javax.swing.JPanel();
+
 		initializeButton = new javax.swing.JButton();
 		startStopResumeButton = new javax.swing.JButton();
+		roundsCompletedTextfield = new javax.swing.JTextField();
+		
 		showSelectedButton = new javax.swing.JButton();
 		selectionOrMovementModeButton = new javax.swing.JToggleButton();
 		setThresholdButton = new javax.swing.JButton();
@@ -174,7 +177,9 @@ public class ProgramWindow extends javax.swing.JFrame {
 		showSequenceNamesCheckbox = new javax.swing.JCheckBox();
 		showSequenceNumbersCheckbox = new javax.swing.JCheckBox();
 		showConnectionsCheckbox = new javax.swing.JCheckBox();
-		zoomOnSelectedButton = new javax.swing.JToggleButton();
+		zoomOnSelectedButton = new javax.swing.JButton();
+		resetZoomButton = new javax.swing.JButton();
+		
 		jMenuBar1 = new javax.swing.JMenuBar();
 		menu_file = new javax.swing.JMenu();
 		loadmenuitem = new javax.swing.JMenuItem();
@@ -276,10 +281,6 @@ public class ProgramWindow extends javax.swing.JFrame {
 		draw_area.setLayout(new javax.swing.BoxLayout(draw_area, javax.swing.BoxLayout.LINE_AXIS));
 		getContentPane().add(draw_area, java.awt.BorderLayout.CENTER);
 
-		buttonpanel.setLayout(new java.awt.GridLayout(1, 0));
-
-		drawbuttonpanel.setLayout(new java.awt.GridLayout(0, 4));
-
 		initializeButton.setText("Initialize");
 		initializeButton.setToolTipText("Initialize the graph positions");
 		initializeButton.setMnemonic(KeyEvent.VK_I);
@@ -288,7 +289,6 @@ public class ProgramWindow extends javax.swing.JFrame {
 				initializeGraphPositions();
 			}
 		});
-		drawbuttonpanel.add(initializeButton);
 
 		startStopResumeButton.setToolTipText("start/resume/stop the current run");
 		startStopResumeButton.setMnemonic(KeyEvent.VK_S);
@@ -297,7 +297,6 @@ public class ProgramWindow extends javax.swing.JFrame {
 				toggleComputationRunning();
 			}
 		});
-		drawbuttonpanel.add(startStopResumeButton);
 		updateStartStopResumeButtonLabel();
 
 		showSelectedButton.setText("Show selected");
@@ -307,7 +306,6 @@ public class ProgramWindow extends javax.swing.JFrame {
 				openShowSelectedSequencesWindow();
 			}
 		});
-		drawbuttonpanel.add(showSelectedButton);
 
 		selectionOrMovementModeButton.setToolTipText("Toggles between moving the coordinate system and selecting sequences");
 		selectionOrMovementModeButton.setMnemonic(KeyEvent.VK_V);
@@ -317,7 +315,12 @@ public class ProgramWindow extends javax.swing.JFrame {
 			}
 		});
 		updateSelectionOrMovementModeButtonLabel();
-		drawbuttonpanel.add(selectionOrMovementModeButton);
+
+		roundsCompletedTextfield.setEditable(false);
+		roundsCompletedTextfield.setText("0");
+		roundsCompletedTextfield.setFont(getContentPane().getFont().deriveFont(Font.BOLD));
+		roundsCompletedTextfield.setToolTipText("rounds completed since last initialization");
+		roundsCompletedTextfield.setHorizontalAlignment(JTextField.CENTER);
 
 		setThresholdButton.setText("Use p-values better than:");
 		setThresholdButton.setMnemonic(KeyEvent.VK_B);
@@ -326,7 +329,6 @@ public class ProgramWindow extends javax.swing.JFrame {
 				setThresholdButtonPressed();
 			}
 		});
-		drawbuttonpanel.add(setThresholdButton);
 
 		textfield_threshold_value.setText("1");
 		textfield_threshold_value.addActionListener(new java.awt.event.ActionListener() {
@@ -334,12 +336,10 @@ public class ProgramWindow extends javax.swing.JFrame {
 				confirmedThresholdTextfieldValue();
 			}
 		});
-		drawbuttonpanel.add(textfield_threshold_value);
 
 		textfield_info_min_blast_evalue.setEditable(false);
 		textfield_info_min_blast_evalue.setText("1");
 		textfield_info_min_blast_evalue.setToolTipText("evalue limit used for blast");
-		drawbuttonpanel.add(textfield_info_min_blast_evalue);
 
 		updateSelectionButtonLabel();
 		selectionButton.setMnemonic(KeyEvent.VK_A);
@@ -348,7 +348,6 @@ public class ProgramWindow extends javax.swing.JFrame {
 				selectionButtonActivated();
 			}
 		});
-		drawbuttonpanel.add(selectionButton);
 
 		showSequenceNamesCheckbox.setText("show names");
 		showSequenceNamesCheckbox.setToolTipText("show sequence names in graph");
@@ -358,7 +357,6 @@ public class ProgramWindow extends javax.swing.JFrame {
 				requestRepaint();
 			}
 		});
-		drawbuttonpanel.add(showSequenceNamesCheckbox);
 
 		showSequenceNumbersCheckbox.setText("show numbers");
 		showSequenceNumbersCheckbox.setToolTipText("show sequence numbers in graph");
@@ -368,8 +366,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 				requestRepaint();
 			}
 		});
-		drawbuttonpanel.add(showSequenceNumbersCheckbox);
-
+		
 		showConnectionsCheckbox.setText("show connections");
 		showConnectionsCheckbox.setToolTipText("draw lines for all connections better than the selected cutoff");
 		showConnectionsCheckbox.setMnemonic(KeyEvent.VK_T);
@@ -378,20 +375,49 @@ public class ProgramWindow extends javax.swing.JFrame {
 				requestRepaint();
 			}
 		});
-		drawbuttonpanel.add(showConnectionsCheckbox);
-
+		
 		zoomOnSelectedButton.setMnemonic(KeyEvent.VK_Z);
+		zoomOnSelectedButton.setToolTipText("Zoom to the selected sequences [>= 2 selected sequences].");
 		zoomOnSelectedButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				zoomOnSelectedTriggered(true);
 			}
 		});
+		
+		resetZoomButton.setText("Reset Zoom");
+		resetZoomButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				resetZoom();
+			}
+		});
+
+		informAboutZoomChange();
+		
+		// we manage the buttons here so it becomes easier to change their layout
+		drawbuttonpanel.setLayout(new java.awt.GridLayout(3, 5));
+
+		// row 1
+		drawbuttonpanel.add(initializeButton);
+		drawbuttonpanel.add(startStopResumeButton);
+		drawbuttonpanel.add(roundsCompletedTextfield);
+		drawbuttonpanel.add(showSelectedButton);
+		drawbuttonpanel.add(selectionOrMovementModeButton);
+				
+		// row 2
+		drawbuttonpanel.add(setThresholdButton);
+		drawbuttonpanel.add(textfield_threshold_value);
+		drawbuttonpanel.add(textfield_info_min_blast_evalue);
+		drawbuttonpanel.add(selectionButton);
+		drawbuttonpanel.add(new JLabel("")); // empty cell to shift the following components
+		
+		// row 3
+		drawbuttonpanel.add(showSequenceNamesCheckbox);
+		drawbuttonpanel.add(showSequenceNumbersCheckbox);
+		drawbuttonpanel.add(showConnectionsCheckbox);
 		drawbuttonpanel.add(zoomOnSelectedButton);
-		updateZoomOnSelectedButtonLabel();
-
-		buttonpanel.add(drawbuttonpanel);
-
-		getContentPane().add(buttonpanel, java.awt.BorderLayout.SOUTH);
+		drawbuttonpanel.add(resetZoomButton);
+		
+		getContentPane().add(drawbuttonpanel, java.awt.BorderLayout.SOUTH);
 
 		menu_file.setText("File");
 		menu_file.setMnemonic(KeyEvent.VK_F);
@@ -1309,6 +1335,8 @@ public class ProgramWindow extends javax.swing.JFrame {
 		for (int i = 0; i < drawbuttonpanel.getComponentCount(); i++) {
 			drawbuttonpanel.getComponent(i).setEnabled(enabled);
 		}
+
+		informAboutZoomChange();
 	}
 
 	/**
@@ -1480,7 +1508,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 	 * Returns whether the user wants to zoom in on the selected sequences.
 	 */
 	boolean isZoomingOnSelectedSequences() {
-		return zoomOnSelectedButton.isSelected();
+		return zoomOnSelected;
 	}
 
 	/**
@@ -1491,14 +1519,19 @@ public class ProgramWindow extends javax.swing.JFrame {
 	 */
 	private void setZoom(float new_zoom_factor) throws IllegalStateException {
 		draw_area.setZoom(new_zoom_factor);
-		updateZoomOnSelectedButtonLabel();
+		
+		informAboutZoomChange();
 	}
 	
 	/**
 	 * Resets the zoom to none and centers the graph.
 	 */
 	private void resetZoom() {
+		zoomOnSelected = false;
+
 		draw_area.resetZoom();
+		
+		informAboutZoomChange();
 	}
 
 	/**
@@ -2557,6 +2590,8 @@ public class ProgramWindow extends javax.swing.JFrame {
 		}
 
 		deleteSequences(sequences_to_keep);
+		
+		informAboutSequenceSelectionChange();
 
 		if (restart_computation) {
 			startComputation();
@@ -2865,25 +2900,29 @@ public class ProgramWindow extends javax.swing.JFrame {
 	private void zoomOnSelectedTriggered(boolean show_error_message) {
 
 		if (!containsData(true)) {
+			zoomOnSelected = false;
 			return;
 		}
-
+		
 		if (isZoomingOnSelectedSequences()) {
-			
-			if (!hasSelectedSequences()) {
-			
-				if (show_error_message) {
-					JOptionPane.showMessageDialog(null, "Please select some sequences", "Message",
-							JOptionPane.INFORMATION_MESSAGE);
-				}
+			zoomOnSelected = false;
 
-				zoomOnSelectedButton.setSelected(false);
+		} else if (hasSelectedSequences()) {
+			zoomOnSelected = true;
+
+		} else {
+			if (show_error_message) {
+				JOptionPane.showMessageDialog(null, "Please select some sequences", "Message",
+						JOptionPane.INFORMATION_MESSAGE);
 			}
-		}
 
+			zoomOnSelected = false;
+
+		}
+		
 		draw_area.resetZoom();
 		
-		updateZoomOnSelectedButtonLabel();
+		informAboutZoomChange();
 	}
 
 	
@@ -2934,16 +2973,33 @@ public class ProgramWindow extends javax.swing.JFrame {
 	}
 	
 	/**
-	 * Based on the GUI state, updates the Zoom button label.
+	 * Based on the GUI state, updates the "Zoom On Selected"/"Show all" button label and enabled state.
 	 */
-	void updateZoomOnSelectedButtonLabel() {
-		if (zoomOnSelectedButton.isSelected()) {
+	private void updateZoomOnSelectedButtonLabel() {
+		if (zoomOnSelected) {
 			zoomOnSelectedButton.setText("Show all");
 			zoomOnSelectedButton.setEnabled(true);
-			
+
 		} else {
 			zoomOnSelectedButton.setText("Zoom on selected");
 			zoomOnSelectedButton.setEnabled(getNumberOfSelectedSequences() > 1);
+			zoomOnSelectedButton.setSelected(getNumberOfSelectedSequences() > 1);
+		}
+	}
+	
+	/**
+	 * Based on the GUI state, updates the "Reset Zoom" button label and enabled state.
+	 */
+	private void updateResetZoomButtonLabel() {
+		if (isZoomingOnSelectedSequences()) {
+			// this is independent of the zoom factor, hence containsData below is not enough to cover this case
+			resetZoomButton.setEnabled(true);
+		
+		} else if (containsData(false)) {
+			resetZoomButton.setEnabled(Math.abs(draw_area.getZoomFactor() - 1) > 1e-3);
+
+		} else {
+			resetZoomButton.setEnabled(false);
 		}
 	}
 
@@ -3302,7 +3358,6 @@ public class ProgramWindow extends javax.swing.JFrame {
 	private javax.swing.JMenuItem affymenuitem;
 	javax.swing.JCheckBoxMenuItem antialiasingcheckboxmenuitem;
 	private javax.swing.JCheckBoxMenuItem attvalcompcheckbox;
-	private javax.swing.JPanel buttonpanel;
 	private javax.swing.JMenuItem centermenuitem;
 	private javax.swing.JMenuItem changebgcolormenuitem;
 	private javax.swing.JMenuItem changeblastcolor;
@@ -3344,6 +3399,8 @@ public class ProgramWindow extends javax.swing.JFrame {
 	private javax.swing.JButton setThresholdButton;
 	private javax.swing.JTextField textfield_threshold_value;
 	private javax.swing.JTextField textfield_info_min_blast_evalue;
+	private javax.swing.JTextField roundsCompletedTextfield;
+	
 
 	/**
 	 * The selection status of this item is forwarded to the computation threads to let them optimize all sequences or
@@ -3389,7 +3446,13 @@ public class ProgramWindow extends javax.swing.JFrame {
 	
 	private javax.swing.JMenuItem taxonomymenuitem;
 	private javax.swing.JMenu menu_windows;
-	private javax.swing.JToggleButton zoomOnSelectedButton;
+	
+	private javax.swing.JButton zoomOnSelectedButton;
+	private boolean zoomOnSelected = false;
+	
+	private javax.swing.JButton resetZoomButton;
+
+	
 	private javax.swing.JMenuItem zoommenuitem;
 	
 	/**
@@ -3583,6 +3646,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 		}
 
 		data.initialize();
+		updateRoundsCompletedTextfield();
 
 		if (options_window != null) {
 			options_window.currcoolfield.setText(String.valueOf(data.currcool));
@@ -3593,6 +3657,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 		mousemove[0] = 0;
 		mousemove[1] = 0;
 
+		resetZoom();
 		centerGraph();
 	}
 
@@ -3775,6 +3840,8 @@ public class ProgramWindow extends javax.swing.JFrame {
 		}
 
 		textfield_info_min_blast_evalue.setText(String.valueOf(data.maxvalfound));
+		updateRoundsCompletedTextfield();
+		
 		setTitle("Clustering of " + data.getBaseInputfileName());
 
 		resetZoom();
@@ -3986,15 +4053,41 @@ public class ProgramWindow extends javax.swing.JFrame {
 	}
 
 	/**
-	 * Informs other parts of the GUI about changes in selected sequences so that they can act accordingly.
+	 * Informs the relevant GUI elements about a change in the selected sequences.
 	 */
 	private void informAboutSequenceSelectionChange() {
 		updateSelectionButtonLabel();
 		updateZoomOnSelectedButtonLabel();
-		zoomOnSelectedTriggered(false);
 
 		if (myseqgroupwindow != null) { // update the highlighting of groups with selected sequences
 			myseqgroupwindow.repaint();
+		}
+	}
+
+	/**
+	 * Informs the relevant GUI elements about a completed clustering iteration.
+	 */
+	public void informAboutCompletedIteration() {
+		updateRoundsCompletedTextfield();
+	}
+
+	/**
+	 * Informs the relevant GUI elements about a zoom level/type change.
+	 */
+	private void informAboutZoomChange() {
+		updateZoomOnSelectedButtonLabel();
+		updateResetZoomButtonLabel();
+	}
+	
+	/**
+	 * Updates the display of completed rounds from the model.
+	 */
+	private void updateRoundsCompletedTextfield() {
+		if (containsData(false)) {
+			roundsCompletedTextfield.setText("Round: " + Integer.toString(data.rounds));
+
+		} else {
+			roundsCompletedTextfield.setText("Round: 0");
 		}
 	}
 	
@@ -4012,8 +4105,13 @@ public class ProgramWindow extends javax.swing.JFrame {
 				data.selectedSequencesIndices[i] = new_selecteds.get(i).intValue();
 			}
 		}
-
+		
 		informAboutSequenceSelectionChange();
+
+		// to get to an overview from zoom on selected mode when 
+		if (zoomOnSelected && data.selectedSequencesIndices.length < 2) {
+			resetZoom();
+		}
 	}
 
 	protected void selectAllSequences() {
@@ -4030,7 +4128,6 @@ public class ProgramWindow extends javax.swing.JFrame {
 	 */
 	protected void deselectAllSequences() {
 		setSelectedSequences(new ArrayList<Integer>());
-		resetZoom();
 	}
 
 	void updatetmpselected(int[] tmpreg) {
@@ -4130,8 +4227,4 @@ public class ProgramWindow extends javax.swing.JFrame {
 						((m[0][0] * m[1][1]) - (m[1][0] * m[0][1])) } };
 		return retmtx;
 	}
-
-
-
-	
 }

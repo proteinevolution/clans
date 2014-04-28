@@ -1,7 +1,6 @@
 package clans.gui;
 
 import java.awt.Color;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ComponentEvent;
@@ -238,7 +237,6 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 		}
 
 		g.setFont(myfont);
-		FontMetrics font_metrics = g.getFontMetrics(myfont);
 		
 		g.setColor(innerAreaBackgroundColor);
 		g.fillRect(0, 0, getWidth(), getHeight());
@@ -267,10 +265,6 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 			
 			drawCoordinateSystemn(g);
 		}
-
-		g.setColor(mainColor);
-		String message = "Round: " + data.rounds;
-		g.drawString(message, getWidth() - font_metrics.stringWidth(message) - xTranslate - 10, getHeight() - yTranslate - 10);
 	}
 	
 	private void drawImage(Graphics g, boolean is_first_stereo_image) {

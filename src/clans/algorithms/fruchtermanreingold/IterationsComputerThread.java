@@ -48,6 +48,7 @@ public class IterationsComputerThread extends java.lang.Thread {
 		
 		while (!Thread.currentThread().isInterrupted()) {
 			data.rounds++;
+			parent.informAboutCompletedIteration();
 			if (data.hasRoundsLimit()) {
 				data.roundsCompleted++;
 
