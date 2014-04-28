@@ -2915,7 +2915,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 	/**
 	 * @return the number of selected sequences
 	 */
-	private int getNumberOfSelectedSequences() {
+	int getNumberOfSelectedSequences() {
 		if (!hasSelectedSequences()) {
 			return 0;
 		}

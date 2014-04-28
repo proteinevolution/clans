@@ -500,15 +500,15 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 			// now add perspective using posarrtmp[i][2]
 			// maxdiff is the maximum value for any coordinate in the system
 		}
-		int selectedelements = data.selectedSequencesIndices.length;
-		if (parent.isZoomingOnSelectedSequences() && (selectedelements > 0)) {// if zoom=true
+
+		if (parent.isZoomingOnSelectedSequences() && (parent.getNumberOfSelectedSequences() > 1)) {
 			// only get maxx and maxy and minx and miny from selected sequences
 			// I know I have at least one selected element (checked at zoombuttonactionperformed)
 			maxX = tposarrtmp[data.selectedSequencesIndices[0]][0];
 			maxY = tposarrtmp[data.selectedSequencesIndices[0]][1];
 			minX = maxX;
 			minY = maxY;
-			for (int i = selectedelements; --i >= 0;) {// for (int i=1;i<selectedelements;i++){
+			for (int i = parent.getNumberOfSelectedSequences(); --i >= 0;) {
 				if (maxX < tposarrtmp[data.selectedSequencesIndices[i]][0]) {
 					maxX = tposarrtmp[data.selectedSequencesIndices[i]][0];
 				} else if (minX > tposarrtmp[data.selectedSequencesIndices[i]][0]) {
@@ -520,6 +520,7 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 					minY = tposarrtmp[data.selectedSequencesIndices[i]][1];
 				}
 			}
+			
 			xfac = drawWidth / (maxX - minX);
 			yfac = drawHeight / (maxY - minY);
 			xoffset = (-minX);
@@ -748,15 +749,14 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 	 * @param g
 	 */
 	private void drawSequenceNames(Graphics g) {
-		int selectednamesnum = data.selectedSequencesIndices.length;
 		String[] namearr = data.sequence_names;
-		if (selectednamesnum == 0) {
+		if (parent.getNumberOfSelectedSequences() == 0) {
 			for (int i = 0; i < data.elements; i++) {
 				g.drawString(String.valueOf(i) + "-" + namearr[i], (int) data.drawarrtmp[i][0],
 						(int) data.drawarrtmp[i][1]);
 			}
 		} else {
-			for (int i = 0; i < selectednamesnum; i++) {
+			for (int i = 0; i < parent.getNumberOfSelectedSequences(); i++) {
 				g.drawString(String.valueOf(i) + "-" + namearr[data.selectedSequencesIndices[i]],
 						(int) data.drawarrtmp[data.selectedSequencesIndices[i]][0],
 						(int) data.drawarrtmp[data.selectedSequencesIndices[i]][1]);
@@ -941,7 +941,7 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 
 		float halfoval = (float) (data.ovalsize / 2);
 		
-		for (int i = data.selectedSequencesIndices.length - 1; i >= 0; i--) {
+		for (int i = parent.getNumberOfSelectedSequences() - 1; i >= 0; i--) {
 			g.setColor(selectedSequenceCircleColor);
 			g.fillOval((int) (data.drawarrtmp[data.selectedSequencesIndices[i]][0] - halfoval),
 					(int) (data.drawarrtmp[data.selectedSequencesIndices[i]][1] - halfoval), data.ovalsize,
@@ -958,7 +958,7 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 
 		float halfoval = (float) (data.ovalsize / 2);
 
-		for (int i = data.selectedSequencesIndices.length - 1; i >= 0; i--) {
+		for (int i = parent.getNumberOfSelectedSequences() - 1; i >= 0; i--) {
 			if (parent.clusterconf[i] < 0) {
 				parent.clusterconf[i] = 0;
 			}
