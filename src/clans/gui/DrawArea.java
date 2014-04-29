@@ -531,7 +531,7 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 		xoffset = (-minX);
 		yoffset = (-minY);
 		if (maxX - minX == 0) {
-			System.out.println("isZero (in Zoom)!");
+			System.err.println("DrawArea undefinied as minimal and maximal x-axis value of data are identical");
 		}
 		
 		// even though we might be zoomed in on selected, unselected sequences must be shown, too
