@@ -325,6 +325,8 @@ public class ClusterData {
         boolean is_biolayout = false;
 		boolean errors_occurred = false;
 		String error_message = "";
+		
+		boolean hasBlockPos = false;
 
 		String inline;
 		int expected_sequences = -1;
@@ -397,6 +399,7 @@ public class ClusterData {
                         }
 
                     } else if (inline.equalsIgnoreCase("<pos>")) {
+                    	hasBlockPos = true;
                         if (!myrun.parse_pos_block(buffered_file_handle, expected_sequences)) {
                         	errors_occurred = true;
                         	error_message = "could not parse <pos> block";
@@ -458,7 +461,7 @@ public class ClusterData {
             return load_biolayout_file(infile, worker);
 		}
 
-        if (myrun.posarr == null) {
+        if (!hasBlockPos) {
             // give it random values
             Random rand = new Random(System.currentTimeMillis());
             myrun.posarr = new float[myrun.inaln.length][3];
