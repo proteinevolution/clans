@@ -1,5 +1,9 @@
 package clans.gui;
 
+import java.text.DecimalFormat;
+
+import javax.swing.JTextField;
+
 public class DialogChangeConnectionColors extends javax.swing.JDialog {
 
     /**
@@ -7,92 +11,76 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
      */
     private static final long serialVersionUID = 1895643871437384612L;
 
-    public DialogChangeConnectionColors(ProgramWindow parent, boolean modal) {
-        super(parent, modal);
+    public DialogChangeConnectionColors(ProgramWindow parent) {
+        super(parent, false);
+        
         this.parent = parent;
-        this.colornum = colorarr.length;
-        draw1 = new drawpanel(colorarr);
+        
+        this.colorarr = parent.data.colorarr;
+        
+		draw1 = new drawpanel(colorarr);
+        
         initComponents();
+        
         draw1.drawwidth = mainpanel.getWidth();
         draw1.drawheight = mainpanel.getHeight();
-        draw1.elementwidth = ((float) draw1.drawwidth) / ((float) colornum);
-        //System.out.println("test");
-        if (parent.data.blasthits != null) {
-            data2d = false;
-            if (parent.data.usescval) {
-                field1.setText(String.valueOf((((((parent.data.colorcutoffs[0]) * parent.data.p2attfactor) + parent.data.p2attoffset)))));
-                field2.setText(String.valueOf((((((parent.data.colorcutoffs[1]) * parent.data.p2attfactor) + parent.data.p2attoffset)))));
-                field3.setText(String.valueOf((((((parent.data.colorcutoffs[2]) * parent.data.p2attfactor) + parent.data.p2attoffset)))));
-                field4.setText(String.valueOf((((((parent.data.colorcutoffs[3]) * parent.data.p2attfactor) + parent.data.p2attoffset)))));
-                field5.setText(String.valueOf((((((parent.data.colorcutoffs[4]) * parent.data.p2attfactor) + parent.data.p2attoffset)))));
-                field6.setText(String.valueOf((((((parent.data.colorcutoffs[5]) * parent.data.p2attfactor) + parent.data.p2attoffset)))));
-                field7.setText(String.valueOf((((((parent.data.colorcutoffs[6]) * parent.data.p2attfactor) + parent.data.p2attoffset)))));
-                field8.setText(String.valueOf((((((parent.data.colorcutoffs[7]) * parent.data.p2attfactor) + parent.data.p2attoffset)))));
-                field9.setText(String.valueOf((((((parent.data.colorcutoffs[8]) * parent.data.p2attfactor) + parent.data.p2attoffset)))));
-                field10.setText(String.valueOf((((((parent.data.colorcutoffs[9]) * parent.data.p2attfactor) + parent.data.p2attoffset)))));
-            } else {
-                field1.setText(String.valueOf((int) (((((parent.data.colorcutoffs[0]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10) + 0.5)));
-                field2.setText(String.valueOf((int) (((((parent.data.colorcutoffs[1]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10) + 0.5)));
-                field3.setText(String.valueOf((int) (((((parent.data.colorcutoffs[2]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10) + 0.5)));
-                field4.setText(String.valueOf((int) (((((parent.data.colorcutoffs[3]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10) + 0.5)));
-                field5.setText(String.valueOf((int) (((((parent.data.colorcutoffs[4]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10) + 0.5)));
-                field6.setText(String.valueOf((int) (((((parent.data.colorcutoffs[5]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10) + 0.5)));
-                field7.setText(String.valueOf((int) (((((parent.data.colorcutoffs[6]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10) + 0.5)));
-                field8.setText(String.valueOf((int) (((((parent.data.colorcutoffs[7]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10) + 0.5)));
-                field9.setText(String.valueOf((int) (((((parent.data.colorcutoffs[8]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10) + 0.5)));
-                field10.setText(String.valueOf((int) (((((parent.data.colorcutoffs[9]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10) + 0.5)));
-            }
-        } else {//if I have only attraction values
-            data2d = true;
-            field1.setText(String.valueOf(parent.data.colorcutoffs[0]));//*parent.p2attfactor));
-            field2.setText(String.valueOf(parent.data.colorcutoffs[1]));//*parent.p2attfactor));
-            field3.setText(String.valueOf(parent.data.colorcutoffs[2]));//*parent.p2attfactor));
-            field4.setText(String.valueOf(parent.data.colorcutoffs[3]));//*parent.p2attfactor));
-            field5.setText(String.valueOf(parent.data.colorcutoffs[4]));//*parent.p2attfactor));
-            field6.setText(String.valueOf(parent.data.colorcutoffs[5]));//*parent.p2attfactor));
-            field7.setText(String.valueOf(parent.data.colorcutoffs[6]));//*parent.p2attfactor));
-            field8.setText(String.valueOf(parent.data.colorcutoffs[7]));//*parent.p2attfactor));
-            field9.setText(String.valueOf(parent.data.colorcutoffs[8]));//*parent.p2attfactor));
-            field10.setText(String.valueOf(parent.data.colorcutoffs[9]));//*parent.p2attfactor));
-        }
-    }
+        draw1.elementwidth = ((float) draw1.drawwidth) / ((float) colorarr.length);
+		
+		if (parent.data.blasthits != null) {
+			data2d = false;
+			
+			if (parent.data.usescval) { // SC values
+				for (int i = 0; i < fields.length; i++) {
+					setTextField(fields[i], scValueToExponent(parent.data.colorcutoffs[i]));
+				}
+
+			} else { // p-values
+				for (int i = 0; i < fields.length; i++) {
+					setTextField(fields[i], pValueToExponent(parent.data.colorcutoffs[i]));
+				}
+			}
+
+		} else { // attraction values
+			data2d = true;
+
+			for (int i = 0; i < fields.length; i++) {
+				setTextField(fields[i], attractionValueToExponent(parent.data.colorcutoffs[i]));
+			}
+		}
+		
+		this.setVisible(true);
+	}
 
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
      * always regenerated by the Form Editor.
      */
-    private void initComponents() {//GEN-BEGIN:initComponents
-        jButton1 = new javax.swing.JButton();
+    private void initComponents() {
         mainpanel = new javax.swing.JPanel();
         buttonpanel = new javax.swing.JPanel();
         worstlabel = new javax.swing.JLabel();
-        updatebutton = new javax.swing.JButton();
-        gradientbutton = new javax.swing.JButton();
-        valgradientbutton = new javax.swing.JButton();
+        updateButton = new javax.swing.JButton();
+        colorGradientButton = new javax.swing.JButton();
+        valueGradientButton = new javax.swing.JButton();
         closebutton = new javax.swing.JButton();
         bestlabel = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         infotextfield = new javax.swing.JTextField();
         textfieldpanel = new javax.swing.JPanel();
-        field1 = new javax.swing.JTextField();
-        field2 = new javax.swing.JTextField();
-        field3 = new javax.swing.JTextField();
-        field4 = new javax.swing.JTextField();
-        field5 = new javax.swing.JTextField();
-        field6 = new javax.swing.JTextField();
-        field7 = new javax.swing.JTextField();
-        field8 = new javax.swing.JTextField();
-        field9 = new javax.swing.JTextField();
-        field10 = new javax.swing.JTextField();
-
-        jButton1.setText("jButton1");
+        
+        
+        fields = new JTextField[NUMBER_OF_COLOR_PATCHES];
+        
+		for (int i = 0; i < fields.length; i++) {
+			fields[i] = new javax.swing.JTextField();
+		}
 
         setTitle("Change Colors");
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
-                closeDialog(evt);
+                handleDialogClosing();
             }
         });
 
@@ -105,7 +93,7 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
             public void ancestorMoved(java.awt.event.HierarchyEvent evt) {
             }
             public void ancestorResized(java.awt.event.HierarchyEvent evt) {
-                mainpanelAncestorResized(evt);
+                handleDialogResizing();
             }
         });
         mainpanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -121,33 +109,33 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
         worstlabel.setText("Worst");
         buttonpanel.add(worstlabel);
 
-        updatebutton.setText("UPDATE");
-        updatebutton.addActionListener(new java.awt.event.ActionListener() {
+        updateButton.setText("UPDATE");
+        updateButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                updatebuttonActionPerformed(evt);
+                updateValuesFromTextfields();
             }
         });
 
-        buttonpanel.add(updatebutton);
+        buttonpanel.add(updateButton);
 
-        gradientbutton.setText("Color gradient");
-        gradientbutton.setToolTipText("select the worst and best color, rest is computed");
-        gradientbutton.addActionListener(new java.awt.event.ActionListener() {
+        colorGradientButton.setText("Color gradient");
+        colorGradientButton.setToolTipText("select the worst and best color, rest is computed");
+        colorGradientButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                gradientbuttonActionPerformed(evt);
+                calculateColorGradient();
             }
         });
 
-        buttonpanel.add(gradientbutton);
+        buttonpanel.add(colorGradientButton);
 
-        valgradientbutton.setText("Value gradient");
-        valgradientbutton.addActionListener(new java.awt.event.ActionListener() {
+        valueGradientButton.setText("Value gradient");
+        valueGradientButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                valgradientbuttonActionPerformed(evt);
+                calculateValueGradient();
             }
         });
 
-        buttonpanel.add(valgradientbutton);
+        buttonpanel.add(valueGradientButton);
 
         closebutton.setText("CLOSE");
         closebutton.addActionListener(new java.awt.event.ActionListener() {
@@ -177,75 +165,94 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
 
         textfieldpanel.setLayout(new java.awt.GridLayout(1, 0));
 
-        textfieldpanel.add(field1);
-
-        textfieldpanel.add(field2);
-
-        textfieldpanel.add(field3);
-
-        textfieldpanel.add(field4);
-
-        textfieldpanel.add(field5);
-
-        textfieldpanel.add(field6);
-
-        textfieldpanel.add(field7);
-
-        textfieldpanel.add(field8);
-
-        textfieldpanel.add(field9);
-
-        textfieldpanel.add(field10);
-
+		for (int i = 0; i < fields.length; i++) {
+			textfieldpanel.add(fields[i]);
+		}
+    	
         jPanel1.add(textfieldpanel);
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.NORTH);
 
         pack();
-    }//GEN-END:initComponents
+    }
 
-    private void valgradientbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_valgradientbuttonActionPerformed
-        // calculate a gradient of the values in the textfields
+    private static void setTextField(JTextField field, float number) {
+    	field.setText(fieldFloatFormat.format(number));
+    }
+    
+    /**
+     * Calculates a gradient between the values in the "worst" and "best" text fields. 
+     */
+    private void calculateValueGradient() {
         String tmpstr = "";
+        float worst, best;
+		
         try {
-            tmpstr = field1.getText();
-            float worst = Float.parseFloat(tmpstr);
-            tmpstr = field10.getText();
-            float best = Float.parseFloat(tmpstr);
-            float interval = (best - worst) / 9;
-            field2.setText(String.valueOf(worst + interval));
-            field3.setText(String.valueOf(worst + 2 * interval));
-            field4.setText(String.valueOf(worst + 3 * interval));
-            field5.setText(String.valueOf(worst + 4 * interval));
-            field6.setText(String.valueOf(worst + 5 * interval));
-            field7.setText(String.valueOf(worst + 6 * interval));
-            field8.setText(String.valueOf(worst + 7 * interval));
-            field9.setText(String.valueOf(worst + 8 * interval));
-        } catch (NumberFormatException ne) {
-            javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse float from '" + tmpstr + "'");
-        }
-        repaint();
-        parent.repaint();
-    }//GEN-LAST:event_valgradientbuttonActionPerformed
+        	// first field == worst
+			tmpstr = fields[0].getText();
+			worst = Float.parseFloat(tmpstr);
+			
+			// last field == best
+			tmpstr = fields[fields.length - 1].getText();
+			best = Float.parseFloat(tmpstr);
 
-    private void gradientbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gradientbuttonActionPerformed
+		} catch (NumberFormatException ne) {
+			javax.swing.JOptionPane.showMessageDialog(this, "ERROR, unable to parse float from '" + tmpstr + "'");
+			return;
+		}
+        
+		float interval = (best - worst) / (fields.length - 1);
+
+		float current_value;
+		// set all except for first and last, which determined the interval above
+		for (int i = 1; i < fields.length - 1; i++) {
+			current_value = worst + i * interval;
+			
+			setTextField(fields[i], current_value);
+
+			if (parent.data.blasthits != null) {
+				if (parent.data.usescval) { // SC values
+					parent.data.colorcutoffs[i] = exponentToScValue(fields[i].getText());
+
+				} else { // p-values
+					parent.data.colorcutoffs[i] = exponentToPValue(fields[i].getText());
+				}
+
+			} else { // attraction values
+				parent.data.colorcutoffs[i] = exponentToAttractionValue(fields[i].getText());
+			}
+		}
+
+		repaint();
+		completelyRepaintParent();
+    }
+
+	/**
+	 * Calculates color gradient based on the "worst" and "best" colors.
+	 */
+    private void calculateColorGradient() {
         // calculate a color gradient
         int worstred = colorarr[0].getRed();
         int worstgreen = colorarr[0].getGreen();
         int worstblue = colorarr[0].getBlue();
-        int bestred = colorarr[colornum - 1].getRed();
-        int bestgreen = colorarr[colornum - 1].getGreen();
-        int bestblue = colorarr[colornum - 1].getBlue();
-        //now compute the stepwise gradient
-        float redstep = ((float) (bestred - worstred)) / ((float) colornum);
-        float greenstep = ((float) (bestgreen - worstgreen)) / ((float) colornum);
-        float bluestep = ((float) (bestblue - worstblue)) / ((float) colornum);
-        for (int i = 1; i < colornum - 1; i++) {
-            colorarr[i] = new java.awt.Color((int) (worstred + (i * redstep)), (int) (worstgreen + (i * greenstep)), (int) (worstblue + (i * bluestep)));
+        
+        int bestred = colorarr[colorarr.length - 1].getRed();
+        int bestgreen = colorarr[colorarr.length - 1].getGreen();
+        int bestblue = colorarr[colorarr.length - 1].getBlue();
+
+        // now compute the stepwise gradient
+        float redstep = ((float) (bestred - worstred)) / ((float) colorarr.length);
+        float greenstep = ((float) (bestgreen - worstgreen)) / ((float) colorarr.length);
+        float bluestep = ((float) (bestblue - worstblue)) / ((float) colorarr.length);
+        
+        for (int i = 1; i < colorarr.length - 1; i++) {
+			colorarr[i] = new java.awt.Color((int) (worstred + (i * redstep)), (int) (worstgreen + (i * greenstep)),
+					(int) (worstblue + (i * bluestep)));
         }
+        
         repaint();
-        parent.repaint();
-    }//GEN-LAST:event_gradientbuttonActionPerformed
+        completelyRepaintParent();
+    }
 
     private void closebuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closebuttonActionPerformed
         // Add your handling code here:
@@ -253,319 +260,170 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
         dispose();
     }//GEN-LAST:event_closebuttonActionPerformed
 
-    private void updatebuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updatebuttonActionPerformed
-        // Add your handling code here:
-        //read all the data from the textfields
-        if (data2d == false) {
-            if (parent.data.usescval == false) {//if the data is in P-values
-                String tmpstr = field1.getText();
-                try {
-                    parent.data.colorcutoffs[0] = (float) ((Float.parseFloat(tmpstr) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    //System.out.println("cut0="+parent.draw1.colorcutoffs[0]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field1.setText(String.valueOf((int) ((((parent.data.colorcutoffs[0]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field2.getText();
-                try {
-                    parent.data.colorcutoffs[1] = (float) ((Float.parseFloat(tmpstr) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    //System.out.println("cut1="+parent.draw1.colorcutoffs[1]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field2.setText(String.valueOf((int) ((((parent.data.colorcutoffs[1]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field3.getText();
-                try {
-                    parent.data.colorcutoffs[2] = (float) ((Float.parseFloat(tmpstr) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    //System.out.println("cut2="+parent.draw1.colorcutoffs[2]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field3.setText(String.valueOf((int) ((((parent.data.colorcutoffs[2]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field4.getText();
-                try {
-                    parent.data.colorcutoffs[3] = (float) ((Float.parseFloat(tmpstr) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    //System.out.println("cut3="+parent.draw1.colorcutoffs[3]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field4.setText(String.valueOf((int) ((((parent.data.colorcutoffs[3]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field5.getText();
-                try {
-                    parent.data.colorcutoffs[4] = (float) ((Float.parseFloat(tmpstr) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    //System.out.println("cut4="+parent.draw1.colorcutoffs[4]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field5.setText(String.valueOf((int) ((((parent.data.colorcutoffs[4]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field6.getText();
-                try {
-                    parent.data.colorcutoffs[5] = (float) ((Float.parseFloat(tmpstr) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    //System.out.println("cut5="+parent.draw1.colorcutoffs[5]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field6.setText(String.valueOf((int) ((((parent.data.colorcutoffs[5]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field7.getText();
-                try {
-                    parent.data.colorcutoffs[6] = (float) ((Float.parseFloat(tmpstr) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    //System.out.println("cut6="+parent.draw1.colorcutoffs[6]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field7.setText(String.valueOf((int) ((((parent.data.colorcutoffs[6]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field8.getText();
-                try {
-                    parent.data.colorcutoffs[7] = (float) ((Float.parseFloat(tmpstr) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    //System.out.println("cut7="+parent.draw1.colorcutoffs[7]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field8.setText(String.valueOf((int) ((((parent.data.colorcutoffs[7]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field9.getText();
-                try {
-                    parent.data.colorcutoffs[8] = (float) ((Float.parseFloat(tmpstr) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    //System.out.println("cut8="+parent.draw1.colorcutoffs[8]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field9.setText(String.valueOf((int) ((((parent.data.colorcutoffs[8]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field10.getText();
-                try {
-                    parent.data.colorcutoffs[9] = (float) ((Float.parseFloat(tmpstr) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    //System.out.println("cut9="+parent.draw1.colorcutoffs[9]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field10.setText(String.valueOf((int) ((((parent.data.colorcutoffs[9]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-            } else {//if data is in scval
-                String tmpstr = field1.getText();
-                try {
-                    parent.data.colorcutoffs[0] = (float) ((Float.parseFloat(tmpstr) - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    System.out.println("cut0="+parent.data.colorcutoffs[0]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field1.setText(String.valueOf((int) ((((parent.data.colorcutoffs[0]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field2.getText();
-                try {
-                    parent.data.colorcutoffs[1] = (float) ((Float.parseFloat(tmpstr)- parent.data.p2attoffset) / parent.data.p2attfactor);
-                    System.out.println("cut1="+parent.data.colorcutoffs[1]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field2.setText(String.valueOf((int) ((((parent.data.colorcutoffs[1]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field3.getText();
-                try {
-                    parent.data.colorcutoffs[2] = (float) ((Float.parseFloat(tmpstr) - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    System.out.println("cut2="+parent.data.colorcutoffs[2]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field3.setText(String.valueOf((int) ((((parent.data.colorcutoffs[2]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field4.getText();
-                try {
-                    parent.data.colorcutoffs[3] = (float) ((Float.parseFloat(tmpstr) - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    System.out.println("cut3="+parent.data.colorcutoffs[3]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field4.setText(String.valueOf((int) ((((parent.data.colorcutoffs[3]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field5.getText();
-                try {
-                    parent.data.colorcutoffs[4] = (float) ((Float.parseFloat(tmpstr) - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    System.out.println("cut4="+parent.data.colorcutoffs[4]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field5.setText(String.valueOf((int) ((((parent.data.colorcutoffs[4]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field6.getText();
-                try {
-                    parent.data.colorcutoffs[5] = (float) ((Float.parseFloat(tmpstr) - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    System.out.println("cut5="+parent.data.colorcutoffs[5]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field6.setText(String.valueOf((int) ((((parent.data.colorcutoffs[5]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field7.getText();
-                try {
-                    parent.data.colorcutoffs[6] = (float) ((Float.parseFloat(tmpstr) - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    System.out.println("cut6="+parent.data.colorcutoffs[6]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field7.setText(String.valueOf((int) ((((parent.data.colorcutoffs[6]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field8.getText();
-                try {
-                    parent.data.colorcutoffs[7] = (float) ((Float.parseFloat(tmpstr) - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    System.out.println("cut7="+parent.data.colorcutoffs[7]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field8.setText(String.valueOf((int) ((((parent.data.colorcutoffs[7]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field9.getText();
-                try {
-                    parent.data.colorcutoffs[8] = (float) ((Float.parseFloat(tmpstr) - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    System.out.println("cut8="+parent.data.colorcutoffs[8]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field9.setText(String.valueOf((int) ((((parent.data.colorcutoffs[8]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-
-                tmpstr = field10.getText();
-                try {
-                    parent.data.colorcutoffs[9] = (float) ((Float.parseFloat(tmpstr) - parent.data.p2attoffset) / parent.data.p2attfactor);
-                    System.out.println("cut9="+parent.data.colorcutoffs[9]);
-                } catch (NumberFormatException ne) {
-                    System.err.println("unable to parse float from " + tmpstr);
-                    field10.setText(String.valueOf((int) ((((parent.data.colorcutoffs[9]) * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10)));
-                    return;
-                }
-            }
-        } else {//if parent is in attraction value mode
-            String tmpstr = field1.getText();
-            try {
-                parent.data.colorcutoffs[0] = (float) (Float.parseFloat(tmpstr) / parent.data.p2attfactor);
-                //System.out.println("cut0="+parent..colorcutoffs[0]);
-            } catch (NumberFormatException ne) {
-                System.err.println("unable to parse float from " + tmpstr);
-                field1.setText(String.valueOf(parent.data.colorcutoffs[0] * parent.data.p2attfactor));
-                return;
-            }
-
-            tmpstr = field2.getText();
-            try {
-                parent.data.colorcutoffs[1] = (float) (Float.parseFloat(tmpstr) / parent.data.p2attfactor);
-                //System.out.println("cut1="+parent..colorcutoffs[1]);
-            } catch (NumberFormatException ne) {
-                System.err.println("unable to parse float from " + tmpstr);
-                field2.setText(String.valueOf(parent.data.colorcutoffs[1] * parent.data.p2attfactor));
-                return;
-            }
-
-            tmpstr = field3.getText();
-            try {
-                parent.data.colorcutoffs[2] = (float) (Float.parseFloat(tmpstr) / parent.data.p2attfactor);
-                //System.out.println("cut2="+parent..colorcutoffs[2]);
-            } catch (NumberFormatException ne) {
-                System.err.println("unable to parse float from " + tmpstr);
-                field3.setText(String.valueOf(parent.data.colorcutoffs[2] * parent.data.p2attfactor));
-                return;
-            }
-
-            tmpstr = field4.getText();
-            try {
-                parent.data.colorcutoffs[3] = (float) (Float.parseFloat(tmpstr) / parent.data.p2attfactor);
-                //System.out.println("cut3="+parent..colorcutoffs[3]);
-            } catch (NumberFormatException ne) {
-                System.err.println("unable to parse float from " + tmpstr);
-                field4.setText(String.valueOf(parent.data.colorcutoffs[3] * parent.data.p2attfactor));
-                return;
-            }
-
-            tmpstr = field5.getText();
-            try {
-                parent.data.colorcutoffs[4] = (float) (Float.parseFloat(tmpstr) / parent.data.p2attfactor);
-                //System.out.println("cut4="+parent..colorcutoffs[4]);
-            } catch (NumberFormatException ne) {
-                System.err.println("unable to parse float from " + tmpstr);
-                field5.setText(String.valueOf(parent.data.colorcutoffs[4] * parent.data.p2attfactor));
-                return;
-            }
-
-            tmpstr = field6.getText();
-            try {
-                parent.data.colorcutoffs[5] = (float) (Float.parseFloat(tmpstr) / parent.data.p2attfactor);
-                //System.out.println("cut5="+parent..colorcutoffs[5]);
-            } catch (NumberFormatException ne) {
-                System.err.println("unable to parse float from " + tmpstr);
-                field6.setText(String.valueOf(parent.data.colorcutoffs[5] * parent.data.p2attfactor));
-                return;
-            }
-
-            tmpstr = field7.getText();
-            try {
-                parent.data.colorcutoffs[6] = (float) (Float.parseFloat(tmpstr) / parent.data.p2attfactor);
-                //System.out.println("cut6="+parent..colorcutoffs[6]);
-            } catch (NumberFormatException ne) {
-                System.err.println("unable to parse float from " + tmpstr);
-                field7.setText(String.valueOf(parent.data.colorcutoffs[6] * parent.data.p2attfactor));
-                return;
-            }
-
-            tmpstr = field8.getText();
-            try {
-                parent.data.colorcutoffs[7] = (float) (Float.parseFloat(tmpstr) / parent.data.p2attfactor);
-                //System.out.println("cut7="+parent..colorcutoffs[7]);
-            } catch (NumberFormatException ne) {
-                System.err.println("unable to parse float from " + tmpstr);
-                field8.setText(String.valueOf(parent.data.colorcutoffs[7] * parent.data.p2attfactor));
-                return;
-            }
-
-            tmpstr = field9.getText();
-            try {
-                parent.data.colorcutoffs[8] = (float) (Float.parseFloat(tmpstr) / parent.data.p2attfactor);
-                //System.out.println("cut8="+parent..colorcutoffs[8]);
-            } catch (NumberFormatException ne) {
-                System.err.println("unable to parse float from " + tmpstr);
-                field9.setText(String.valueOf(parent.data.colorcutoffs[8] * parent.data.p2attfactor));
-                return;
-            }
-
-            tmpstr = field10.getText();
-            try {
-                parent.data.colorcutoffs[9] = (float) (Float.parseFloat(tmpstr) / parent.data.p2attfactor);
-                //System.out.println("cut9="+parent.draw1.colorcutoffs[9]);
-            } catch (NumberFormatException ne) {
-                System.err.println("unable to parse float from " + tmpstr);
-                field10.setText(String.valueOf(parent.data.colorcutoffs[9] * parent.data.p2attfactor));
-                return;
-            }
-        }
-
-        parent.data.resetDrawOrder();
-        parent.repaint();
-    }//GEN-LAST:event_updatebuttonActionPerformed
+    
+	/**
+	 * Converts the cutoff exponent to the real cutoff p-value. This inverts {@code pValueToExponent}.
+	 * 
+	 * @param value
+	 *            The cutoff exponent.
+	 * @return The p-value corresponding to the cutoff exponent.
+	 * @throws NumberFormatException
+	 *             If the entered number is not parsable as Float.
+	 */
+	private float exponentToPValue(String value) throws NumberFormatException {
+		return (float) ((Float.parseFloat(value) * ln10 - parent.data.p2attoffset) / parent.data.p2attfactor);
+	}
 
 	/**
-	 * open and handle color chooser dialog for a clicked element of the color bar
+	 * Extracts the exponent from a p-value. This inverts method {@code exponentToPValue}.
+	 * 
+	 * @param value
+	 *            The p-value.
+	 * @return The exponent representation.
+	 */
+	private float pValueToExponent(float value) {
+		return (float) (((value * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10);
+	}
+
+	/**
+	 * Converts the cutoff exponent to the real cutoff SC value. This inverts {@code scValueToExponent}.
+	 * 
+	 * @param value
+	 *            The cutoff exponent.
+	 * @return The SC value corresponding to the cutoff exponent.
+	 * @throws NumberFormatException
+	 *             If the entered number is not parsable as Float.
+	 */
+	private float exponentToScValue(String value) throws NumberFormatException {
+		return (float) ((Float.parseFloat(value) - parent.data.p2attoffset) / parent.data.p2attfactor);
+	}
+
+	/**
+	 * Extracts the exponent from a SC value. This inverts method {@code exponentToScValue}.
+	 * 
+	 * @param value
+	 *            The SC value.
+	 * @return The exponent representation.
+	 */
+	private int scValueToExponent(float value) {
+		return (int) (((value * parent.data.p2attfactor) + parent.data.p2attoffset) / ln10);
+	}
+
+	/**
+	 * Converts the cutoff exponent to the real cutoff attraction value. This inverts {@code attractionValueToExponent}.
+	 * 
+	 * @param value
+	 *            The cutoff exponent.
+	 * @return The attraction value corresponding to the cutoff exponent.
+	 * @throws NumberFormatException
+	 *             If the entered number is not parsable as Float.
+	 */
+	private float exponentToAttractionValue(String value) throws NumberFormatException {
+		return (float) (Float.parseFloat(value) / parent.data.p2attfactor);
+	}
+
+	/**
+	 * Extracts the exponent from a attraction value. This inverts method {@code exponentToAttractionValue}.
+	 * 
+	 * @param value
+	 *            The attraction value.
+	 * @return The exponent representation.
+	 */
+	private float attractionValueToExponent(float value) {
+		return value * parent.data.p2attfactor;
+	}
+    
+	/**
+	 * Converts exponent {@code value} to a p-value and updates the color cutoff accordingly.
+	 * 
+	 * @param value
+	 *            The input value.
+	 * @param index
+	 *            The index to the color cutoff array item that must be adjusted.
+	 */
+	private void verifyAndSetPValue(String value, int index) {
+		float new_value;
+		try {
+			new_value = exponentToPValue(value);
+
+		} catch (NumberFormatException e) {
+			System.err.println("unable to parse float from " + value);
+			return;
+		}
+
+		setTextField(fields[index], pValueToExponent(new_value));
+	}
+
+	/**
+	 * Converts exponent {@code value} to a SC value and updates the color cutoff accordingly.
+	 * 
+	 * @param value
+	 *            The input value.
+	 * @param index
+	 *            The index to the color cutoff array item that must be adjusted.
+	 */
+	private void verifyAndSetSCValue(String value, int index) {
+		float new_value;
+		try {
+			new_value = exponentToScValue(value);
+
+		} catch (NumberFormatException e) {
+			System.err.println("unable to parse float from " + value);
+			return;
+		}
+
+		setTextField(fields[index], scValueToExponent(new_value));
+	}
+
+	/**
+	 * Converts {@code value} to an attraction value and updates the color cutoff accordingly.
+	 * 
+	 * @param value
+	 *            The input value.
+	 * @param index
+	 *            The index to the color cutoff array item that must be adjusted.
+	 */
+	private void verifyAndSetAttractionValue(String value, int index) {
+		float new_value;
+		try {
+			new_value = exponentToAttractionValue(value);
+
+		} catch (NumberFormatException e) {
+			System.err.println("unable to parse float from " + value);
+			return;
+		}
+
+		setTextField(fields[index], attractionValueToExponent(new_value));
+	}
+    
+	/**
+	 * Reads text fields and injects their data into the model if parsable.
+	 */
+	private void updateValuesFromTextfields() {
+
+		if (!data2d) {
+			if (parent.data.usescval) { // SC values
+				for (int i = 0; i < fields.length; i++) {
+					verifyAndSetSCValue(fields[i].getText(), i);
+				}
+
+			} else { // p-values
+				for (int i = 0; i < fields.length; i++) {
+					verifyAndSetPValue(fields[i].getText(), i);
+				}
+			}
+
+		} else { // attraction values
+			for (int i = 0; i < fields.length; i++) {
+				verifyAndSetAttractionValue(fields[i].getText(), i);
+			}
+		}
+
+		completelyRepaintParent();
+	}
+
+	/**
+	 * Opens a color chooser dialog for a clicked element of the color bar and handles the user input.
 	 * 
 	 * @param evt
 	 */
@@ -575,89 +433,85 @@ public class DialogChangeConnectionColors extends javax.swing.JDialog {
 		int colorelement = (int) (xval / draw1.elementwidth); // determine clicked element
 
 		colorarr[colorelement] = parent.safe_change_color_dialog("Select New Color", colorarr[colorelement]);
-		
+
 		repaint();
-		parent.repaint();
+		completelyRepaintParent();
 	}
 
-    private void mainpanelAncestorResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_mainpanelAncestorResized
-        // Add your handling code here:
+	/**
+	 * Handle dialog resizing.
+	 */
+    private void handleDialogResizing() {
         draw1.drawwidth = mainpanel.getWidth();
         draw1.drawheight = mainpanel.getHeight();
-        draw1.elementwidth = ((float) draw1.drawwidth) / ((float) colornum);
+        draw1.elementwidth = ((float) draw1.drawwidth) / ((float) colorarr.length);
         repaint();
-    }//GEN-LAST:event_mainpanelAncestorResized
+    }
+    
+	/**
+	 * Triggers a reevaluation and repaint of the data in the parent.
+	 */
+    private void completelyRepaintParent() {
+		parent.data.resetDrawOrder();
+		parent.repaint();
+    }
 
-    /** Closes the dialog */
-    private void closeDialog(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
-        setVisible(false);
-        dispose();
-    }//GEN-LAST:event_closeDialog
-    /**
-     * @param args the command line arguments
-     */
-    static java.awt.Color[] colorarr = new java.awt.Color[2];
+	/**
+	 * Handle dialog closing.
+	 * 
+	 * @param evt
+	 */
+	private void handleDialogClosing() {
+		setVisible(false);
+		dispose();
+	}
+    
+    java.awt.Color[] colorarr = new java.awt.Color[2];
     drawpanel draw1;
     javax.swing.JColorChooser colorchooser = new javax.swing.JColorChooser();
     ProgramWindow parent;
-    int colornum;
     static double ln10 = java.lang.Math.log(10);
-    boolean data2d = false;//has parent loaded in 2d
+    boolean data2d = false;
 
-    public static void changecolor(ProgramWindow parent, java.awt.Color[] incolorarr) {
-        //this should replace the colors in colorarr with new ones
-        colorarr = incolorarr;
-        new DialogChangeConnectionColors(parent, false).setVisible(true);
-    }//en getnewcolors
-    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel bestlabel;
     private javax.swing.JPanel buttonpanel;
     private javax.swing.JButton closebutton;
-    private javax.swing.JTextField field1;
-    private javax.swing.JTextField field10;
-    private javax.swing.JTextField field2;
-    private javax.swing.JTextField field3;
-    private javax.swing.JTextField field4;
-    private javax.swing.JTextField field5;
-    private javax.swing.JTextField field6;
-    private javax.swing.JTextField field7;
-    private javax.swing.JTextField field8;
-    private javax.swing.JTextField field9;
-    private javax.swing.JButton gradientbutton;
+    
+    private final int NUMBER_OF_COLOR_PATCHES = 10;
+    private javax.swing.JTextField[] fields;
+    private final static DecimalFormat fieldFloatFormat = new DecimalFormat("#.##");
+    
+    private javax.swing.JButton colorGradientButton;
     private javax.swing.JTextField infotextfield;
-    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel mainpanel;
     private javax.swing.JPanel textfieldpanel;
-    private javax.swing.JButton updatebutton;
-    private javax.swing.JButton valgradientbutton;
+    private javax.swing.JButton updateButton;
+    private javax.swing.JButton valueGradientButton;
     private javax.swing.JLabel worstlabel;
-    // End of variables declaration//GEN-END:variables
 
     class drawpanel extends javax.swing.JPanel {
 
-        /**
-         * 
-         */
         private static final long serialVersionUID = 5838939531675395908L;
 
         public drawpanel(java.awt.Color[] colorarr) {
             this.colorarr = colorarr;
         }
+        
         java.awt.Color[] colorarr;
         float elementwidth;
         int drawwidth;
         int drawheight;
 
         public void paintComponent(java.awt.Graphics g) {
-            for (int i = 0; i < colornum; i++) {
-                g.setColor(colorarr[i]);
+            for (int i = 0; i < colorarr.length; i++) {
+            	g.setColor(colorarr[i]);
                 g.fillRect((int) (i * elementwidth), 0, (int) elementwidth, drawheight);
+                
                 g.setColor(java.awt.Color.black);
                 g.drawRect((int) (i * elementwidth), 0, (int) elementwidth, drawheight);
-            }//end for i
-        }//end paintcomponent
-    }//end class drawpanel
-}//end class
-
+            }
+        }
+    }
+}

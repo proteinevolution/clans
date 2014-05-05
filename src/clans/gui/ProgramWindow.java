@@ -2864,7 +2864,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 	 * Opens a dialog for changing connection colors.
 	 */
 	private void openChangeDotConnectionColorDialog() {
-		DialogChangeConnectionColors.changecolor(this, data.colorarr);
+		new DialogChangeConnectionColors(this);
 		draw_area.repaint();
 	}
 
