@@ -1211,51 +1211,45 @@ public class ClusterData {
      * 
      * @param input_filename
      */
-    public void append_groups_or_clusters_from_file(File input_filename) {
-         
+    public void append_groups_or_clusters_from_file(File input_filename) {         
         try {
             BufferedReader inread = new BufferedReader(new FileReader(input_filename));
             String firstline = inread.readLine();
             inread.close();
-            
             if (firstline.startsWith("<ids>")) {
                 // I want to read cluster data not group data
                 System.out.println("reading cluster data");
                 append_clusters_from_file(input_filename);
-            }// else do the usual read
-            
+            }else{
+            	// else do the usual read
+            	System.out.println("reading sequence group data");
+            }
             inread = new BufferedReader(new FileReader(input_filename));
             Vector<String> tmpvec_strings = new Vector<String>();
             Vector<Integer> tmpvec_integers = new Vector<Integer>();
             HashMap<String, Integer> mynamehash = new HashMap<String, Integer>();
             String[] tmparr;
             String tmpstr = "";
-            
+            //System.out.println("current dataset seqnum:"+sequence_names.length);
             for (int i = 0; i < sequence_names.length; i++) {
                 tmparr = sequence_names[i].split("\\s+");
                 mynamehash.put(tmparr[0], new Integer(i));
-            }
-            
+            }            
             String[] mynamearr = null;
             int maxnum = 0;
             String inline;
             while ((inline = inread.readLine()) != null) {
- 
                 if (inline.length() == 0) {
                     continue;
                 }
-                
                 if (inline.equalsIgnoreCase("<seq>")) {
                     // read the sequence names used in this file
                     while ((inline = inread.readLine()) != null) {
-
                         if (inline.length() == 0) {
                             continue;
                         }
-                        
                         if (inline.equalsIgnoreCase("</seq>")) {
-                              break;
-                            
+                        	break;
                         } else if (inline.startsWith(">")) {
                             tmpstr = inline.substring(1).trim();
                             tmparr = tmpstr.split("\\s+");
@@ -1265,9 +1259,11 @@ public class ClusterData {
                     maxnum = tmpvec_strings.size();
                     mynamearr = new String[maxnum];
                     tmpvec_strings.copyInto(mynamearr);
-                    
+                    //System.out.println("Append dataset seqnum:"+tmpvec_strings.size());
+                    tmpvec_strings.clear();
                 } else if (inline.equalsIgnoreCase("<seqgroups>")) {
                     // read the groups defined in this file; format is CLANS
+                	//System.out.println("in seqgroups");
                     if (maxnum == 0) {
                         System.err.println("ERROR; missing sequence names");
                         inread.close();
@@ -1280,19 +1276,17 @@ public class ClusterData {
                     int size = 0, tmpval;
                     boolean hide = false;
                     while ((inline = inread.readLine()) != null) {
-
                         if (inline.length() == 0) {
                             continue;
                         }
-                        
                         if (inline.equalsIgnoreCase("</seqgroups>")) {
+                        	//System.out.println("END seqgroups");
                             break;
                         }
-                        
                         if (inline.startsWith("name=")) {
-                            name = inline.substring(5).trim();
+                        	name = inline.substring(5).trim();
                             type = 0;
-                            
+                            //System.out.println("\tname="+name);
                         } else if (inline.startsWith("type=")) {
                             try {
                                 tmpstr = inline.substring(5).trim();
@@ -1300,7 +1294,6 @@ public class ClusterData {
                             } catch (NumberFormatException ne) {
                                 System.err.println("ERROR, unable to parse int from '" + tmpstr + "'");
                             }
-                            
                         } else if (inline.startsWith("size=")) {
                             try {
                                 tmpstr = inline.substring(5).trim();
@@ -1308,7 +1301,6 @@ public class ClusterData {
                             } catch (NumberFormatException ne) {
                                 System.err.println("ERROR, unable to parse int from '" + tmpstr + "'");
                             }
-                            
                         } else if (inline.startsWith("hide=")) {
                             try {
                                 tmpstr = inline.substring(5).trim();
@@ -1321,19 +1313,15 @@ public class ClusterData {
                             } catch (NumberFormatException ne) {
                                 System.err.println("ERROR, unable to parse int from '" + tmpstr + "'");
                             }
-                            
                         } else if (inline.startsWith("numbers=")) {
                             count++;
                             SequenceGroup mygroup = new SequenceGroup();
-                            
                             if (name != null) {
                                 mygroup.name = name;
                                 name = null;
-                            
                             } else {
                                 mygroup.name = String.valueOf(count);
                             }
-                            
                             mygroup.type = type;
                             mygroup.color = color;
                             mygroup.hide = hide;
@@ -1342,50 +1330,44 @@ public class ClusterData {
                             color = java.awt.Color.red;
                             // now convert the numbers you read to the numbers used in namearr
                             tmparr = inline.substring(8).trim().split(";");
-
                             int[] tmp = new int[tmparr.length];
-
                             try {
                                 for (int i = 0; i < tmparr.length; i++) {
                                     tmpstr = tmparr[i];
                                     tmp[i] = Integer.parseInt(tmpstr);
                                 }
                             } catch (NumberFormatException ne) {
-                                System.err
-                                        .println("Unable to parse int from '" + tmpstr + "' in line '" + inline + "'");
+                                System.err.println("Unable to parse int from '" + tmpstr + "' in line '" + inline + "'");
                                 continue;
                             }
-                            tmpvec_strings.clear();
+                            //tmpvec_strings.clear();
+                            tmpvec_integers.clear();
                             for (int i = 0; i < tmparr.length; i++) {
                                 tmpstr = mynamearr[tmp[i]];
-
                                 if (mynamehash.containsKey(tmpstr)) {
                                     tmpvec_integers.addElement(mynamehash.get(tmpstr));
                                 } else {
-                                    System.err.println("no correspondence found for '" + tmpstr
-                                            + "' in current graph; skipping entry " + sequence_names.length);
+                                    System.err.println("no name '" + tmpstr + "' found in current graph; skipping entry");
                                 }
                             }
-                            
-                            elements = tmpvec_strings.size();
+                            //elements = tmpvec_strings.size();
+                            elements = tmpvec_integers.size();
                             mygroup.sequences = new int[elements];
-
                             for (int i = 0; i < elements; i++) {
                                 mygroup.sequences[i] = ((Integer) tmpvec_integers.elementAt(i)).intValue();
                             }
-                            
                             if (elements > 0) {
+                            	//System.out.println("Adding group '"+mygroup.name+"' ("+seqgroupsvec.size()+") with elements '"+elements);
                                 seqgroupsvec.addElement(mygroup);
+                            }else{
+                            	//System.out.println("group size = 0");
                             }
-                            
                         } else if (inline.startsWith("color=")) {
                             tmpstr = inline.substring(6).trim();
                             tmparr = tmpstr.split(";");
-                            
                             if ((tmparr.length != 3) && (tmparr.length != 4)) {
                                 System.err.println("ERROR reading color info from line '" + inline + "'");
                             }
-                            
                             int red, green, blue;
                             try {
                                 tmpstr = tmparr[0];
@@ -1401,10 +1383,8 @@ public class ClusterData {
                                     int alpha = Integer.parseInt(tmpstr);
                                     color = new java.awt.Color(red, green, blue, alpha);
                                 }
-                                
                             } catch (NumberFormatException ne) {
-                                System.err
-                                        .println("unable to convert '" + tmpstr + "' to int in line '" + inline + "'");
+                                System.err.println("unable to convert '" + tmpstr + "' to int in line '" + inline + "'");
                                 color = java.awt.Color.red;
                             }
                         }
@@ -1412,11 +1392,10 @@ public class ClusterData {
                 }
             }
             inread.close();
-            
         } catch (IOException ioe) {
             System.err.println("IOERROR; unable to read from file '" + input_filename.getAbsolutePath() + "'");
         }
-    }
+    }//end append_groups_or_clusters_from_file(File input_filename)
 
     /**
      * read the cluster data generated by the iterative clustering approach (append groups to groupsvec)

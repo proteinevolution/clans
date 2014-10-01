@@ -1098,9 +1098,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 		
 		int returnVal = fc.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-		
 			data.append_groups_or_clusters_from_file(fc.getSelectedFile());
-			
 			if (myseqgroupwindow != null) {
 				myseqgroupwindow.setVisible(false);
 				myseqgroupwindow.dispose();
