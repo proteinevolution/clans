@@ -2185,7 +2185,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 		// selected YES, irrespective of the currently selected button
 		UIManager.put("Button.defaultButtonFollowsFocus", Boolean.TRUE);
 
-		JFileChooser jFileChooser = new JFileChooser() {
+		JFileChooser jFileChooser = new JFileChooser(new File(System.getProperty("user.dir"))) {
 			/**
 			 * For existing files, ask whether to overwrite or not or cancel the save.
 			 * 
