@@ -82,9 +82,7 @@ public class FileHandling2 {
             int kval=-1;
             int hspcount=-1;
             double pval=-1;
-            String[] tmparr;
             HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
-            String hspkey;
             while ((inline=inread.readLine())!=null){
                 if(inline.startsWith("#")){
                     continue;
@@ -96,7 +94,7 @@ public class FileHandling2 {
                     }
                     if(ival!=jval && pval<=cutoff){
                         if((ival>-1)&&(jval>-1)&&(kval>-1)){
-                            hspkey=ival+"_"+jval;
+                            String hspkey=ival+"_"+jval;
                             if(hsphash.containsKey(hspkey)==false){
                                 currhsp.val=new double[1];
                                 currhsp.val[0]=pval;
@@ -106,7 +104,7 @@ public class FileHandling2 {
                             }
                         }
                     }
-                    tmparr=(inline.substring(5)).split(";",0);
+                    String[] tmparr=(inline.substring(5)).split(";",0);
                     if(tmparr.length==3){
                         try{
                             ival=Integer.parseInt(tmparr[0]);
@@ -164,7 +162,7 @@ public class FileHandling2 {
             }//end while reading
             if(pval<=cutoff){
                 if((ival>-1)&&(jval>-1)&&(kval>-1)){
-                    hspkey=ival+"_"+jval;
+                    String hspkey=ival+"_"+jval;
                     if(hsphash.containsKey(hspkey)==false){
                         currhsp.val=new double[1];
                         currhsp.val[0]=pval;
@@ -189,7 +187,7 @@ public class FileHandling2 {
         //now get all the minhsp elements form the hash
         return retarr;
     }//end blast
-    
+
     //--------------------------------------------------------------------------
     
     public static void parse_intermediate_results(ClusterData data){

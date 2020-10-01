@@ -578,13 +578,11 @@ public class ClusterDataLoadHelper {
 	 *             Exception will not occur.
 	 */
 	public boolean parse_hsp_block(BufferedReader buffered_file_handle, SwingWorker<Void, Integer> worker)
-			throws IOException, CancellationException {
-        int myi, myj;
-		String[] split_result;
+            throws IOException, CancellationException {
+        String[] split_result;
         String tmpstr;
         MinimalHsp currhsp;
         HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
-        String hspkey = "";
         String inline;
         int characters_for_round_number = 9;
         String format_for_round_number = "%" + characters_for_round_number + "s";
@@ -596,18 +594,18 @@ public class ClusterDataLoadHelper {
         int count = 0;
         String lastline = "";
         while (((inline = buffered_file_handle.readLine()) != null) && (inline.equalsIgnoreCase("</hsp>") == false)) {
-        	
+
             // skip empty lines
             if (inline.length() == 0) {
                 continue;
             }
-            
+
             count++;
-            
+
             if (count % 10000 == 0) {
                 System.out.print(".");
-                
-				// every 10000 HSPs as tradeoff between time wasted on checking and responsiveness of the cancelation
+
+                // every 10000 HSPs as tradeoff between time wasted on checking and responsiveness of the cancelation
                 ClusterData.checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
 
                 if (count % 500000 == 0) {
@@ -635,35 +633,32 @@ public class ClusterDataLoadHelper {
             }
             
             try {
-                myi = Integer.parseInt(split_result[0]);
-                myj = Integer.parseInt(split_result[1]);
-            
-                if (myi == myj) { // connections to itself are useless
+                int myi = Integer.parseInt(split_result[0]);
+                int myj = Integer.parseInt(split_result[1]);
+
+                if (myi == myj) { // Connections to itself are useless
                     continue;
                 }
 
                 split_result = tmpstr.split("\\s+");
                 if (split_result.length == 0) {
-                	continue;
+                    continue;
                 }
-                
-                hspkey = myi + "_" + myj;
+
+                String hspkey = myi + "_" + myj;
                 if (hsphash.containsKey(hspkey)) {
                     currhsp = hsphash.get(hspkey);
                     for (int i = 0; i < split_result.length; i++) {
                         currhsp.addpval(Double.parseDouble(split_result[i]));
                     }
-
                 } else {
                     currhsp = new MinimalHsp(myi, myj);
                     currhsp.val = new double[split_result.length];
                     for (int i = 0; i < split_result.length; i++) {
                         currhsp.val[i] = Double.parseDouble(split_result[i]);
                     }
+                    hsphash.put(hspkey, currhsp);
                 }
-                
-                hsphash.put(hspkey, currhsp);
-            
             } catch (NumberFormatException Ne) {
                 System.err.println("ERROR, unable to parse int int: double ... from " + inline);
                 return false;

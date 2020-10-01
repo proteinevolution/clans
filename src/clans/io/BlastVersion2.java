@@ -218,25 +218,23 @@ public class BlastVersion2 {
         HashMap<String, MinimalHsp> allhash = new HashMap<String, MinimalHsp>();
         try {
             BufferedReader fileread = new BufferedReader(new FileReader(saveblastname));
-            String inline = "", idline = "", valline = "", tmpstr = "";
-            String[] tmparr;
+            String inline = "", idline = "", valline = "";
             HashMap<String, MinimalHsp> roundhash = new HashMap<String, MinimalHsp>();
             //read until I hit the "#done for sequence" lines and then pass the current elements to the final hash containing the data
-            MinimalHsp myhsp;
             boolean passrounds = false;
             HashMap<Integer, Integer> donehash = new HashMap<Integer, Integer>();
             int count = 0;
             try {
                 while ((inline = fileread.readLine()) != null) {
                     if (inline.startsWith("hsp: ")) {
-                        tmparr = idline.split(";");
+                        String[] tmparr = idline.split(";");
                         if (tmparr.length >= 2) {
-                            tmpstr = tmparr[0] + ";" + tmparr[1];
+                            String tmpstr = tmparr[0] + ";" + tmparr[1];
                             if (roundhash.containsKey(tmpstr)) {
-                                myhsp = roundhash.get(tmpstr);
+                                MinimalHsp myhsp = roundhash.get(tmpstr);
                                 myhsp.addpval(Double.parseDouble(valline));
                             } else {
-                                myhsp = new MinimalHsp(Integer.parseInt(tmparr[0]), Integer.parseInt(tmparr[1]));
+                                MinimalHsp myhsp = new MinimalHsp(Integer.parseInt(tmparr[0]), Integer.parseInt(tmparr[1]));
                                 myhsp.addpval(Double.parseDouble(valline));
                                 roundhash.put(myhsp.query + ";" + myhsp.hit, myhsp);
                             }
@@ -256,7 +254,7 @@ public class BlastVersion2 {
                             //then move the data from the roundhash to the allhash for those sequences in donehash
                             MinimalHsp[] checkarr = roundhash.values().toArray(new MinimalHsp[0]);
                             for (int i = checkarr.length; --i >= 0;) {
-                                myhsp = checkarr[i];
+                                MinimalHsp myhsp = checkarr[i];
                                 if (donehash.containsKey(new Integer(myhsp.query))) {
                                     allhash.put(myhsp.query + ";" + myhsp.hit, myhsp);
                                 }
@@ -268,7 +266,7 @@ public class BlastVersion2 {
                     } else if (inline.startsWith("#")) {
                         passrounds = true;
                         //add these elements from roundshash to allhash and overwrite previous ones if necessary
-                        tmpstr = inline.substring(inline.indexOf(":") + 1);
+                        String tmpstr = inline.substring(inline.indexOf(":") + 1);
                         donehash.put(nameshash.get(tmpstr), null);
                     } else {
                         if (inline.length() > 0) {
@@ -285,7 +283,7 @@ public class BlastVersion2 {
                     //then move the data from the roundhash to the allhash for those sequences in donehash
                     MinimalHsp[] checkarr = roundhash.values().toArray(new MinimalHsp[0]);
                     for (int i = checkarr.length; --i >= 0;) {
-                        myhsp = checkarr[i];
+                        MinimalHsp myhsp = checkarr[i];
                         if (donehash.containsKey(new Integer(myhsp.query))) {
                             allhash.put(myhsp.query + ";" + myhsp.hit, myhsp);
                         }
@@ -293,8 +291,8 @@ public class BlastVersion2 {
                     roundhash.clear();
                     donehash.clear();
                 }
-            } catch (NumberFormatException ne) {
-                System.err.println("ERROR trying to parse number from '" + tmpstr + "'");
+            } catch (NumberFormatException e) {
+                System.err.println("ERROR trying to parse number from '" + e.getMessage().replaceAll("For input string: ", "") + "'");
             }
             fileread.close();
         } catch (IOException ioe) {
