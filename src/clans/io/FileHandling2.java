@@ -76,13 +76,12 @@ public class FileHandling2 {
                 System.err.println("NumberFormatError, Wrong Format!");
                 System.exit(0);
             }
-            MinimalHsp currhsp=new MinimalHsp();
             int ival=-1;
             int jval=-1;
             int kval=-1;
             int hspcount=-1;
             double pval=-1;
-            HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
+            HashMap<MinimalHsp, MinimalHsp> hsphash = new HashMap<MinimalHsp, MinimalHsp>();
             while ((inline=inread.readLine())!=null){
                 if(inline.startsWith("#")){
                     continue;
@@ -94,13 +93,12 @@ public class FileHandling2 {
                     }
                     if(ival!=jval && pval<=cutoff){
                         if((ival>-1)&&(jval>-1)&&(kval>-1)){
-                            String hspkey=ival+"_"+jval;
-                            if(hsphash.containsKey(hspkey)==false){
-                                currhsp.val=new double[1];
-                                currhsp.val[0]=pval;
-                                hsphash.put(hspkey,currhsp);
+                            MinimalHsp newHSP=new MinimalHsp(ival, jval);
+                            if(hsphash.containsKey(newHSP)==false){
+                                newHSP.addpval(pval);
+                                hsphash.put(newHSP,newHSP);
                             }else{
-                                hsphash.get(hspkey).addpval(pval);
+                                hsphash.get(newHSP).addpval(pval);
                             }
                         }
                     }
@@ -114,10 +112,7 @@ public class FileHandling2 {
                             System.err.println("unable to parse correct numbers from "+inline);
                             System.exit(0);
                         }
-                        currhsp=new MinimalHsp(ival, jval);
                     }else{
-                        // Why including this at all in this case?
-                        currhsp=new MinimalHsp();
                         pval=1;
                     }
                 }else if(inline.startsWith("\tqname: ")){
@@ -162,13 +157,12 @@ public class FileHandling2 {
             }//end while reading
             if(pval<=cutoff){
                 if((ival>-1)&&(jval>-1)&&(kval>-1)){
-                    String hspkey=ival+"_"+jval;
-                    if(hsphash.containsKey(hspkey)==false){
-                        currhsp.val=new double[1];
-                        currhsp.val[0]=pval;
-                        hsphash.put(hspkey,currhsp);
+                    MinimalHsp newHSP=new MinimalHsp(ival, jval);
+                    if(hsphash.containsKey(newHSP)==false){
+                        hsphash.get(newHSP).addpval(pval);
+                        hsphash.put(newHSP,newHSP);
                     }else{
-                        hsphash.get(hspkey).addpval(pval);
+                        hsphash.get(newHSP).addpval(pval);
                     }
                 }
             }
