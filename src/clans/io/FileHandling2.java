@@ -116,10 +116,9 @@ public class FileHandling2 {
                             System.err.println("unable to parse correct numbers from "+inline);
                             System.exit(0);
                         }
-                        currhsp=new MinimalHsp();
-                        currhsp.query=ival;
-                        currhsp.hit=jval;
+                        currhsp=new MinimalHsp(ival, jval);
                     }else{
+                        // Why including this at all in this case?
                         currhsp=new MinimalHsp();
                         pval=1;
                     }

@@ -655,9 +655,7 @@ public class ClusterDataLoadHelper {
                     }
 
                 } else {
-                    currhsp = new MinimalHsp();
-                    currhsp.query = myi;
-                    currhsp.hit = myj;
+                    currhsp = new MinimalHsp(myi, myj);
                     currhsp.val = new double[split_result.length];
                     for (int i = 0; i < split_result.length; i++) {
                         currhsp.val[i] = Double.parseDouble(split_result[i]);

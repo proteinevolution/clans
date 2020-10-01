@@ -234,16 +234,10 @@ public class BlastVersion2 {
                             tmpstr = tmparr[0] + ";" + tmparr[1];
                             if (roundhash.containsKey(tmpstr)) {
                                 myhsp = roundhash.get(tmpstr);
-                                tmpstr = valline;
-                                myhsp.addpval(Double.parseDouble(tmpstr));
+                                myhsp.addpval(Double.parseDouble(valline));
                             } else {
-                                myhsp = new MinimalHsp();
-                                tmpstr = tmparr[0];
-                                myhsp.query = Integer.parseInt(tmpstr);
-                                tmpstr = tmparr[1];
-                                myhsp.hit = Integer.parseInt(tmpstr);
-                                tmpstr = valline;
-                                myhsp.addpval(Double.parseDouble(tmpstr));
+                                myhsp = new MinimalHsp(Integer.parseInt(tmparr[0]), Integer.parseInt(tmparr[1]));
+                                myhsp.addpval(Double.parseDouble(valline));
                                 roundhash.put(myhsp.query + ";" + myhsp.hit, myhsp);
                             }
                         } else {
