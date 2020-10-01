@@ -215,11 +215,11 @@ public class BlastVersion2 {
         //now I have written all results to the temporary file.
         //next, read them back from the file and send them to CLANS
         System.out.println("reading all results from temporary file '" + saveblastname + "'");
-        HashMap<String, MinimalHsp> allhash = new HashMap<String, MinimalHsp>();
+        HashMap<MinimalHsp, MinimalHsp> allhash = new HashMap<MinimalHsp, MinimalHsp>();
         try {
             BufferedReader fileread = new BufferedReader(new FileReader(saveblastname));
             String inline = "", idline = "", valline = "";
-            HashMap<String, MinimalHsp> roundhash = new HashMap<String, MinimalHsp>();
+            HashMap<MinimalHsp, MinimalHsp> roundhash = new HashMap<MinimalHsp, MinimalHsp>();
             //read until I hit the "#done for sequence" lines and then pass the current elements to the final hash containing the data
             boolean passrounds = false;
             HashMap<Integer, Integer> donehash = new HashMap<Integer, Integer>();
@@ -229,14 +229,14 @@ public class BlastVersion2 {
                     if (inline.startsWith("hsp: ")) {
                         String[] tmparr = idline.split(";");
                         if (tmparr.length >= 2) {
-                            String tmpstr = tmparr[0] + ";" + tmparr[1];
-                            if (roundhash.containsKey(tmpstr)) {
-                                MinimalHsp myhsp = roundhash.get(tmpstr);
-                                myhsp.addpval(Double.parseDouble(valline));
+                            int query = Integer.parseInt(tmparr[0]);
+                            int hit = Integer.parseInt(tmparr[1]);
+                            MinimalHsp myhsp = new MinimalHsp(query, hit);
+                            if (roundhash.containsKey(myhsp)) {
+                                roundhash.get(myhsp).addpval(Double.parseDouble(valline));
                             } else {
-                                MinimalHsp myhsp = new MinimalHsp(Integer.parseInt(tmparr[0]), Integer.parseInt(tmparr[1]));
                                 myhsp.addpval(Double.parseDouble(valline));
-                                roundhash.put(myhsp.query + ";" + myhsp.hit, myhsp);
+                                roundhash.put(myhsp, myhsp);
                             }
                         } else {
                             System.out.println("WARNING: hsp found with less than two elements on '" + idline + "'");
@@ -256,7 +256,7 @@ public class BlastVersion2 {
                             for (int i = checkarr.length; --i >= 0;) {
                                 MinimalHsp myhsp = checkarr[i];
                                 if (donehash.containsKey(new Integer(myhsp.query))) {
-                                    allhash.put(myhsp.query + ";" + myhsp.hit, myhsp);
+                                    allhash.put(myhsp, myhsp);
                                 }
                             }//end for i
                             roundhash.clear();
@@ -285,7 +285,7 @@ public class BlastVersion2 {
                     for (int i = checkarr.length; --i >= 0;) {
                         MinimalHsp myhsp = checkarr[i];
                         if (donehash.containsKey(new Integer(myhsp.query))) {
-                            allhash.put(myhsp.query + ";" + myhsp.hit, myhsp);
+                            allhash.put(myhsp, myhsp);
                         }
                     }//end for i
                     roundhash.clear();
