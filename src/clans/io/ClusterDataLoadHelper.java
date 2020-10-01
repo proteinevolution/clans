@@ -581,8 +581,7 @@ public class ClusterDataLoadHelper {
             throws IOException, CancellationException {
         String[] split_result;
         String tmpstr;
-        MinimalHsp currhsp;
-        HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
+        HashMap<MinimalHsp, MinimalHsp> hspHash = new HashMap<MinimalHsp, MinimalHsp>();
         String inline;
         int characters_for_round_number = 9;
         String format_for_round_number = "%" + characters_for_round_number + "s";
@@ -645,19 +644,18 @@ public class ClusterDataLoadHelper {
                     continue;
                 }
 
-                String hspkey = myi + "_" + myj;
-                if (hsphash.containsKey(hspkey)) {
-                    currhsp = hsphash.get(hspkey);
+                MinimalHsp newHSP = new MinimalHsp(myi, myj);
+                if (hspHash.containsKey(newHSP)) {
+                    MinimalHsp oldHSP = hspHash.get(newHSP);
                     for (int i = 0; i < split_result.length; i++) {
-                        currhsp.addpval(Double.parseDouble(split_result[i]));
+                        oldHSP.addpval(Double.parseDouble(split_result[i]));
                     }
                 } else {
-                    currhsp = new MinimalHsp(myi, myj);
-                    currhsp.val = new double[split_result.length];
+                    newHSP.val = new double[split_result.length];
                     for (int i = 0; i < split_result.length; i++) {
-                        currhsp.val[i] = Double.parseDouble(split_result[i]);
+                        newHSP.val[i] = Double.parseDouble(split_result[i]);
                     }
-                    hsphash.put(hspkey, currhsp);
+                    hspHash.put(newHSP, newHSP);
                 }
             } catch (NumberFormatException Ne) {
                 System.err.println("ERROR, unable to parse int int: double ... from " + inline);
@@ -671,7 +669,7 @@ public class ClusterDataLoadHelper {
         System.out.println("total HSPs: " + count);
         
         if (inline.equalsIgnoreCase("</hsp>")) {
-            blasthits = hsphash.values().toArray(new MinimalHsp[0]);
+            blasthits = hspHash.values().toArray(new MinimalHsp[0]);
         } else {
             System.err.println("ERROR reading truncated file; <hsp> tag not closed by </hsp>");
         }
