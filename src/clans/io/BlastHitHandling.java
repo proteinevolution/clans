@@ -39,10 +39,6 @@ public class BlastHitHandling {
                 }
             }
         }
-        HashMap<String, Integer> nameshash = new HashMap<String, Integer>();
-        for(int i=0;i<seqnum;i++){
-            nameshash.put(inaln[i].name, new Integer(i));
-        }//end for i
         //format the database
         try{
             PrintWriter outwrite=new PrintWriter(new BufferedWriter(new FileWriter(basename)));
@@ -349,6 +345,10 @@ public class BlastHitHandling {
             System.err.println("IOError in "+blastcommand+" for "+inaln[referenceseqnum].name);
             return new HighScoringSegmentPair[0];
         }
+        HashMap<String, Integer> nameshash = new HashMap<String, Integer>();
+        for(int i=0;i<seqnum;i++){
+            nameshash.put(inaln[i].name, new Integer(i));
+        }//end for i
         //parse the hsp's from myblast
         retvec = HspReader.get(myblast, retvec, mineval, minpval, 0f, 0f, 0f, 0, nameshash, false);
         System.out.println("hsp's for "+inaln[referenceseqnum].name+" = "+retvec.size());
