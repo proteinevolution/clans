@@ -871,10 +871,7 @@ public class ClusterData {
                         System.out.println("reading matrix");
                         int counter = 0;
                         String[] tmparr;
-                        HashMap<String, MinimalAttractionValue> tmphash = new HashMap<String, MinimalAttractionValue>();
-                        String key;
-                        MinimalAttractionValue curratt;
-                        float tmpval;
+                        HashMap<MinimalAttractionValue, MinimalAttractionValue> tmphash = new HashMap<MinimalAttractionValue, MinimalAttractionValue>();
                         while (((inline = inread.readLine()) != null) && (inline.equalsIgnoreCase("</mtx>") == false)) {
                             // skip empty lines
                             if (inline.length() == 0) {
@@ -889,22 +886,14 @@ public class ClusterData {
                             }
                             try {
                                 for (int i = 0; i < seqs; i++) {
-                                    tmpval = Float.parseFloat(tmparr[i]);
+                                    float tmpval = Float.parseFloat(tmparr[i]);
                                     if (tmpval != 0) {
-                                        if (counter < i) {
-                                            key = counter + "_" + i;
+                                        MinimalAttractionValue curratt = new MinimalAttractionValue(counter, i);
+                                        if (tmphash.containsKey(curratt)) {
+                                            tmphash.get(curratt).att += tmpval / 2;
                                         } else {
-                                            key = i + "_" + counter;
-                                        }
-                                        if (tmphash.containsKey(key)) {
-                                            curratt = (MinimalAttractionValue) tmphash.get(key);
-                                            curratt.att += tmpval / 2;
-                                        } else {
-                                            curratt = new MinimalAttractionValue();
-                                            curratt.query = counter;
-                                            curratt.hit = i;
                                             curratt.att = tmpval / 2;
-                                            tmphash.put(key, curratt);
+                                            tmphash.put(curratt, curratt);
                                         }
                                     }
                                 }
@@ -1838,11 +1827,8 @@ public class ClusterData {
 
         ArrayList<MinimalAttractionValue> tmpvec = new ArrayList<MinimalAttractionValue>();
         int number_of_blasthits = blasthits.length;
-        HashMap<String, MinimalAttractionValue> myhash = new HashMap<String, MinimalAttractionValue>(number_of_blasthits);
-        float newatt;
-        String key;
+        HashMap<MinimalAttractionValue, MinimalAttractionValue> myhash = new HashMap<MinimalAttractionValue, MinimalAttractionValue>(number_of_blasthits);
         float maxattval = 0;
-        MinimalAttractionValue curratt = null;
         maxvalfound = 0;// init to zero, is assigned value in getattvalsimple or mult
         // NOTE: this is not necessarily a symmetrical array. compute all values
         // and then symmetrize computing the average values
@@ -1851,18 +1837,13 @@ public class ClusterData {
             // make the attraction values
             if (attvalsimple) {
                 for (int i = number_of_blasthits; --i >= 0;) {
-                    if (blasthits[i].query < blasthits[i].hit) {
-                        key = blasthits[i].query + "_" + blasthits[i].hit;
-                    } else {
-                        key = blasthits[i].hit + "_" + blasthits[i].query;
-                    }
-                    if (myhash.containsKey(key)) {
-                        curratt = (MinimalAttractionValue) myhash.get(key);
+                    MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
+                    if (myhash.containsKey(curratt)) {
+                        curratt = myhash.get(curratt);
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-							newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements,
-									pvalue_threshold, this);
+                            float newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -1872,21 +1853,12 @@ public class ClusterData {
                         }
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt = new MinimalAttractionValue();
-                        if (blasthits[i].query < blasthits[i].hit) {
-                            curratt.query = blasthits[i].query;
-                            curratt.hit = blasthits[i].hit;
-                        } else {
-                            curratt.hit = blasthits[i].query;
-                            curratt.query = blasthits[i].hit;
-                        }
-						curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements,
-								pvalue_threshold, this);
+                        curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
                         if (curratt.att != 0) {
-                            myhash.put(key, curratt);
+                            myhash.put(curratt, curratt);
                             tmpvec.add(curratt);
                         }
                     }
@@ -1896,20 +1868,13 @@ public class ClusterData {
                 }
             } else {
                 for (int i = 0; i < number_of_blasthits; i++) {
-                    
-                	if (blasthits[i].query < blasthits[i].hit) {
-                        key = blasthits[i].query + "_" + blasthits[i].hit;
-                    } else {
-                        key = blasthits[i].hit + "_" + blasthits[i].query;
-                    }
-                    
-                    if (myhash.containsKey(key)) {
-                        curratt = myhash.get(key);
+                    MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
+                    if (myhash.containsKey(curratt)) {
+                        curratt = myhash.get(curratt);
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-							newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements,
-									pvalue_threshold, this);
+                            float newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -1919,22 +1884,13 @@ public class ClusterData {
                         }
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt = new MinimalAttractionValue();
-                        if (blasthits[i].query < blasthits[i].hit) {
-                            curratt.query = blasthits[i].query;
-                            curratt.hit = blasthits[i].hit;
-                        } else {
-                            curratt.hit = blasthits[i].query;
-                            curratt.query = blasthits[i].hit;
-                        }
-						curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements,
-								pvalue_threshold, this);
+                        curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
                         if (curratt.att != 0) {
                             tmpvec.add(curratt);
-                            myhash.put(key, curratt);
+                            myhash.put(curratt, curratt);
                         }
                     }
                     if (curratt.att > maxattval) {
@@ -1947,11 +1903,11 @@ public class ClusterData {
             // note, this does NOT symmetrize the attractions
             if (usescval == false) {
                 for (int i = tmpvec.size() - 1; i >= 0; i--) {
-                    if (((MinimalAttractionValue) tmpvec.get(i)).att == -1) {
-                        ((MinimalAttractionValue) tmpvec.get(i)).att = 1;
+                    if (tmpvec.get(i).att == -1) {
+                        tmpvec.get(i).att = 1;
 
                     } else {
-                        ((MinimalAttractionValue) tmpvec.get(i)).att /= maxattval;
+                        tmpvec.get(i).att /= maxattval;
                     }
                 }
                 
@@ -1966,17 +1922,13 @@ public class ClusterData {
             // rescale the attraction values to range from 0 to 1 (with the smallest positive non-zero value as zero.
             if (attvalsimple) {
                 for (int i = 0; i < number_of_blasthits; i++) {
-                    if (blasthits[i].query < blasthits[i].hit) {
-                        key = blasthits[i].query + "_" + blasthits[i].hit;
-                    } else {
-                        key = blasthits[i].hit + "_" + blasthits[i].query;
-                    }
-                    if (myhash.containsKey(key)) {
-                        curratt = (MinimalAttractionValue) myhash.get(key);
+                    MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
+                    if (myhash.containsKey(curratt)) {
+                        curratt =  myhash.get(curratt);
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-                            newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                            float newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -1986,21 +1938,12 @@ public class ClusterData {
                         }
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt = new MinimalAttractionValue();
-                        if (blasthits[i].query < blasthits[i].hit) {
-                            curratt.query = blasthits[i].query;
-                            curratt.hit = blasthits[i].hit;
-                        } else {
-                            curratt.hit = blasthits[i].query;
-                            curratt.query = blasthits[i].hit;
-                        }
-                        curratt.att = ClusterMethods
-                                .computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                        curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
                         if (curratt.att != 0) {
-                            myhash.put(key, curratt);
+                            myhash.put(curratt, curratt);
                             tmpvec.add(curratt);
                         }
                     }
@@ -2013,17 +1956,13 @@ public class ClusterData {
                 }
             } else {
                 for (int i = 0; i < number_of_blasthits; i++) {
-                    if (blasthits[i].query < blasthits[i].hit) {
-                        key = blasthits[i].query + "_" + blasthits[i].hit;
-                    } else {
-                        key = blasthits[i].hit + "_" + blasthits[i].query;
-                    }
-                    if (myhash.containsKey(key)) {
-                        curratt = (MinimalAttractionValue) myhash.get(key);
+                    MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
+                    if (myhash.containsKey(curratt)) {
+                        curratt = myhash.get(curratt);
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-                            newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                            float newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -2034,20 +1973,12 @@ public class ClusterData {
 
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt = new MinimalAttractionValue();
-                        if (blasthits[i].query < blasthits[i].hit) {
-                            curratt.query = blasthits[i].query;
-                            curratt.hit = blasthits[i].hit;
-                        } else {
-                            curratt.hit = blasthits[i].query;
-                            curratt.query = blasthits[i].hit;
-                        }
                         curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
                         if (curratt.att != 0) {
-                            myhash.put(key, curratt);
+                            myhash.put(curratt, curratt);
                             tmpvec.add(curratt);
                         }
 
@@ -2063,10 +1994,10 @@ public class ClusterData {
             // and divide all vals by maxattval and offset by minattval(-->range: 0-1)
             float divval = maxattval - minattval;
             for (int i = tmpvec.size() - 1; i >= 0; i--) {
-                if (((MinimalAttractionValue) tmpvec.get(i)).att == -1) {
-                    ((MinimalAttractionValue) tmpvec.get(i)).att = 1;
+                if (tmpvec.get(i).att == -1) {
+                    tmpvec.get(i).att = 1;
                 } else {
-                    ((MinimalAttractionValue) tmpvec.get(i)).att = (((MinimalAttractionValue) tmpvec.get(i)).att - minattval) / divval;
+                    tmpvec.get(i).att = (tmpvec.get(i).att - minattval) / divval;
                 }
             }
 

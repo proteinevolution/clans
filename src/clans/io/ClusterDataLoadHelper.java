@@ -707,15 +707,14 @@ public class ClusterDataLoadHelper {
             if (elements != 3) {
                 System.err.println("unable to parse attraction value information from '" + inline + "'");
             }
-            MinimalAttractionValue curratt = new MinimalAttractionValue();
             try {
-                curratt.query = Integer.parseInt(tmparr[0]);
-                curratt.hit = Integer.parseInt(tmparr[1]);
-                curratt.att = Float.parseFloat(tmparr[2]);
+                int query = Integer.parseInt(tmparr[0]);
+                int hit = Integer.parseInt(tmparr[1]);
+                float att = Float.parseFloat(tmparr[2]);
+                tmpvec.addElement(new MinimalAttractionValue(query, hit, att));
             } catch (NumberFormatException ne) {
                 System.err.println("unable to parse float for " + tmpstr + " in " + inline);
             }
-            tmpvec.addElement(curratt);
             counter++;
         }
         attvals = new MinimalAttractionValue[tmpvec.size()];
@@ -836,10 +835,7 @@ public class ClusterDataLoadHelper {
         System.out.println("reading matrix");
         int counter = 0;
         String[] tmparr;
-        HashMap<String, MinimalAttractionValue> tmphash = new HashMap<String, MinimalAttractionValue>();
-        String key;
-        MinimalAttractionValue curratt;
-        float tmpval;
+        HashMap<MinimalAttractionValue, MinimalAttractionValue> tmphash = new HashMap<MinimalAttractionValue, MinimalAttractionValue>();
         String inline;
         
         while (((inline = buffered_file_handle.readLine()) != null) && (inline.equalsIgnoreCase("</mtx>") == false)) {
@@ -854,22 +850,14 @@ public class ClusterDataLoadHelper {
             }
             try {
                 for (int i = 0; i < expected_sequences; i++) {
-                    tmpval = Float.parseFloat(tmparr[i]);
+                    float tmpval = Float.parseFloat(tmparr[i]);
                     if (tmpval != 0) {
-                        if (counter < i) {
-                            key = counter + "_" + i;
+                        MinimalAttractionValue curratt = new MinimalAttractionValue(counter, i);
+                        if (tmphash.containsKey(curratt)) {
+                            tmphash.get(curratt).att += tmpval / 2;
                         } else {
-                            key = i + "_" + counter;
-                        }
-                        if (tmphash.containsKey(key)) {
-                            curratt = (MinimalAttractionValue) tmphash.get(key);
-                            curratt.att += tmpval / 2;
-                        } else {
-                            curratt = new MinimalAttractionValue();
-                            curratt.query = counter;
-                            curratt.hit = i;
                             curratt.att = tmpval / 2;
-                            tmphash.put(key, curratt);
+                            tmphash.put(curratt, curratt);
                         }
                     }
                 }//end for i

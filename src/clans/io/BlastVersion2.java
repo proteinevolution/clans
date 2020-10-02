@@ -600,7 +600,7 @@ public class BlastVersion2 {
                 HighScoringSegmentPair myhsp;
                 int qnum, hnum;
                 double val;
-                HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
+                HashMap<MinimalHsp, MinimalHsp> hsphash = new HashMap<MinimalHsp, MinimalHsp>();
                 for (int i = hsplist.size(); --i >= 0;) {
                     myhsp = hsplist.get(i);
                     if (nameshash.containsKey(myhsp.qname)) {
@@ -620,10 +620,11 @@ public class BlastVersion2 {
                     val = myhsp.value;
                     if (qnum != hnum) {//I don't want the values of one sequence to itself
                         //System.out.println("doing hsp:"+qnum+";"+hnum);
-                        if (hsphash.containsKey(qnum + ";" + hnum)) {
-                            hsphash.get(qnum + ";" + hnum).addpval(val);
+                        MinimalHsp hsp = new MinimalHsp(qnum, hnum, val);
+                        if (hsphash.containsKey(hsp)) {
+                            hsphash.get(hsp).addpval(val);
                         } else {
-                            hsphash.put(qnum + ";" + hnum, new MinimalHsp(qnum, hnum, val));
+                            hsphash.put(hsp, hsp);
                         }
                     }
                 }//end for i
