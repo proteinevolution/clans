@@ -36,7 +36,7 @@ public class MinimalAttractionValue {
         this.hit=hnum;
         this.att=att;
     }
-    
+
     public final int query;
     public final int hit;
     public float att=0;
