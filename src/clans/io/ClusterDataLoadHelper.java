@@ -433,9 +433,7 @@ public class ClusterDataLoadHelper {
             //read the sequence data
             if (inline.startsWith(">")) {
                 if (currname.length() > 0) {
-                    inaln[counter] = new AminoAcidSequence();
-                    inaln[counter].name = currname;
-                    inaln[counter].seq = currseq;
+                    inaln[counter] = new AminoAcidSequence(currname, currseq);
                     counter++;
                 }
                 currname = inline.substring(1).trim();
@@ -445,9 +443,7 @@ public class ClusterDataLoadHelper {
             }
         }
         
-        inaln[counter] = new AminoAcidSequence();
-        inaln[counter].name = currname;
-        inaln[counter].seq = currseq;
+        inaln[counter] = new AminoAcidSequence(currname, currseq);
         counter++;
         if (counter != expected_sequences) {
             System.err.println("ERROR, not found the number of specified sequences, expected:" + expected_sequences + " found:" + counter);

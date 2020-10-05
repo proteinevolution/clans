@@ -845,9 +845,7 @@ public class ClusterData {
                             // read the sequence data
                             if (inline.startsWith(">")) {
                                 if (currname.length() > 0) {
-                                    myrun.inaln[counter] = new AminoAcidSequence();
-                                    myrun.inaln[counter].name = currname;
-                                    myrun.inaln[counter].seq = currseq;
+                                    myrun.inaln[counter] = new AminoAcidSequence(currname, currseq);
                                     counter++;
                                 }
                                 currname = inline.substring(1);
@@ -856,9 +854,7 @@ public class ClusterData {
                                 currseq += inline;
                             }
                         }
-                        myrun.inaln[counter] = new AminoAcidSequence();
-                        myrun.inaln[counter].name = currname;
-                        myrun.inaln[counter].seq = currseq;
+                        myrun.inaln[counter] = new AminoAcidSequence(currname, currseq);
                         counter++;
                         if (counter != seqs) {
                             System.err.println("ERROR, not found the number of specified sequences");
