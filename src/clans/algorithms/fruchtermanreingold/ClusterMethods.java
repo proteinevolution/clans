@@ -910,7 +910,13 @@ public class ClusterMethods {
 	 */
 	public static AminoAcidSequence[] removeGapsFromSequences(AminoAcidSequence[] sequences) {
 		for (int i = 0; i < sequences.length; i++) {
-			sequences[i].seq = sequences[i].seq.replaceAll("-", "");
+			if(sequences[i].seq.contains("-")) {
+				// This is a bit unclear weather replaceAll returns
+				// a new string if nothing is to replace.
+				// But if then it is memorywise an expensive operation,
+				// since allocating memory takes time.
+				sequences[i].seq = sequences[i].seq.replaceAll("-", "");
+			}
 		}
 		return sequences;
 	}
