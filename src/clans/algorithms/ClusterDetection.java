@@ -272,9 +272,9 @@ public class ClusterDetection {
 			 int seqnum, int[] tmpseqs, int minlinks) {
 		// get all the sequences found by all of the tmpseqs
 		int attnum = attvals.length;
-		HashMap<Integer, Integer> tmphash = new HashMap<Integer, Integer>();
+		HashSet<Integer> tmphash = new HashSet<Integer>();
 		for (int i = tmpseqs.length - 1; i >= 0; i--) {
-			tmphash.put(tmpseqs[i], null);
+			tmphash.add(tmpseqs[i]);
 		}// end for i
 			// initialize to zero
 		for (int i = 0; i < seqnum; i++) {
@@ -282,10 +282,10 @@ public class ClusterDetection {
 		}// end for i
 			// now see which were found by the above
 		for (int i = 0; i < attnum; i++) {
-			if (tmphash.containsKey(attvals[i].query)) {
+			if (tmphash.contains(attvals[i].query)) {
 				clusterhash[attvals[i].hit][1]++;
 			}
-			if (tmphash.containsKey(attvals[i].hit)) {
+			if (tmphash.contains(attvals[i].hit)) {
 				clusterhash[attvals[i].query][1]++;
 			}
 		}// end for i
@@ -364,19 +364,19 @@ public class ClusterDetection {
     static int[] getconnecteds(int maxnum,
 			int seqnum, MinimalAttractionValue[] attvals) {
 		int attnum = attvals.length;
-		HashMap<Integer, ?> tmphash = new HashMap<Integer, Object>();
+		HashSet<Integer> tmphash = new HashSet<Integer>();
 		for (int i = 0; i < attnum; i++) {
 			if (attvals[i].query == maxnum) {
 				// System.out.println("found hit:"+attvals[i].query+":"+attvals[i].hit);
-				if (tmphash.containsKey(attvals[i].hit) == false) {
+				if (tmphash.contains(attvals[i].hit) == false) {
 					// System.out.println("adding:"+attvals[i].hit+" as "+attvals[i].hit);
-					tmphash.put(attvals[i].hit, null);
+					tmphash.add(attvals[i].hit);
 				}
 			} else if (attvals[i].hit == maxnum) {
 				// System.out.println("found hit:"+attvals[i].hit+":"+attvals[i].query);
-				if (tmphash.containsKey(attvals[i].query) == false) {
+				if (tmphash.contains(attvals[i].query) == false) {
 					// System.out.println("adding:"+attvals[i].query+" as "+attvals[i].query);
-					tmphash.put(attvals[i].query, null);
+					tmphash.add(attvals[i].query);
 				}
 			}
 		}// end for i
@@ -385,7 +385,7 @@ public class ClusterDetection {
 		int[] retarr = new int[tmphash.size()];
 		int count = 0;
 		for (int i = seqnum - 1; i >= 0; i--) {
-			if (tmphash.containsKey(i)) {
+			if (tmphash.contains(i)) {
 				retarr[count] = i;
 				count++;
 			}
@@ -613,8 +613,8 @@ public class ClusterDetection {
 		// System.out.println("seed "+seed);//("in getcluster for seed "+seed);//"seed="+seed);
 		currvec.add(basevec.remove(seed));
 		int seednum = currvec.elementAt(0).intValue();
-		HashMap<Integer, ?> tmphash = new HashMap<Integer, Object>();
-		tmphash.put(seednum, null);
+		HashSet<Integer> tmphash = new HashSet<Integer>();
+		tmphash.add(seednum);
 		// now add all those values with attraction to currvec greater than to
 		// basevec.
 		int elements = basevec.size();
@@ -647,7 +647,7 @@ public class ClusterDetection {
 			// System.out.println("elements="+elements+" maxnum="+maxnum+" maxatt="+maxatt);
 			if (maxnum > -1) {
 				if (limit < maxatt) {
-					tmphash.put(basevec.elementAt(maxnum).intValue(), null);
+					tmphash.add(basevec.elementAt(maxnum).intValue());
 					currvec.addElement(basevec.remove(maxnum));
 					elements--;
 					foundnew = true;
@@ -658,7 +658,7 @@ public class ClusterDetection {
 	}// end getcluster
 
 	// --------------------------------------------------------------------------
-	static float getavgatt(int newpos, Vector<Integer> newgroup, MinimalAttractionValue[] attvals, HashMap<Integer, ?> tmphash) {
+	static float getavgatt(int newpos, Vector<Integer> newgroup, MinimalAttractionValue[] attvals, HashSet<Integer> tmphash) {
 		int elements = newgroup.size();
 		int attnum = attvals.length;
 		float retval = 0;
@@ -666,14 +666,14 @@ public class ClusterDetection {
 		// now get the average attraction of newpos to the current cluster
 		for (int i = 0; i < attnum; i++) {
 			if (attvals[i].hit == newpos
-					&& tmphash.containsKey(attvals[i].query)) {
+					&& tmphash.contains(attvals[i].query)) {
 				if (attvals[i].att >= 0) {
 					retval += attvals[i].att;
 				} else {
 					skipped++;
 				}
 			} else if (attvals[i].query == newpos
-					&& tmphash.containsKey(attvals[i].hit)) {
+					&& tmphash.contains(attvals[i].hit)) {
 				if (attvals[i].att >= 0) {
 					retval += attvals[i].att;
 				} else {
@@ -690,16 +690,16 @@ public class ClusterDetection {
 		// note, the attraction values should be symmetrical and only those >=0
 		// should be considered
 		int elements = invec.size();
-		HashMap<Integer, ?> tmphash = new HashMap<Integer, Object>(elements);
+		HashSet<Integer> tmphash = new HashSet<Integer>(elements);
 		for (int i = 0; i < elements; i++) {
-			tmphash.put(invec.elementAt(i).intValue(), null);
+			tmphash.add(invec.elementAt(i).intValue());
 		}// end for i
 		int attnum = attvals.length;
 		float sumval = 0;
 		int skipped = 0;
 		for (int i = 0; i < attnum; i++) {
-			if (tmphash.containsKey(attvals[i].query)
-					|| tmphash.containsKey(attvals[i].hit)) {
+			if (tmphash.contains(attvals[i].query)
+					|| tmphash.contains(attvals[i].hit)) {
 				if (attvals[i].att >= 0) {
 					sumval += attvals[i].att;
 				} else {
@@ -714,16 +714,16 @@ public class ClusterDetection {
 	static float getvaratt(Vector<Integer> invec, MinimalAttractionValue[] attvals, float avgval) {
 		// get the variance of the attraction values for this cluster
 		int elements = invec.size();
-		HashMap<Integer, ?> tmphash = new HashMap<Integer, Object>(elements);
+		HashSet<Integer> tmphash = new HashSet<Integer>(elements);
 		for (int i = 0; i < elements; i++) {
-			tmphash.put(invec.elementAt(i).intValue(), null);
+			tmphash.add(invec.elementAt(i).intValue());
 		}// end for i
 		int attnum = attvals.length;
 		float sumval = 0;
 		int skipped = 0;
 		for (int i = 0; i < attnum; i++) {
-			if (tmphash.containsKey(attvals[i].query)
-					|| tmphash.containsKey(attvals[i].hit)) {
+			if (tmphash.contains(attvals[i].query)
+					|| tmphash.contains(attvals[i].hit)) {
 				if (attvals[i].att >= 0) {
 					float tmpval = attvals[i].att - avgval;
 					sumval += java.lang.Math.sqrt(tmpval * tmpval);
