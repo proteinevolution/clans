@@ -93,15 +93,15 @@ public class ClusterDetection {
 					clusterhash.get(i)[0] = -1;
 				}
                 if (clusterhash.get(i)[0] == -1
-                        && clusterhash.get(i)[2] > maxconn) {// if
-                                                                                 // this
-                                                                                 // sequence
-                                                                                 // is
-                                                                                 // unassigned
-                                                                                 // and
-                                                                                 // has
-                                                                                 // max
-                                                                                 // connections
+                        && clusterhash.get(i)[2] > maxconn) { // if
+                                                              // this
+                                                              // sequence
+                                                              // is
+                                                              // unassigned
+                                                              // and
+                                                              // has
+                                                              // max
+                                                              // connections
 					maxconn = clusterhash.get(i)[2];
 					maxnum = i;
 					// System.out.println("maxconn="+maxconn+" new seed="+maxnum);
@@ -112,30 +112,30 @@ public class ClusterDetection {
 				// System.out.println("seed="+maxnum+" maxconn="+maxconn);
 			System.out.print(".");
 			int[] conarr = getconnecteds(maxnum, clusterhash, seqnum, attvals);
-			if (conarr.length < minlinks) {// if I
-																		// found
-																		// no
-																		// new
-																		// sequence
-																		// with
-																		// at
-																		// least
-																		// minlinks
-																		// connections
-																		// (no
-																		// new
-																		// clusters
-																		// possible)
+			if (conarr.length < minlinks) {	// if I
+											// found
+											// no
+											// new
+											// sequence
+											// with
+											// at
+											// least
+											// minlinks
+											// connections
+											// (no
+											// new
+											// clusters
+											// possible)
 				done = true;
 				break;
 			}
 			for (int i = 0; i < seqnum; i++) {
-				clusterhash.get(i)[1] = 0;// seqshits[i]=0;//the
-																// number of
-																// links
-																// connecting
-																// sequences to
-																// this group
+				clusterhash.get(i)[1] = 0;	// seqshits[i]=0;//the
+											// number of
+											// links
+											// connecting
+											// sequences to
+											// this group
 			}// end for i
 			for (int i = conarr.length - 1; i >= 0; i--) {
 				// remember which sequences had hits with current seed
@@ -209,9 +209,9 @@ public class ClusterDetection {
 						if (clusterhash.get(tmpseqs2[i])[0] != 0) {
 							newcluster.add(tmpseqs2[i]);
 							if (clusterhash.get(tmpseqs2[i])[0] != -2) {
-								clusterhash.get(tmpseqs2[i])[0] = 0;// groupvals[i]=0;//added
-																						// to
-																						// cluster
+								clusterhash.get(tmpseqs2[i])[0] = 0;	// groupvals[i]=0;//added
+																		// to
+																		// cluster
 							}
 						}
 					}// end for i
@@ -220,15 +220,15 @@ public class ClusterDetection {
 				if (newcluster.member.length < minlinks) {
 					// System.out.println("setting "+maxnum+" to -2");
 					// if my currnet cluster has less than minlinks elements
-					clusterhash.get(maxnum)[0] = -2;// skip
-																		// this
-																		// seq
-																		// for
-																		// the
-																		// rest
-																		// of
-																		// the
-																		// analysis
+					clusterhash.get(maxnum)[0] = -2;	// skip
+														// this
+														// seq
+														// for
+														// the
+														// rest
+														// of
+														// the
+														// analysis
 					continue GETCLUSTER;
 				}
 			}// end while newcluster.members==0
@@ -247,9 +247,9 @@ public class ClusterDetection {
 				for (int i = tmpseqs2.length - 1; i >= 0; i--) {
 					if (clusterhash.get(tmpseqs2[i])[0] != 0) {
 						newcluster.add(tmpseqs2[i]);
-						clusterhash.get(tmpseqs2[i])[0] = 0;// groupvals[i]=0;//added
-																				// to
-																				// cluster
+						clusterhash.get(tmpseqs2[i])[0] = 0;	// groupvals[i]=0;//added
+																// to
+																// cluster
 					}
 				}// end for i
 			}// end while
@@ -327,18 +327,18 @@ public class ClusterDetection {
 		}// end for i
 		for (int i = 0; i < seqnum; i++) {
 			if ((clusterhash.get(i)[1] == 1)
-					&& (clusterhash.get(i)[0] == -1)) {// if
-																			// this
-																			// sequence
-																			// had
-																			// a
-																			// connection
-																			// to
-																			// maxnum
-																			// and
-																			// is
-																			// currently
-																			// unassigned
+					&& (clusterhash.get(i)[0] == -1)) {	// if
+														// this
+														// sequence
+														// had
+														// a
+														// connection
+														// to
+														// maxnum
+														// and
+														// is
+														// currently
+														// unassigned
 				for (int j = 1; j <= minlinks; j++) {
 					if (clusterhash.get(i)[2] > maxconn[j]) {
 						// shift all subsequent values
@@ -433,7 +433,7 @@ public class ClusterDetection {
 			}// end for i
 			if (newnum > -1) {
 				System.out.print(".");
-				tracesingle(attvals, seqnum, groupvals, counter, newnum, attnum);// trace
+				tracesingle(attvals, seqnum, groupvals, counter, newnum, attnum);	// trace
 																					// the
 																					// single
 																					// linkages
