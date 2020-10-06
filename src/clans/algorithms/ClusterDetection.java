@@ -111,7 +111,7 @@ public class ClusterDetection {
 				// now see which sequences were connected to maxnum
 				// System.out.println("seed="+maxnum+" maxconn="+maxconn);
 			System.out.print(".");
-			int[] conarr = getconnecteds(maxnum, clusterhash, seqnum, attvals);
+			int[] conarr = getconnecteds(maxnum, seqnum, attvals);
 			if (conarr.length < minlinks) {	// if I
 											// found
 											// no
@@ -168,7 +168,7 @@ public class ClusterDetection {
 				for (int i = tmpseqs.length - 1; i >= 0; i--) {
 					clusterhash.get(tmpseqs[i])[0] = -3;					// groupvals[tmpseqs[i]]=-3;//am
 																			// checking,
-																			// remeber
+																			// remember
 																			// it
 																			// is
 																			// used
@@ -364,7 +364,7 @@ public class ClusterDetection {
 	 * @param attvals
 	 * @return
 	 */
-    static int[] getconnecteds(int maxnum, HashMap<Integer, int[]> clusterhash,
+    static int[] getconnecteds(int maxnum,
 			int seqnum, MinimalAttractionValue[] attvals) {
 		int attnum = attvals.length;
 		HashMap<Integer, ?> tmphash = new HashMap<Integer, Object>();
