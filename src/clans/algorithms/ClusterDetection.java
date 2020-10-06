@@ -59,22 +59,20 @@ public class ClusterDetection {
 		 * until no 1st step sequences have more than "N" connections
 		 */
 
-		// make a Hash and an array of Integers.
-		// make the corresponding hash containing as value an array of int
-		HashMap<Integer, int[]> clusterhash = new HashMap<Integer, int[]>((int) (seqnum / 0.8) + 1, 0.8f);
-		int[] tmparr;
+		// No HashMap needed here turns out that clusterhash is used as a
+		// two-dimensional array. In this case also have such an array.
+		// This also saves memory, since we can fill it with primitives.
+		int[][] clusterhash = new int[seqnum][3];
 		for (int i = 0; i < seqnum; i++) {
-			tmparr = new int[3];
-			tmparr[0] = -1;// groupvals; is a sequence assigned to a cluster and
-							// if so, which cluster
+			clusterhash[i][0] = -1;	// groupvals; is a sequence assigned to a cluster and
+									// if so, which cluster
 			// groupval: -3=used as seed2 in last round, -2=don't use as seed,
 			// -1=unassigned, 0=added to this cluster; >0=number of last cluster
 			// this seq was assigned to
-			tmparr[1] = 0;// used as seqshits (flag whether or not this sequence
-							// is relevant in this calculation
-			tmparr[2] = 0;// how many connections each sequence has to all
-							// others
-			clusterhash.put(i, tmparr);// groupvals,
+			clusterhash[i][1] = 0;	// used as seqshits (flag whether or not this sequence
+									// is relevant in this calculation
+			clusterhash[i][2] = 0;	// how many connections each sequence has to all
+									// others
 		}// end for i
 		getmaxnum(attvals, clusterhash, 2);// get the maximum number
 														boolean done = false;
@@ -88,12 +86,12 @@ public class ClusterDetection {
 			// first reset all the unassigned cluster sequences
 			maxconn = 0;
 			for (int i = 0; i < seqnum; i++) {
-				if (clusterhash.get(i)[0] == 0
-						|| clusterhash.get(i)[0] == -3) {
-					clusterhash.get(i)[0] = -1;
+				if (clusterhash[i][0] == 0
+						|| clusterhash[i][0] == -3) {
+					clusterhash[i][0] = -1;
 				}
-                if (clusterhash.get(i)[0] == -1
-                        && clusterhash.get(i)[2] > maxconn) { // if
+                if (clusterhash[i][0] == -1
+                        && clusterhash[i][2] > maxconn) { // if
                                                               // this
                                                               // sequence
                                                               // is
@@ -102,7 +100,7 @@ public class ClusterDetection {
                                                               // has
                                                               // max
                                                               // connections
-					maxconn = clusterhash.get(i)[2];
+					maxconn = clusterhash[i][2];
 					maxnum = i;
 					// System.out.println("maxconn="+maxconn+" new seed="+maxnum);
 
@@ -130,7 +128,7 @@ public class ClusterDetection {
 				break;
 			}
 			for (int i = 0; i < seqnum; i++) {
-				clusterhash.get(i)[1] = 0;	// seqshits[i]=0;//the
+				clusterhash[i][1] = 0;	// seqshits[i]=0;//the
 											// number of
 											// links
 											// connecting
@@ -139,9 +137,9 @@ public class ClusterDetection {
 			}// end for i
 			for (int i = conarr.length - 1; i >= 0; i--) {
 				// remember which sequences had hits with current seed
-				clusterhash.get(conarr[i])[1] = 1;// seqshits[maxnumarr[i]]=1;
+				clusterhash[conarr[i]][1] = 1;// seqshits[maxnumarr[i]]=1;
 			}
-			clusterhash.get(maxnum)[0] = 1;// counter;//groupvals[maxnum]=counter;
+			clusterhash[maxnum][0] = 1;// counter;//groupvals[maxnum]=counter;
 			newcluster = new SequenceCluster();
 			while (newcluster.member.length == 0) {
 				// get the minlinks other sequences that share the most hits
@@ -153,27 +151,27 @@ public class ClusterDetection {
 					if (tmpseqs[i] == -1) {
 						// remove the current seed from analysis until end
 						// (where it might come back in)
-						clusterhash.get(maxnum)[0] = -2;					// skip
-																			// this
-																			// seq
-																			// for
-																			// the
-																			// rest
-																			// of
-																			// the
-																			// analysis
+						clusterhash[maxnum][0] = -2;	// skip
+														// this
+														// seq
+														// for
+														// the
+														// rest
+														// of
+														// the
+														// analysis
 						continue GETCLUSTER;
 					}
 				}// end for i
 				for (int i = tmpseqs.length - 1; i >= 0; i--) {
-					clusterhash.get(tmpseqs[i])[0] = -3;					// groupvals[tmpseqs[i]]=-3;//am
-																			// checking,
-																			// remember
-																			// it
-																			// is
-																			// used
-																			// as
-																			// seed2
+					clusterhash[tmpseqs[i]][0] = -3;	// groupvals[tmpseqs[i]]=-3;//am
+														// checking,
+														// remember
+														// it
+														// is
+														// used
+														// as
+														// seed2
 				}// end for i
 					// now I have the N most connected sequences sharing the
 					// most connections and directly connected
@@ -187,8 +185,8 @@ public class ClusterDetection {
 				for (int i = tmpseqs2.length - 1; i >= 0; i--) {
 					newcluster.add(tmpseqs2[i]);
 					// System.out.println("\tseq:"+tmpseqs2[i]);
-					if (clusterhash.get(tmpseqs2[i])[0] != -2) {
-						clusterhash.get(tmpseqs2[i])[0] = 0;// groupvals[i]=0;//added
+					if (clusterhash[tmpseqs2[i]][0] != -2) {
+						clusterhash[tmpseqs2[i]][0] = 0;// groupvals[i]=0;//added
 																				// to
 																				// cluster
 					}
@@ -206,12 +204,12 @@ public class ClusterDetection {
 					tmpseqs2 = getfound(attvals, clusterhash, seqnum,
 							newcluster.member, minlinks);
 					for (int i = tmpseqs2.length - 1; i >= 0; i--) {
-						if (clusterhash.get(tmpseqs2[i])[0] != 0) {
+						if (clusterhash[tmpseqs2[i]][0] != 0) {
 							newcluster.add(tmpseqs2[i]);
-							if (clusterhash.get(tmpseqs2[i])[0] != -2) {
-								clusterhash.get(tmpseqs2[i])[0] = 0;	// groupvals[i]=0;//added
-																		// to
-																		// cluster
+							if (clusterhash[tmpseqs2[i]][0] != -2) {
+								clusterhash[tmpseqs2[i]][0] = 0;	// groupvals[i]=0;//added
+																	// to
+																	// cluster
 							}
 						}
 					}// end for i
@@ -220,15 +218,15 @@ public class ClusterDetection {
 				if (newcluster.member.length < minlinks) {
 					// System.out.println("setting "+maxnum+" to -2");
 					// if my currnet cluster has less than minlinks elements
-					clusterhash.get(maxnum)[0] = -2;	// skip
-														// this
-														// seq
-														// for
-														// the
-														// rest
-														// of
-														// the
-														// analysis
+					clusterhash[maxnum][0] = -2;	// skip
+													// this
+													// seq
+													// for
+													// the
+													// rest
+													// of
+													// the
+													// analysis
 					continue GETCLUSTER;
 				}
 			}// end while newcluster.members==0
@@ -245,9 +243,9 @@ public class ClusterDetection {
 				tmpseqs2 = getfound(attvals, clusterhash, seqnum,
 						newcluster.member, minlinks);
 				for (int i = tmpseqs2.length - 1; i >= 0; i--) {
-					if (clusterhash.get(tmpseqs2[i])[0] != 0) {
+					if (clusterhash[tmpseqs2[i]][0] != 0) {
 						newcluster.add(tmpseqs2[i]);
-						clusterhash.get(tmpseqs2[i])[0] = 0;	// groupvals[i]=0;//added
+						clusterhash[tmpseqs2[i]][0] = 0;	// groupvals[i]=0;//added
 																// to
 																// cluster
 					}
@@ -256,8 +254,8 @@ public class ClusterDetection {
 				// now I have all sequences I can add in this way
 				// set the groups info
 			for (int i = newcluster.member.length - 1; i >= 0; i--) {
-				// if(((int[])clusterhash.get(newcluster.member[i]))[0]==0){
-				clusterhash.get(newcluster.member[i])[0] = counter;
+				// if(clusterhash[newcluster.member[i]][0]==0){
+				clusterhash[newcluster.member[i]][0] = counter;
 				// }
 			}// end for i
 			counter++;
@@ -270,7 +268,7 @@ public class ClusterDetection {
 	}// end multilinkage
 
 	// --------------------------------------------------------------------------
-	static int[] getfound(MinimalAttractionValue[] attvals, HashMap<Integer, int[]> clusterhash,
+	static int[] getfound(MinimalAttractionValue[] attvals, int[][] clusterhash,
 			 int seqnum, int[] tmpseqs, int minlinks) {
 		// get all the sequences found by all of the tmpseqs
 		int attnum = attvals.length;
@@ -280,20 +278,20 @@ public class ClusterDetection {
 		}// end for i
 			// initialize to zero
 		for (int i = 0; i < seqnum; i++) {
-			clusterhash.get(i)[1] = 0;// seqshits[i]=0;
+			clusterhash[i][1] = 0;// seqshits[i]=0;
 		}// end for i
 			// now see which were found by the above
 		for (int i = 0; i < attnum; i++) {
 			if (tmphash.containsKey(attvals[i].query)) {
-				clusterhash.get(attvals[i].hit)[1]++;
+				clusterhash[attvals[i].hit][1]++;
 			}
 			if (tmphash.containsKey(attvals[i].hit)) {
-				clusterhash.get(attvals[i].query)[1]++;
+				clusterhash[attvals[i].query][1]++;
 			}
 		}// end for i
 		Vector<Integer> tmpvec = new Vector<Integer>();
 		for (int i = 0; i < seqnum; i++) {
-			if (clusterhash.get(i)[1] >= minlinks) {
+			if (clusterhash[i][1] >= minlinks) {
 				tmpvec.addElement(new Integer(i));
 			}
 		}// end for i
@@ -314,7 +312,7 @@ public class ClusterDetection {
      * @param minlinks
      * @return
      */
-    static int[] getmaxshared(MinimalAttractionValue[] attvals, HashMap<Integer, int[]> clusterhash, int seqnum, int maxnum,
+    static int[] getmaxshared(MinimalAttractionValue[] attvals, int[][] clusterhash, int seqnum, int maxnum,
             int minlinks) {
 		int[] retarr = new int[minlinks + 1];
 		retarr[0] = maxnum;
@@ -326,8 +324,8 @@ public class ClusterDetection {
 										// output
 		}// end for i
 		for (int i = 0; i < seqnum; i++) {
-			if ((clusterhash.get(i)[1] == 1)
-					&& (clusterhash.get(i)[0] == -1)) {	// if
+			if ((clusterhash[i][1] == 1)
+					&& (clusterhash[i][0] == -1)) {	// if
 														// this
 														// sequence
 														// had
@@ -340,13 +338,13 @@ public class ClusterDetection {
 														// currently
 														// unassigned
 				for (int j = 1; j <= minlinks; j++) {
-					if (clusterhash.get(i)[2] > maxconn[j]) {
+					if (clusterhash[i][2] > maxconn[j]) {
 						// shift all subsequent values
 						for (int k = minlinks; k > j; k--) {
 							maxconn[k] = maxconn[k - 1];
 							retarr[k] = retarr[k - 1];
 						}// end for k
-						maxconn[j] = clusterhash.get(i)[2];
+						maxconn[j] = clusterhash[i][2];
 						retarr[j] = i;
 						break;
 					}
@@ -359,7 +357,6 @@ public class ClusterDetection {
 	/**
 	 * get the sequences with a connection to maxnum
 	 * @param maxnum
-	 * @param clusterhash
 	 * @param seqnum
 	 * @param attvals
 	 * @return
@@ -397,13 +394,13 @@ public class ClusterDetection {
 	}// end for getconnecteds
 
 	// --------------------------------------------------------------------------
-	static void getmaxnum(MinimalAttractionValue[] attvals, HashMap<Integer, int[]> clusterhash,
+	static void getmaxnum(MinimalAttractionValue[] attvals, int[][] clusterhash,
 			int hashpos) {
 		// get how many connections to others each sequence has
 		int attnum = attvals.length;
 		for (int i = 0; i < attnum; i++) {
-			clusterhash.get(attvals[i].query)[hashpos]++;
-			clusterhash.get(attvals[i].hit)[hashpos]++;
+			clusterhash[attvals[i].query][hashpos]++;
+			clusterhash[attvals[i].hit][hashpos]++;
 		}// end for i
 		return;
 	}// end getmaxnum
