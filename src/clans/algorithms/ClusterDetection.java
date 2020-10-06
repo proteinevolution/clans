@@ -580,8 +580,7 @@ public class ClusterDetection {
 		HashMap<Integer, Integer> tmphash = new HashMap<Integer, Integer>(elements);
 		float[] sumvals = new float[elements];
 		for (int i = 0; i < elements; i++) {
-			tmphash.put(invec.elementAt(i).intValue(),
-					new Integer(i));
+			tmphash.put(invec.elementAt(i), new Integer(i));
 			sumvals[i] = 0;
 		}// end for i
 		float maxval = 0;
@@ -612,7 +611,7 @@ public class ClusterDetection {
 		// split one cluster off basevec and put the representatives in currvec
 		// System.out.println("seed "+seed);//("in getcluster for seed "+seed);//"seed="+seed);
 		currvec.add(basevec.remove(seed));
-		int seednum = currvec.elementAt(0).intValue();
+		Integer seednum = currvec.elementAt(0);
 		HashSet<Integer> tmphash = new HashSet<Integer>();
 		tmphash.add(seednum);
 		// now add all those values with attraction to currvec greater than to
@@ -647,7 +646,7 @@ public class ClusterDetection {
 			// System.out.println("elements="+elements+" maxnum="+maxnum+" maxatt="+maxatt);
 			if (maxnum > -1) {
 				if (limit < maxatt) {
-					tmphash.add(basevec.elementAt(maxnum).intValue());
+					tmphash.add(basevec.elementAt(maxnum));
 					currvec.addElement(basevec.remove(maxnum));
 					elements--;
 					foundnew = true;
@@ -692,7 +691,7 @@ public class ClusterDetection {
 		int elements = invec.size();
 		HashSet<Integer> tmphash = new HashSet<Integer>(elements);
 		for (int i = 0; i < elements; i++) {
-			tmphash.add(invec.elementAt(i).intValue());
+			tmphash.add(invec.elementAt(i));
 		}// end for i
 		int attnum = attvals.length;
 		float sumval = 0;
@@ -716,7 +715,7 @@ public class ClusterDetection {
 		int elements = invec.size();
 		HashSet<Integer> tmphash = new HashSet<Integer>(elements);
 		for (int i = 0; i < elements; i++) {
-			tmphash.add(invec.elementAt(i).intValue());
+			tmphash.add(invec.elementAt(i));
 		}// end for i
 		int attnum = attvals.length;
 		float sumval = 0;
