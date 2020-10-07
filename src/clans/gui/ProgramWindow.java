@@ -807,7 +807,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 		});
 		menu_windows.add(getblasthitsmenuitem);
 
-		clustermenuitem.setText("find clusters");
+		clustermenuitem.setText("Find clusters");
 		clustermenuitem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				openFindClustersWindow();
