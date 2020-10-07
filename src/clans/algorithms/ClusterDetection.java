@@ -485,53 +485,53 @@ public class ClusterDetection {
 			float sigmafac, int minseqnum, int seqnum) {
 		// return a vector containing all clusters found by a polythenic
 		// additive method
-		// assign all sequencs to one cluster. then take always the sequence
+		// assign all sequences to one cluster. then take always the sequence
 		// with highest overall attraction and seed it to a new cluster
 		// next add all sequences with attractions higher to the new cluster
 		// than average+factor*variance
 		// System.out.println("in getconvex getclusters");
 		Vector<SequenceCluster> retvec = new Vector<SequenceCluster>();
 		// assign all nodes to one cluster to start out
-		Vector<Integer> basevec = new Vector<Integer>(seqnum);
+		Vector<Integer> remainingSeqIDs = new Vector<Integer>(seqnum);
 		for (int i = 0; i < seqnum; i++) {
-			basevec.add(new Integer(i));
+			remainingSeqIDs.add(new Integer(i));
 		}// end for i
 			// then take a node from this base cluster and add all those with
 			// higher affinity to it than to the base
 		Vector<Integer> currvec = new Vector<Integer>(seqnum);
 		SequenceCluster currcluster;
-		float avgatt = getavgatt(basevec, attvals);// get the average
-																// attraction
-																// for the
-																// values in
-																// that vector
-		float varatt = getvaratt(basevec, attvals, avgatt);// get the
-																		// variance
-																		// of
-																		// attraction
-																		// values
-		int seed;
-		while (basevec.size() > 0) {
-			// System.out.println("doing getmaxatt");
-			seed = getmaxatt(basevec, attvals);// get the vector
-															// element with the
-															// highest overall
+		float avgatt = getavgatt(remainingSeqIDs, attvals);	// get the average
 															// attraction
+															// for the
+															// values in
+															// that vector
+		float varatt = getvaratt(remainingSeqIDs, attvals, avgatt);	// get the
+																	// variance
+																	// of
+																	// attraction
+																	// values
+		int seed;
+		while (remainingSeqIDs.size() > 0) {
+			// System.out.println("doing getmaxatt");
+			seed = getmaxatt(remainingSeqIDs, attvals);	// get the vector
+												// element with the
+												// highest overall
+												// attraction
 			// System.out.println("done getmaxatt");
-			// System.out.println("seed="+seed+" basevec.size="+basevec.size());
+			// System.out.println("seed="+seed+" remainingSeqIDs.size="+remainingSeqIDs.size());
 			if (seed == -1) {// if I have no further attraction values in the
 								// matrix
 				// System.out.println("adding all leftover sequences");
 				// add all leftover sequences as separate clusters
-				while (basevec.size() > 0) {
+				while (remainingSeqIDs.size() > 0) {
 					currcluster = new SequenceCluster();
-					currcluster.add(basevec.remove(0).intValue());
+					currcluster.add(remainingSeqIDs.remove(0).intValue());
 					retvec.addElement(currcluster);
-				}// end while basevec.size 2nd
+				}// end while remainingSeqIDs.size 2nd
 				break;
 			}// end if seed==-1
 				// System.out.println("doing getcluster");
-			getcluster(seed, basevec, attvals, currvec, avgatt, varatt,
+			getcluster(seed, remainingSeqIDs, attvals, currvec, avgatt, varatt,
 					sigmafac);// get one more cluster
 			// System.out.println("done getcluster");
 			currcluster = new SequenceCluster();
@@ -574,13 +574,13 @@ public class ClusterDetection {
 	 * for j }//end for i return retval/((seqnum1*seqnum2)-skipped); }//end
 	 * getavgatt
 	 */// --------------------------------------------------------------------------
-	static int getmaxatt(Vector<Integer> invec, MinimalAttractionValue[] attvals) {
+	static int getmaxatt(Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals) {
 		// get the sequence with overall highest attvals
-		int elements = invec.size();
+		int elements = remainingSeqIDs.size();
 		HashMap<Integer, Integer> tmphash = new HashMap<Integer, Integer>(elements);
 		float[] sumvals = new float[elements];
 		for (int i = 0; i < elements; i++) {
-			tmphash.put(invec.elementAt(i), new Integer(i));
+			tmphash.put(remainingSeqIDs.elementAt(i), new Integer(i));
 			sumvals[i] = 0;
 		}// end for i
 		float maxval = 0;
@@ -606,24 +606,24 @@ public class ClusterDetection {
 	}// end getmaxatt
 
 	// --------------------------------------------------------------------------
-	static void getcluster(int seed, Vector<Integer> basevec, MinimalAttractionValue[] attvals,
+	static void getcluster(int seed, Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals,
 			Vector<Integer> currvec, float avgatt, float varatt, float sigmafac) {
-		// split one cluster off basevec and put the representatives in currvec
+		// split one cluster off remainingSeqIDs and put the representatives in currvec
 		// System.out.println("seed "+seed);//("in getcluster for seed "+seed);//"seed="+seed);
-		currvec.add(basevec.remove(seed));
+		currvec.add(remainingSeqIDs.remove(seed));
 		Integer seednum = currvec.elementAt(0);
 		HashSet<Integer> tmphash = new HashSet<Integer>();
 		tmphash.add(seednum);
 		// now add all those values with attraction to currvec greater than to
-		// basevec.
-		int elements = basevec.size();
+		// remainingSeqIDs.
+		int elements = remainingSeqIDs.size();
 
 		boolean foundnew = true;
 		float maxatt, curratt;
 		int maxnum = 0;
 		float limit = (avgatt + (sigmafac * varatt));
 		while (foundnew == true) {
-			elements = basevec.size();
+			elements = remainingSeqIDs.size();
 			if (elements % 100 == 0) {
 				System.out.print(elements);
 			}
@@ -634,7 +634,7 @@ public class ClusterDetection {
 			// elements
 			for (int i = 0; i < elements; i++) {
 				curratt = getavgatt(
-						basevec.elementAt(i).intValue(), currvec,
+						remainingSeqIDs.elementAt(i).intValue(), currvec,
 						attvals, tmphash);
 				// System.out.println("done getavgatt "+i);
 				if (curratt > maxatt) {
@@ -646,8 +646,8 @@ public class ClusterDetection {
 			// System.out.println("elements="+elements+" maxnum="+maxnum+" maxatt="+maxatt);
 			if (maxnum > -1) {
 				if (limit < maxatt) {
-					tmphash.add(basevec.elementAt(maxnum));
-					currvec.addElement(basevec.remove(maxnum));
+					tmphash.add(remainingSeqIDs.elementAt(maxnum));
+					currvec.addElement(remainingSeqIDs.remove(maxnum));
 					elements--;
 					foundnew = true;
 				}
@@ -684,14 +684,14 @@ public class ClusterDetection {
 	}// end getavgatt
 
 	// --------------------------------------------------------------------------
-	static float getavgatt(Vector<Integer> invec, MinimalAttractionValue[] attvals) {
+	static float getavgatt(Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals) {
 		// get the average attraction value for all sequences in this vector
 		// note, the attraction values should be symmetrical and only those >=0
 		// should be considered
-		int elements = invec.size();
+		int elements = remainingSeqIDs.size();
 		HashSet<Integer> tmphash = new HashSet<Integer>(elements);
 		for (int i = 0; i < elements; i++) {
-			tmphash.add(invec.elementAt(i));
+			tmphash.add(remainingSeqIDs.elementAt(i));
 		}// end for i
 		int attnum = attvals.length;
 		float sumval = 0;
@@ -710,12 +710,12 @@ public class ClusterDetection {
 	}// end getavgatt
 
 	// --------------------------------------------------------------------------
-	static float getvaratt(Vector<Integer> invec, MinimalAttractionValue[] attvals, float avgval) {
+	static float getvaratt(Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals, float avgval) {
 		// get the variance of the attraction values for this cluster
-		int elements = invec.size();
+		int elements = remainingSeqIDs.size();
 		HashSet<Integer> tmphash = new HashSet<Integer>(elements);
 		for (int i = 0; i < elements; i++) {
-			tmphash.add(invec.elementAt(i));
+			tmphash.add(remainingSeqIDs.elementAt(i));
 		}// end for i
 		int attnum = attvals.length;
 		float sumval = 0;
