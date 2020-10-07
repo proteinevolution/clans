@@ -498,7 +498,7 @@ public class ClusterDetection {
 		}// end for i
 			// then take a node from this base cluster and add all those with
 			// higher affinity to it than to the base
-		Vector<Integer> currvec = new Vector<Integer>(seqnum);
+		Vector<Integer> newClusterSeqIDs = new Vector<Integer>(seqnum);
 		SequenceCluster currcluster;
 		float avgatt = getAverageAttraction(remainingSeqIDs, attvals);	// get the average
 																		// attraction
@@ -531,17 +531,17 @@ public class ClusterDetection {
 				break;
 			}// end if seed==-1
 				// System.out.println("doing getcluster");
-			getCluster(seed, remainingSeqIDs, attvals, currvec, avgatt, varatt,
+			getCluster(seed, remainingSeqIDs, attvals, newClusterSeqIDs, avgatt, varatt,
 					sigmafac);// get one more cluster
 			// System.out.println("done getcluster");
 			currcluster = new SequenceCluster();
-			currcluster.member = new int[currvec.size()];
-			for (int i = currvec.size() - 1; i >= 0; i--) {
-				currcluster.member[i] = currvec.elementAt(i)
+			currcluster.member = new int[newClusterSeqIDs.size()];
+			for (int i = newClusterSeqIDs.size() - 1; i >= 0; i--) {
+				currcluster.member[i] = newClusterSeqIDs.elementAt(i)
 						.intValue();
 			}// end for i
 			retvec.add(currcluster);
-			currvec.clear();
+			newClusterSeqIDs.clear();
 		}// end while basecluster>0
 			// now sort the vector
 		int clusterelements = retvec.size();
@@ -607,14 +607,14 @@ public class ClusterDetection {
 
 	// --------------------------------------------------------------------------
 	static void getCluster(int seed, Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals,
-			Vector<Integer> currvec, float avgatt, float varatt, float sigmafac) {
-		// split one cluster off remainingSeqIDs and put the representatives in currvec
+			Vector<Integer> newClusterSeqIDs, float avgatt, float varatt, float sigmafac) {
+		// split one cluster off remainingSeqIDs and put the representatives in newClusterSeqIDs
 		// System.out.println("seed "+seed);//("in getcluster for seed "+seed);//"seed="+seed);
-		currvec.add(remainingSeqIDs.remove(seed));
-		Integer seednum = currvec.elementAt(0);
+		newClusterSeqIDs.add(remainingSeqIDs.remove(seed));
+		Integer seednum = newClusterSeqIDs.elementAt(0);
 		HashSet<Integer> tmphash = new HashSet<Integer>();
 		tmphash.add(seednum);
-		// now add all those values with attraction to currvec greater than to
+		// now add all those values with attraction to newClusterSeqIDs greater than to
 		// remainingSeqIDs.
 		int elements = remainingSeqIDs.size();
 
@@ -634,7 +634,7 @@ public class ClusterDetection {
 			// elements
 			for (int i = 0; i < elements; i++) {
 				curratt = getAverageAttraction(
-						remainingSeqIDs.elementAt(i).intValue(), currvec,
+						remainingSeqIDs.elementAt(i).intValue(), newClusterSeqIDs,
 						attvals, tmphash);
 				// System.out.println("done getAverageAttraction "+i);
 				if (curratt > maxatt) {
@@ -647,7 +647,7 @@ public class ClusterDetection {
 			if (maxnum > -1) {
 				if (limit < maxatt) {
 					tmphash.add(remainingSeqIDs.elementAt(maxnum));
-					currvec.addElement(remainingSeqIDs.remove(maxnum));
+					newClusterSeqIDs.addElement(remainingSeqIDs.remove(maxnum));
 					elements--;
 					foundnew = true;
 				}
@@ -657,8 +657,8 @@ public class ClusterDetection {
 	}// end getcluster
 
 	// --------------------------------------------------------------------------
-	static float getAverageAttraction(int newpos, Vector<Integer> newgroup, MinimalAttractionValue[] attvals, HashSet<Integer> tmphash) {
-		int elements = newgroup.size();
+	static float getAverageAttraction(int newpos, Vector<Integer> newClusterSeqIDs, MinimalAttractionValue[] attvals, HashSet<Integer> tmphash) {
+		int elements = newClusterSeqIDs.size();
 		int attnum = attvals.length;
 		float retval = 0;
 		float skipped = 0;
