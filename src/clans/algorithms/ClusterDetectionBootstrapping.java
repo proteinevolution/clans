@@ -28,7 +28,7 @@ public class ClusterDetectionBootstrapping {
             tmpdata.copyInto(tmparr);
             tmpdata.clear();
             //now get the cluster for this data
-            replicate[i]=ClusterDetection.getconvex(tmparr,sigmafac,minseqnum,elements);
+            replicate[i]=ClusterDetection.getConvex(tmparr,sigmafac,minseqnum,elements);
         }//end for i
         //now compare the replicate clusters to the original
         checkreplicates(clustervec, replicate);

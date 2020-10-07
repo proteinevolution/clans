@@ -1593,7 +1593,7 @@ public class ProgramWindow extends javax.swing.JFrame {
 				int minseqnum = Integer.parseInt(tmpstr);
 				
 				System.out.println("searching for convex clusters");
-				Vector<SequenceCluster> clustervec = ClusterDetection.getconvex(data.attractionValues, sigmafac, minseqnum,
+				Vector<SequenceCluster> clustervec = ClusterDetection.getConvex(data.attractionValues, sigmafac, minseqnum,
 						data.elements);
 				
 				System.out.println("done searching for clusters; opening window");

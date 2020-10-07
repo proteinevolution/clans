@@ -481,7 +481,7 @@ public class ClusterDetection {
 	// ---------------------convex
 	// clustering------------------------------------
 	// --------------------------------------------------------------------------
-	public static Vector<SequenceCluster> getconvex(MinimalAttractionValue[] attvals,
+	public static Vector<SequenceCluster> getConvex(MinimalAttractionValue[] attvals,
 			float sigmafac, int minseqnum, int seqnum) {
 		// return a vector containing all clusters found by a polythenic
 		// additive method
@@ -500,24 +500,24 @@ public class ClusterDetection {
 			// higher affinity to it than to the base
 		Vector<Integer> currvec = new Vector<Integer>(seqnum);
 		SequenceCluster currcluster;
-		float avgatt = getavgatt(remainingSeqIDs, attvals);	// get the average
-															// attraction
-															// for the
-															// values in
-															// that vector
-		float varatt = getvaratt(remainingSeqIDs, attvals, avgatt);	// get the
-																	// variance
-																	// of
-																	// attraction
-																	// values
+		float avgatt = getAverageAttraction(remainingSeqIDs, attvals);	// get the average
+																		// attraction
+																		// for the
+																		// values in
+																		// that vector
+		float varatt = getAttractionVariance(remainingSeqIDs, attvals, avgatt);	// get the
+																				// variance
+																				// of
+																				// attraction
+																				// values
 		int seed;
 		while (remainingSeqIDs.size() > 0) {
-			// System.out.println("doing getmaxatt");
-			seed = getmaxatt(remainingSeqIDs, attvals);	// get the vector
-												// element with the
-												// highest overall
-												// attraction
-			// System.out.println("done getmaxatt");
+			// System.out.println("doing getMaxAttraction");
+			seed = getMaxAttraction(remainingSeqIDs, attvals);	// get the vector
+																// element with the
+																// highest overall
+																// attraction
+			// System.out.println("done getMaxAttraction");
 			// System.out.println("seed="+seed+" remainingSeqIDs.size="+remainingSeqIDs.size());
 			if (seed == -1) {// if I have no further attraction values in the
 								// matrix
@@ -531,7 +531,7 @@ public class ClusterDetection {
 				break;
 			}// end if seed==-1
 				// System.out.println("doing getcluster");
-			getcluster(seed, remainingSeqIDs, attvals, currvec, avgatt, varatt,
+			getCluster(seed, remainingSeqIDs, attvals, currvec, avgatt, varatt,
 					sigmafac);// get one more cluster
 			// System.out.println("done getcluster");
 			currcluster = new SequenceCluster();
@@ -563,8 +563,8 @@ public class ClusterDetection {
 
 	// --------------------------------------------------------------------------
 	/*
-	 * static float getavgatt(cluster c1, cluster c2, minattvals[] attvals){
-	 * //get the average attraction between these two clusters int
+	 * static float getMaxAttraction(cluster c1, cluster c2, minattvals[] attvals){
+	 * //get the maximum attraction between these two clusters int
 	 * seqnum1=c1.member.length; int
 	 * seqnum2=c2.member.length; float retval=0;
 	 * float skipped=0;//used in the bootstrapping procedure where some values
@@ -572,9 +572,9 @@ public class ClusterDetection {
 	 * j=0;j<seqnum2;j++){ if(attvals[c1.member[i]][c2.member[j]]>=0){
 	 * retval+=attvals[c1.member[i]][c2.member[j]]; }else{ skipped++; } }//end
 	 * for j }//end for i return retval/((seqnum1*seqnum2)-skipped); }//end
-	 * getavgatt
+	 * getMaxAttraction
 	 */// --------------------------------------------------------------------------
-	static int getmaxatt(Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals) {
+	static int getMaxAttraction(Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals) {
 		// get the sequence with overall highest attvals
 		int elements = remainingSeqIDs.size();
 		HashMap<Integer, Integer> tmphash = new HashMap<Integer, Integer>(elements);
@@ -603,10 +603,10 @@ public class ClusterDetection {
 			}
 		}// end for i
 		return maxnum;
-	}// end getmaxatt
+	}// end getMaxAttraction
 
 	// --------------------------------------------------------------------------
-	static void getcluster(int seed, Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals,
+	static void getCluster(int seed, Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals,
 			Vector<Integer> currvec, float avgatt, float varatt, float sigmafac) {
 		// split one cluster off remainingSeqIDs and put the representatives in currvec
 		// System.out.println("seed "+seed);//("in getcluster for seed "+seed);//"seed="+seed);
@@ -633,10 +633,10 @@ public class ClusterDetection {
 			// now get the element with highest attraction to the new vector of
 			// elements
 			for (int i = 0; i < elements; i++) {
-				curratt = getavgatt(
+				curratt = getAverageAttraction(
 						remainingSeqIDs.elementAt(i).intValue(), currvec,
 						attvals, tmphash);
-				// System.out.println("done getavgatt "+i);
+				// System.out.println("done getAverageAttraction "+i);
 				if (curratt > maxatt) {
 					maxatt = curratt;
 					maxnum = i;
@@ -657,7 +657,7 @@ public class ClusterDetection {
 	}// end getcluster
 
 	// --------------------------------------------------------------------------
-	static float getavgatt(int newpos, Vector<Integer> newgroup, MinimalAttractionValue[] attvals, HashSet<Integer> tmphash) {
+	static float getAverageAttraction(int newpos, Vector<Integer> newgroup, MinimalAttractionValue[] attvals, HashSet<Integer> tmphash) {
 		int elements = newgroup.size();
 		int attnum = attvals.length;
 		float retval = 0;
@@ -681,10 +681,10 @@ public class ClusterDetection {
 			}
 		}// end for i
 		return retval / (float) (elements - skipped);
-	}// end getavgatt
+	}// end getAverageAttraction
 
 	// --------------------------------------------------------------------------
-	static float getavgatt(Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals) {
+	static float getAverageAttraction(Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals) {
 		// get the average attraction value for all sequences in this vector
 		// note, the attraction values should be symmetrical and only those >=0
 		// should be considered
@@ -707,10 +707,10 @@ public class ClusterDetection {
 			}
 		}// end for i
 		return sumval / (float) (((elements * (elements - 1)) / 2) - skipped);
-	}// end getavgatt
+	}// end getAverageAttraction
 
 	// --------------------------------------------------------------------------
-	static float getvaratt(Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals, float avgval) {
+	static float getAttractionVariance(Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals, float avgval) {
 		// get the variance of the attraction values for this cluster
 		int elements = remainingSeqIDs.size();
 		HashSet<Integer> tmphash = new HashSet<Integer>(elements);
@@ -732,7 +732,7 @@ public class ClusterDetection {
 			}
 		}// end for i
 		return sumval / (float) (((elements * (elements - 1)) / 2) - skipped);
-	}// end getvaratt
+	}// end getAttractionVariance
 
 	// ------------------------------------------------------------------------------
 	// --------------------------network
