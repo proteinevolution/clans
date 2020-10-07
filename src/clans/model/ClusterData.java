@@ -331,9 +331,34 @@ public class ClusterData {
 		String inline;
 		int expected_sequences = -1;
 		int current_line = 0;
-		
+		int hspCount = 0;
+
 		BufferedReader buffered_file_handle = new BufferedReader(new FileReader(infile));
-		
+
+		try {
+			System.out.println("Count HSPs in '" + infile.getAbsolutePath() + "'");
+			while ((inline = buffered_file_handle.readLine()) != null) {
+				if (inline.equalsIgnoreCase("<hsp>")) {
+					while (((inline = buffered_file_handle.readLine()) != null) && (inline.equalsIgnoreCase("</hsp>") == false)) {
+						//skip empty lines
+						if(inline.length()==0){
+							continue;
+						}
+						hspCount++;
+					}//end while count HSPs
+				}
+			}//end while for going through file for counting HSPs
+			System.out.println("Counted " + hspCount + " HSPs");
+		} catch (IOException e) {
+			error_message = "IOError unable to read from " + infile.getAbsolutePath() + ":\n\t" + e.getMessage();
+			System.err.println(error_message);
+			throw new IOException(error_message);
+		} finally {
+			buffered_file_handle.close();
+		}
+
+		buffered_file_handle = new BufferedReader(new FileReader(infile));
+
 		try {
             while ((inline = buffered_file_handle.readLine()) != null) {
             	current_line += 1;
@@ -406,7 +431,7 @@ public class ClusterData {
                         }
 
                     } else if (inline.equalsIgnoreCase("<hsp>")) {
-                        if (!myrun.parse_hsp_block(buffered_file_handle, worker)) {
+                        if (!myrun.parse_hsp_block(buffered_file_handle, worker, hspCount)) {
                         	errors_occurred = true;
                         	error_message = "could not parse <hsp> block";
                         }

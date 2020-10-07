@@ -554,9 +554,10 @@ public class ClusterDataLoadHelper {
 	/**
 	 * Convenience method that calls {@code parse_hsp_block(BufferedReader, SwingWorker)} with SwingWorker {@code null}. This
 	 * method should be used in no-GUI mode.
+	 * Unused and should be removed
 	 */
-	public boolean parse_hsp_block(BufferedReader buffered_file_handle) throws IOException{
-		return parse_hsp_block(buffered_file_handle, null);
+	public boolean parse_hsp_block(BufferedReader buffered_file_handle, int hspCount) throws IOException{
+		return parse_hsp_block(buffered_file_handle, null, hspCount);
 	}
 
 	/**
@@ -573,11 +574,11 @@ public class ClusterDataLoadHelper {
 	 *             If worker is cancelled and loading should therefore be cancelled. In headless (no-GUI) mode this
 	 *             Exception will not occur.
 	 */
-	public boolean parse_hsp_block(BufferedReader buffered_file_handle, SwingWorker<Void, Integer> worker)
+	public boolean parse_hsp_block(BufferedReader buffered_file_handle, SwingWorker<Void, Integer> worker, int hspCount)
             throws IOException, CancellationException {
         String[] split_result;
         String tmpstr;
-        HashMap<MinimalHsp, MinimalHsp> hspHash = new HashMap<MinimalHsp, MinimalHsp>();
+        HashMap<MinimalHsp, MinimalHsp> hspHash = new HashMap<MinimalHsp, MinimalHsp>((int) (hspCount / 0.75) + 1, 0.75f);
         String inline;
         int characters_for_round_number = 9;
         String format_for_round_number = "%" + characters_for_round_number + "s";
