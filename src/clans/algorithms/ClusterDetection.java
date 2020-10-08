@@ -484,7 +484,7 @@ public class ClusterDetection {
 		// next add all sequences with attractions higher to the new cluster
 		// than average+factor*variance
 		// System.out.println("in getconvex getclusters");
-		Vector<SequenceCluster> retvec = new Vector<SequenceCluster>();
+		Vector<SequenceCluster> returnClusters = new Vector<SequenceCluster>();
 		// assign all nodes to one cluster to start out
 		Vector<Integer> remainingSeqIDs = new Vector<Integer>(seqnum);
 		for (int i = 0; i < seqnum; i++) {
@@ -520,7 +520,7 @@ public class ClusterDetection {
 				while (remainingSeqIDs.size() > 0) {
 					currcluster = new SequenceCluster();
 					currcluster.add(remainingSeqIDs.remove(0).intValue());
-					retvec.addElement(currcluster);
+					returnClusters.addElement(currcluster);
 				}// end while remainingSeqIDs.size 2nd
 				break;
 			}// end if seed==-1
@@ -534,14 +534,14 @@ public class ClusterDetection {
 				currcluster.member[i] = newClusterSeqIDs.elementAt(i)
 						.intValue();
 			}// end for i
-			retvec.add(currcluster);
+			returnClusters.add(currcluster);
 			newClusterSeqIDs.clear();
 		}// end while basecluster>0
 
 		// Now sort the vector
-		retvec.sort(new ClusterSizeComparator());
+		returnClusters.sort(new ClusterSizeComparator());
 
-		return retvec;
+		return returnClusters;
 	}// end get
 
 	// --------------------------------------------------------------------------
