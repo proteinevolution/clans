@@ -486,6 +486,8 @@ public class ClusterDetection {
 		private float sigmafac;
 		private int minseqnum; // Not used
 		private int seqnum;    // Only local, and thus can be removed
+		private Vector<Integer> remainingSeqIDs;
+		private Vector<Integer> newClusterSeqIDs;
 
 		private ConvexClustering(
 		                         MinimalAttractionValue[] attvals,
@@ -509,29 +511,30 @@ public class ClusterDetection {
 			// than average+factor*variance
 			// System.out.println("in getconvex getclusters");
 			Vector<SequenceCluster> returnClusters = new Vector<SequenceCluster>();
-			// assign all nodes to one cluster to start out
-			Vector<Integer> remainingSeqIDs = new Vector<Integer>(this.seqnum);
+
+			// Assign all nodes to one cluster to start out
+			this.remainingSeqIDs = new Vector<Integer>(this.seqnum);
 			for (int i = 0; i < this.seqnum; i++) {
-				remainingSeqIDs.add(new Integer(i));
+				this.remainingSeqIDs.add(new Integer(i));
 			}// end for i
-				// then take a node from this base cluster and add all those with
-				// higher affinity to it than to the base
-			Vector<Integer> newClusterSeqIDs = new Vector<Integer>(this.seqnum);
-			SequenceCluster currcluster;
-			float avgatt = this.getAverageAttraction(remainingSeqIDs);	// get the average
+
+			// Then take a node from this base cluster and add all those with
+			// higher affinity to it than to the base
+			this.newClusterSeqIDs = new Vector<Integer>(this.seqnum);
+			float avgatt = this.getAverageAttraction();	// get the average
 																			// attraction
 																			// for the
 																			// values in
 																			// that vector
-			float varatt = this.getAttractionVariance(remainingSeqIDs, avgatt);	// get the
+			float varatt = this.getAttractionVariance(avgatt);	// get the
 																					// variance
 																					// of
 																					// attraction
 																					// values
 			int seed;
-			while (remainingSeqIDs.size() > 0) {
+			while (this.remainingSeqIDs.size() > 0) {
 				// System.out.println("doing getMaxAttraction");
-				seed = this.getMaxAttraction(remainingSeqIDs);	// get the vector
+				seed = this.getMaxAttraction();	// get the vector
 																	// element with the
 																	// highest overall
 																	// attraction
@@ -542,20 +545,20 @@ public class ClusterDetection {
 									// matrix
 					// System.out.println("adding all leftover sequences");
 					// Add all leftover sequences as separate clusters
-					while (remainingSeqIDs.size() > 0) {
-						SequenceCluster newCluster = new SequenceCluster(remainingSeqIDs.remove(0));
+					while (this.remainingSeqIDs.size() > 0) {
+						SequenceCluster newCluster = new SequenceCluster(this.remainingSeqIDs.remove(0));
 						returnClusters.addElement(newCluster);
 					}
 					break;
 				}// end if seed==-1
 
 				// System.out.println("doing getcluster");
-				this.getCluster(seed, remainingSeqIDs, newClusterSeqIDs, avgatt, varatt);
+				this.getCluster(seed, avgatt, varatt);
 				// System.out.println("done getcluster");
 
-				SequenceCluster newCluster = new SequenceCluster(newClusterSeqIDs);
+				SequenceCluster newCluster = new SequenceCluster(this.newClusterSeqIDs);
 				returnClusters.add(newCluster);
-				newClusterSeqIDs.clear();
+				this.newClusterSeqIDs.clear();
 			}// end while basecluster>0
 
 			// Now sort the vector
@@ -577,13 +580,13 @@ public class ClusterDetection {
 		* for j }//end for i return retval/((seqnum1*seqnum2)-skipped); }//end
 		* getMaxAttraction
 		*/// --------------------------------------------------------------------------
-		private int getMaxAttraction(Vector<Integer> remainingSeqIDs) {
+		private int getMaxAttraction() {
 			// get the sequence with overall highest attvals
-			int elements = remainingSeqIDs.size();
+			int elements = this.remainingSeqIDs.size();
 			HashMap<Integer, Integer> tmphash = new HashMap<Integer, Integer>(elements);
 			float[] sumvals = new float[elements];
 			for (int i = 0; i < elements; i++) {
-				tmphash.put(remainingSeqIDs.elementAt(i), new Integer(i));
+				tmphash.put(this.remainingSeqIDs.elementAt(i), new Integer(i));
 				sumvals[i] = 0;
 			}// end for i
 			float maxval = 0;
@@ -609,24 +612,23 @@ public class ClusterDetection {
 		}// end getMaxAttraction
 
 		// --------------------------------------------------------------------------
-		private void getCluster(int seed, Vector<Integer> remainingSeqIDs,
-				Vector<Integer> newClusterSeqIDs, float avgatt, float varatt) {
+		private void getCluster(int seed, float avgatt, float varatt) {
 			// split one cluster off remainingSeqIDs and put the representatives in newClusterSeqIDs
 			// System.out.println("seed "+seed);//("in getcluster for seed "+seed);//"seed="+seed);
-			newClusterSeqIDs.add(remainingSeqIDs.remove(seed));
-			Integer seednum = newClusterSeqIDs.elementAt(0);
+			this.newClusterSeqIDs.add(this.remainingSeqIDs.remove(seed));
+			Integer seednum = this.newClusterSeqIDs.elementAt(0);
 			HashSet<Integer> tmphash = new HashSet<Integer>();
 			tmphash.add(seednum);
 			// now add all those values with attraction to newClusterSeqIDs greater than to
 			// remainingSeqIDs.
-			int elements = remainingSeqIDs.size();
+			int elements = this.remainingSeqIDs.size();
 
 			boolean foundnew = true;
 			float maxatt, curratt;
 			int maxnum = 0;
 			float limit = (avgatt + (this.sigmafac * varatt));
 			while (foundnew == true) {
-				elements = remainingSeqIDs.size();
+				elements = this.remainingSeqIDs.size();
 				if (elements % 100 == 0) {
 					System.out.print(elements);
 				}
@@ -637,7 +639,7 @@ public class ClusterDetection {
 				// elements
 				for (int i = 0; i < elements; i++) {
 					curratt = this.getAverageLocalAttraction(
-							remainingSeqIDs.elementAt(i).intValue(), newClusterSeqIDs,
+							this.remainingSeqIDs.elementAt(i).intValue(),
 							tmphash);
 					// System.out.println("done getAverageLocalAttraction "+i);
 					if (curratt > maxatt) {
@@ -649,8 +651,8 @@ public class ClusterDetection {
 				// System.out.println("elements="+elements+" maxnum="+maxnum+" maxatt="+maxatt);
 				if (maxnum > -1) {
 					if (limit < maxatt) {
-						tmphash.add(remainingSeqIDs.elementAt(maxnum));
-						newClusterSeqIDs.addElement(remainingSeqIDs.remove(maxnum));
+						tmphash.add(this.remainingSeqIDs.elementAt(maxnum));
+						this.newClusterSeqIDs.addElement(this.remainingSeqIDs.remove(maxnum));
 						elements--;
 						foundnew = true;
 					}
@@ -660,8 +662,8 @@ public class ClusterDetection {
 		}// end getcluster
 
 		// --------------------------------------------------------------------------
-		private float getAverageLocalAttraction(int newPos, Vector<Integer> newClusterSeqIDs, HashSet<Integer> tmphash) {
-			int elements = newClusterSeqIDs.size();
+		private float getAverageLocalAttraction(int newPos, HashSet<Integer> tmphash) {
+			int elements = this.newClusterSeqIDs.size();
 			int attnum = this.attvals.length;
 			float retval = 0;
 			float skipped = 0;
@@ -687,14 +689,14 @@ public class ClusterDetection {
 		}// end getAverageLocalAttraction
 
 		// --------------------------------------------------------------------------
-		private float getAverageAttraction(Vector<Integer> remainingSeqIDs) {
+		private float getAverageAttraction() {
 			// get the average attraction value for all sequences in this vector
 			// note, the attraction values should be symmetrical and only those >=0
 			// should be considered
-			int elements = remainingSeqIDs.size();
+			int elements = this.remainingSeqIDs.size();
 			HashSet<Integer> tmphash = new HashSet<Integer>(elements);
 			for (int i = 0; i < elements; i++) {
-				tmphash.add(remainingSeqIDs.elementAt(i));
+				tmphash.add(this.remainingSeqIDs.elementAt(i));
 			}// end for i
 			int attnum = this.attvals.length;
 			float sumval = 0;
@@ -713,12 +715,12 @@ public class ClusterDetection {
 		}// end getAverageAttraction
 
 		// --------------------------------------------------------------------------
-		private float getAttractionVariance(Vector<Integer> remainingSeqIDs, float avgval) {
+		private float getAttractionVariance(float avgval) {
 			// get the variance of the attraction values for this cluster
-			int elements = remainingSeqIDs.size();
+			int elements = this.remainingSeqIDs.size();
 			HashSet<Integer> tmphash = new HashSet<Integer>(elements);
 			for (int i = 0; i < elements; i++) {
-				tmphash.add(remainingSeqIDs.elementAt(i));
+				tmphash.add(this.remainingSeqIDs.elementAt(i));
 			}// end for i
 			int attnum = this.attvals.length;
 			float sumval = 0;
