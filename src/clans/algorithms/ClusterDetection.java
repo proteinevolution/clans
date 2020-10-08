@@ -579,34 +579,36 @@ public class ClusterDetection {
 		*/// --------------------------------------------------------------------------
 		private int getMaxAttraction() {
 			// Get the sequence with overall highest attraction values from remainingSeqIDs
-			int elements = this.remainingSeqIDs.size();
+			int remainingSeqNum = this.remainingSeqIDs.size();
 
-			HashMap<Integer, Integer> tmphash = new HashMap<Integer, Integer>(elements);
-			float[] sumvals = new float[elements];
-			for (int i = 0; i < elements; i++) {
-				tmphash.put(this.remainingSeqIDs.elementAt(i), new Integer(i));
+			HashMap<Integer, Integer> remaining2Index = new HashMap<Integer, Integer>(remainingSeqNum);
+			float[] sumvals = new float[remainingSeqNum];
+			for (int i = 0; i < remainingSeqNum; i++) {
+				remaining2Index.put(this.remainingSeqIDs.elementAt(i), new Integer(i));
 				sumvals[i] = 0;
-			}// end for i
+			}
 
 			float maxval = 0;
 			int maxnum = -1;
 			int attnum = this.attractionValues.length;
 			for (int i = 0; i < attnum; i++) {
-				if (tmphash.containsKey(this.attractionValues[i].query)) {
-					sumvals[tmphash.get(this.attractionValues[i].query)
-							.intValue()] += this.attractionValues[i].att;
+				if (remaining2Index.containsKey(this.attractionValues[i].query)) {
+					int index = remaining2Index.get(this.attractionValues[i].query).intValue();
+					sumvals[index] += this.attractionValues[i].att;
 				}
-				if (tmphash.containsKey(this.attractionValues[i].hit)) {
-					sumvals[tmphash.get(this.attractionValues[i].hit)
-							.intValue()] += this.attractionValues[i].att;
+				if (remaining2Index.containsKey(this.attractionValues[i].hit)) {
+					int index = remaining2Index.get(this.attractionValues[i].hit).intValue();
+					sumvals[index] += this.attractionValues[i].att;
 				}
-			}// end for i
-			for (int i = 0; i < elements; i++) {
+			}
+
+			for (int i = 0; i < remainingSeqNum; i++) {
 				if (sumvals[i] > maxval) {
 					maxval = sumvals[i];
 					maxnum = i;
 				}
-			}// end for i
+			}
+
 			return maxnum;
 		}// end getMaxAttraction
 
@@ -618,7 +620,7 @@ public class ClusterDetection {
 			Integer seednum = this.newClusterSeqIDs.elementAt(0);
 			HashSet<Integer> tmphash = new HashSet<Integer>();
 			tmphash.add(seednum);
-			// now add all those values with attraction to newClusterSeqIDs greater than to
+			// Now add all those values with attraction to newClusterSeqIDs greater than to
 			// remainingSeqIDs.
 			int elements = this.remainingSeqIDs.size();
 
@@ -673,14 +675,15 @@ public class ClusterDetection {
 			// Now get the average attraction of newPos to the current cluster
 			for (int i = 0; i < attnum; i++) {
 				if (this.attractionValues[i].hit == newPos
-						&& tmphash.contains(this.attractionValues[i].query)) {
+				&&  tmphash.contains(this.attractionValues[i].query)) {
 					if (this.attractionValues[i].att >= 0) {
 						retval += this.attractionValues[i].att;
 					} else {
 						skipped++;
 					}
-				} else if (this.attractionValues[i].query == newPos
-						&& tmphash.contains(this.attractionValues[i].hit)) {
+				}
+				else if (this.attractionValues[i].query == newPos
+				     &&  tmphash.contains(this.attractionValues[i].hit)) {
 					if (this.attractionValues[i].att >= 0) {
 						retval += this.attractionValues[i].att;
 					} else {
