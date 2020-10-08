@@ -34,13 +34,7 @@ public class ClusterDetection {
 		} else {// otherwise it gets a bit more difficult
 			multilinkage(attvals, retvec, minseqnum, minlinks, seqnum);
 			// now sort the vector
-			int clusternum = retvec.size();
-			SequenceCluster[] tmparr = new SequenceCluster[clusternum];
-			retvec.copyInto(tmparr);
-			java.util.Arrays.sort(tmparr, new clustersizecomparator());
-			for (int i = 0; i < clusternum; i++) {
-				retvec.setElementAt(tmparr[i], i);
-			}// end for i
+			retvec.sort(new ClusterSizeComparator());
 		}
 		return retvec;
 	}// end getlinkage
@@ -446,7 +440,7 @@ public class ClusterDetection {
 			clusterarr[groupvals[i]].add(i);
 		}// end for i
 			// now sort the clusterarr by cluster size
-		java.util.Arrays.sort(clusterarr, new clustersizecomparator());
+		java.util.Arrays.sort(clusterarr, new ClusterSizeComparator());
 		for (int i = 0; i < counter; i++) {
             if (clusterarr[i].member.length >= minseqnum) {
 				retvec.addElement(clusterarr[i]);
@@ -543,21 +537,10 @@ public class ClusterDetection {
 			retvec.add(currcluster);
 			newClusterSeqIDs.clear();
 		}// end while basecluster>0
-			// now sort the vector
-		int clusterelements = retvec.size();
-		SequenceCluster[] sortarr = new SequenceCluster[clusterelements];
-		retvec.copyInto(sortarr);
-		java.util.Arrays.sort(sortarr, new clustersizecomparator());
-		retvec.clear();
-		// now add them back in sorted order and filter for minimum sequence
-		// number
-		for (int i = 0; i < clusterelements; i++) {
-            if (sortarr[i].member.length >= minseqnum) {
-				retvec.addElement(sortarr[i]);
-			} else {
-				break;
-			}
-		}// end for i
+
+		// Now sort the vector
+		retvec.sort(new ClusterSizeComparator());
+
 		return retvec;
 	}// end get
 
@@ -1050,7 +1033,7 @@ public class ClusterDetection {
 	}// end class netnode
 }
 
-class clustersizecomparator implements Comparator<SequenceCluster> {
+class ClusterSizeComparator implements Comparator<SequenceCluster> {
 
     public int compare(SequenceCluster o1, SequenceCluster o2) {
          // sort largest first
