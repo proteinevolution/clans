@@ -6,86 +6,92 @@ public class SequenceCluster {
 	public int[] member=new int[0];
 	public float clusterconfidence=-1;
 	public float[] seqconfidence=null;
-    
+
     /**
      * 
-     * @param newmember
+     * @param newMember
      */
-    public void add(int newmember){
-        int[] oldmember=member;
-        int oldsize=oldmember.length;
-        member=new int[oldsize+1];
+    public void add(int newMember) {
+        int[] oldMember = member;
+        int oldSize = oldMember.length;
+        member = new int[oldSize + 1];
         
-        for(int i=0;i<oldsize;i++){
-            member[i]=oldmember[i];
+        for(int i = 0; i < oldSize; i++) {
+            member[i] = oldMember[i];
             
-            if(newmember==oldmember[i]){//if what I want to add is already present as an element
-                member=oldmember;
+            if(newMember == oldMember[i]) {//if what I want to add is already present as an element
+                member = oldMember;
                 return;
             }
         }
         
-        member[oldsize]=newmember;
+        member[oldSize] = newMember;
     }
     
     /**
      * 
      * @param newmembers
      */
-    public void add(int[] newmembers){
-        int[] oldmember=member;
-        int oldsize=oldmember.length;
-        int newsize=newmembers.length;
-        member=new int[oldsize+newsize];
-        int poscount=0;
-        for(int i=0;i<oldsize;i++){
-            member[poscount]=oldmember[i];
-            poscount++;
+    public void add(int[] newMembers) {
+        int[] oldMember = member;
+        int oldSize = oldMember.length;
+        int newSize = newMembers.length;
+        member = new int[oldSize + newSize];
+
+        int posCount=0;
+        for(int i = 0;i < oldSize; i++){
+            member[posCount] = oldMember[i];
+            posCount++;
         }
-        boolean hasmember;
-        for(int i=0;i<newsize;i++){
-            hasmember=false;
-            for(int j=0;j<oldsize;j++){
-                if(oldmember[j]==newmembers[i]){
-                    hasmember=true;
+
+        boolean hasMember;
+        for(int i = 0; i < newSize; i++) {
+            hasMember = false;
+            for(int j = 0; j < oldSize; j++) {
+                if(oldMember[j] == newMembers[i]) {
+                    hasMember = true;
                     break;//exit for j
                 }
             }//end for j
-            if(hasmember==false){
-                member[poscount]=newmembers[i];
-                poscount++;
+
+            if(!hasMember){
+                member[posCount] = newMembers[i];
+                posCount++;
             }
         }//end for i
-        oldmember=member;
-        member=new int[poscount];
-        for(int i=0;i<poscount;i++){
-            member[i]=oldmember[i];
+
+        oldMember = member;
+        member = new int[posCount];
+        for(int i = 0; i < posCount; i++){
+            member[i] = oldMember[i];
         }
     }
     
     /**
      * 
-     * @param xmember
+     * @param xMember
      */
-    void remove(int xmember){
-        int[] oldmember=member;
-        int oldsize=oldmember.length;
-        if(oldsize<1){
+    void remove(int xMember) {
+        int[] oldMember = member;
+        int oldSize = oldMember.length;
+        if(oldSize < 1) {
             return;
         }
-        member=new int[oldsize-1];
-        int offset=0;
-        for(int i=0;i<oldsize;i++){
-            if(oldmember[i]==xmember){
+
+        member = new int[oldSize - 1];
+        int offset = 0;
+        for(int i = 0; i < oldSize; i++) {
+            if(oldMember[i] == xMember) {
                 offset=1;
                 continue;
             }
-            if((i==(oldsize-1))&&(offset==0)){
+
+            if((i == (oldSize - 1)) && (offset == 0)) {
                 //if I didn't find the element to remove
-                member=oldmember;
+                member = oldMember;
                 return;
             }
-            member[i-offset]=oldmember[i];
+            member[i - offset] = oldMember[i];
         }
     }
 }
