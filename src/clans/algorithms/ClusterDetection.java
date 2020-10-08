@@ -620,10 +620,10 @@ public class ClusterDetection {
 				// now get the element with highest attraction to the new vector of
 				// elements
 				for (int i = 0; i < elements; i++) {
-					curratt = this.getAverageAttraction(
+					curratt = this.getAverageLocalAttraction(
 							remainingSeqIDs.elementAt(i).intValue(), newClusterSeqIDs,
 							attvals, tmphash);
-					// System.out.println("done getAverageAttraction "+i);
+					// System.out.println("done getAverageLocalAttraction "+i);
 					if (curratt > maxatt) {
 						maxatt = curratt;
 						maxnum = i;
@@ -644,21 +644,21 @@ public class ClusterDetection {
 		}// end getcluster
 
 		// --------------------------------------------------------------------------
-		private float getAverageAttraction(int newpos, Vector<Integer> newClusterSeqIDs, MinimalAttractionValue[] attvals, HashSet<Integer> tmphash) {
+		private float getAverageLocalAttraction(int newPos, Vector<Integer> newClusterSeqIDs, MinimalAttractionValue[] attvals, HashSet<Integer> tmphash) {
 			int elements = newClusterSeqIDs.size();
 			int attnum = attvals.length;
 			float retval = 0;
 			float skipped = 0;
-			// now get the average attraction of newpos to the current cluster
+			// now get the average attraction of newPos to the current cluster
 			for (int i = 0; i < attnum; i++) {
-				if (attvals[i].hit == newpos
+				if (attvals[i].hit == newPos
 						&& tmphash.contains(attvals[i].query)) {
 					if (attvals[i].att >= 0) {
 						retval += attvals[i].att;
 					} else {
 						skipped++;
 					}
-				} else if (attvals[i].query == newpos
+				} else if (attvals[i].query == newPos
 						&& tmphash.contains(attvals[i].hit)) {
 					if (attvals[i].att >= 0) {
 						retval += attvals[i].att;
@@ -668,7 +668,7 @@ public class ClusterDetection {
 				}
 			}// end for i
 			return retval / (float) (elements - skipped);
-		}// end getAverageAttraction
+		}// end getAverageLocalAttraction
 
 		// --------------------------------------------------------------------------
 		private float getAverageAttraction(Vector<Integer> remainingSeqIDs, MinimalAttractionValue[] attvals) {
