@@ -135,7 +135,7 @@ public class ClusterDetection {
 			}
 			clusterhash[maxnum][0] = 1;// counter;//groupvals[maxnum]=counter;
 			newcluster = new SequenceCluster();
-			while (newcluster.member.length == 0) {
+			while (newcluster.members.length == 0) {
 				// get the minlinks other sequences that share the most hits
 				// with this sequence
 				tmpseqs = getmaxshared(attvals, clusterhash, seqnum, maxnum, minlinks);
@@ -188,7 +188,7 @@ public class ClusterDetection {
 					// now see if I have members>minlinks
 				int foundnew = 0;
 				int newmembers;
-                while (((newmembers = newcluster.member.length) < minlinks)
+                while (((newmembers = newcluster.members.length) < minlinks)
                         && (newmembers != foundnew)) {
 					// System.out.println("inwhile");
 					foundnew = newmembers;
@@ -196,7 +196,7 @@ public class ClusterDetection {
 					// if I don't, I need to re-check, including the new members
 					// until I do have more than minlinks
 					tmpseqs2 = getfound(attvals, clusterhash, seqnum,
-							newcluster.member, minlinks);
+							newcluster.members, minlinks);
 					for (int i = tmpseqs2.length - 1; i >= 0; i--) {
 						if (clusterhash[tmpseqs2[i]][0] != 0) {
 							newcluster.add(tmpseqs2[i]);
@@ -207,9 +207,9 @@ public class ClusterDetection {
 							}
 						}
 					}// end for i
-				}// end while newcluster.members<minlinks
-					// System.out.println("newcluster.members="+newcluster.member.length);
-				if (newcluster.member.length < minlinks) {
+				}// end while newcluster.memberss<minlinks
+					// System.out.println("newcluster.memberss="+newcluster.members.length);
+				if (newcluster.members.length < minlinks) {
 					// System.out.println("setting "+maxnum+" to -2");
 					// if my currnet cluster has less than minlinks elements
 					clusterhash[maxnum][0] = -2;	// skip
@@ -223,19 +223,19 @@ public class ClusterDetection {
 													// analysis
 					continue GETCLUSTER;
 				}
-			}// end while newcluster.members==0
+			}// end while newcluster.memberss==0
 				// now I have a new cluster with at least minlinks members
 				// next, see which sequences they find with at least minlinks
 				// connections
 			int lastmembers = 0;
 			int newmembers;
 
-            while ((newmembers = newcluster.member.length) != lastmembers) {
+            while ((newmembers = newcluster.members.length) != lastmembers) {
 				lastmembers = newmembers;
 
 				// while I find sequences to add
 				tmpseqs2 = getfound(attvals, clusterhash, seqnum,
-						newcluster.member, minlinks);
+						newcluster.members, minlinks);
 				for (int i = tmpseqs2.length - 1; i >= 0; i--) {
 					if (clusterhash[tmpseqs2[i]][0] != 0) {
 						newcluster.add(tmpseqs2[i]);
@@ -247,13 +247,13 @@ public class ClusterDetection {
 			}// end while
 				// now I have all sequences I can add in this way
 				// set the groups info
-			for (int i = newcluster.member.length - 1; i >= 0; i--) {
-				// if(clusterhash[newcluster.member[i]][0]==0){
-				clusterhash[newcluster.member[i]][0] = counter;
+			for (int i = newcluster.members.length - 1; i >= 0; i--) {
+				// if(clusterhash[newcluster.members[i]][0]==0){
+				clusterhash[newcluster.members[i]][0] = counter;
 				// }
 			}// end for i
 			counter++;
-			if (newcluster.member.length > minseqnum) {
+			if (newcluster.members.length > minseqnum) {
 				// System.out.println("adding cluster "+counter);
 				retvec.addElement(newcluster);
 			}
@@ -442,7 +442,7 @@ public class ClusterDetection {
 			// now sort the clusterarr by cluster size
 		java.util.Arrays.sort(clusterarr, new ClusterSizeComparator());
 		for (int i = 0; i < counter; i++) {
-            if (clusterarr[i].member.length >= minseqnum) {
+            if (clusterarr[i].members.length >= minseqnum) {
 				retvec.addElement(clusterarr[i]);
 			} else {
 				break;
@@ -512,26 +512,29 @@ public class ClusterDetection {
 																// highest overall
 																// attraction
 			// System.out.println("done getMaxAttraction");
+
 			// System.out.println("seed="+seed+" remainingSeqIDs.size="+remainingSeqIDs.size());
 			if (seed == -1) {// if I have no further attraction values in the
 								// matrix
 				// System.out.println("adding all leftover sequences");
-				// add all leftover sequences as separate clusters
+				// Add all leftover sequences as separate clusters
 				while (remainingSeqIDs.size() > 0) {
 					currcluster = new SequenceCluster();
 					currcluster.add(remainingSeqIDs.remove(0).intValue());
 					returnClusters.addElement(currcluster);
-				}// end while remainingSeqIDs.size 2nd
+				}
 				break;
 			}// end if seed==-1
-				// System.out.println("doing getcluster");
+
+			// System.out.println("doing getcluster");
 			getCluster(seed, remainingSeqIDs, attvals, newClusterSeqIDs, avgatt, varatt,
 					sigmafac);// get one more cluster
 			// System.out.println("done getcluster");
+
 			currcluster = new SequenceCluster();
-			currcluster.member = new int[newClusterSeqIDs.size()];
+			currcluster.members = new int[newClusterSeqIDs.size()];
 			for (int i = newClusterSeqIDs.size() - 1; i >= 0; i--) {
-				currcluster.member[i] = newClusterSeqIDs.elementAt(i)
+				currcluster.members[i] = newClusterSeqIDs.elementAt(i)
 						.intValue();
 			}// end for i
 			returnClusters.add(currcluster);
@@ -548,12 +551,12 @@ public class ClusterDetection {
 	/*
 	 * static float getMaxAttraction(cluster c1, cluster c2, minattvals[] attvals){
 	 * //get the maximum attraction between these two clusters int
-	 * seqnum1=c1.member.length; int
-	 * seqnum2=c2.member.length; float retval=0;
+	 * seqnum1=c1.members.length; int
+	 * seqnum2=c2.members.length; float retval=0;
 	 * float skipped=0;//used in the bootstrapping procedure where some values
 	 * are changed to -1 (removed) for(int i=0;i<seqnum1;i++){ for(int
-	 * j=0;j<seqnum2;j++){ if(attvals[c1.member[i]][c2.member[j]]>=0){
-	 * retval+=attvals[c1.member[i]][c2.member[j]]; }else{ skipped++; } }//end
+	 * j=0;j<seqnum2;j++){ if(attvals[c1.members[i]][c2.members[j]]>=0){
+	 * retval+=attvals[c1.members[i]][c2.members[j]]; }else{ skipped++; } }//end
 	 * for j }//end for i return retval/((seqnum1*seqnum2)-skipped); }//end
 	 * getMaxAttraction
 	 */// --------------------------------------------------------------------------
@@ -796,11 +799,11 @@ public class ClusterDetection {
 			tmp = clusters[i];
 			currcluster = new SequenceCluster();
 			currcluster.name = "cluster " + i;
-			currcluster.member = new int[tmp.size()];
+			currcluster.members = new int[tmp.size()];
 			// System.out.println("finalizing cluster "+i+" elements="+tmp.size());
 			if (tmp.size() >= minseqnum) {
 				for (int j = tmp.size(); --j >= 0;) {
-					currcluster.member[j] = tmp.get(j).index;
+					currcluster.members[j] = tmp.get(j).index;
 				}// end for j
 				clustervec.add(currcluster);
 			}
@@ -1037,8 +1040,8 @@ class ClusterSizeComparator implements Comparator<SequenceCluster> {
 
     public int compare(SequenceCluster o1, SequenceCluster o2) {
          // sort largest first
-        int num1 = o1.member.length;
-        int num2 = o2.member.length;
+        int num1 = o1.members.length;
+        int num2 = o2.members.length;
 		return (num1 < num2 ? 1 : (num1 == num2 ? 0 : -1));
 	}
 }

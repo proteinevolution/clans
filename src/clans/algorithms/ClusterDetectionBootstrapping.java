@@ -90,7 +90,7 @@ public class ClusterDetectionBootstrapping {
             replicate[i]=ClusterDetection.getnetwork(tmparr,minseqnum,dooffset,globalaverage,elements,maxrounds);
             System.out.println("clusternum="+replicate[i].size());
             for(int j=replicate[i].size()-1;j>=0;j--){
-                System.out.println("\t seqs=" + replicate[i].elementAt(j).member.length);
+                System.out.println("\t seqs=" + replicate[i].elementAt(j).members.length);
             }//end for j
         }//end for i
         //now compare the replicate clusters to the original
@@ -116,13 +116,13 @@ public class ClusterDetectionBootstrapping {
         for(i=0;i<replicates;i++){
             replicatessize=replicate[i].size();
             for(j=0;j<replicatessize;j++){
-                java.util.Arrays.sort(replicate[i].elementAt(j).member);
+                java.util.Arrays.sort(replicate[i].elementAt(j).members);
             }//end for j
         }//end for i
         for(i=0;i<clusternum;i++){
             currcluster=clustervec.elementAt(i);
-            java.util.Arrays.sort(currcluster.member);
-            currcluster.clusterconfidence=0;
+            java.util.Arrays.sort(currcluster.members);
+            currcluster.clusterConfidence=0;
             checkstring=makecheckstring(currcluster);
             for(j=0;j<replicates;j++){
                 foundcluster=false;
@@ -135,12 +135,12 @@ public class ClusterDetectionBootstrapping {
                     }
                 }//end for k
                 if(foundcluster){
-                    currcluster.clusterconfidence++;
+                    currcluster.clusterConfidence++;
                 }
             }//end for j
-            currcluster.clusterconfidence/=replicates;
+            currcluster.clusterConfidence/=replicates;
         }//end for i
-        getseqconfidences(clustervec,replicate);
+        getseqConfidences(clustervec,replicate);
     }//end checkreplicates
     
     //--------------------------------------------------------------------------
@@ -148,9 +148,9 @@ public class ClusterDetectionBootstrapping {
     static String makecheckstring(SequenceCluster incluster){
         //convert the cluster elements into a sorted string
         StringBuffer tmp=new StringBuffer();
-        int elements=incluster.member.length;
+        int elements=incluster.members.length;
         for(int i=0;i<elements;i++){
-            tmp.append(incluster.member[i]+";");
+            tmp.append(incluster.members[i]+";");
         }//end for i
         return tmp.toString();
     }
@@ -160,7 +160,7 @@ public class ClusterDetectionBootstrapping {
      * @param clustervec
      * @param replicate
      */
-    static void getseqconfidences(Vector<SequenceCluster> clustervec, Vector<SequenceCluster>[] replicate){
+    static void getseqConfidences(Vector<SequenceCluster> clustervec, Vector<SequenceCluster>[] replicate){
         System.out.println("calculating sequence confidences");
         //get the confidence with which each sequence is assigned to each cluster
         //sum how often each cluster sequence pair is present.
@@ -172,10 +172,10 @@ public class ClusterDetectionBootstrapping {
         boolean hasseq;
         for(i=0;i<clusternum;i++){//for each cluster
             currcluster=clustervec.elementAt(i);
-            seqnum=currcluster.member.length;
-            currcluster.seqconfidence=new float[seqnum];
+            seqnum=currcluster.members.length;
+            currcluster.seqConfidence=new float[seqnum];
             for(j=0;j<seqnum;j++){
-                currcluster.seqconfidence[j]=0;
+                currcluster.seqConfidence[j]=0;
             }//end for j
             //now see how often each sequence in this cluster is recovered as belonging to the same group in the replicates
             for(j=0;j<replicates;j++){
@@ -183,12 +183,12 @@ public class ClusterDetectionBootstrapping {
                     sharednum=0;
                     nonsharednum=0;
                     checkcluster = replicate[j].elementAt(k);
-                    checkseqnum=checkcluster.member.length;
+                    checkseqnum=checkcluster.members.length;
                     //now see which and how many sequences these clusters share
                     for(l=0;l<seqnum;l++){
                         hasseq=false;
                         for(m=0;m<checkseqnum;m++){
-                            if(checkcluster.member[m]==currcluster.member[l]){//if they share this sequence
+                            if(checkcluster.members[m]==currcluster.members[l]){//if they share this sequence
                                 hasseq=true;
                                 break;
                             }
@@ -203,9 +203,9 @@ public class ClusterDetectionBootstrapping {
                     if(sharednum>0){
                         for(l=0;l<seqnum;l++){
                             for(m=0;m<checkseqnum;m++){
-                                if(checkcluster.member[m]==currcluster.member[l]){//if they share this sequence
-                                    currcluster.seqconfidence[l]+=((sharednum-1)/seqnum);//fraction of sequences they shared
-                                    currcluster.seqconfidence[l]-=(nonsharednum/checkseqnum);//remove fraction of sequences they did not share
+                                if(checkcluster.members[m]==currcluster.members[l]){//if they share this sequence
+                                    currcluster.seqConfidence[l]+=((sharednum-1)/seqnum);//fraction of sequences they shared
+                                    currcluster.seqConfidence[l]-=(nonsharednum/checkseqnum);//remove fraction of sequences they did not share
                                 }
                             }//end for m
                         }//end for l
@@ -214,11 +214,11 @@ public class ClusterDetectionBootstrapping {
             }//end for j
             System.out.println("cluster "+i);
             for(j=0;j<seqnum;j++){
-                currcluster.seqconfidence[j]/=replicates;
-                System.out.println("\t"+j+" "+currcluster.member[j]+" "+currcluster.seqconfidence[j]);
+                currcluster.seqConfidence[j]/=replicates;
+                System.out.println("\t"+j+" "+currcluster.members[j]+" "+currcluster.seqConfidence[j]);
             }//end for j
         }//end for i
-    }//end getseqconfidences
+    }//end getseqConfidences
     
     //--------------------------------------------------------------------------
     
@@ -234,9 +234,9 @@ public class ClusterDetectionBootstrapping {
         checkobject mycheck;
         //now make a quick lookup for which sequences were defined in which cluster
         for(int i=0;i<clusternum;i++){
-            sequences = clustervec.elementAt(i).member.length;
+            sequences = clustervec.elementAt(i).members.length;
             for(j=0;j<sequences;j++){
-                tmpname = String.valueOf(clustervec.elementAt(i).member[j]);
+                tmpname = String.valueOf(clustervec.elementAt(i).members[j]);
                 if(clusterseqshash.containsKey(tmpname)){
                     mycheck=clusterseqshash.get(tmpname);
                     tmpintarr=mycheck.clusters;
@@ -281,20 +281,20 @@ public class ClusterDetectionBootstrapping {
                 checkcluster = replicate[i].elementAt(j);
                 
                 //now see how many sequences are shared between this cluster and the reference
-                sequences=checkcluster.member.length;
+                sequences=checkcluster.members.length;
                 //now find how many sequences it shares with the reference cluster
                 for(k=0;k<sequences;k++){
-                    if(clusterseqshash.containsKey(String.valueOf(checkcluster.member[k]))){//if this sequence is known as part of a cluster
-                        myclusternums=clusterseqshash.get(String.valueOf(checkcluster.member[k])).clusters;
-                        seqsums=clusterseqshash.get(String.valueOf(checkcluster.member[k])).sumvals;
-                        entries=clusterseqshash.get(String.valueOf(checkcluster.member[k])).entries;
+                    if(clusterseqshash.containsKey(String.valueOf(checkcluster.members[k]))){//if this sequence is known as part of a cluster
+                        myclusternums=clusterseqshash.get(String.valueOf(checkcluster.members[k])).clusters;
+                        seqsums=clusterseqshash.get(String.valueOf(checkcluster.members[k])).sumvals;
+                        entries=clusterseqshash.get(String.valueOf(checkcluster.members[k])).entries;
                         //need the for loops as multiple cluster assignments are possible
                         for(l=0;l<sequences;l++){//see if these sequences shared a cluster in the references
                             if(l==k){
                                 continue;
                             }
-                            if(clusterseqshash.containsKey(String.valueOf(checkcluster.member[l]))){
-                                checkclusternums=clusterseqshash.get(String.valueOf(checkcluster.member[l])).clusters;
+                            if(clusterseqshash.containsKey(String.valueOf(checkcluster.members[l]))){
+                                checkclusternums=clusterseqshash.get(String.valueOf(checkcluster.members[l])).clusters;
                                 //now see if myclusternums and checkclusternums share a number
                                 for(m=myclusternums.length-1;m>=0;m--){
                                     sharednum=false;
@@ -320,9 +320,9 @@ public class ClusterDetectionBootstrapping {
                             }
                         }//end for l
                         for(l=myclusternums.length-1;l>=0;l--){//now get the average value for each
-                            //    ((checkobject)clusterseqshash.get(String.valueOf(checkcluster.member[k]))).sumvals[l]+=seqsums[l]/((float)((sequences-1)*sequences));
-                            clusterseqshash.get(String.valueOf(checkcluster.member[k])).sumvals[l]+=seqsums[l];
-                            clusterseqshash.get(String.valueOf(checkcluster.member[k])).entries[l]+=entries[l];
+                            //    ((checkobject)clusterseqshash.get(String.valueOf(checkcluster.members[k]))).sumvals[l]+=seqsums[l]/((float)((sequences-1)*sequences));
+                            clusterseqshash.get(String.valueOf(checkcluster.members[k])).sumvals[l]+=seqsums[l];
+                            clusterseqshash.get(String.valueOf(checkcluster.members[k])).entries[l]+=entries[l];
                         }
                     }else{
                         //this sequence was not assigned to a cluster in the references
@@ -342,15 +342,15 @@ public class ClusterDetectionBootstrapping {
         for(int i=0;i<clusternum;i++){
             clusterconf[i]=0;
             clusterentries[i]=0;
-            //I haven't created the seqconfidences array yet
-            clustervec.elementAt(i).seqconfidence = new float[clustervec.elementAt(i).member.length];
+            //I haven't created the seqConfidences array yet
+            clustervec.elementAt(i).seqConfidence = new float[clustervec.elementAt(i).members.length];
         }//end for i
         for(int i=0;i<seqnamesnum;i++){
             mycheck=clusterseqshash.get(keysarr[i]);
             for(j=mycheck.clusters.length-1;j>=0;j--){
                 clusterconf[mycheck.clusters[j]]+=mycheck.sumvals[j];
                 clusterentries[mycheck.clusters[j]]+=mycheck.entries[j];
-                seqarr=((SequenceCluster)clustervec.elementAt(mycheck.clusters[j])).member;
+                seqarr=((SequenceCluster)clustervec.elementAt(mycheck.clusters[j])).members;
                 tmpint=-1;
                 for(k=seqarr.length-1;k>=0;k--){
                     if(String.valueOf(seqarr[k]).equals(keysarr[i])){
@@ -359,12 +359,12 @@ public class ClusterDetectionBootstrapping {
                     }
                 }//end for k
                 if(tmpint>-1){
-                    ((SequenceCluster)clustervec.elementAt(mycheck.clusters[j])).seqconfidence[tmpint]=mycheck.sumvals[j]/mycheck.entries[j];
+                    ((SequenceCluster)clustervec.elementAt(mycheck.clusters[j])).seqConfidence[tmpint]=mycheck.sumvals[j]/mycheck.entries[j];
                 }
             }//end for j
         }//end for i
         for(int i=0;i<clusternum;i++){
-            ((SequenceCluster)clustervec.elementAt(i)).clusterconfidence=(float)clusterconf[i]/(float)clusterentries[i];
+            ((SequenceCluster)clustervec.elementAt(i)).clusterConfidence=(float)clusterconf[i]/(float)clusterentries[i];
         }//end for i
         testconfidences(clustervec);
     }
@@ -379,9 +379,9 @@ public class ClusterDetectionBootstrapping {
         for(int i=0;i<clusternum;i++){
             currcluster=(SequenceCluster)invec.elementAt(i);
             System.out.println("Cluster:"+i);
-            System.out.println("\tbootstrap:"+currcluster.clusterconfidence);
-            for(int j=currcluster.member.length-1;j>=0;j--){
-                System.out.print(" "+currcluster.member[j]+":"+currcluster.seqconfidence[j]+";");
+            System.out.println("\tbootstrap:"+currcluster.clusterConfidence);
+            for(int j=currcluster.members.length-1;j>=0;j--){
+                System.out.print(" "+currcluster.members[j]+":"+currcluster.seqConfidence[j]+";");
             }
             System.out.println();
         }
@@ -406,9 +406,9 @@ public class ClusterDetectionBootstrapping {
         boolean foundseq;
         for(int i=0;i<vecnum;i++){
             currcluster=clustervec.elementAt(i);
-            seqnum=currcluster.member.length;
+            seqnum=currcluster.members.length;
             for(j=0;j<seqnum;j++){
-                nameclusterhash.put(String.valueOf(currcluster.member[j]),new Integer(i));
+                nameclusterhash.put(String.valueOf(currcluster.members[j]),new Integer(i));
             }//end for j
         }//end for i
         //now I know which sequence was assigned to which cluster
@@ -418,7 +418,7 @@ public class ClusterDetectionBootstrapping {
         for(int i=0;i<vecnum;i++){//for each cluster I need to bootstrap
             currcluster=clustervec.elementAt(i);
             clustersum=0;
-            seqnum=currcluster.member.length;
+            seqnum=currcluster.members.length;
             seqsums=new double[seqnum];
             for(j=0;j<seqnum;j++){//for each sequence in that cluster
                 //check how this sequence is assigned in the other clusters
@@ -428,19 +428,19 @@ public class ClusterDetectionBootstrapping {
                         //see if this cluster has the sequence I look for
                         foundseq=false;
                         //for each sequence in each of the clusters in each replicate
-                        for (m = replicate[k].elementAt(l).member.length - 1; m >= 0; m--) {
-                            if(((SequenceCluster)replicate[k].elementAt(l)).member[m]==currcluster.member[j]){
+                        for (m = replicate[k].elementAt(l).members.length - 1; m >= 0; m--) {
+                            if(((SequenceCluster)replicate[k].elementAt(l)).members[m]==currcluster.members[j]){
                                 foundseq=true;
                                 break;
                             }
                         }
                         if(foundseq){//if this cluster does contain the sequence,
                             //check how many other sequences correspond in that cluster
-                            seqnum2=currcluster.member.length;
+                            seqnum2=currcluster.members.length;
                             for(m=0;m<seqnum2;m++){
                                 //if this sequence is also part of the same cluster in the main vector
-                                if(nameclusterhash.containsKey(String.valueOf(currcluster.member[m]))){
-                                    if(nameclusterhash.get(String.valueOf(currcluster.member[m])).intValue()==i){
+                                if(nameclusterhash.containsKey(String.valueOf(currcluster.members[m]))){
+                                    if(nameclusterhash.get(String.valueOf(currcluster.members[m])).intValue()==i){
                                         seqsums[j]++;
                                     }else{
                                         seqsums[j]--;
@@ -451,12 +451,12 @@ public class ClusterDetectionBootstrapping {
                     }//end for l
                 }//end for k
             }//end for j
-            currcluster.seqconfidence=new float[seqnum];
+            currcluster.seqConfidence=new float[seqnum];
             for(j=0;j<seqnum;j++){
-                currcluster.seqconfidence[j]=(float)(seqsums[j]/(replicates*seqnum));
-                clustersum+=currcluster.seqconfidence[j];
+                currcluster.seqConfidence[j]=(float)(seqsums[j]/(replicates*seqnum));
+                clustersum+=currcluster.seqConfidence[j];
             }//end for j
-            currcluster.clusterconfidence=(float)(clustersum/(float)seqnum);
+            currcluster.clusterConfidence=(float)(clustersum/(float)seqnum);
             clustervec.setElementAt(currcluster,i);//should be unnecessary but doesn't hurt and is more readable
         }//end for i
     }//end checkreplicate

@@ -123,7 +123,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         
         for (int i = selectedvals.length; --i >= 0;) {
             
-            SequenceGroup newgroup = new SequenceGroup(newname + "_" + i, clusters.elementAt(selectedvals[i]).member,
+            SequenceGroup newgroup = new SequenceGroup(newname + "_" + i, clusters.elementAt(selectedvals[i]).members,
                     parent.data.groupsize, 0, Color.red);
 
             parent.data.seqgroupsvec.addElement(newgroup);
@@ -147,7 +147,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         }
         int newsize=0;
         for(int i=selectedvals.length;--i>=0;){
-            newsize+=((SequenceCluster)clusters.elementAt(selectedvals[i])).member.length;
+            newsize+=((SequenceCluster)clusters.elementAt(selectedvals[i])).members.length;
         }//end for i
         //now add all the values to a new array
         int[] newselected=new int[newsize];
@@ -155,7 +155,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         int mysize;
         int[] myarr;
         for(int i=selectedvals.length-1;i>=0;i--){
-            myarr=((SequenceCluster)clusters.elementAt(selectedvals[i])).member;
+            myarr=((SequenceCluster)clusters.elementAt(selectedvals[i])).members;
             mysize=myarr.length;
             for(int j=0;j<mysize;j++){
                 newselected[j+currcount]=myarr[j];
@@ -182,7 +182,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         int[] selectedvals=clusterlist.getSelectedIndices();
         int newsize=0;
         for(int i=selectedvals.length-1;i>=0;i--){
-            newsize+=((SequenceCluster)clusters.elementAt(selectedvals[i])).member.length;
+            newsize+=((SequenceCluster)clusters.elementAt(selectedvals[i])).members.length;
         }//end for i
         //now add all the values to a new array
         int[] newselected=new int[newsize];
@@ -196,8 +196,8 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         int[] myarr;
         float[] myconf;
         for(int i=selectedvals.length-1;i>=0;i--){
-            myarr=((SequenceCluster)clusters.elementAt(selectedvals[i])).member;
-            myconf=((SequenceCluster)clusters.elementAt(selectedvals[i])).seqconfidence;
+            myarr=((SequenceCluster)clusters.elementAt(selectedvals[i])).members;
+            myconf=((SequenceCluster)clusters.elementAt(selectedvals[i])).seqConfidence;
             mysize=myarr.length;
             if(didbootstrap){//was: myconf!=null){
                 for(int j=0;j<mysize;j++){
@@ -232,12 +232,12 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         String[] retarr = new String[invec.size()];
         for (int i = 0; i < invec.size(); i++) {
 
-            if (invec.elementAt(i).clusterconfidence > -1) {
-                retarr[i] = invec.elementAt(i).name + " (" + invec.elementAt(i).member.length + " sequences) (jacknife:"
-                        + invec.elementAt(i).clusterconfidence * 100 + "%)";
+            if (invec.elementAt(i).clusterConfidence > -1) {
+                retarr[i] = invec.elementAt(i).name + " (" + invec.elementAt(i).members.length + " sequences) (jacknife:"
+                        + invec.elementAt(i).clusterConfidence * 100 + "%)";
 
             } else {
-                retarr[i] = invec.elementAt(i).name + " (" + invec.elementAt(i).member.length + " sequences)";
+                retarr[i] = invec.elementAt(i).name + " (" + invec.elementAt(i).members.length + " sequences)";
             }
 
         }
