@@ -474,17 +474,17 @@ public class ClusterDetection {
 	// ---------------------convex
 	// clustering------------------------------------
 	// --------------------------------------------------------------------------
-	public static Vector<SequenceCluster> getConvex(MinimalAttractionValue[] attvals,
-			float sigmafac, int minseqnum, int seqNum) {
-		ConvexClustering convex = new ConvexClustering(attvals, sigmafac, minseqnum, seqNum);
+	public static Vector<SequenceCluster> getConvex(MinimalAttractionValue[] attractionValues,
+			float sigmaFactor, int minSeqNum, int seqNum) {
+		ConvexClustering convex = new ConvexClustering(attractionValues, sigmaFactor, minSeqNum, seqNum);
 		return convex.getConvex();
 	}
 
 	private static class ConvexClustering {
 
-		private MinimalAttractionValue[] attvals;
-		private float sigmafac;
-		private int minseqnum; // Not used
+		private MinimalAttractionValue[] attractionValues;
+		private float sigmaFactor;
+		private int minSeqNum; // Not used
 		private int seqNum;
 		private Vector<Integer> remainingSeqIDs;
 		private Vector<Integer> newClusterSeqIDs;
@@ -492,16 +492,16 @@ public class ClusterDetection {
 		private float attractionVar;
 
 		private ConvexClustering(
-		                         MinimalAttractionValue[] attvals,
-		                         float sigmafac,
-		                         int minseqnum,
+		                         MinimalAttractionValue[] attractionValues,
+		                         float sigmaFactor,
+		                         int minSeqNum,
 		                         int seqNum
 		                        )
 		{
-			this.attvals    = attvals;
-			this.sigmafac   = sigmafac;
-			this.minseqnum  = minseqnum;
-			this.seqNum     = seqNum;
+			this.attractionValues = attractionValues;
+			this.sigmaFactor      = sigmaFactor;
+			this.minSeqNum        = minSeqNum;
+			this.seqNum           = seqNum;
 		}
 
 		private void initialize()
@@ -590,15 +590,15 @@ public class ClusterDetection {
 
 			float maxval = 0;
 			int maxnum = -1;
-			int attnum = this.attvals.length;
+			int attnum = this.attractionValues.length;
 			for (int i = 0; i < attnum; i++) {
-				if (tmphash.containsKey(this.attvals[i].query)) {
-					sumvals[tmphash.get(this.attvals[i].query)
-							.intValue()] += this.attvals[i].att;
+				if (tmphash.containsKey(this.attractionValues[i].query)) {
+					sumvals[tmphash.get(this.attractionValues[i].query)
+							.intValue()] += this.attractionValues[i].att;
 				}
-				if (tmphash.containsKey(this.attvals[i].hit)) {
-					sumvals[tmphash.get(this.attvals[i].hit)
-							.intValue()] += this.attvals[i].att;
+				if (tmphash.containsKey(this.attractionValues[i].hit)) {
+					sumvals[tmphash.get(this.attractionValues[i].hit)
+							.intValue()] += this.attractionValues[i].att;
 				}
 			}// end for i
 			for (int i = 0; i < elements; i++) {
@@ -625,7 +625,7 @@ public class ClusterDetection {
 			boolean foundnew = true;
 			float maxatt, curratt;
 			int maxnum = 0;
-			float limit = (this.avgAttraction + (this.sigmafac * this.attractionVar));
+			float limit = (this.avgAttraction + (this.sigmaFactor * this.attractionVar));
 			while (foundnew == true) {
 
 				elements = this.remainingSeqIDs.size();
@@ -666,23 +666,23 @@ public class ClusterDetection {
 		private float getAverageLocalAttraction(int newPos, HashSet<Integer> tmphash) {
 
 			int elements = this.newClusterSeqIDs.size();
-			int attnum = this.attvals.length;
+			int attnum = this.attractionValues.length;
 			float retval = 0;
 			float skipped = 0;
 
 			// Now get the average attraction of newPos to the current cluster
 			for (int i = 0; i < attnum; i++) {
-				if (this.attvals[i].hit == newPos
-						&& tmphash.contains(this.attvals[i].query)) {
-					if (this.attvals[i].att >= 0) {
-						retval += this.attvals[i].att;
+				if (this.attractionValues[i].hit == newPos
+						&& tmphash.contains(this.attractionValues[i].query)) {
+					if (this.attractionValues[i].att >= 0) {
+						retval += this.attractionValues[i].att;
 					} else {
 						skipped++;
 					}
-				} else if (this.attvals[i].query == newPos
-						&& tmphash.contains(this.attvals[i].hit)) {
-					if (this.attvals[i].att >= 0) {
-						retval += this.attvals[i].att;
+				} else if (this.attractionValues[i].query == newPos
+						&& tmphash.contains(this.attractionValues[i].hit)) {
+					if (this.attractionValues[i].att >= 0) {
+						retval += this.attractionValues[i].att;
 					} else {
 						skipped++;
 					}
@@ -698,14 +698,14 @@ public class ClusterDetection {
 			// Note, the attraction values should be symmetrical and only those >=0
 			// should be considered.
 
-			int attnum = this.attvals.length;
+			int attnum = this.attractionValues.length;
 			float sumval = 0;
 			int skipped = 0;
 			for (int i = 0; i < attnum; i++) {
-				if (initHash.contains(this.attvals[i].query)
-				||  initHash.contains(this.attvals[i].hit)) {
-					if (this.attvals[i].att >= 0) {
-						sumval += this.attvals[i].att;
+				if (initHash.contains(this.attractionValues[i].query)
+				||  initHash.contains(this.attractionValues[i].hit)) {
+					if (this.attractionValues[i].att >= 0) {
+						sumval += this.attractionValues[i].att;
 					} else {
 						skipped++;
 					}
@@ -719,14 +719,14 @@ public class ClusterDetection {
 		private void computeAttractionVariance(HashSet<Integer> initHash) {
 			// Get the variance of the attraction values for this cluster.
 
-			int attnum = this.attvals.length;
+			int attnum = this.attractionValues.length;
 			float sumval = 0;
 			int skipped = 0;
 			for (int i = 0; i < attnum; i++) {
-				if (initHash.contains(this.attvals[i].query)
-				||  initHash.contains(this.attvals[i].hit)) {
-					if (this.attvals[i].att >= 0) {
-						float tmpval = this.attvals[i].att - this.avgAttraction;
+				if (initHash.contains(this.attractionValues[i].query)
+				||  initHash.contains(this.attractionValues[i].hit)) {
+					if (this.attractionValues[i].att >= 0) {
+						float tmpval = this.attractionValues[i].att - this.avgAttraction;
 						sumval += java.lang.Math.sqrt(tmpval * tmpval);
 					} else {
 						skipped++;
