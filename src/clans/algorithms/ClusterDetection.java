@@ -482,10 +482,13 @@ public class ClusterDetection {
 
 	private static class ConvexClustering {
 
+		// Input variables
 		private MinimalAttractionValue[] attractionValues;
 		private float sigmaFactor;
 		private int minSeqNum; // Not used
 		private int seqNum;
+
+		// Internal variables
 		private Vector<Integer> remainingSeqIDs;
 		private Vector<Integer> newClusterSeqIDs;
 		private float avgAttraction;
@@ -625,25 +628,25 @@ public class ClusterDetection {
 			int remainingSeqs = this.remainingSeqIDs.size();
 
 			boolean foundNew = true;
-			float maxAtt;
-			int maxNum = 0;
 			float limit = (this.avgAttraction + (this.sigmaFactor * this.attractionVar));
 			while (foundNew == true) {
+
+				foundNew = false;
 
 				remainingSeqs = this.remainingSeqIDs.size();
 				if (remainingSeqs % 100 == 0) {
 					System.out.print(remainingSeqs);
 				}
-				foundNew = false;
-				maxAtt = -1;
-				maxNum = -1;
+
+				float maxAtt = -1;
+				int maxNum = -1;
 
 				// Now get the element with highest attraction to the new vector of elements
 				for (int i = 0; i < remainingSeqs; i++) {
-					float currAtt = this.getAverageLocalAttraction(
-							this.remainingSeqIDs.elementAt(i).intValue(),
-							newSeqHash);
-					// System.out.println("done getAverageLocalAttraction "+i);
+
+					int newPos = this.remainingSeqIDs.elementAt(i).intValue();
+					float currAtt = this.getAverageLocalAttraction(newPos, newSeqHash);
+
 					if (currAtt > maxAtt) {
 						maxAtt = currAtt;
 						maxNum = i;
