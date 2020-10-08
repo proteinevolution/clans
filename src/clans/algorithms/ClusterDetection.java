@@ -629,7 +629,7 @@ public class ClusterDetection {
 
 			boolean foundNew = true;
 			float limit = (this.avgAttraction + (this.sigmaFactor * this.attractionVar));
-			while (foundNew == true) {
+			while (foundNew) {
 
 				foundNew = false;
 
@@ -738,7 +738,8 @@ public class ClusterDetection {
 						skipped++;
 					}
 				}
-			}// end for i
+			}
+
 			this.attractionVar = sumVal / (float) (((this.seqNum * (this.seqNum - 1)) / 2) - skipped);
 		}// end getAttractionVariance
 	} // End ConvexClustering
