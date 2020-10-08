@@ -554,7 +554,7 @@ public class ClusterDetection {
 					break;
 				}
 
-				this.getCluster(seed);
+				this.getOneCluster(seed);
 
 				SequenceCluster newCluster = new SequenceCluster(this.newClusterSeqIDs);
 				returnClusters.add(newCluster);
@@ -616,7 +616,7 @@ public class ClusterDetection {
 		}// end getMaxAttraction
 
 		// --------------------------------------------------------------------------
-		private void getCluster(int seed) {
+		private void getOneCluster(int seed) {
 			// Split one cluster off remainingSeqIDs and put the representatives in newClusterSeqIDs
 
 			this.newClusterSeqIDs.add(this.remainingSeqIDs.remove(seed));
