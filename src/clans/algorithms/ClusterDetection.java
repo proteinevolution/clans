@@ -488,6 +488,7 @@ public class ClusterDetection {
 		private int seqnum;    // Only local, and thus can be removed
 		private Vector<Integer> remainingSeqIDs;
 		private Vector<Integer> newClusterSeqIDs;
+		private float avgAttraction;
 
 		private ConvexClustering(
 		                         MinimalAttractionValue[] attvals,
@@ -523,9 +524,9 @@ public class ClusterDetection {
 			this.newClusterSeqIDs = new Vector<Integer>(this.seqnum);
 
 			// Get the average attraction for all nodes
-			float avgatt = this.getAverageAttraction();
+			this.computeAverageAttraction();
 			// Get the variance of attraction over all nodes
-			float varatt = this.getAttractionVariance(avgatt);
+			float varatt = this.getAttractionVariance();
 
 			while (this.remainingSeqIDs.size() > 0) {
 				// Get the remaining node with maximum attraction value
@@ -541,7 +542,7 @@ public class ClusterDetection {
 					break;
 				}
 
-				this.getCluster(seed, avgatt, varatt);
+				this.getCluster(seed, varatt);
 
 				SequenceCluster newCluster = new SequenceCluster(this.newClusterSeqIDs);
 				returnClusters.add(newCluster);
@@ -599,7 +600,7 @@ public class ClusterDetection {
 		}// end getMaxAttraction
 
 		// --------------------------------------------------------------------------
-		private void getCluster(int seed, float avgatt, float varatt) {
+		private void getCluster(int seed, float varatt) {
 			// Split one cluster off remainingSeqIDs and put the representatives in newClusterSeqIDs
 			// System.out.println("seed "+seed);//("in getcluster for seed "+seed);//"seed="+seed);
 			this.newClusterSeqIDs.add(this.remainingSeqIDs.remove(seed));
@@ -613,7 +614,7 @@ public class ClusterDetection {
 			boolean foundnew = true;
 			float maxatt, curratt;
 			int maxnum = 0;
-			float limit = (avgatt + (this.sigmafac * varatt));
+			float limit = (this.avgAttraction + (this.sigmafac * varatt));
 			while (foundnew == true) {
 				elements = this.remainingSeqIDs.size();
 				if (elements % 100 == 0) {
@@ -676,15 +677,17 @@ public class ClusterDetection {
 		}// end getAverageLocalAttraction
 
 		// --------------------------------------------------------------------------
-		private float getAverageAttraction() {
+		private void computeAverageAttraction() {
 			// Get the average attraction value for all sequences in remainingSeqIDs.
 			// Note, the attraction values should be symmetrical and only those >=0
 			// should be considered.
+
 			int elements = this.remainingSeqIDs.size();
 			HashSet<Integer> tmphash = new HashSet<Integer>(elements);
 			for (int i = 0; i < elements; i++) {
 				tmphash.add(this.remainingSeqIDs.elementAt(i));
 			}// end for i
+
 			int attnum = this.attvals.length;
 			float sumval = 0;
 			int skipped = 0;
@@ -697,12 +700,13 @@ public class ClusterDetection {
 						skipped++;
 					}
 				}
-			}// end for i
-			return sumval / (float) (((elements * (elements - 1)) / 2) - skipped);
+			}
+
+			this.avgAttraction = sumval / (float) (((elements * (elements - 1)) / 2) - skipped);
 		}// end getAverageAttraction
 
 		// --------------------------------------------------------------------------
-		private float getAttractionVariance(float avgval) {
+		private float getAttractionVariance() {
 			// Get the variance of the attraction values for this cluster.
 			int elements = this.remainingSeqIDs.size();
 			HashSet<Integer> tmphash = new HashSet<Integer>(elements);
@@ -716,7 +720,7 @@ public class ClusterDetection {
 				if (tmphash.contains(this.attvals[i].query)
 						|| tmphash.contains(this.attvals[i].hit)) {
 					if (this.attvals[i].att >= 0) {
-						float tmpval = this.attvals[i].att - avgval;
+						float tmpval = this.attvals[i].att - this.avgAttraction;
 						sumval += java.lang.Math.sqrt(tmpval * tmpval);
 					} else {
 						skipped++;
