@@ -504,21 +504,13 @@ public class ClusterDetection {
 			this.seqnum     = seqnum;
 		}
 
-		private Vector<SequenceCluster> getConvex() {
-			// return a vector containing all clusters found by a polythenic
-			// additive method
-			// assign all sequences to one cluster. then take always the sequence
-			// with highest overall attraction and seed it to a new cluster
-			// next add all sequences with attractions higher to the new cluster
-			// than average+factor*variance
-			// System.out.println("in getconvex getclusters");
-			Vector<SequenceCluster> returnClusters = new Vector<SequenceCluster>();
-
+		private void initialize()
+		{
 			// Assign all nodes to one cluster to start out
 			this.remainingSeqIDs = new Vector<Integer>(this.seqnum);
 			for (int i = 0; i < this.seqnum; i++) {
 				this.remainingSeqIDs.add(new Integer(i));
-			}// end for i
+			}
 
 			// Then take a node from this base cluster and add all those with
 			// higher affinity to it than to the base
@@ -528,6 +520,19 @@ public class ClusterDetection {
 			this.computeAverageAttraction();
 			// Get the variance of attraction over all nodes
 			this.computeAttractionVariance();
+		}
+
+		private Vector<SequenceCluster> getConvex() {
+			// return a vector containing all clusters found by a polythenic
+			// additive method
+			// assign all sequences to one cluster. then take always the sequence
+			// with highest overall attraction and seed it to a new cluster
+			// next add all sequences with attractions higher to the new cluster
+			// than average+factor*variance
+
+			this.initialize();
+
+			Vector<SequenceCluster> returnClusters = new Vector<SequenceCluster>();
 
 			while (this.remainingSeqIDs.size() > 0) {
 				// Get the remaining node with maximum attraction value
