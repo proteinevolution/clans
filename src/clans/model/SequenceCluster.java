@@ -27,11 +27,11 @@ public class SequenceCluster {
 	 * 
 	 * @param newMembers
 	 */
-	public SequenceCluster(Vector<Integer> newMembers)
+	public SequenceCluster(ArrayList<Integer> newMembers)
 	{
 		this.members = new int[newMembers.size()];
 		for (int i = 0; i < newMembers.size(); i++) {
-			this.members[i] = newMembers.elementAt(i).intValue();
+			this.members[i] = newMembers.get(i).intValue();
 		}
 	}
 

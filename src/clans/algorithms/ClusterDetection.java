@@ -489,8 +489,8 @@ public class ClusterDetection {
 		private int seqNum;
 
 		// Internal variables
-		private Vector<Integer> remainingSeqIDs;
-		private Vector<Integer> newClusterSeqIDs;
+		private ArrayList<Integer> remainingSeqIDs;
+		private ArrayList<Integer> newClusterSeqIDs;
 		private float avgAttraction;
 		private float attractionVar;
 
@@ -511,7 +511,7 @@ public class ClusterDetection {
 		{
 			// Assign all nodes to one cluster to start out
 			HashSet<Integer> initHash = new HashSet<Integer>(this.seqNum);
-			this.remainingSeqIDs = new Vector<Integer>(this.seqNum);
+			this.remainingSeqIDs = new ArrayList<Integer>(this.seqNum);
 			for (int i = 0; i < this.seqNum; i++) {
 				Integer seqID = new Integer(i);
 				this.remainingSeqIDs.add(seqID);
@@ -520,7 +520,7 @@ public class ClusterDetection {
 
 			// Then take a node from this base cluster and add all those with
 			// higher affinity to it than to the base
-			this.newClusterSeqIDs = new Vector<Integer>(this.seqNum);
+			this.newClusterSeqIDs = new ArrayList<Integer>(this.seqNum);
 
 			// Get the average attraction for all nodes
 			this.computeAverageAttraction(initHash);
@@ -538,6 +538,8 @@ public class ClusterDetection {
 
 			this.initialize();
 
+			// It is recommended to use  ArrayList instead, however that would
+			// change the interface so I leave it as ToDo.
 			Vector<SequenceCluster> returnClusters = new Vector<SequenceCluster>();
 
 			while (this.remainingSeqIDs.size() > 0) {
@@ -587,7 +589,7 @@ public class ClusterDetection {
 			HashMap<Integer, Integer> remaining2Index = new HashMap<Integer, Integer>(remainingSeqNum);
 			float[] sumVals = new float[remainingSeqNum];
 			for (int i = 0; i < remainingSeqNum; i++) {
-				remaining2Index.put(this.remainingSeqIDs.elementAt(i), new Integer(i));
+				remaining2Index.put(this.remainingSeqIDs.get(i), new Integer(i));
 				sumVals[i] = 0;
 			}
 
@@ -620,7 +622,7 @@ public class ClusterDetection {
 			// Split one cluster off remainingSeqIDs and put the representatives in newClusterSeqIDs
 
 			this.newClusterSeqIDs.add(this.remainingSeqIDs.remove(seed));
-			Integer seedNum = this.newClusterSeqIDs.elementAt(0);
+			Integer seedNum = this.newClusterSeqIDs.get(0);
 			HashSet<Integer> newSeqHash = new HashSet<Integer>();
 			newSeqHash.add(seedNum);
 			// Now add all those values with attraction to newClusterSeqIDs greater than to
@@ -644,7 +646,7 @@ public class ClusterDetection {
 				// Now get the element with highest attraction to the new vector of elements
 				for (int i = 0; i < remainingSeqs; i++) {
 
-					int newPos = this.remainingSeqIDs.elementAt(i).intValue();
+					int newPos = this.remainingSeqIDs.get(i).intValue();
 					float currAtt = this.getAverageLocalAttraction(newPos, newSeqHash);
 
 					if (currAtt > maxAtt) {
@@ -657,8 +659,8 @@ public class ClusterDetection {
 
 				if (maxNum > -1) {
 					if (limit < maxAtt) {
-						newSeqHash.add(this.remainingSeqIDs.elementAt(maxNum));
-						this.newClusterSeqIDs.addElement(this.remainingSeqIDs.remove(maxNum));
+						newSeqHash.add(this.remainingSeqIDs.get(maxNum));
+						this.newClusterSeqIDs.add(this.remainingSeqIDs.remove(maxNum));
 						remainingSeqs--;
 						foundNew = true;
 					}
