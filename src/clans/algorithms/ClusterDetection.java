@@ -20,12 +20,11 @@ public class ClusterDetection {
 		Vector<SequenceCluster> retvec = new Vector<SequenceCluster>();
 		// simple cases, 0 and 1
 		if (minlinks < 1) {// return all sequences
-			SequenceCluster newcluster = new SequenceCluster();
-			int[] tmpint = new int[seqnum];
+			int[] newClusterMembers = new int[seqnum];
 			for (int i = 0; i < seqnum; i++) {
-				tmpint[i] = i;
+				newClusterMembers[i] = i;
 			}// end for i
-			newcluster.add(tmpint);
+			SequenceCluster newcluster = new SequenceCluster(newClusterMembers);
 			retvec.add(newcluster);
 		} else if (minlinks == 1) {// single linkage
 			singlelinkage(attvals, retvec, minseqnum, seqnum);
@@ -519,9 +518,8 @@ public class ClusterDetection {
 				// System.out.println("adding all leftover sequences");
 				// Add all leftover sequences as separate clusters
 				while (remainingSeqIDs.size() > 0) {
-					currcluster = new SequenceCluster();
-					currcluster.add(remainingSeqIDs.remove(0).intValue());
-					returnClusters.addElement(currcluster);
+					SequenceCluster newCluster = new SequenceCluster(remainingSeqIDs.remove(0));
+					returnClusters.addElement(newCluster);
 				}
 				break;
 			}// end if seed==-1
@@ -531,13 +529,8 @@ public class ClusterDetection {
 					sigmafac);// get one more cluster
 			// System.out.println("done getcluster");
 
-			currcluster = new SequenceCluster();
-			currcluster.members = new int[newClusterSeqIDs.size()];
-			for (int i = newClusterSeqIDs.size() - 1; i >= 0; i--) {
-				currcluster.members[i] = newClusterSeqIDs.elementAt(i)
-						.intValue();
-			}// end for i
-			returnClusters.add(currcluster);
+			SequenceCluster newCluster = new SequenceCluster(newClusterSeqIDs);
+			returnClusters.add(newCluster);
 			newClusterSeqIDs.clear();
 		}// end while basecluster>0
 
@@ -545,7 +538,7 @@ public class ClusterDetection {
 		returnClusters.sort(new ClusterSizeComparator());
 
 		return returnClusters;
-	}// end get
+	}// end getConvex
 
 	// --------------------------------------------------------------------------
 	/*

@@ -9,6 +9,41 @@ public class SequenceCluster {
 	public float clusterConfidence = -1;
 	public float[] seqConfidence = null;
 
+	public SequenceCluster()
+	{
+	}
+
+	/**
+	 * 
+	 * @param newMember
+	 */
+	public SequenceCluster(Integer newMember)
+	{
+		this.members = new int[1];
+		this.members[0] = newMember.intValue();
+	}
+
+	/**
+	 * 
+	 * @param newMembers
+	 */
+	public SequenceCluster(Vector<Integer> newMembers)
+	{
+		this.members = new int[newMembers.size()];
+		for (int i = 0; i < newMembers.size(); i++) {
+			this.members[i] = newMembers.elementAt(i).intValue();
+		}
+	}
+
+	/**
+	 * 
+	 * @param newMembers
+	 */
+	public SequenceCluster(int[] newMembers)
+	{
+		this.members = newMembers;
+	}
+
     /**
      * 
      * @param newMember
@@ -32,7 +67,7 @@ public class SequenceCluster {
     
     /**
      * 
-     * @param newmembers
+     * @param newMembers
      */
     public void add(int[] newMembers) {
         int[] oldMembers = members;
