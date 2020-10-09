@@ -491,6 +491,8 @@ public class ClusterDetection {
 		// Internal variables
 		private ArrayList<Integer> remainingSeqIDs;
 		private ArrayList<Integer> newClusterSeqIDs;
+		private ArrayList<ArrayList<MinimalAttractionValue>> queryAttractionValues;
+		private ArrayList<ArrayList<MinimalAttractionValue>> hitAttractionValues;
 		private float avgAttraction;
 		private float attractionVar;
 
@@ -526,6 +528,22 @@ public class ClusterDetection {
 			this.computeAverageAttraction(initHash);
 			// Get the variance of attraction over all nodes
 			this.computeAttractionVariance(initHash);
+
+			// What a stuff cannot create a generic array
+			this.queryAttractionValues = new ArrayList<ArrayList<MinimalAttractionValue>>(this.seqNum);
+			this.hitAttractionValues = new ArrayList<ArrayList<MinimalAttractionValue>>(this.seqNum);
+
+			for (int i = 0; i < this.seqNum; i++)
+			{
+				this.queryAttractionValues.add(new ArrayList<MinimalAttractionValue>());
+				this.hitAttractionValues.add(new ArrayList<MinimalAttractionValue>());
+			}
+
+			for(int i = 0; i < attractionValues.length; i++)
+			{
+				this.queryAttractionValues.get(attractionValues[i].query).add(attractionValues[i]);
+				this.hitAttractionValues.get(attractionValues[i].hit).add(attractionValues[i]);
+			}
 		}
 
 		private Vector<SequenceCluster> getConvex() {
@@ -596,14 +614,24 @@ public class ClusterDetection {
 			float maxVal = 0;
 			int maxNum = -1;
 			int attNum = this.attractionValues.length;
-			for (int i = 0; i < attNum; i++) {
-				if (remaining2Index.containsKey(this.attractionValues[i].query)) {
-					int index = remaining2Index.get(this.attractionValues[i].query).intValue();
-					sumVals[index] += this.attractionValues[i].att;
+
+			for(int i = 0; i < this.queryAttractionValues.size(); i++) {
+				if (remaining2Index.containsKey(i)) {
+					ArrayList<MinimalAttractionValue> queryPosArray = this.queryAttractionValues.get(i);
+					int index = remaining2Index.get(i).intValue();
+					for(int j = 0; j < queryPosArray.size(); j++) {
+						sumVals[index] += queryPosArray.get(j).att;
+					}
 				}
-				if (remaining2Index.containsKey(this.attractionValues[i].hit)) {
-					int index = remaining2Index.get(this.attractionValues[i].hit).intValue();
-					sumVals[index] += this.attractionValues[i].att;
+			}
+
+			for(int i = 0; i < this.hitAttractionValues.size(); i++) {
+				if (remaining2Index.containsKey(i)) {
+					ArrayList<MinimalAttractionValue> hitPosArray = this.hitAttractionValues.get(i);
+					int index = remaining2Index.get(i).intValue();
+					for(int j = 0; j < hitPosArray.size(); j++) {
+						sumVals[index] += hitPosArray.get(j).att;
+					}
 				}
 			}
 
@@ -675,22 +703,27 @@ public class ClusterDetection {
 			int newClusterSeqs = this.newClusterSeqIDs.size();
 			int attNum = this.attractionValues.length;
 			float retVal = 0;
-			float skipped = 0;
+			int skipped = 0;
 
 			// Now get the average attraction of newPos to the current cluster
-			for (int i = 0; i < attNum; i++) {
-				if (this.attractionValues[i].hit == newPos
-				&&  newSeqHash.contains(this.attractionValues[i].query)) {
-					if (this.attractionValues[i].att >= 0) {
-						retVal += this.attractionValues[i].att;
+			ArrayList<MinimalAttractionValue> queryPosArray = this.queryAttractionValues.get(newPos);
+			for(int i = 0; i < queryPosArray.size(); i++) {
+				MinimalAttractionValue queryAttVal = queryPosArray.get(i);
+				if(newSeqHash.contains(queryAttVal.hit)) {
+					if (queryAttVal.att >= 0) {
+						retVal += queryAttVal.att;
 					} else {
 						skipped++;
 					}
 				}
-				else if (this.attractionValues[i].query == newPos
-				     &&  newSeqHash.contains(this.attractionValues[i].hit)) {
-					if (this.attractionValues[i].att >= 0) {
-						retVal += this.attractionValues[i].att;
+			}
+
+			ArrayList<MinimalAttractionValue> hitPosArray = this.hitAttractionValues.get(newPos);
+			for(int i = 0; i < hitPosArray.size(); i++) {
+				MinimalAttractionValue hitAttVal = hitPosArray.get(i);
+				if(newSeqHash.contains(hitAttVal.query)) {
+					if (hitAttVal.att >= 0) {
+						retVal += hitAttVal.att;
 					} else {
 						skipped++;
 					}
