@@ -485,7 +485,7 @@ public class ClusterDetection {
 		// Input variables
 		private MinimalAttractionValue[] attractionValues;
 		private float sigmaFactor;
-		private int minSeqNum; // Not used
+		private int minSeqNum;
 		private int seqNum;
 
 		// Internal variables
@@ -564,7 +564,7 @@ public class ClusterDetection {
 				// Get the remaining node with maximum attraction value
 				int seed = this.getMaxAttraction();
 
-				if (seed == -1) {
+				if (seed == -1 && this.minSeqNum <= 1) {
 					// If there are no more attraction values left
 					// Add all leftover sequences as separate clusters
 					while (this.remainingSeqIDs.size() > 0) {
@@ -576,8 +576,10 @@ public class ClusterDetection {
 
 				this.getOneCluster(seed);
 
-				SequenceCluster newCluster = new SequenceCluster(this.newClusterSeqIDs);
-				returnClusters.add(newCluster);
+				if(this.newClusterSeqIDs.size() >= this.minSeqNum) {
+					SequenceCluster newCluster = new SequenceCluster(this.newClusterSeqIDs);
+					returnClusters.add(newCluster);
+				}
 				this.newClusterSeqIDs.clear();
 			}
 
