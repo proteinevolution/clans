@@ -1592,11 +1592,11 @@ public class ProgramWindow extends javax.swing.JFrame {
 				tmpstr = (String) optionsvec.remove(0);
 				int minseqnum = Integer.parseInt(tmpstr);
 				
-				System.out.println("searching for convex clusters");
+				System.out.println("Searching for convex clusters");
 				Vector<SequenceCluster> clustervec = ClusterDetection.getConvex(data.attractionValues, sigmafac, minseqnum,
-						data.elements);
+						data.elements, data.cpu);
 				
-				System.out.println("done searching for clusters; opening window");
+				System.out.println("Done searching for clusters; opening window");
 				if (((String) optionsvec.remove(0)).equalsIgnoreCase("true")) {// if do bootstrap
 					didbootstrap = true;
 					tmpstr = (String) optionsvec.remove(0);
@@ -1608,12 +1608,13 @@ public class ProgramWindow extends javax.swing.JFrame {
 					}
 					
 					if (ClusterDetectionBootstrapping.bootstrapconvex(data.attractionValues, clustervec, "convex", replicates,
-							remove, sigmafac, minseqnum, data.elements) == false) {
+							remove, sigmafac, minseqnum, data.elements, data.cpu) == false) {
 						javax.swing.JOptionPane.showMessageDialog(this, "ERROR while bootstrapping");
 						return;
 					}
 				}
-				new WindowClusterDetectionResults(this, clustervec, "convex: " + minseqnum + ";" + sigmafac, didbootstrap)
+				String clusterString = clustervec.size() == 1 ? " cluster; " : " clusters; ";
+				new WindowClusterDetectionResults(this, clustervec, "Convex: " + clustervec.size() + clusterString + minseqnum + "; " + sigmafac, didbootstrap)
 						.setVisible(true);
 			} catch (NumberFormatException ne) {
 				javax.swing.JOptionPane.showMessageDialog(this, "Unable to parse float from " + tmpstr);
@@ -1625,11 +1626,11 @@ public class ProgramWindow extends javax.swing.JFrame {
 				tmpstr = (String) optionsvec.remove(0);
 				int minseqnum = Integer.parseInt(tmpstr);
 
-				System.out.println("searching for linkage clusters");
+				System.out.println("Searching for linkage clusters");
 				Vector<SequenceCluster> clustervec = ClusterDetection.getlinkage(data.attractionValues, minlinkage, minseqnum,
 						data.elements);
 				
-				System.out.println("done searching for clusters; opening window");
+				System.out.println("Done searching for clusters; opening window");
 				if (((String) optionsvec.remove(0)).equalsIgnoreCase("true")) {// if do bootstrap
 					didbootstrap = true;
 					tmpstr = (String) optionsvec.remove(0);
@@ -1645,7 +1646,8 @@ public class ProgramWindow extends javax.swing.JFrame {
 						return;
 					}
 				}
-				new WindowClusterDetectionResults(this, clustervec, "linkage: " + minseqnum + ";" + minlinkage, didbootstrap)
+				String clusterString = clustervec.size() == 1 ? " cluster; " : " clusters; ";
+				new WindowClusterDetectionResults(this, clustervec, "Linkage: " + clustervec.size() + clusterString + minseqnum + "; " + minlinkage, didbootstrap)
 						.setVisible(true);
 			} catch (NumberFormatException ne) {
 				javax.swing.JOptionPane.showMessageDialog(this, "Unable to parse int from " + tmpstr);
@@ -1666,11 +1668,11 @@ public class ProgramWindow extends javax.swing.JFrame {
 				}
 				int maxrounds = Integer.parseInt(optionsvec.remove(optionsvec.size() - 1));
 
-				System.out.println("searching for network clusters, maxrounds=" + maxrounds);
+				System.out.println("Searching for network clusters, maxrounds=" + maxrounds);
 				Vector<SequenceCluster> clustervec = ClusterDetection.getnetwork(data.attractionValues, minseqnum, dooffset,
 						globalaverage, data.elements, maxrounds);
 				
-				System.out.println("done searching for clusters; opening window");
+				System.out.println("Done searching for clusters; opening window");
 				if (((String) optionsvec.remove(0)).equalsIgnoreCase("true")) {// if do bootstrap
 					didbootstrap = true;
 					tmpstr = (String) optionsvec.remove(0);
@@ -1687,7 +1689,8 @@ public class ProgramWindow extends javax.swing.JFrame {
 						return;
 					}
 				}
-				new WindowClusterDetectionResults(this, clustervec, "network:" + minseqnum + ";" + dooffset + ";" + globalaverage,
+				String clusterString = clustervec.size() == 1 ? " cluster; " : " clusters; ";
+				new WindowClusterDetectionResults(this, clustervec, "Network: " + clustervec.size() + clusterString + minseqnum + "; " + dooffset + "; " + globalaverage,
 						didbootstrap).setVisible(true);
 			} catch (NumberFormatException ne) {
 				javax.swing.JOptionPane.showMessageDialog(this, "Unable to parse int from " + tmpstr);
