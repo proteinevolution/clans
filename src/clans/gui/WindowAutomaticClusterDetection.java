@@ -121,7 +121,7 @@ public class WindowAutomaticClusterDetection extends javax.swing.JDialog {
         convexpanel.setLayout(new java.awt.GridLayout(2, 0));
 
         clustertypebuttonGroup.add(convexclusterradiobutton);
-        convexclusterradiobutton.setText("Convex clustering (slow!)");
+        convexclusterradiobutton.setText("Convex clustering (slowest)");
         convexpanel.add(convexclusterradiobutton);
 
         convexlabel.setText("stdev cutoff");
@@ -170,7 +170,7 @@ public class WindowAutomaticClusterDetection extends javax.swing.JDialog {
         networkpanel.setLayout(new java.awt.GridLayout(0, 3));
 
         clustertypebuttonGroup.add(networkclusterradiobutton);
-        networkclusterradiobutton.setText("Network based");
+        networkclusterradiobutton.setText("Network based (fastest)");
         networkpanel.add(networkclusterradiobutton);
 
         minseqlabel.setText("min. sequences per cluster");

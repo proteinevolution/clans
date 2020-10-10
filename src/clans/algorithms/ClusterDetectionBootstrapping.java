@@ -8,7 +8,7 @@ import clans.model.proteins.MinimalAttractionValue;
 public class ClusterDetectionBootstrapping {
     
     public static boolean bootstrapconvex(MinimalAttractionValue[] dataarr, Vector<SequenceCluster> clustervec, String clustermethod, int replicates,
-            float remove, float sigmafac, int minseqnum, int elements) {
+            float remove, float sigmafac, int minseqnum, int elements, int cpuNum) {
         //remove "remove" of data and then recluster for "replicates" replicates.
         //then get the cluster confidences AND sequence to cluster confidences
         Vector<SequenceCluster>[] replicate = new Vector[replicates];
@@ -28,7 +28,7 @@ public class ClusterDetectionBootstrapping {
             tmpdata.copyInto(tmparr);
             tmpdata.clear();
             //now get the cluster for this data
-            replicate[i]=ClusterDetection.getConvex(tmparr,sigmafac,minseqnum,elements);
+            replicate[i]=ClusterDetection.getConvex(tmparr, sigmafac, minseqnum, elements, cpuNum);
         }//end for i
         //now compare the replicate clusters to the original
         checkreplicates(clustervec, replicate);

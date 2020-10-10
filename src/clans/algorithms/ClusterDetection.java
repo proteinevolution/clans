@@ -1,6 +1,7 @@
 package clans.algorithms;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 import clans.model.SequenceCluster;
 import clans.model.proteins.MinimalAttractionValue;
@@ -475,8 +476,8 @@ public class ClusterDetection {
 	// clustering------------------------------------
 	// --------------------------------------------------------------------------
 	public static Vector<SequenceCluster> getConvex(MinimalAttractionValue[] attractionValues,
-			float sigmaFactor, int minSeqNum, int seqNum) {
-		ConvexClustering convex = new ConvexClustering(attractionValues, sigmaFactor, minSeqNum, seqNum);
+			float sigmaFactor, int minSeqNum, int seqNum, int cpuNum) {
+		ConvexClustering convex = new ConvexClustering(attractionValues, sigmaFactor, minSeqNum, seqNum, cpuNum);
 		return convex.getConvex();
 	}
 
@@ -487,6 +488,7 @@ public class ClusterDetection {
 		private float sigmaFactor;
 		private int minSeqNum;
 		private int seqNum;
+		private int cpuNum;
 
 		// Internal variables
 		private ArrayList<Integer> remainingSeqIDs;
@@ -495,18 +497,21 @@ public class ClusterDetection {
 		private ArrayList<ArrayList<MinimalAttractionValue>> hitAttractionValues;
 		private float avgAttraction;
 		private float attractionVar;
+		private ExecutorService threadPool = null;
 
 		private ConvexClustering(
 		                         MinimalAttractionValue[] attractionValues,
 		                         float sigmaFactor,
 		                         int minSeqNum,
-		                         int seqNum
+		                         int seqNum,
+		                         int cpuNum
 		                        )
 		{
 			this.attractionValues = attractionValues;
 			this.sigmaFactor      = sigmaFactor;
 			this.minSeqNum        = minSeqNum;
 			this.seqNum           = seqNum;
+			this.cpuNum           = cpuNum;
 		}
 
 		private void initialize()
@@ -543,6 +548,58 @@ public class ClusterDetection {
 			{
 				this.queryAttractionValues.get(attractionValues[i].query).add(attractionValues[i]);
 				this.hitAttractionValues.get(attractionValues[i].hit).add(attractionValues[i]);
+			}
+
+			this.initializeThreadPool();
+		}
+
+		private void initializeThreadPool()
+		{
+			if(this.cpuNum > 1) {
+				this.threadPool = Executors.newFixedThreadPool(this.cpuNum);
+			}
+		}
+
+		private void shutdownThreadPool()
+		{
+			if(this.cpuNum > 1) {
+				this.threadPool.shutdown();
+			}
+		}
+
+		private void waitForThreads(Donable[] threads) {
+			synchronized(this) {
+
+				while(true) {
+					boolean done = true;
+					for(int i = 0; i < threads.length; i++) {
+						if(!threads[i].isDone()) {
+							done = false;
+							break;
+						}
+					}
+
+					if(done) {
+						break;
+					}
+
+					try {
+						/**
+						* wait on the sync object pauses this thread until a computation is finished in a child thread,
+						* which reawakens this thread by sync.notify()
+						*/
+						this.wait();
+
+					} catch (InterruptedException e) {
+						/**
+						* We want the InterruptedException to inform the thread to stop iterating after this round.
+						* However, when .wait() throws this Exception, the interrupted state of this thread is reset to
+						* false. As we want to finish this round, we later need to tell the thread to stop.
+						*/
+
+						// Currently not implemented here
+					}
+				}
 			}
 		}
 
@@ -586,6 +643,8 @@ public class ClusterDetection {
 			// Now sort the vector
 			returnClusters.sort(new ClusterSizeComparator());
 
+			this.shutdownThreadPool();
+
 			return returnClusters;
 		}// end getConvex
 
@@ -610,37 +669,19 @@ public class ClusterDetection {
 			float[] sumVals = new float[remainingSeqNum];
 			for (int i = 0; i < remainingSeqNum; i++) {
 				remaining2Index.put(this.remainingSeqIDs.get(i), new Integer(i));
-				sumVals[i] = 0;
+				sumVals[i] = 0.0f;
 			}
 
-			float maxVal = 0;
+			MaxAttraction[] threads = new MaxAttraction[this.cpuNum];
+			this.runThreads(threads, remaining2Index, sumVals);
+
+			float maxVal = 0.0f;
 			int maxNum = -1;
-			int attNum = this.attractionValues.length;
 
-			for(int i = 0; i < this.queryAttractionValues.size(); i++) {
-				if (remaining2Index.containsKey(i)) {
-					ArrayList<MinimalAttractionValue> queryPosArray = this.queryAttractionValues.get(i);
-					int index = remaining2Index.get(i).intValue();
-					for(int j = 0; j < queryPosArray.size(); j++) {
-						sumVals[index] += queryPosArray.get(j).att;
-					}
-				}
-			}
-
-			for(int i = 0; i < this.hitAttractionValues.size(); i++) {
-				if (remaining2Index.containsKey(i)) {
-					ArrayList<MinimalAttractionValue> hitPosArray = this.hitAttractionValues.get(i);
-					int index = remaining2Index.get(i).intValue();
-					for(int j = 0; j < hitPosArray.size(); j++) {
-						sumVals[index] += hitPosArray.get(j).att;
-					}
-				}
-			}
-
-			for (int i = 0; i < remainingSeqNum; i++) {
-				if (sumVals[i] > maxVal) {
-					maxVal = sumVals[i];
-					maxNum = i;
+			for(int i = 0; i < threads.length; i++) {
+				if (threads[i].maxVal > maxVal) {
+					maxVal = threads[i].maxVal;
+					maxNum = threads[i].maxNum;
 				}
 			}
 
@@ -657,7 +698,6 @@ public class ClusterDetection {
 			newSeqHash.add(seedNum);
 			// Now add all those values with attraction to newClusterSeqIDs greater than to
 			// remainingSeqIDs.
-			int remainingSeqs = this.remainingSeqIDs.size();
 
 			boolean foundNew = true;
 			float limit = (this.avgAttraction + (this.sigmaFactor * this.attractionVar));
@@ -665,23 +705,21 @@ public class ClusterDetection {
 
 				foundNew = false;
 
-				remainingSeqs = this.remainingSeqIDs.size();
+				int remainingSeqs = this.remainingSeqIDs.size();
 				if (remainingSeqs % 100 == 0) {
 					System.out.print(remainingSeqs);
 				}
 
+				NextSequenceForCluster[] threads = new NextSequenceForCluster[this.cpuNum];
+				this.runThreads(threads, newSeqHash, remainingSeqs);
+
 				float maxAtt = -1;
 				int maxNum = -1;
 
-				// Now get the element with highest attraction to the new vector of elements
-				for (int i = 0; i < remainingSeqs; i++) {
-
-					int newPos = this.remainingSeqIDs.get(i).intValue();
-					float currAtt = this.getAverageLocalAttraction(newPos, newSeqHash);
-
-					if (currAtt > maxAtt) {
-						maxAtt = currAtt;
-						maxNum = i;
+				for(int i = 0; i < threads.length; i++) {
+					if (threads[i].maxAtt > maxAtt) {
+						maxAtt = threads[i].maxAtt;
+						maxNum = threads[i].maxNum;
 					}
 				}
 
@@ -703,7 +741,6 @@ public class ClusterDetection {
 		private float getAverageLocalAttraction(int newPos, HashSet<Integer> newSeqHash) {
 
 			int newClusterSeqs = this.newClusterSeqIDs.size();
-			int attNum = this.attractionValues.length;
 			float retVal = 0;
 			int skipped = 0;
 
@@ -779,6 +816,177 @@ public class ClusterDetection {
 
 			this.attractionVar = sumVal / (float) (((this.seqNum * (this.seqNum - 1)) / 2) - skipped);
 		}// end getAttractionVariance
+
+		private void runThreads(MaxAttraction[] threads, HashMap<Integer, Integer> remaining2Index, float[] sumVals) {
+			// Duplicated code in runThreads, however the constructor differs, so that is hard to parameterize
+			for(int i = 0; i < threads.length; i++){
+				int start;
+				int end;
+				if (i == (threads.length - 1)) {
+					// Do everything from here to the last element to avoid rounding errors
+					// If this.seqNum < threads.length everything goes to the last thread
+					start = i * (int) (this.seqNum / threads.length);
+					end   = this.seqNum;
+				} else {
+					start =  i      * (int) (this.seqNum / threads.length);
+					end   = (i + 1) * (int) (this.seqNum / threads.length);
+				}
+
+				threads[i] = new MaxAttraction(sumVals, remaining2Index, start, end);
+			}
+
+			if(threads.length == 1) {
+				// If we have just one CPU we run the run method
+				// directly in this thread. 
+				threads[0].run();
+			}
+			else {
+				// Otherwise we use the threads from the pool to run it.
+				for(int i = 0; i < threads.length; i++) {
+					this.threadPool.execute(threads[i]);
+				}
+
+				this.waitForThreads(threads);
+			}
+		}
+
+		private void runThreads(NextSequenceForCluster[] threads, HashSet<Integer> newSeqHash, int remainingSeqs) {
+
+			// Duplicated code in runThreads, however the constructor differs, so that is hard to parameterize
+			for(int i = 0; i < threads.length; i++) {
+				int start;
+				int end;
+				if (i == (threads.length - 1)) {
+					// Do everything from here to the last element to avoid rounding errors
+					// If remainingSeqs < threads.length everything goes to the last thread
+					start = i * (int) (remainingSeqs / threads.length);
+					end   = remainingSeqs;
+				} else {
+					start =  i      * (int) (remainingSeqs / threads.length);
+					end   = (i + 1) * (int) (remainingSeqs / threads.length);
+				}
+
+				threads[i] = new NextSequenceForCluster(newSeqHash, start, end);
+			}
+
+			if(threads.length == 1) {
+				// If we have just one CPU we run the run method
+				// directly in this thread. 
+				threads[0].run();
+			}
+			else {
+				// Otherwise we use the threads from the pool to run it.
+				for(int i = 0; i < threads.length; i++) {
+					this.threadPool.execute(threads[i]);
+				}
+
+				this.waitForThreads(threads);
+			}
+		}
+
+		private interface Donable extends Runnable {
+			public boolean isDone();
+		}
+
+		private class MaxAttraction implements Donable {
+
+			private final float[] sumVals;
+			private final HashMap<Integer, Integer> remaining2Index;
+			private final int start;
+			private final int end;
+			private float maxVal = 0.0f;
+			private int maxNum = -1;
+			private boolean done = false;
+
+			private MaxAttraction(float[] sumVals, HashMap<Integer, Integer> remaining2Index, int start, int end) {
+				this.sumVals         = sumVals;
+				this.remaining2Index = remaining2Index;
+				this.start           = start;
+				this.end             = end;
+			}
+
+			public boolean isDone() {
+				return this.done;
+			}
+
+			public void run() {
+				for(int i = this.start; i < this.end; i++) {
+					if (this.remaining2Index.containsKey(i)) {
+						ArrayList<MinimalAttractionValue> queryPosArray = ConvexClustering.this.queryAttractionValues.get(i);
+						int index = this.remaining2Index.get(i).intValue();
+						for(int j = 0; j < queryPosArray.size(); j++) {
+							this.sumVals[index] += queryPosArray.get(j).att;
+						}
+					}
+				}
+
+				for(int i = this.start; i < this.end; i++) {
+					if (this.remaining2Index.containsKey(i)) {
+						ArrayList<MinimalAttractionValue> hitPosArray = ConvexClustering.this.hitAttractionValues.get(i);
+						int index = this.remaining2Index.get(i).intValue();
+						for(int j = 0; j < hitPosArray.size(); j++) {
+							this.sumVals[index] += hitPosArray.get(j).att;
+						}
+					}
+				}
+
+				for(int i = this.start; i < this.end; i++) {
+					if (this.remaining2Index.containsKey(i)) {
+						int index = this.remaining2Index.get(i).intValue();
+							if (this.sumVals[index] > this.maxVal) {
+							this.maxVal = this.sumVals[index];
+							this.maxNum = index;
+						}
+					}
+				}
+
+				synchronized(ConvexClustering.this) {
+					this.done = true;
+					ConvexClustering.this.notify();
+				}
+			}
+		}
+
+		private class NextSequenceForCluster implements Donable {
+
+			private final HashSet<Integer> newSeqHash;
+			private final int start;
+			private final int end;
+			private float maxAtt = -1.0f;
+			private int maxNum = 0;
+			private boolean done = false;
+
+			private NextSequenceForCluster(HashSet<Integer> newSeqHash, int start, int end) {
+				this.newSeqHash = newSeqHash;
+				this.start      = start;
+				this.end        = end;
+			}
+
+			public boolean isDone() {
+				return this.done;
+			}
+
+			public void run() {
+
+				// Now get the element with highest attraction to the new vector of elements
+				for (int i = this.start; i < this.end; i++) {
+
+					int newPos = ConvexClustering.this.remainingSeqIDs.get(i).intValue();
+					float currAtt = ConvexClustering.this.getAverageLocalAttraction(newPos, this.newSeqHash);
+
+					if (currAtt > this.maxAtt) {
+						this.maxAtt = currAtt;
+						this.maxNum = i;
+					}
+				}
+
+				synchronized(ConvexClustering.this) {
+					this.done = true;
+					ConvexClustering.this.notify();
+				}
+			}
+		}
+
 	} // End ConvexClustering
 
 	// ------------------------------------------------------------------------------
@@ -850,7 +1058,7 @@ public class ClusterDetection {
 		}// end for i
 		ArrayList<element>[] clusters = tmphash.values().toArray(new ArrayList[0]);
         
-		System.out.println("sorting clusters by size (" + clusters.length + ")");
+		System.out.println("Sorting clusters by size (" + clusters.length + ")");
 		java.util.Arrays.sort(clusters, new sizecomparator());
 		
 		Vector<SequenceCluster> clustervec = new Vector<SequenceCluster>();
@@ -859,7 +1067,7 @@ public class ClusterDetection {
 		for (int i = clusters.length; --i >= 0;) {
 			tmp = clusters[i];
 			currcluster = new SequenceCluster();
-			currcluster.name = "cluster " + i;
+			currcluster.name = "Cluster " + i;
 			currcluster.members = new int[tmp.size()];
 			// System.out.println("finalizing cluster "+i+" elements="+tmp.size());
 			if (tmp.size() >= minseqnum) {
