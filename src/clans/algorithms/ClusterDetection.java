@@ -26,15 +26,12 @@ public class ClusterDetection {
 				newClusterMembers[i] = i;
 			}// end for i
 			SequenceCluster newcluster = new SequenceCluster(newClusterMembers);
+			newcluster.name = "Cluster 0";
 			retvec.add(newcluster);
 		} else if (minlinks == 1) {// single linkage
 			singlelinkage(attvals, retvec, minseqnum, seqnum);
-			// now sort the return vector
-			// cluster is sorted in singlelinkage method
 		} else {// otherwise it gets a bit more difficult
 			multilinkage(attvals, retvec, minseqnum, minlinks, seqnum);
-			// now sort the vector
-			retvec.sort(new ClusterSizeComparator());
 		}
 		return retvec;
 	}// end getlinkage
@@ -258,6 +255,13 @@ public class ClusterDetection {
 				retvec.addElement(newcluster);
 			}
 		}// end while done==false
+
+		retvec.sort(new ClusterSizeComparator());
+
+		for(int i = 0; i < retvec.size(); i++) {
+			retvec.get(i).name = "Cluster " + i;
+		}
+
 		return;
 	}// end multilinkage
 
@@ -443,6 +447,7 @@ public class ClusterDetection {
 		java.util.Arrays.sort(clusterarr, new ClusterSizeComparator());
 		for (int i = 0; i < counter; i++) {
             if (clusterarr[i].members.length >= minseqnum) {
+				clusterarr[i].name = "Cluster " + retvec.size();
 				retvec.addElement(clusterarr[i]);
 			} else {
 				break;
@@ -642,6 +647,12 @@ public class ClusterDetection {
 
 			// Now sort the vector
 			returnClusters.sort(new ClusterSizeComparator());
+
+			// Give the clusters unique names
+			for(int i = 0; i < returnClusters.size(); i++) {
+				returnClusters.get(i).name = "Cluster " + i;
+			}
+
 
 			this.shutdownThreadPool();
 
@@ -1061,12 +1072,14 @@ public class ClusterDetection {
 		System.out.println("Sorting clusters by size (" + clusters.length + ")");
 		java.util.Arrays.sort(clusters, new sizecomparator());
 		
-		Vector<SequenceCluster> clustervec = new Vector<SequenceCluster>();
+		Vector<SequenceCluster> returnClusters = new Vector<SequenceCluster>();
 		SequenceCluster currcluster;
 		ArrayList<element> tmp;
-		for (int i = clusters.length; --i >= 0;) {
+
+		for (int i = 0; i < clusters.length; i++) {
 			tmp = clusters[i];
 			currcluster = new SequenceCluster();
+			System.out.println(i);
 			currcluster.name = "Cluster " + i;
 			currcluster.members = new int[tmp.size()];
 			// System.out.println("finalizing cluster "+i+" elements="+tmp.size());
@@ -1074,26 +1087,20 @@ public class ClusterDetection {
 				for (int j = tmp.size(); --j >= 0;) {
 					currcluster.members[j] = tmp.get(j).index;
 				}// end for j
-				clustervec.add(currcluster);
+				returnClusters.add(currcluster);
 			}
 		}// end for i
 		System.out.println("Done network based clustering");
-		return clustervec;
+		return returnClusters;
 	}// end getnetwork
 
 	static class sizecomparator implements Comparator<ArrayList<element>> {
 
 		public int compare(ArrayList<element> a1, ArrayList<element> a2) {
-            int a1s = a1.size();
-            int a2s = a2.size();
-
-			if (a1s > a2s) {
-				return 1;
-			} else if (a1s < a2s) {
-				return -1;
-			} else {
-				return 0;
-			}
+			// Sort largest first
+			int num1 = a1.size();
+			int num2 = a2.size();
+			return (num1 < num2 ? 1 : (num1 == num2 ? 0 : -1));
 		}
 	}
 
@@ -1307,10 +1314,10 @@ public class ClusterDetection {
 
 class ClusterSizeComparator implements Comparator<SequenceCluster> {
 
-    public int compare(SequenceCluster o1, SequenceCluster o2) {
-         // sort largest first
-        int num1 = o1.members.length;
-        int num2 = o2.members.length;
+	public int compare(SequenceCluster o1, SequenceCluster o2) {
+		// Sort largest first
+		int num1 = o1.members.length;
+		int num2 = o2.members.length;
 		return (num1 < num2 ? 1 : (num1 == num2 ? 0 : -1));
 	}
 }
