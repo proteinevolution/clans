@@ -1583,6 +1583,8 @@ public class ProgramWindow extends javax.swing.JFrame {
 		if (optionsvec.size() == 0) {// if I canceled
 			return;
 		}
+
+		// @ToDo merge these three repetitions of code
 		boolean didbootstrap = false;
 		String tmpstr = (String) optionsvec.remove(0);
 		if (tmpstr.equals("convex")) {
@@ -1593,10 +1595,10 @@ public class ProgramWindow extends javax.swing.JFrame {
 				int minseqnum = Integer.parseInt(tmpstr);
 				
 				System.out.println("Searching for convex clusters");
+				final long startTime = System.currentTimeMillis();
 				Vector<SequenceCluster> clustervec = ClusterDetection.getConvex(data.attractionValues, sigmafac, minseqnum,
 						data.elements, data.cpu);
-				
-				System.out.println("Done searching for clusters; opening window");
+
 				if (((String) optionsvec.remove(0)).equalsIgnoreCase("true")) {// if do bootstrap
 					didbootstrap = true;
 					tmpstr = (String) optionsvec.remove(0);
@@ -1613,6 +1615,11 @@ public class ProgramWindow extends javax.swing.JFrame {
 						return;
 					}
 				}
+
+				final long totalTime = System.currentTimeMillis() - startTime;
+				System.out.println("");
+				System.out.println(String.format("Searching for clusters took %s seconds; opening window", (totalTime) / 1000.0f));
+
 				String clusterString = clustervec.size() == 1 ? " cluster; " : " clusters; ";
 				new WindowClusterDetectionResults(this, clustervec, "Convex: " + clustervec.size() + clusterString + minseqnum + "; " + sigmafac, didbootstrap)
 						.setVisible(true);
@@ -1627,10 +1634,10 @@ public class ProgramWindow extends javax.swing.JFrame {
 				int minseqnum = Integer.parseInt(tmpstr);
 
 				System.out.println("Searching for linkage clusters");
+				final long startTime = System.currentTimeMillis();
 				Vector<SequenceCluster> clustervec = ClusterDetection.getlinkage(data.attractionValues, minlinkage, minseqnum,
 						data.elements);
-				
-				System.out.println("Done searching for clusters; opening window");
+
 				if (((String) optionsvec.remove(0)).equalsIgnoreCase("true")) {// if do bootstrap
 					didbootstrap = true;
 					tmpstr = (String) optionsvec.remove(0);
@@ -1646,6 +1653,11 @@ public class ProgramWindow extends javax.swing.JFrame {
 						return;
 					}
 				}
+
+				final long totalTime = System.currentTimeMillis() - startTime;
+				System.out.println("");
+				System.out.println(String.format("Searching for clusters took %s seconds; opening window", (totalTime) / 1000.0f));
+
 				String clusterString = clustervec.size() == 1 ? " cluster; " : " clusters; ";
 				new WindowClusterDetectionResults(this, clustervec, "Linkage: " + clustervec.size() + clusterString + minseqnum + "; " + minlinkage, didbootstrap)
 						.setVisible(true);
@@ -1669,10 +1681,10 @@ public class ProgramWindow extends javax.swing.JFrame {
 				int maxrounds = Integer.parseInt(optionsvec.remove(optionsvec.size() - 1));
 
 				System.out.println("Searching for network clusters, maxrounds=" + maxrounds);
+				final long startTime = System.currentTimeMillis();
 				Vector<SequenceCluster> clustervec = ClusterDetection.getnetwork(data.attractionValues, minseqnum, dooffset,
 						globalaverage, data.elements, maxrounds);
-				
-				System.out.println("Done searching for clusters; opening window");
+
 				if (((String) optionsvec.remove(0)).equalsIgnoreCase("true")) {// if do bootstrap
 					didbootstrap = true;
 					tmpstr = (String) optionsvec.remove(0);
@@ -1689,6 +1701,11 @@ public class ProgramWindow extends javax.swing.JFrame {
 						return;
 					}
 				}
+
+				final long totalTime = System.currentTimeMillis() - startTime;
+				System.out.println("");
+				System.out.println(String.format("Searching for clusters took %s seconds; opening window", (totalTime) / 1000.0f));
+
 				String clusterString = clustervec.size() == 1 ? " cluster; " : " clusters; ";
 				new WindowClusterDetectionResults(this, clustervec, "Network: " + clustervec.size() + clusterString + minseqnum + "; " + dooffset + "; " + globalaverage,
 						didbootstrap).setVisible(true);
