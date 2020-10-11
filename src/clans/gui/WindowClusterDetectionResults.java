@@ -18,8 +18,8 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
     String[] clusterNames;
     boolean didBootStrap = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton addToIndividualSeqGroupsButton;
-    private javax.swing.JButton addToSeqGroupsButton;
+    private javax.swing.JButton addEachSelectedClusterAsSeqGroupButton;
+    private javax.swing.JButton addSelectedSeqsAsOneGroupButton;
     private javax.swing.JButton closeButton;
     private javax.swing.JList clusterList;
     private javax.swing.JPanel listPanel;
@@ -46,8 +46,8 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         scrollPanel = new javax.swing.JScrollPane();
         clusterList = new javax.swing.JList(clusterNames);
         buttonPanel = new javax.swing.JPanel();
-        addToSeqGroupsButton = new javax.swing.JButton();
-        addToIndividualSeqGroupsButton = new javax.swing.JButton();
+        addSelectedSeqsAsOneGroupButton = new javax.swing.JButton();
+        addEachSelectedClusterAsSeqGroupButton = new javax.swing.JButton();
         closeButton = new javax.swing.JButton();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -72,23 +72,23 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
 
         buttonPanel.setLayout(new java.awt.GridLayout(1, 0));
 
-        addToSeqGroupsButton.setText("Add to sequence groups");
-        addToSeqGroupsButton.addActionListener(new java.awt.event.ActionListener() {
+        addSelectedSeqsAsOneGroupButton.setText("Add selected clusters as one group");
+        addSelectedSeqsAsOneGroupButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addToSeqGroupsButtonActionPerformed(evt);
+                addSelectedSeqsAsOneGroupButtonActionPerformed(evt);
             }
         });
 
-        buttonPanel.add(addToSeqGroupsButton);
+        buttonPanel.add(addSelectedSeqsAsOneGroupButton);
 
-        addToIndividualSeqGroupsButton.setText("Add each as separate sequence group");
-        addToIndividualSeqGroupsButton.addActionListener(new java.awt.event.ActionListener() {
+        addEachSelectedClusterAsSeqGroupButton.setText("Add each selected cluster as one group");
+        addEachSelectedClusterAsSeqGroupButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addToIndividualSeqGroupsButtonActionPerformed(evt);
+                addEachSelectedClusterAsSeqGroupButtonActionPerformed(evt);
             }
         });
 
-        buttonPanel.add(addToIndividualSeqGroupsButton);
+        buttonPanel.add(addEachSelectedClusterAsSeqGroupButton);
 
         closeButton.setText("Close");
         closeButton.addActionListener(new java.awt.event.ActionListener() {
@@ -108,7 +108,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
      * add each of the currently selected clusters as separate sequence group
      * @param evt
      */
-    private void addToIndividualSeqGroupsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addToIndividualSeqGroupsButtonActionPerformed
+    private void addEachSelectedClusterAsSeqGroupButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addEachSelectedClusterAsSeqGroupButtonActionPerformed
         String newName=javax.swing.JOptionPane.showInputDialog(this,"Base group name:",this.getTitle());
 
         if(newName == null){
@@ -130,13 +130,13 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         }
 
         parent.repaint();
-    }//GEN-LAST:event_addToIndividualSeqGroupsButtonActionPerformed
+    }//GEN-LAST:event_addEachSelectedClusterAsSeqGroupButtonActionPerformed
 
     /**
      * add the currently selected groups to the seqgroups vector
      * @param evt
      */
-    private void addToSeqGroupsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addToSeqGroupsButtonActionPerformed
+    private void addSelectedSeqsAsOneGroupButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addSelectedSeqsAsOneGroupButtonActionPerformed
         String newName = javax.swing.JOptionPane.showInputDialog(this,"Group name:","selected sequences");
 
         if(newName == null){
@@ -169,7 +169,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         parent.data.seqgroupsvec.addElement(newGroup);
 
         parent.repaint();
-    }//GEN-LAST:event_addToSeqGroupsButtonActionPerformed
+    }//GEN-LAST:event_addSelectedSeqsAsOneGroupButtonActionPerformed
 
     private void closeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
         this.setVisible(false);
