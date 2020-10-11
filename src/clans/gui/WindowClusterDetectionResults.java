@@ -123,7 +123,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         
         for (int i = selectedvals.length; --i >= 0;) {
             
-            SequenceGroup newgroup = new SequenceGroup(newname + "_" + i, clusters.elementAt(selectedvals[i]).members,
+            SequenceGroup newgroup = new SequenceGroup(newname + "_" + i, clusters.get(selectedvals[i]).members,
                     parent.data.groupsize, 0, Color.red);
 
             parent.data.seqgroupsvec.addElement(newgroup);
@@ -147,7 +147,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         }
         int newsize=0;
         for(int i=selectedvals.length;--i>=0;){
-            newsize+=((SequenceCluster)clusters.elementAt(selectedvals[i])).members.length;
+            newsize += clusters.get(selectedvals[i]).members.length;
         }//end for i
         //now add all the values to a new array
         int[] newselected=new int[newsize];
@@ -155,7 +155,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         int mysize;
         int[] myarr;
         for(int i=selectedvals.length-1;i>=0;i--){
-            myarr=((SequenceCluster)clusters.elementAt(selectedvals[i])).members;
+            myarr = clusters.get(selectedvals[i]).members;
             mysize=myarr.length;
             for(int j=0;j<mysize;j++){
                 newselected[j+currcount]=myarr[j];
@@ -182,7 +182,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         int[] selectedvals=clusterlist.getSelectedIndices();
         int newsize=0;
         for(int i=selectedvals.length-1;i>=0;i--){
-            newsize+=((SequenceCluster)clusters.elementAt(selectedvals[i])).members.length;
+            newsize += clusters.get(selectedvals[i]).members.length;
         }//end for i
         //now add all the values to a new array
         int[] newselected=new int[newsize];
@@ -196,8 +196,8 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         int[] myarr;
         float[] myconf;
         for(int i=selectedvals.length-1;i>=0;i--){
-            myarr=((SequenceCluster)clusters.elementAt(selectedvals[i])).members;
-            myconf=((SequenceCluster)clusters.elementAt(selectedvals[i])).seqConfidence;
+            myarr = clusters.get(selectedvals[i]).members;
+            myconf = clusters.get(selectedvals[i]).seqConfidence;
             mysize=myarr.length;
             if(didbootstrap){//was: myconf!=null){
                 for(int j=0;j<mysize;j++){
