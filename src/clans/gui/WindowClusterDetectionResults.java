@@ -117,11 +117,11 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
 
         int[] selectedValues = clusterList.getSelectedIndices();
 
-        if (selectedValues.length == 0) {
+        if(selectedValues.length == 0) {
             return;
         }
 
-        for (int i = selectedValues.length; --i >= 0;) {
+        for(int i = 0; i < selectedValues.length; i++) {
 
             SequenceGroup newGroup = new SequenceGroup(newName + "_" + i, clusters.get(selectedValues[i]).members,
                     parent.data.groupsize, 0, Color.red);
@@ -149,17 +149,17 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         }
 
         int newSize = 0;
-        for(int i = selectedValues.length; --i >= 0;){
+        for(int i = 0; i < selectedValues.length; i++) {
             newSize += clusters.get(selectedValues[i]).members.length;
         }//end for i
 
         //now add all the values to a new array
         int[] newSelected = new int[newSize];
         int currCount = 0;
-        for(int i = selectedValues.length - 1; i >= 0; i--){
+        for(int i = 0; i < selectedValues.length; i++) {
 
             int[] clusterMembers = clusters.get(selectedValues[i]).members;
-            for(int j = 0; j < clusterMembers.length; j++){
+            for(int j = 0; j < clusterMembers.length; j++) {
                 newSelected[j + currCount] = clusterMembers[j];
             }//end for j
             currCount += clusterMembers.length;
@@ -183,7 +183,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
     private void clusterListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_clusterListValueChanged
         int[] selectedValues = clusterList.getSelectedIndices();
         int newSize = 0;
-        for(int i = selectedValues.length - 1; i >= 0; i--){
+        for (int i = 0; i < selectedValues.length; i++) {
             newSize += clusters.get(selectedValues[i]).members.length;
         }//end for i
 
@@ -196,7 +196,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         }
 
         int currCount=0;
-        for(int i = selectedValues.length - 1; i >= 0; i--) {
+        for (int i = 0; i < selectedValues.length; i++) {
             int[] clusterMembers = clusters.get(selectedValues[i]).members;
             float[] myConfidence = clusters.get(selectedValues[i]).seqConfidence;
 
