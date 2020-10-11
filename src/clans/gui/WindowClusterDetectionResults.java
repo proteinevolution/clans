@@ -109,7 +109,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
      * @param evt
      */
     private void addEachSelectedClusterAsSeqGroupButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addEachSelectedClusterAsSeqGroupButtonActionPerformed
-        String newName=javax.swing.JOptionPane.showInputDialog(this,"Base group name:",this.getTitle());
+        String newName=javax.swing.JOptionPane.showInputDialog(this,"Base group name:",this.getTitle() + "_");
 
         if(newName == null){
             return;
@@ -123,7 +123,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
 
         for(int i = 0; i < selectedValues.length; i++) {
 
-            SequenceGroup newGroup = new SequenceGroup(newName + "_" + i, clusters.get(selectedValues[i]).members,
+            SequenceGroup newGroup = new SequenceGroup(newName + selectedValues[i], clusters.get(selectedValues[i]).members,
                     parent.data.groupsize, 0, Color.red);
 
             parent.data.seqgroupsvec.addElement(newGroup);
