@@ -81,8 +81,9 @@ public class ClusterMethods {
 	
         if (move_only_selected_sequences) {
 
-			// assign each sequence to a thread
-			java.util.HashMap<String, Integer> sequence_thread_mapping = new java.util.HashMap<String, Integer>();
+			// Assign each sequence to a thread
+			// This seems to be created every round, which is not efficient
+			java.util.HashMap<Integer, Integer> sequence_thread_mapping = new java.util.HashMap<Integer, Integer>();
 			int sequences_per_threads = data.selectedSequencesIndicesStableCopy.length / data.cpu;
 			int thread_for_this_sequence;
 
@@ -91,7 +92,7 @@ public class ClusterMethods {
 				if (thread_for_this_sequence > data.cpu - 1) {
 					thread_for_this_sequence = data.cpu - 1;
 				}
-				sequence_thread_mapping.put(String.valueOf(data.selectedSequencesIndicesStableCopy[i]), Integer.valueOf(thread_for_this_sequence));
+				sequence_thread_mapping.put(data.selectedSequencesIndicesStableCopy[i], thread_for_this_sequence);
 			}
 
 			for (int i = 0; i < data.cpu; i++) {
@@ -214,6 +215,7 @@ public class ClusterMethods {
         float[] weights=data.weights;
         
 		if (move_only_selected_sequences) {
+			// This seems to be created every round, which is not efficient
 			java.util.HashMap<Integer, Integer> tmphash = new java.util.HashMap<Integer, Integer>(
 					(int) (selected_sequences_indices.length / 0.8) + 1, 0.8f);
 

@@ -21,7 +21,7 @@ public class MovementComputerThread extends java.lang.Thread {
 	 * @param selectedNamesIndices
 	 */
 	public MovementComputerThread(ClusterData data, int thread_id, final Object informParentOfCompletenessLock,
-			HashMap<String, Integer> selectedNamesHash) {
+			HashMap<Integer, Integer> selectedNamesHash) {
 
 		this(data, thread_id, informParentOfCompletenessLock);
 
@@ -63,7 +63,7 @@ public class MovementComputerThread extends java.lang.Thread {
 	private MinimalAttractionValue[] attractions;
 	private float[][] movements;
 
-	private HashMap<String, Integer> selectedNamesHash = null;
+	private HashMap<Integer, Integer> selectedNamesHash = null;
 	private int[] selectedNamesIndices = null; // a local copy of parent.selectednames, as that may change during a calculation
 
 	/**
@@ -79,7 +79,7 @@ public class MovementComputerThread extends java.lang.Thread {
 	private boolean doSelectedOnly() {
 		return selectedNamesHash != null && selectedNamesIndices != null;
 	}
-    
+
     /**
      * use the positions of all elements and their attraction/repulsion values to calculate a movement vector for each
      * (take into account the last movement). repulsion doesn't have a specific value as all evalues below a certain
@@ -131,19 +131,19 @@ public class MovementComputerThread extends java.lang.Thread {
                 
                 // now add the attraction values, but only for the query or hit sequences for which I am responsible
                 for (int i = attnum; --i >= 0;) {
-                    if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].query))) && (selectedNamesHash.get(String.valueOf(attractions[i].query)).intValue() == threadId)) {
+                    if ((selectedNamesHash.containsKey(attractions[i].query)) && (selectedNamesHash.get(attractions[i].query).intValue() == threadId)) {
                         ClusterMethods.addAttraction(positions[attractions[i].query], positions[attractions[i].hit], attractions[i].att,
                                 currmoveatt, attvalpow, attfactor, data.cluster2d);
 
                         movements[attractions[i].query][0] += currmoveatt[0];
                         movements[attractions[i].query][1] += currmoveatt[1];
                         //movement[attvals[i].query][2]+=currmoveatt[2];
-                        if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].hit))) && (selectedNamesHash.get(String.valueOf(attractions[i].hit)).intValue() == threadId)) {
+                        if ((selectedNamesHash.containsKey(attractions[i].hit)) && (selectedNamesHash.get(attractions[i].hit).intValue() == threadId)) {
                             movements[attractions[i].hit][0] -= currmoveatt[0];
                             movements[attractions[i].hit][1] -= currmoveatt[1];
                             //movement[attvals[i].hit][2]-=currmoveatt[2];
                         }
-                    } else if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].hit))) && (selectedNamesHash.get(String.valueOf(attractions[i].hit)).intValue() == threadId)) {
+                    } else if ((selectedNamesHash.containsKey(attractions[i].hit)) && (selectedNamesHash.get(attractions[i].hit).intValue() == threadId)) {
                         ClusterMethods.addAttraction(positions[attractions[i].query], positions[attractions[i].hit], attractions[i].att,
                                 currmoveatt, attvalpow, attfactor, data.cluster2d);
 
@@ -180,25 +180,25 @@ public class MovementComputerThread extends java.lang.Thread {
                         movements[selectedNamesIndices[i]][2] += currmoverep[2];
                     }//end for j
                 }//end for i
-                
+
                 // now add the attraction values, but only for the query or hit sequences for which I am responsible
                 for (int i = attnum; --i >= 0;) {
-                    if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].query))) && (selectedNamesHash.get(String.valueOf(attractions[i].query)).intValue() == threadId)) {
+                    if ((selectedNamesHash.containsKey(attractions[i].query)) && (selectedNamesHash.get(attractions[i].query).intValue() == threadId)) {
                         ClusterMethods.addAttraction(positions[attractions[i].query], positions[attractions[i].hit], attractions[i].att,
                                 currmoveatt, attvalpow, attfactor, data.cluster2d);
 
                         movements[attractions[i].query][0] += currmoveatt[0];
                         movements[attractions[i].query][1] += currmoveatt[1];
                         movements[attractions[i].query][2] += currmoveatt[2];
-                        if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].hit))) && (selectedNamesHash.get(String.valueOf(attractions[i].hit)).intValue() == threadId)) {
+                        if ((selectedNamesHash.containsKey(attractions[i].hit)) && (selectedNamesHash.get(attractions[i].hit).intValue() == threadId)) {
                             movements[attractions[i].hit][0] -= currmoveatt[0];
                             movements[attractions[i].hit][1] -= currmoveatt[1];
                             movements[attractions[i].hit][2] -= currmoveatt[2];
                         }
-                    } else if ((selectedNamesHash.containsKey(String.valueOf(attractions[i].hit))) && (selectedNamesHash.get(String.valueOf(attractions[i].hit)).intValue() == threadId)) {
+                    } else if ((selectedNamesHash.containsKey(attractions[i].hit)) && (selectedNamesHash.get(attractions[i].hit).intValue() == threadId)) {
                         ClusterMethods.addAttraction(positions[attractions[i].query], positions[attractions[i].hit], attractions[i].att,
                                 currmoveatt, attvalpow, attfactor, data.cluster2d);
-                        
+
                         movements[attractions[i].hit][0] -= currmoveatt[0];
                         movements[attractions[i].hit][1] -= currmoveatt[1];
                         movements[attractions[i].hit][2] -= currmoveatt[2];
