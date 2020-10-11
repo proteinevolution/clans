@@ -111,7 +111,7 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
     private void addToIndividualSeqGroupsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addToIndividualSeqGroupsButtonActionPerformed
         String newName=javax.swing.JOptionPane.showInputDialog(this,"Base group name:",this.getTitle());
 
-        if(newName != null && newName.length() == 0){
+        if(newName == null){
             return;
         }
 
@@ -138,7 +138,8 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
      */
     private void addToSeqGroupsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addToSeqGroupsButtonActionPerformed
         String newName = javax.swing.JOptionPane.showInputDialog(this,"Group name:","selected sequences");
-        if(newName != null && newName.length() == 0){
+
+        if(newName == null){
             return;
         }
 
