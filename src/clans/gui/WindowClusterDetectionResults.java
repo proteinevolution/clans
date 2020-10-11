@@ -27,12 +27,12 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
     private javax.swing.JScrollPane scrollPanel;
     // End of variables declaration//GEN-END:variables
 
-    public WindowClusterDetectionResults(ProgramWindow parent, Vector<SequenceCluster> clusters, String label, boolean didBootStrap) {
+    public WindowClusterDetectionResults(ProgramWindow parent, Vector<SequenceCluster> clusters, String windowTitle, boolean didBootStrap) {
         this.parent = parent;
         this.clusters = clusters;
         this.didBootStrap = didBootStrap;
         this.clusterNames = getClusterNames(clusters);
-        this.setTitle(label);
+        this.setTitle(windowTitle);
         initComponents();
     }
 
@@ -155,15 +155,13 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
         //now add all the values to a new array
         int[] newSelected = new int[newSize];
         int currCount = 0;
-        int mySize;
-        int[] myArr;
-        for(int i=selectedValues.length-1;i>=0;i--){
-            myArr = clusters.get(selectedValues[i]).members;
-            mySize = myArr.length;
-            for(int j = 0; j < mySize; j++){
-                newSelected[j + currCount] = myArr[j];
+        for(int i = selectedValues.length - 1; i >= 0; i--){
+
+            int[] clusterMembers = clusters.get(selectedValues[i]).members;
+            for(int j = 0; j < clusterMembers.length; j++){
+                newSelected[j + currCount] = clusterMembers[j];
             }//end for j
-            currCount += mySize;
+            currCount += clusterMembers.length;
         }//end for i
         
         SequenceGroup newGroup = new SequenceGroup(newName, newSelected, parent.data.groupsize, 0, Color.red);
@@ -190,35 +188,33 @@ public class WindowClusterDetectionResults extends javax.swing.JDialog {
 
         //now add all the values to a new array
         int[] newSelected = new int[newSize];
-        float[] clusterConf = null;
+        float[] clusterConfidence = null;
         if(didBootStrap) {
             //System.out.println("not using sequence confidences");
-            clusterConf = new float[newSize];
+            clusterConfidence = new float[newSize];
         }
 
         int currCount=0;
-        int mySize;
-        int[] myArr;
-        float[] myconf;
-        for(int i=selectedValues.length - 1; i >= 0; i--) {
-            myArr = clusters.get(selectedValues[i]).members;
-            myconf = clusters.get(selectedValues[i]).seqConfidence;
-            mySize = myArr.length;
-            if(didBootStrap) { // was: myconf!=null){
-                for(int j = 0; j < mySize; j++){
-                    newSelected[j + currCount] = myArr[j];
-                    clusterConf[j + currCount] = myconf[j];
+        for(int i = selectedValues.length - 1; i >= 0; i--) {
+            int[] clusterMembers = clusters.get(selectedValues[i]).members;
+            float[] myConfidence = clusters.get(selectedValues[i]).seqConfidence;
+
+            if(didBootStrap) { // was: myConfidence != null){
+                for(int j = 0; j < clusterMembers.length; j++){
+                    newSelected[j + currCount] = clusterMembers[j];
+                    clusterConfidence[j + currCount] = myConfidence[j];
                 }//end for j
             } else {
-                for(int j = 0; j < mySize; j++){
-                    newSelected[j + currCount] = myArr[j];
+                for(int j = 0; j < clusterMembers.length; j++){
+                    newSelected[j + currCount] = clusterMembers[j];
                 }//end for j
             }
-            currCount += mySize;
+
+            currCount += clusterMembers.length;
         }//end for i
 
         parent.data.selectedSequencesIndices = newSelected;
-        parent.clusterconf = clusterConf;
+        parent.clusterconf = clusterConfidence;
         parent.repaint();
     }//GEN-LAST:event_clusterListValueChanged
 
