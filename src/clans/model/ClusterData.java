@@ -1857,7 +1857,7 @@ public class ClusterData {
         if (rescalepvalues == false) {
             // make the attraction values
             if (attvalsimple) {
-                for (int i = number_of_blasthits; --i >= 0;) {
+                for (int i = 0; i < number_of_blasthits; i++) {
                     MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
                     if (myhash.containsKey(curratt)) {
                         curratt = myhash.get(curratt);
@@ -1910,8 +1910,8 @@ public class ClusterData {
                             curratt.att /= 2;
                         }
                         if (curratt.att != 0) {
-                            tmpvec.add(curratt);
                             myhash.put(curratt, curratt);
+                            tmpvec.add(curratt);
                         }
                     }
                     if (curratt.att > maxattval) {
@@ -1923,7 +1923,7 @@ public class ClusterData {
             // standard, just divide all values by the maximum value
             // note, this does NOT symmetrize the attractions
             if (usescval == false) {
-                for (int i = tmpvec.size() - 1; i >= 0; i--) {
+                for (int i = 0; i < tmpvec.size(); i++) {
                     if (tmpvec.get(i).att == -1) {
                         tmpvec.get(i).att = 1;
 
@@ -2014,7 +2014,7 @@ public class ClusterData {
             }
             // and divide all vals by maxattval and offset by minattval(-->range: 0-1)
             float divval = maxattval - minattval;
-            for (int i = tmpvec.size() - 1; i >= 0; i--) {
+            for (int i = 0; i < tmpvec.size(); i++) {
                 if (tmpvec.get(i).att == -1) {
                     tmpvec.get(i).att = 1;
                 } else {
@@ -2025,8 +2025,8 @@ public class ClusterData {
             p2attfactor = divval;
             p2attoffset = minattval;
         }
-        attractionValues = (MinimalAttractionValue[]) tmpvec.toArray(new MinimalAttractionValue[0]);
-        
+        attractionValues = tmpvec.toArray(new MinimalAttractionValue[0]);
+
 		String formatted_used_hsps = String.format("%" + Integer.toString(blasthits.length).length() + "s",
 				attractionValues.length);
 		String formatted_pvalue = String.format("%7s", new DecimalFormat("0.###E0").format(pvalue_threshold));
@@ -2034,7 +2034,7 @@ public class ClusterData {
 				new DecimalFormat("0.00").format(100 * (float) (attractionValues.length) / blasthits.length) + "%");
 		System.out.println("used/total HSPs at threshold " + formatted_pvalue + ": " + formatted_used_hsps + "/"
 				+ blasthits.length + " (" + formatted_percentage + ")");
-    }
+	}
 
     /**
      * Resets the graph with random sequence positions and recomputes "attraction" values from HSPs.
