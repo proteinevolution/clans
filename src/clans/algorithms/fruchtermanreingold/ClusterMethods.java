@@ -671,7 +671,7 @@ public class ClusterMethods {
 				}
 
 			} else { // cluster in 3D
-				for(int i = data.elements; --i >=0;) {
+				for(int i = data.elements; --i >= 0;) {
 					posarr[i][0] += (currcool * ((lastmovearr[i][0] * multdamp) + (movearr[i][0])));
 					posarr[i][1] += (currcool * ((lastmovearr[i][1] * multdamp) + (movearr[i][1])));
 					posarr[i][2] += (currcool * ((lastmovearr[i][2] * multdamp) + (movearr[i][2])));
@@ -785,8 +785,8 @@ public class ClusterMethods {
 				retvec.add(attractions[i]);
 			}
 		}
-		MinimalAttractionValue[] retarr = (MinimalAttractionValue[])retvec.toArray(new MinimalAttractionValue[0]);
-		return retarr;
+
+		return retvec.toArray(new MinimalAttractionValue[0]);
 	}
 
 	/**
@@ -794,7 +794,6 @@ public class ClusterMethods {
 	 * use the BEST value!
 	 * 
 	 * @param invec
-	 * @param dbsize
 	 * @param minpval
 	 * @param data
 	 * @return
@@ -802,15 +801,15 @@ public class ClusterMethods {
 	public static float computeSimpleAttractionValue(double[] invec, double minpval, ClusterData data) {
 
 		if (invec == null) {
-			return 0;
+			return 0.0f;
 		} else if (invec.length < 1) { // if I have no hits
-			return 0;
+			return 0.0f;
 		}
 
 		double bestval = invec[0]; // is a p-value (should be from 0 to 1)
 		double currval;
 		if(data.usescval) {
-			bestval = 0;
+			bestval = 0.0;
 			for(int i = invec.length - 1; i >= 0; i--) {
 				currval = invec[i];
 				if(currval > bestval) {
@@ -853,7 +852,6 @@ public class ClusterMethods {
 	 * Multiply the pvalues of different HSPs.
 	 * 
 	 * @param invec
-	 * @param dbsize
 	 * @param minpval
 	 * @param data
 	 * @return
@@ -861,18 +859,18 @@ public class ClusterMethods {
 	public static float computeComplexAttractionValue(double[] invec, double minpval, ClusterData data) {
 
 		if (invec == null) {
-			return 0;
+			return 0.0f;
 		} else if (invec.length < 1) {
-			return 0;
+			return 0.0f;
 		}
 
 		double currval = invec[0];
 		if(data.usescval) {
 			// then I am using score values (no logarithming at the end)
-			currval = 0;
+			currval = 0.0;
 			
 			for (int i = invec.length; --i >= 0;) { // sum the values
-				currval+=invec[i];
+				currval+= invec[i];
 			}
 
 			// maxvalfound=worst accepted value (comes from P-values where larger=worse)
