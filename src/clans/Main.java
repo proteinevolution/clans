@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.*;
 
 import clans.algorithms.EnrichWithSimilarSequences;
+import clans.algorithms.ClusterDetection;
 import clans.gui.ProgramWindow;
 import clans.headless.ClusteringWithoutGui;
 import clans.io.AlignmentHandling;
@@ -14,6 +15,8 @@ import clans.io.ClusterDataLoadHelper;
 import clans.model.ClusterData;
 import clans.model.proteins.AminoAcidSequence;
 import clans.model.proteins.MinimalHsp;
+import clans.model.SequenceCluster;
+import clans.model.SequenceGroup;
 
 public class Main {
 
@@ -95,6 +98,9 @@ public class Main {
 									// and -load)
 	static boolean initialize = false; // if true will initialize the clustermap upon loading
 	static int dorounds = -1; // how many rounds to cluster by (only if used in conjunction with -load)
+	static boolean clusterConvex = false; // Do convex clustering and add the clusters to the output file (only if used in conjunction with -load, -savetoname, and dorounds >= 0)
+	static int minClusterSeqNum = 2; // Minimum number of sequences in a cluster (only with -load, -savetoname, dorounds >= 0, and clusterConvex)
+	static float stdevCutoff = 0.5f; // Standard deviation cutoff for convex clustering (only with -load, -savetoname, dorounds >= 0, and clusterConvex)
 
 	// variables used for adding new sequences to an already present dataset
 	static String olddata = "";
@@ -116,9 +122,13 @@ public class Main {
 		System.out.println("-infile name of input file");
 		System.out.println("-load name-of-savefile");
 		System.out.println("-rounds (int) (def:" + dorounds
-				+ ") how many rounds to cluster for (only used in conjunction with -load)");
+				+ ") how many rounds to cluster for (only with -load and -saveto)");
 		System.out
-				.println("-saveto String where to save the results to (only used in conjunction with -load and -rounds)");
+				.println("-saveto String where to save the results to (only with -load and -rounds)");
+		System.out.println("-clusterConvex boolean if true saves groups from convex clustering (def: " + clusterConvex + ", only with -load, -rounds, and -saveto)");
+		System.out.println("-minClusterSeqNum minimum number of sequences in clustered computed with -clusterConvex (def: " + minClusterSeqNum + ", only with -load, -rounds, -saveto, and -clusterConvex)");
+		System.out.println("-stdevCutoff standard deviation cutoff with -clusterConvex (def: " + stdevCutoff + ", only with -load, -rounds, -saveto, and -clusterConvex)");
+
 		System.out.println("-initialize boolean (t/F) if true randomly initializes the graph in runs without GUI");
 		System.out.println("-loadalt name-of-alternate-format-savefile");
 		System.out.println("-lowmem t/F (doesn't do much at the moment)");
@@ -167,6 +177,12 @@ public class Main {
 		if (input_filename != null && dorounds >= 0) {
 			System.out.println("rounds=" + dorounds);
 			System.out.println("saveto=" + savetoname);
+			System.out.println("clusterConvex=" + clusterConvex);
+
+			if(clusterConvex) {
+				System.out.println("minClusterSeqNum=" + minClusterSeqNum);
+				System.out.println("stdevCutoff=" + stdevCutoff);
+			}
 		}
 
 		System.out.println("cmd=" + cmd);
@@ -357,7 +373,7 @@ public class Main {
 
 				// add only the new matches
 				ArrayList<MinimalHsp> addblasthits = new ArrayList<MinimalHsp>();
-                for (int i = newblasthits.length; --i >= 0;) {
+				for (int i = newblasthits.length; --i >= 0;) {
 					if (newblasthits[i].query >= readelements || newblasthits[i].hit >= readelements) {
 						addblasthits.add(newblasthits[i]);
 					}
@@ -538,6 +554,19 @@ public class Main {
 			}
 		}
 
+		if(clusterConvex) {
+			Vector<SequenceCluster> clusters = ClusterDetection.getConvex(myclusterer.data.attractionValues,
+			                                                            stdevCutoff,
+			                                                            minClusterSeqNum,
+			                                                            myclusterer.data.elements,
+			                                                            myclusterer.data.cpu);
+			for(int i = 0; i < clusters.size(); i++) {
+
+				SequenceCluster seqCluster = clusters.get(i);
+				myclusterer.data.add_group(seqCluster.name, seqCluster.members);
+			}
+		}
+
 		File savefile = new File(savetoname);
 		
 		try{
@@ -623,6 +652,52 @@ public class Main {
 					savetoname = args[i];
 				} else {
 					System.err.println("Error reading -saveto, missing argument.");
+					return false;
+				}
+				i++;
+				continue;
+			}
+
+			if ((args[i].equalsIgnoreCase("-clusterConvex"))) {
+				i++;
+				if (i < args.length) {
+					clusterConvex = (args[i].equalsIgnoreCase("TRUE") || args[i].equalsIgnoreCase("T"));
+				} else {
+					System.err.println("Error reading -clusterConvex, missing argument.");
+					return false;
+				}
+				i++;
+				continue;
+			}
+
+			if ((args[i].equalsIgnoreCase("-minClusterSeqNum")) || (args[i].equalsIgnoreCase("-min"))) {
+				i++;
+				if ((i) < args.length) {
+					try {
+						minClusterSeqNum = Integer.parseInt(args[i]);
+					} catch (NumberFormatException e) {
+						System.err.println("unable to parse int from " + args[i] + " in -minClusterSeqNum.");
+						return false;
+					}
+				} else {
+					System.err.println("Error reading -minClusterSeqNum, missing argument.");
+					return false;
+				}
+				i++;
+				continue;
+			}
+
+			if ((args[i].equalsIgnoreCase("-stdevCutoff")) || (args[i].equalsIgnoreCase("-std"))) {
+				i++;
+				if ((i) < args.length) {
+					try {
+						stdevCutoff = Float.parseFloat(args[i]);
+					} catch (NumberFormatException e) {
+						System.err.println("unable to parse float from '" + args[i] + "' in -stdevCutoff");
+						return false;
+					}
+				} else {
+					System.err.println("Error reading -stdevCutoff, missing argument.");
 					return false;
 				}
 				i++;
