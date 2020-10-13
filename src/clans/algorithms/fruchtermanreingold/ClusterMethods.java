@@ -799,7 +799,7 @@ public class ClusterMethods {
 	 * @param data
 	 * @return
 	 */
-    public static float computeSimpleAttractionValue(double[] invec,int dbsize,double minpval,ClusterData data){
+    public static float computeSimpleAttractionValue(double[] invec, double minpval, ClusterData data){
 
 		if (invec == null) {
 			return 0;
@@ -858,7 +858,7 @@ public class ClusterMethods {
 	 * @param data
 	 * @return
 	 */
-	public static float computeComplexAttractionValue(double[] invec, int dbsize, double minpval, ClusterData data) {
+	public static float computeComplexAttractionValue(double[] invec, double minpval, ClusterData data) {
 
 		if (invec == null) {
 			return 0;

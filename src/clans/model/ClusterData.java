@@ -1864,7 +1864,7 @@ public class ClusterData {
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-                            float newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                            float newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -1874,7 +1874,7 @@ public class ClusterData {
                         }
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                        curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
@@ -1895,7 +1895,7 @@ public class ClusterData {
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-                            float newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                            float newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -1905,7 +1905,7 @@ public class ClusterData {
                         }
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                        curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
@@ -1949,7 +1949,7 @@ public class ClusterData {
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-                            float newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                            float newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -1959,7 +1959,7 @@ public class ClusterData {
                         }
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                        curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
@@ -1983,7 +1983,7 @@ public class ClusterData {
                         if (curratt.att == -1) {
                             // in this case keep the -1
                         } else {
-                            float newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                            float newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, pvalue_threshold, this);
                             if (newatt == -1) {
                                 curratt.att = -1;
                             } else {
@@ -1994,7 +1994,7 @@ public class ClusterData {
 
                     } else {
                         // if I've never encountered this query-hit pair before
-                        curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, elements, pvalue_threshold, this);
+                        curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, pvalue_threshold, this);
                         if (curratt.att != -1) {
                             curratt.att /= 2;
                         }
