@@ -794,11 +794,10 @@ public class ClusterMethods {
 	 * use the BEST value!
 	 * 
 	 * @param invec
-	 * @param minpval
 	 * @param data
 	 * @return
 	 */
-	public static float computeSimpleAttractionValue(double[] invec, double minpval, ClusterData data) {
+	public static float computeSimpleAttractionValue(double[] invec, ClusterData data) {
 
 		if (invec == null) {
 			return 0.0f;
@@ -816,12 +815,11 @@ public class ClusterMethods {
 					bestval = currval;
 				}
 			}
-			if(bestval < data.maxvalfound) {//maxvalfound=worst accepted value (comes from P-values where larger=worse)
-				data.maxvalfound=bestval;
+			if(bestval < data.maxvalfound) { // maxvalfound = worst accepted value (comes from P-values where larger=worse)
+				data.maxvalfound = bestval;
 			}
 			currval = bestval;
-			if(currval < minpval) {//minpval also functions as minscoreval here
-				//System.out.println(" currval="+currval+" is less than minpval="+minpval+" returning zero");
+			if(currval < data.pvalue_threshold) { // data.pvalue_threshold also functions as minscoreval here
 				return 0;
 			}
 		} else {
@@ -838,7 +836,7 @@ public class ClusterMethods {
 				return -1;//this is identity
 			}else if(bestval > 1) {//should never happen to p-values!
 				return 0;
-			}else if(bestval > minpval) {//if this value is worse than permitted
+			}else if(bestval > data.pvalue_threshold) {//if this value is worse than permitted
 				return 0;
 			}
 			//now all pvalues between 0 and 1
@@ -856,7 +854,7 @@ public class ClusterMethods {
 	 * @param data
 	 * @return
 	 */
-	public static float computeComplexAttractionValue(double[] invec, double minpval, ClusterData data) {
+	public static float computeComplexAttractionValue(double[] invec, ClusterData data) {
 
 		if (invec == null) {
 			return 0.0f;
@@ -878,7 +876,7 @@ public class ClusterMethods {
 				data.maxvalfound = currval;
 			}
 
-			if (currval < minpval) { // minpval also functions as minscoreval here
+			if (currval < data.pvalue_threshold) { // data.pvalue_threshold also functions as minscoreval here
 				return 0;
 			}
 		} else { // then I am using P-values
@@ -886,13 +884,13 @@ public class ClusterMethods {
 				currval *= invec[i];
 			}
 			if(currval > data.maxvalfound) {
-				data.maxvalfound=currval;
+				data.maxvalfound = currval;
 			}
 			if(currval == 0) {
 				return -1; // this is identity
 			} else if (currval > 1) { // should never happen to p-values!
 				return 0;
-			} else if (currval > minpval) { // if this value is worse than permitted
+			} else if (currval > data.pvalue_threshold) { // if this value is worse than permitted
 				return 0;
 			}
 			// now all pvalues between 0 and 1
