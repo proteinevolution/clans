@@ -896,17 +896,17 @@ public class Main {
 				continue;
 			}
 
-			if ((args[i].equalsIgnoreCase("-dorounds"))) {
+			if ((args[i].equalsIgnoreCase("-dorounds") || args[i].equalsIgnoreCase("-rounds"))) {
 				i++;
 				if ((i) < args.length) {
 					try {
 						dorounds = Integer.parseInt(args[i]);
 					} catch (NumberFormatException e) {
-						System.err.println("unable to parse int from " + args[i] + " in -dorounds.");
+						System.err.println("unable to parse int from " + args[i] + " in -rounds.");
 						return false;
 					}
 				} else {
-					System.err.println("Error reading -dorounds, missing argument.");
+					System.err.println("Error reading -rounds, missing argument.");
 					return false;
 				}
 				i++;
