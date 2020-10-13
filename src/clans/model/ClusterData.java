@@ -1854,164 +1854,89 @@ public class ClusterData {
 		// NOTE: this is not necessarily a symmetrical array. compute all values
 		// and then symmetrize computing the average values
 
-		if (rescalepvalues == false) {
-			// make the attraction values
-			if (attvalsimple) {
-				for (int i = 0; i < number_of_blasthits; i++) {
-					MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
-					if (myhash.containsKey(curratt)) {
-						curratt = myhash.get(curratt);
-						if (curratt.att == -1) {
-							// in this case keep the -1
-						} else {
-							float newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, this);
-							if (newatt == -1) {
-								curratt.att = -1;
-							} else {
-								newatt /= 2;
-								curratt.att += newatt;
-							}
-						}
+		// Rescale the attraction values to range from 0 to 1 (with the smallest positive non-zero value as zero.
+		// With minattval == 0.0f don't rescale
+		float minattval = this.rescalepvalues ? java.lang.Float.MAX_VALUE : 0.0f;
+
+		if (attvalsimple) {
+			for (int i = 0; i < number_of_blasthits; i++) {
+				MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
+				if (myhash.containsKey(curratt)) {
+					curratt =  myhash.get(curratt);
+					if (curratt.att == -1) {
+						// In this case keep the -1
 					} else {
-						// if I've never encountered this query-hit pair before
-						curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, this);
-						if (curratt.att != -1) {
-							curratt.att /= 2;
-						}
-						if (curratt.att != 0) {
-							myhash.put(curratt, curratt);
-							tmpvec.add(curratt);
+						float newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, this);
+						if (newatt == -1) {
+							curratt.att = -1;
+						} else {
+							newatt /= 2;
+							curratt.att += newatt;
 						}
 					}
-					if (curratt.att > maxattval) {
-						maxattval = curratt.att;
+				} else {
+					// If I've never encountered this query-hit pair before
+					curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, this);
+					if (curratt.att != -1) {
+						curratt.att /= 2;
+					}
+					if (curratt.att != 0) {
+						myhash.put(curratt, curratt);
+						tmpvec.add(curratt);
 					}
 				}
-			} else {
-				for (int i = 0; i < number_of_blasthits; i++) {
-					MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
-					if (myhash.containsKey(curratt)) {
-						curratt = myhash.get(curratt);
-						if (curratt.att == -1) {
-							// in this case keep the -1
-						} else {
-							float newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
-							if (newatt == -1) {
-								curratt.att = -1;
-							} else {
-								newatt /= 2;
-								curratt.att += newatt;
-							}
-						}
-					} else {
-						// if I've never encountered this query-hit pair before
-						curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
-						if (curratt.att != -1) {
-							curratt.att /= 2;
-						}
-						if (curratt.att != 0) {
-							myhash.put(curratt, curratt);
-							tmpvec.add(curratt);
-						}
-					}
-					if (curratt.att > maxattval) {
-						maxattval = curratt.att;
-					}
+				if (curratt.att > maxattval) {
+					maxattval = curratt.att;
+				}
+				if ((curratt.att > 0) && (curratt.att < minattval)) {
+					minattval = curratt.att;
 				}
 			}
-			// divide all vals by maxattval (-->range: 0-1)
-			// standard, just divide all values by the maximum value
-			// note, this does NOT symmetrize the attractions
-			if (usescval == false) {
-				for (int i = 0; i < tmpvec.size(); i++) {
-					if (tmpvec.get(i).att == -1) {
-						tmpvec.get(i).att = 1;
-
+		} else {
+			for (int i = 0; i < number_of_blasthits; i++) {
+				MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
+				if (myhash.containsKey(curratt)) {
+					curratt = myhash.get(curratt);
+					if (curratt.att == -1) {
+						// In this case keep the -1
 					} else {
-						tmpvec.get(i).att /= maxattval;
-					}
-				}
-
-				p2attfactor = maxattval;
-				p2attoffset = 0;
-			} else {// if using scval
-				p2attfactor = 1;
-				p2attoffset = 0;
-			}
-		} else {// if rescalepvaluecheckbox==true
-			float minattval = java.lang.Float.MAX_VALUE;
-			// rescale the attraction values to range from 0 to 1 (with the smallest positive non-zero value as zero.
-			if (attvalsimple) {
-				for (int i = 0; i < number_of_blasthits; i++) {
-					MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
-					if (myhash.containsKey(curratt)) {
-						curratt =  myhash.get(curratt);
-						if (curratt.att == -1) {
-							// in this case keep the -1
+						float newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
+						if (newatt == -1) {
+							curratt.att = -1;
 						} else {
-							float newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, this);
-							if (newatt == -1) {
-								curratt.att = -1;
-							} else {
-								newatt /= 2;
-								curratt.att += newatt;
-							}
-						}
-					} else {
-						// if I've never encountered this query-hit pair before
-						curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, this);
-						if (curratt.att != -1) {
-							curratt.att /= 2;
-						}
-						if (curratt.att != 0) {
-							myhash.put(curratt, curratt);
-							tmpvec.add(curratt);
+							newatt /= 2;
+							curratt.att += newatt;
 						}
 					}
-					if (curratt.att > maxattval) {
-						maxattval = curratt.att;
+
+				} else {
+					// If I've never encountered this query-hit pair before
+					curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
+					if (curratt.att != -1) {
+						curratt.att /= 2;
 					}
-					if ((curratt.att > 0) && (curratt.att < minattval)) {
-						minattval = curratt.att;
+					if (curratt.att != 0) {
+						myhash.put(curratt, curratt);
+						tmpvec.add(curratt);
 					}
+
 				}
-			} else {
-				for (int i = 0; i < number_of_blasthits; i++) {
-					MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
-					if (myhash.containsKey(curratt)) {
-						curratt = myhash.get(curratt);
-						if (curratt.att == -1) {
-							// in this case keep the -1
-						} else {
-							float newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
-							if (newatt == -1) {
-								curratt.att = -1;
-							} else {
-								newatt /= 2;
-								curratt.att += newatt;
-							}
-						}
-
-					} else {
-						// if I've never encountered this query-hit pair before
-						curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
-						if (curratt.att != -1) {
-							curratt.att /= 2;
-						}
-						if (curratt.att != 0) {
-							myhash.put(curratt, curratt);
-							tmpvec.add(curratt);
-						}
-
-					}
-					if (curratt.att > maxattval) {
-						maxattval = curratt.att;
-					}
-					if ((curratt.att > 0) && (curratt.att < minattval)) {
-						minattval = curratt.att;
-					}
+				if (curratt.att > maxattval) {
+					maxattval = curratt.att;
+				}
+				if ((curratt.att > 0) && (curratt.att < minattval)) {
+					minattval = curratt.att;
 				}
 			}
+		}
+
+		// This reflects the situation before merging the two
+		// diverging copies of the code. However, the if-statement
+		// was not part of the original code, therefore it is
+		// qestionable whether non-usescval and usescval should be
+		// treated differently.
+		if (!usescval || rescalepvalues) {
+
 			// Divide all vals by maxattval and offset by minattval(-->range: 0-1)
 			float divval = maxattval - minattval;
 			for (int i = 0; i < tmpvec.size(); i++) {
@@ -2024,7 +1949,11 @@ public class ClusterData {
 
 			p2attfactor = divval;
 			p2attoffset = minattval;
+		} else {// if using scval
+			p2attfactor = 1;
+			p2attoffset = 0;
 		}
+
 		attractionValues = tmpvec.toArray(new MinimalAttractionValue[0]);
 
 		String formatted_used_hsps = String.format("%" + Integer.toString(blasthits.length).length() + "s",
