@@ -1858,75 +1858,48 @@ public class ClusterData {
 		// With minattval == 0.0f don't rescale
 		float minattval = this.rescalepvalues ? java.lang.Float.MAX_VALUE : 0.0f;
 
-		if (attvalsimple) {
-			for (int i = 0; i < number_of_blasthits; i++) {
-				MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
-				if (myhash.containsKey(curratt)) {
-					curratt =  myhash.get(curratt);
-					if (curratt.att == -1) {
-						// In this case keep the -1
+		for (int i = 0; i < number_of_blasthits; i++) {
+			MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
+			if (myhash.containsKey(curratt)) {
+				curratt = myhash.get(curratt);
+				if (curratt.att != -1) { // Otherwise keep the -1
+					float newatt;
+					if (attvalsimple) {
+						newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, this);
+					}
+					else {
+						newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
+					}
+
+					if (newatt == -1) {
+						curratt.att = -1;
 					} else {
-						float newatt = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, this);
-						if (newatt == -1) {
-							curratt.att = -1;
-						} else {
-							newatt /= 2;
-							curratt.att += newatt;
-						}
+						newatt /= 2;
+						curratt.att += newatt;
 					}
-				} else {
-					// If I've never encountered this query-hit pair before
+				}
+			} else {
+				// If I've never encountered this query-hit pair before
+				if (attvalsimple) {
 					curratt.att = ClusterMethods.computeSimpleAttractionValue(blasthits[i].val, this);
-					if (curratt.att != -1) {
-						curratt.att /= 2;
-					}
-					if (curratt.att != 0) {
-						myhash.put(curratt, curratt);
-						tmpvec.add(curratt);
-					}
 				}
-				if (curratt.att > maxattval) {
-					maxattval = curratt.att;
+				else {
+					curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
 				}
-				if ((curratt.att > 0) && (curratt.att < minattval)) {
-					minattval = curratt.att;
+
+				if (curratt.att != -1) {
+					curratt.att /= 2;
+				}
+				if (curratt.att != 0) {
+					myhash.put(curratt, curratt);
+					tmpvec.add(curratt);
 				}
 			}
-		} else {
-			for (int i = 0; i < number_of_blasthits; i++) {
-				MinimalAttractionValue curratt = new MinimalAttractionValue(blasthits[i].query, blasthits[i].hit);
-				if (myhash.containsKey(curratt)) {
-					curratt = myhash.get(curratt);
-					if (curratt.att == -1) {
-						// In this case keep the -1
-					} else {
-						float newatt = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
-						if (newatt == -1) {
-							curratt.att = -1;
-						} else {
-							newatt /= 2;
-							curratt.att += newatt;
-						}
-					}
-
-				} else {
-					// If I've never encountered this query-hit pair before
-					curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
-					if (curratt.att != -1) {
-						curratt.att /= 2;
-					}
-					if (curratt.att != 0) {
-						myhash.put(curratt, curratt);
-						tmpvec.add(curratt);
-					}
-
-				}
-				if (curratt.att > maxattval) {
-					maxattval = curratt.att;
-				}
-				if ((curratt.att > 0) && (curratt.att < minattval)) {
-					minattval = curratt.att;
-				}
+			if (curratt.att > maxattval) {
+				maxattval = curratt.att;
+			}
+			if ((curratt.att > 0) && (curratt.att < minattval)) {
+				minattval = curratt.att;
 			}
 		}
 
