@@ -1874,8 +1874,9 @@ public class ClusterData {
 					if (newatt == -1) {
 						curratt.att = -1;
 					} else {
-						newatt /= 2;
+						// Average the two attraction values
 						curratt.att += newatt;
+						curratt.att /= 2;
 					}
 				}
 			} else {
@@ -1887,9 +1888,6 @@ public class ClusterData {
 					curratt.att = ClusterMethods.computeComplexAttractionValue(blasthits[i].val, this);
 				}
 
-				if (curratt.att != -1) {
-					curratt.att /= 2;
-				}
 				if (curratt.att != 0) {
 					myhash.put(curratt, curratt);
 					tmpvec.add(curratt);
