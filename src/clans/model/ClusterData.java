@@ -1846,7 +1846,6 @@ public class ClusterData {
 			return;
 		}
 
-		ArrayList<MinimalAttractionValue> tmpvec = new ArrayList<MinimalAttractionValue>();
 		int number_of_blasthits = blasthits.length;
 		HashMap<MinimalAttractionValue, MinimalAttractionValue> myhash = new HashMap<MinimalAttractionValue, MinimalAttractionValue>(number_of_blasthits);
 		float maxattval = 0;
@@ -1890,7 +1889,6 @@ public class ClusterData {
 
 				if (curratt.att != 0) {
 					myhash.put(curratt, curratt);
-					tmpvec.add(curratt);
 				}
 			}
 			if (curratt.att > maxattval) {
@@ -1901,6 +1899,9 @@ public class ClusterData {
 			}
 		}
 
+		attractionValues = myhash.values().toArray(new MinimalAttractionValue[0]);
+		myhash = null; // Not needed anymore, so the garbage collector can collect it
+
 		// This reflects the situation before merging the two
 		// diverging copies of the code. However, the if-statement
 		// was not part of the original code, therefore it is
@@ -1910,11 +1911,11 @@ public class ClusterData {
 
 			// Divide all vals by maxattval and offset by minattval(-->range: 0-1)
 			float divval = maxattval - minattval;
-			for (int i = 0; i < tmpvec.size(); i++) {
-				if (tmpvec.get(i).att == -1) {
-					tmpvec.get(i).att = 1;
+			for (int i = 0; i < attractionValues.length; i++) {
+				if (attractionValues[i].att == -1) {
+					attractionValues[i].att = 1;
 				} else {
-					tmpvec.get(i).att = (tmpvec.get(i).att - minattval) / divval;
+					attractionValues[i].att = (attractionValues[i].att - minattval) / divval;
 				}
 			}
 
@@ -1924,8 +1925,6 @@ public class ClusterData {
 			p2attfactor = 1;
 			p2attoffset = 0;
 		}
-
-		attractionValues = tmpvec.toArray(new MinimalAttractionValue[0]);
 
 		String formatted_used_hsps = String.format("%" + Integer.toString(blasthits.length).length() + "s",
 				attractionValues.length);
