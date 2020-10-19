@@ -819,9 +819,14 @@ public class ClusterDetection {
 						skipped++;
 					}
 				}
-			}
 
-			this.attractionVar = sumVal / (float) (((this.seqNum * (this.seqNum - 1)) / 2) - skipped);
+			// Note this is the number of maximum possible attraction values in matrix.
+			// Identity is not considered and those attraction values that are not in the attractionValues
+			// Vector would be set to zero if they were in.
+			int numValuesSkippedOrNoData = ((this.seqNum * (this.seqNum - 1)) / 2) - skipped - attNum;
+			sumVal += numValuesSkippedOrNoData * java.lang.Math.sqrt(this.avgAttraction * this.avgAttraction);
+
+			this.attractionVar = sumVal / (float) ((this.seqNum * (this.seqNum - 1)) / 2);
 		}// end getAttractionVariance
 
 		private void runThreads(MaxAttraction[] threads, HashMap<Integer, Integer> remaining2Index, float[] sumVals) {
