@@ -735,7 +735,7 @@ public class ClusterDetection {
 				System.out.print(".");
 
 				if (maxNum > -1) {
-					if (limit < maxAtt) {
+					if (maxAtt >= limit) {
 						newSeqHash.add(this.remainingSeqIDs.get(maxNum));
 						this.newClusterSeqIDs.add(this.remainingSeqIDs.remove(maxNum));
 						remainingSeqs--;
