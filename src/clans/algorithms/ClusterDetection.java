@@ -522,12 +522,10 @@ public class ClusterDetection {
 		private void initialize()
 		{
 			// Assign all nodes to one cluster to start out
-			HashSet<Integer> initHash = new HashSet<Integer>(this.seqNum);
 			this.remainingSeqIDs = new ArrayList<Integer>(this.seqNum);
 			for (int i = 0; i < this.seqNum; i++) {
 				Integer seqID = new Integer(i);
 				this.remainingSeqIDs.add(seqID);
-				initHash.add(seqID);
 			}
 
 			// Then take a node from this base cluster and add all those with
@@ -535,9 +533,9 @@ public class ClusterDetection {
 			this.newClusterSeqIDs = new ArrayList<Integer>(this.seqNum);
 
 			// Get the average attraction for all nodes
-			this.computeAverageAttraction(initHash);
+			this.computeAverageAttraction();
 			// Get the variance of attraction over all nodes
-			this.computeAttractionVariance(initHash);
+			this.computeAttractionVariance();
 
 			// What a stuff cannot create a generic array
 			this.queryAttractionValues = new ArrayList<ArrayList<MinimalAttractionValue>>(this.seqNum);
@@ -784,7 +782,7 @@ public class ClusterDetection {
 		}// end getAverageLocalAttraction
 
 		// --------------------------------------------------------------------------
-		private void computeAverageAttraction(HashSet<Integer> initHash) {
+		private void computeAverageAttraction() {
 			// Get the average attraction value for all sequences.
 			// Note, the attraction values should be symmetrical and only those >=0
 			// should be considered.
@@ -793,29 +791,27 @@ public class ClusterDetection {
 			float sumVal = 0;
 			int skipped = 0;
 			for (int i = 0; i < attNum; i++) {
-				if (initHash.contains(this.attractionValues[i].query)
-				||  initHash.contains(this.attractionValues[i].hit)) {
 					if (this.attractionValues[i].att >= 0) {
 						sumVal += this.attractionValues[i].att;
 					} else {
 						skipped++;
 					}
 				}
-			}
 
+			// Note this is the number of maximum possible attraction values in matrix.
+			// Identity is not considered and those attraction values that are not in the attractionValues
+			// Vector would be set to zero if they were in.
 			this.avgAttraction = sumVal / (float) (((this.seqNum * (this.seqNum - 1)) / 2) - skipped);
 		}// end getAverageAttraction
 
 		// --------------------------------------------------------------------------
-		private void computeAttractionVariance(HashSet<Integer> initHash) {
+		private void computeAttractionVariance() {
 			// Get the variance of the attraction values for this cluster.
 
 			int attNum = this.attractionValues.length;
 			float sumVal = 0;
 			int skipped = 0;
 			for (int i = 0; i < attNum; i++) {
-				if (initHash.contains(this.attractionValues[i].query)
-				||  initHash.contains(this.attractionValues[i].hit)) {
 					if (this.attractionValues[i].att >= 0) {
 						float tmpVal = this.attractionValues[i].att - this.avgAttraction;
 						sumVal += java.lang.Math.sqrt(tmpVal * tmpVal);
