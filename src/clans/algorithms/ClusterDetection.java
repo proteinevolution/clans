@@ -503,6 +503,7 @@ public class ClusterDetection {
 		private float avgAttraction;
 		private float attractionVar;
 		private ExecutorService threadPool = null;
+		private float attractionLimit;
 
 		private ConvexClustering(
 		                         MinimalAttractionValue[] attractionValues,
@@ -536,6 +537,9 @@ public class ClusterDetection {
 			this.computeAverageAttraction();
 			// Get the variance of attraction over all nodes
 			this.computeAttractionVariance();
+			
+			this.attractionLimit = (this.avgAttraction + (this.sigmaFactor * this.attractionVar));
+
 
 			// What a stuff cannot create a generic array
 			this.queryAttractionValues = new ArrayList<ArrayList<MinimalAttractionValue>>(this.seqNum);
@@ -709,7 +713,6 @@ public class ClusterDetection {
 			// remainingSeqIDs.
 
 			boolean foundNew = true;
-			float limit = (this.avgAttraction + (this.sigmaFactor * this.attractionVar));
 			while (foundNew) {
 
 				foundNew = false;
@@ -735,7 +738,7 @@ public class ClusterDetection {
 				System.out.print(".");
 
 				if (maxNum > -1) {
-					if (maxAtt >= limit) {
+					if (maxAtt >= this.attractionLimit) {
 						newSeqHash.add(this.remainingSeqIDs.get(maxNum));
 						this.newClusterSeqIDs.add(this.remainingSeqIDs.remove(maxNum));
 						remainingSeqs--;
@@ -791,12 +794,12 @@ public class ClusterDetection {
 			float sumVal = 0;
 			int skipped = 0;
 			for (int i = 0; i < attNum; i++) {
-					if (this.attractionValues[i].att >= 0) {
-						sumVal += this.attractionValues[i].att;
-					} else {
-						skipped++;
-					}
+				if (this.attractionValues[i].att >= 0) {
+					sumVal += this.attractionValues[i].att;
+				} else {
+					skipped++;
 				}
+			}
 
 			// Note this is the number of maximum possible attraction values in matrix.
 			// Identity is not considered and those attraction values that are not in the attractionValues
@@ -812,13 +815,13 @@ public class ClusterDetection {
 			float sumVal = 0;
 			int skipped = 0;
 			for (int i = 0; i < attNum; i++) {
-					if (this.attractionValues[i].att >= 0) {
-						float tmpVal = this.attractionValues[i].att - this.avgAttraction;
-						sumVal += java.lang.Math.sqrt(tmpVal * tmpVal);
-					} else {
-						skipped++;
-					}
+				if (this.attractionValues[i].att >= 0) {
+					float tmpVal = this.attractionValues[i].att - this.avgAttraction;
+					sumVal += java.lang.Math.sqrt(tmpVal * tmpVal);
+				} else {
+					skipped++;
 				}
+			}
 
 			// Note this is the number of maximum possible attraction values in matrix.
 			// Identity is not considered and those attraction values that are not in the attractionValues
