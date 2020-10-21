@@ -628,13 +628,17 @@ public class ClusterDetection {
 				// Get the remaining node with maximum attraction value
 				int seed = this.getMaxAttraction();
 
-				if (seed == -1 && this.minSeqNum <= 1) {
+				if (seed == -1) {
 					// If there are no more attraction values left
 					// Add all leftover sequences as separate clusters
-					while (this.remainingSeqIDs.size() > 0) {
-						SequenceCluster newCluster = new SequenceCluster(this.remainingSeqIDs.remove(0));
-						returnClusters.addElement(newCluster);
+					if(this.minSeqNum <= 1)
+					{
+						while (this.remainingSeqIDs.size() > 0) {
+							SequenceCluster newCluster = new SequenceCluster(this.remainingSeqIDs.remove(0));
+							returnClusters.addElement(newCluster);
+						}
 					}
+
 					break;
 				}
 
