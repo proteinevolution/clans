@@ -129,7 +129,7 @@ public class HspReader {
                             }
                         }// end if startql
                         querydone = true;
-                        queryname = extractqueryname(queryname, nameshash);
+                        queryname = extractqueryname(queryname);
                         continue;
                     }//end if endql
                     if ((endql = inline.indexOf("Length=")) > -1) {//blast+
@@ -144,7 +144,7 @@ public class HspReader {
                             }
                         }// end if startql
                         querydone = true;
-                        queryname = extractqueryname(queryname, nameshash);
+                        queryname = extractqueryname(queryname);
                         continue;
                     }//end if endql
                     if (readquery) {
@@ -545,11 +545,10 @@ public class HspReader {
     }// end makefinal
 
     //------------------------------------------------------------------------------
-    static String extractqueryname(String instring, HashMap<String, Integer> nameshash) {
+    static String extractqueryname(String instring) {
         //get the name part of the query identifier block
-        //see it it is present in nameshash.
-        int begin;
-        if ((begin = instring.indexOf("Query=</b>")) > -1) {//if this exists on this line
+        int begin = instring.indexOf("Query=</b>");
+        if (begin > -1) {//if this exists on this line
             instring = instring.substring(begin + 10).trim();
         }
         return instring;
@@ -580,7 +579,7 @@ public class HspReader {
             System.err.println("unable to parse name from " + instring);
         }
         return instring;
-    }//end extractqueryname
+    }//end extractname
 
     //------------------------------------------------------------------------------
     static double getpvalfactor(String inreadstring, int seqnum) {

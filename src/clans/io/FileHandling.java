@@ -58,9 +58,8 @@ public class FileHandling {
         int seqlength=inaln[0].seq.length();
         AminoAcidSequence[] tmpaln=new AminoAcidSequence[elements];
         for(int i=0;i<elements;i++){
-            tmpaln[i]=new AminoAcidSequence();
-            tmpaln[i].name=inaln[i].name;
-            tmpaln[i].seq=inaln[i].seq;
+            // Why does this need to be copied. Pointers would be just enough.
+            tmpaln[i]=new AminoAcidSequence(inaln[i].name, inaln[i].seq);
         }//end for i
         int j;
         StringBuffer tmpstr=new StringBuffer(blocksize+3);

@@ -61,7 +61,6 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 	private int fontwidth = (int) (fontsize / 2);
 	
 	// mostly unsorted fields follow
-	private HashMap<String, MinimalAttractionValue> frustration;// color code for the frustration of connections
 	
 	private int[] originpos = new int[2];
 	private int colornum = 10;
@@ -677,27 +676,27 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 	 * @param g
 	 */
 	private void drawConnectionsFrustrationColored(Graphics g) {
-		String key;
-		int[] tmparr;
-		MinimalAttractionValue currfrust;
-		
-		frustration = getfrustration(data.attractionValues, data.posarr);
-		
+
+		// This ugly to recompute each time we draw, since we create quite some objects, but this
+		// depends on the positions of the sequence nodes, and may change between each invocation.
+		HashMap<MinimalAttractionValue, MinimalAttractionValue> frustration =
+		    getfrustration(data.attractionValues, data.posarr);
+
 		if (data.draworder.size() < 1) {
 			// draw the lines in the same order as before
 			data.draworder = getLineDrawOrder(data.attractionValues, colornum);
 		}
-		
+
 		for (int i = 0; i < colornum; i++) {
 
 			// draw all the vector elements
 			for (int j = 0; j < data.draworder.get(i).size(); j++) {
-				tmparr = (int[]) data.draworder.get(i).get(j);
-				key = tmparr[0] + "_" + tmparr[1];
+				int[] tmparr = (int[]) data.draworder.get(i).get(j);
+				MinimalAttractionValue key = new MinimalAttractionValue(tmparr[0], tmparr[1]);
 
 				if (frustration.containsKey(key)) {
-					currfrust = (MinimalAttractionValue) frustration.get(key);
-			
+					MinimalAttractionValue currfrust = frustration.get(key);
+
 					if (currfrust.att > 0) {
 						// then the coloring should be in blue(i.e. too short for attval)
 						g.setColor(new Color((1 - currfrust.att), (1 - currfrust.att), 1));
@@ -710,7 +709,7 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 							data.drawarrtmp[currfrust.hit][0], data.drawarrtmp[currfrust.hit][1]);
 				
 				} else {
-					System.err.println("no value for frustration key '" + key + "'");
+					System.err.println("no value for frustration key '" + key.hit + "_" + key.query + "'");
 				}
 			}
 		}
@@ -1071,36 +1070,28 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 	 * @param posarr
 	 * @return
 	 */
-	private HashMap<String, MinimalAttractionValue> getfrustration(MinimalAttractionValue[] attvals, float[][] posarr) {
-		HashMap<String, MinimalAttractionValue> retarr = new HashMap<String, MinimalAttractionValue>(
+	private HashMap<MinimalAttractionValue, MinimalAttractionValue> getfrustration(MinimalAttractionValue[] attvals, float[][] posarr) {
+		HashMap<MinimalAttractionValue, MinimalAttractionValue> retarr = new HashMap<MinimalAttractionValue, MinimalAttractionValue>(
 				(int) (attvals.length / 0.8) + 1, 0.8f);
 		MinimalAttractionValue[] minattarr = new MinimalAttractionValue[attvals.length];
-		int query_index, hit_index;
-		float attraction;
-		
+
 		float avgatt = 0;
 		float avgdist = 0;
 		float maxval = 0;
 		int counter = 0;
-		
-		String key;
-		float tmpfloat;
-		float tmpx, tmpy, tmpz;
-		float tmpval;
-		
+
 		for (int i = 0; i < attvals.length; i++) {
-			attraction = attvals[i].att;
-			query_index = attvals[i].query;
-			hit_index = attvals[i].hit;
-			key = query_index + "_" + hit_index;
+			float attraction = attvals[i].att;
+			int query_index = attvals[i].query;
+			int hit_index = attvals[i].hit;
 			if (attraction > 0) {// else don't do the calculations as I won't be drawing a line
 				counter++;
-				tmpx = posarr[query_index][0] - posarr[hit_index][0];
-				tmpy = posarr[query_index][1] - posarr[hit_index][1];
-				tmpz = posarr[query_index][2] - posarr[hit_index][2];
-				tmpval = (float) java.lang.Math.sqrt(tmpx * tmpx + tmpy * tmpy + tmpz * tmpz);
+				float tmpx = posarr[query_index][0] - posarr[hit_index][0];
+				float tmpy = posarr[query_index][1] - posarr[hit_index][1];
+				float tmpz = posarr[query_index][2] - posarr[hit_index][2];
+				float tmpval = (float) java.lang.Math.sqrt(tmpx * tmpx + tmpy * tmpy + tmpz * tmpz);
 				minattarr[i] = new MinimalAttractionValue(query_index, hit_index, tmpval);
-				retarr.put(key, minattarr[i]);
+				retarr.put(minattarr[i], minattarr[i]);
 				avgdist += tmpval;
 				avgatt += attraction;
 			}
@@ -1108,13 +1099,13 @@ public class DrawArea extends JPanel implements java.awt.print.Printable, Compon
 		
 		avgdist /= counter;
 		avgatt /= counter;
-		tmpfloat = avgatt * avgdist;
+		float tmpfloat = avgatt * avgdist;
 
 		// note: the higher the attval, the smaller the dist!
 		for (int i = 0; i < attvals.length; i++) {
-			attraction = attvals[i].att;
-			query_index = attvals[i].query;
-			hit_index = attvals[i].hit;
+			float attraction = attvals[i].att;
+			int query_index = attvals[i].query;
+			int hit_index = attvals[i].hit;
 			if (attraction > 0) {
 				minattarr[i].att = (tmpfloat - (attraction * minattarr[i].att));
 				if (maxval < minattarr[i].att) {

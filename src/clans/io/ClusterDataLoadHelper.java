@@ -433,9 +433,7 @@ public class ClusterDataLoadHelper {
             //read the sequence data
             if (inline.startsWith(">")) {
                 if (currname.length() > 0) {
-                    inaln[counter] = new AminoAcidSequence();
-                    inaln[counter].name = currname;
-                    inaln[counter].seq = currseq;
+                    inaln[counter] = new AminoAcidSequence(currname, currseq);
                     counter++;
                 }
                 currname = inline.substring(1).trim();
@@ -445,9 +443,7 @@ public class ClusterDataLoadHelper {
             }
         }
         
-        inaln[counter] = new AminoAcidSequence();
-        inaln[counter].name = currname;
-        inaln[counter].seq = currseq;
+        inaln[counter] = new AminoAcidSequence(currname, currseq);
         counter++;
         if (counter != expected_sequences) {
             System.err.println("ERROR, not found the number of specified sequences, expected:" + expected_sequences + " found:" + counter);
@@ -558,9 +554,10 @@ public class ClusterDataLoadHelper {
 	/**
 	 * Convenience method that calls {@code parse_hsp_block(BufferedReader, SwingWorker)} with SwingWorker {@code null}. This
 	 * method should be used in no-GUI mode.
+	 * Unused and should be removed
 	 */
-	public boolean parse_hsp_block(BufferedReader buffered_file_handle) throws IOException{
-		return parse_hsp_block(buffered_file_handle, null);
+	public boolean parse_hsp_block(BufferedReader buffered_file_handle, int hspCount) throws IOException{
+		return parse_hsp_block(buffered_file_handle, null, hspCount);
 	}
 
 	/**
@@ -577,14 +574,11 @@ public class ClusterDataLoadHelper {
 	 *             If worker is cancelled and loading should therefore be cancelled. In headless (no-GUI) mode this
 	 *             Exception will not occur.
 	 */
-	public boolean parse_hsp_block(BufferedReader buffered_file_handle, SwingWorker<Void, Integer> worker)
-			throws IOException, CancellationException {
-        int myi, myj;
-		String[] split_result;
+	public boolean parse_hsp_block(BufferedReader buffered_file_handle, SwingWorker<Void, Integer> worker, int hspCount)
+            throws IOException, CancellationException {
+        String[] split_result;
         String tmpstr;
-        MinimalHsp currhsp;
-        HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
-        String hspkey = "";
+        HashMap<MinimalHsp, MinimalHsp> hspHash = new HashMap<MinimalHsp, MinimalHsp>((int) (hspCount / 0.75) + 1, 0.75f);
         String inline;
         int characters_for_round_number = 9;
         String format_for_round_number = "%" + characters_for_round_number + "s";
@@ -596,18 +590,18 @@ public class ClusterDataLoadHelper {
         int count = 0;
         String lastline = "";
         while (((inline = buffered_file_handle.readLine()) != null) && (inline.equalsIgnoreCase("</hsp>") == false)) {
-        	
+
             // skip empty lines
             if (inline.length() == 0) {
                 continue;
             }
-            
+
             count++;
-            
+
             if (count % 10000 == 0) {
                 System.out.print(".");
-                
-				// every 10000 HSPs as tradeoff between time wasted on checking and responsiveness of the cancelation
+
+                // every 10000 HSPs as tradeoff between time wasted on checking and responsiveness of the cancelation
                 ClusterData.checkWorkerStatus(worker); // stop saving if told so by user (only in GUI mode)
 
                 if (count % 500000 == 0) {
@@ -635,37 +629,31 @@ public class ClusterDataLoadHelper {
             }
             
             try {
-                myi = Integer.parseInt(split_result[0]);
-                myj = Integer.parseInt(split_result[1]);
-            
-                if (myi == myj) { // connections to itself are useless
+                int myi = Integer.parseInt(split_result[0]);
+                int myj = Integer.parseInt(split_result[1]);
+
+                if (myi == myj) { // Connections to itself are useless
                     continue;
                 }
 
                 split_result = tmpstr.split("\\s+");
                 if (split_result.length == 0) {
-                	continue;
+                    continue;
                 }
-                
-                hspkey = myi + "_" + myj;
-                if (hsphash.containsKey(hspkey)) {
-                    currhsp = hsphash.get(hspkey);
-                    for (int i = 0; i < split_result.length; i++) {
-                        currhsp.addpval(Double.parseDouble(split_result[i]));
-                    }
 
-                } else {
-                    currhsp = new MinimalHsp();
-                    currhsp.query = myi;
-                    currhsp.hit = myj;
-                    currhsp.val = new double[split_result.length];
+                MinimalHsp newHSP = new MinimalHsp(myi, myj);
+                if (hspHash.containsKey(newHSP)) {
+                    MinimalHsp oldHSP = hspHash.get(newHSP);
                     for (int i = 0; i < split_result.length; i++) {
-                        currhsp.val[i] = Double.parseDouble(split_result[i]);
+                        oldHSP.addpval(Double.parseDouble(split_result[i]));
                     }
+                } else {
+                    newHSP.val = new double[split_result.length];
+                    for (int i = 0; i < split_result.length; i++) {
+                        newHSP.val[i] = Double.parseDouble(split_result[i]);
+                    }
+                    hspHash.put(newHSP, newHSP);
                 }
-                
-                hsphash.put(hspkey, currhsp);
-            
             } catch (NumberFormatException Ne) {
                 System.err.println("ERROR, unable to parse int int: double ... from " + inline);
                 return false;
@@ -678,7 +666,7 @@ public class ClusterDataLoadHelper {
         System.out.println("total HSPs: " + count);
         
         if (inline.equalsIgnoreCase("</hsp>")) {
-            blasthits = hsphash.values().toArray(new MinimalHsp[0]);
+            blasthits = hspHash.values().toArray(new MinimalHsp[0]);
         } else {
             System.err.println("ERROR reading truncated file; <hsp> tag not closed by </hsp>");
         }
@@ -716,15 +704,14 @@ public class ClusterDataLoadHelper {
             if (elements != 3) {
                 System.err.println("unable to parse attraction value information from '" + inline + "'");
             }
-            MinimalAttractionValue curratt = new MinimalAttractionValue();
             try {
-                curratt.query = Integer.parseInt(tmparr[0]);
-                curratt.hit = Integer.parseInt(tmparr[1]);
-                curratt.att = Float.parseFloat(tmparr[2]);
+                int query = Integer.parseInt(tmparr[0]);
+                int hit = Integer.parseInt(tmparr[1]);
+                float att = Float.parseFloat(tmparr[2]);
+                tmpvec.addElement(new MinimalAttractionValue(query, hit, att));
             } catch (NumberFormatException ne) {
                 System.err.println("unable to parse float for " + tmpstr + " in " + inline);
             }
-            tmpvec.addElement(curratt);
             counter++;
         }
         attvals = new MinimalAttractionValue[tmpvec.size()];
@@ -845,10 +832,7 @@ public class ClusterDataLoadHelper {
         System.out.println("reading matrix");
         int counter = 0;
         String[] tmparr;
-        HashMap<String, MinimalAttractionValue> tmphash = new HashMap<String, MinimalAttractionValue>();
-        String key;
-        MinimalAttractionValue curratt;
-        float tmpval;
+        HashMap<MinimalAttractionValue, MinimalAttractionValue> tmphash = new HashMap<MinimalAttractionValue, MinimalAttractionValue>();
         String inline;
         
         while (((inline = buffered_file_handle.readLine()) != null) && (inline.equalsIgnoreCase("</mtx>") == false)) {
@@ -863,22 +847,14 @@ public class ClusterDataLoadHelper {
             }
             try {
                 for (int i = 0; i < expected_sequences; i++) {
-                    tmpval = Float.parseFloat(tmparr[i]);
+                    float tmpval = Float.parseFloat(tmparr[i]);
                     if (tmpval != 0) {
-                        if (counter < i) {
-                            key = counter + "_" + i;
+                        MinimalAttractionValue curratt = new MinimalAttractionValue(counter, i);
+                        if (tmphash.containsKey(curratt)) {
+                            tmphash.get(curratt).att += tmpval / 2;
                         } else {
-                            key = i + "_" + counter;
-                        }
-                        if (tmphash.containsKey(key)) {
-                            curratt = (MinimalAttractionValue) tmphash.get(key);
-                            curratt.att += tmpval / 2;
-                        } else {
-                            curratt = new MinimalAttractionValue();
-                            curratt.query = counter;
-                            curratt.hit = i;
                             curratt.att = tmpval / 2;
-                            tmphash.put(key, curratt);
+                            tmphash.put(curratt, curratt);
                         }
                     }
                 }//end for i

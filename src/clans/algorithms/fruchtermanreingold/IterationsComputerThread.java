@@ -30,8 +30,6 @@ public class IterationsComputerThread extends java.lang.Thread {
 		setName("IterationsComputerThread");
 	}
 
-	String tmpstr = "";
-	float tmpcool = 1;
 	final Object syncon = new Object(); // dummy object to sync on
 	
 	ProgramWindow parent;
@@ -143,7 +141,7 @@ public class IterationsComputerThread extends java.lang.Thread {
 			}
 
 			data.posarr = data.positions;
-			tmpcool = (((float) ((int) (data.currcool * 100000))) / 100000);
+			float tmpcool = (((float) ((int) (data.currcool * 100000))) / 100000);
 			if (parent.options_window != null) {
 				parent.options_window.currcoolfield.setText(String.valueOf(tmpcool));
 			}

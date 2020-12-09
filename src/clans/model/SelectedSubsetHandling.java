@@ -13,20 +13,20 @@ public class SelectedSubsetHandling {
 		// convert the old sequence numbering to the new and remove all
 		// non-relevant blast hsp's
 		Vector<MinimalHsp> tmpvec = new Vector<MinimalHsp>();
-		int qnum, hnum;
-		HashMap<Integer, Integer> tmphash = new HashMap<Integer, Integer>(
+		HashSet<Integer> tmphash = new HashSet<Integer>(
 				(int) (selectednames.length / 0.8) + 1, 0.8f);
 
 		for (int i = 0; i < selectednames.length; i++) {
-			tmphash.put(selectednames[i], new Integer(i));
+			tmphash.add(selectednames[i]);
 		}
 
 		for (int i = 0; i < blasthits.length; i++) {
-			qnum = blasthits[i].query;
-			hnum = blasthits[i].hit;
-			if (tmphash.containsKey(qnum) && tmphash.containsKey(hnum)) {
-				tmpvec.addElement(new MinimalHsp(tmphash.get(qnum).intValue(),
-						tmphash.get(hnum).intValue(), blasthits[i].val));
+			int qnum = blasthits[i].query;
+			int hnum = blasthits[i].hit;
+			if (tmphash.contains(qnum) && tmphash.contains(hnum)) {
+				// Must this be copied?
+				tmpvec.addElement(new MinimalHsp(blasthits[i].query,
+						blasthits[i].hit, blasthits[i].val));
 			}
 		}
 
@@ -40,19 +40,18 @@ public class SelectedSubsetHandling {
 		// convert the old sequence numbering to the new and remove all
 		// non-relevant attvals
 		Vector<MinimalAttractionValue> tmpvec = new Vector<MinimalAttractionValue>();
-		String qnum, hnum;
-		HashMap<String, Integer> tmphash = new HashMap<String, Integer>(
+		HashSet<Integer> tmphash = new HashSet<Integer>(
 				(int) (selectednames.length / 0.8) + 1, 0.8f);
 		for (int i = 0; i < selectednames.length; i++) {
-			tmphash.put(String.valueOf(selectednames[i]), new Integer(i));
+			tmphash.add(selectednames[i]);
 		}
 
 		for (int i = 0; i < myattvals.length; i++) {
-			qnum = String.valueOf(myattvals[i].query);
-			hnum = String.valueOf(myattvals[i].hit);
-			if (tmphash.containsKey(qnum) && tmphash.containsKey(hnum)) {
-				tmpvec.addElement(new MinimalAttractionValue(((Integer) tmphash.get(qnum))
-						.intValue(), ((Integer) tmphash.get(hnum)).intValue(),
+			int qnum = myattvals[i].query;
+			int hnum = myattvals[i].hit;
+			if (tmphash.contains(qnum) && tmphash.contains(hnum)) {
+				// Must this be copied?
+				tmpvec.addElement(new MinimalAttractionValue(myattvals[i].query, myattvals[i].hit,
 						myattvals[i].att));
 			}
 		}

@@ -76,15 +76,12 @@ public class FileHandling2 {
                 System.err.println("NumberFormatError, Wrong Format!");
                 System.exit(0);
             }
-            MinimalHsp currhsp=new MinimalHsp();
             int ival=-1;
             int jval=-1;
             int kval=-1;
             int hspcount=-1;
             double pval=-1;
-            String[] tmparr;
-            HashMap<String, MinimalHsp> hsphash = new HashMap<String, MinimalHsp>();
-            String hspkey;
+            HashMap<MinimalHsp, MinimalHsp> hsphash = new HashMap<MinimalHsp, MinimalHsp>();
             while ((inline=inread.readLine())!=null){
                 if(inline.startsWith("#")){
                     continue;
@@ -96,17 +93,16 @@ public class FileHandling2 {
                     }
                     if(ival!=jval && pval<=cutoff){
                         if((ival>-1)&&(jval>-1)&&(kval>-1)){
-                            hspkey=ival+"_"+jval;
-                            if(hsphash.containsKey(hspkey)==false){
-                                currhsp.val=new double[1];
-                                currhsp.val[0]=pval;
-                                hsphash.put(hspkey,currhsp);
+                            MinimalHsp newHSP=new MinimalHsp(ival, jval);
+                            if(hsphash.containsKey(newHSP)==false){
+                                newHSP.addpval(pval);
+                                hsphash.put(newHSP,newHSP);
                             }else{
-                                hsphash.get(hspkey).addpval(pval);
+                                hsphash.get(newHSP).addpval(pval);
                             }
                         }
                     }
-                    tmparr=(inline.substring(5)).split(";",0);
+                    String[] tmparr=(inline.substring(5)).split(";",0);
                     if(tmparr.length==3){
                         try{
                             ival=Integer.parseInt(tmparr[0]);
@@ -116,11 +112,7 @@ public class FileHandling2 {
                             System.err.println("unable to parse correct numbers from "+inline);
                             System.exit(0);
                         }
-                        currhsp=new MinimalHsp();
-                        currhsp.query=ival;
-                        currhsp.hit=jval;
                     }else{
-                        currhsp=new MinimalHsp();
                         pval=1;
                     }
                 }else if(inline.startsWith("\tqname: ")){
@@ -165,13 +157,12 @@ public class FileHandling2 {
             }//end while reading
             if(pval<=cutoff){
                 if((ival>-1)&&(jval>-1)&&(kval>-1)){
-                    hspkey=ival+"_"+jval;
-                    if(hsphash.containsKey(hspkey)==false){
-                        currhsp.val=new double[1];
-                        currhsp.val[0]=pval;
-                        hsphash.put(hspkey,currhsp);
+                    MinimalHsp newHSP=new MinimalHsp(ival, jval);
+                    if(hsphash.containsKey(newHSP)==false){
+                        hsphash.get(newHSP).addpval(pval);
+                        hsphash.put(newHSP,newHSP);
                     }else{
-                        hsphash.get(hspkey).addpval(pval);
+                        hsphash.get(newHSP).addpval(pval);
                     }
                 }
             }
@@ -190,7 +181,7 @@ public class FileHandling2 {
         //now get all the minhsp elements form the hash
         return retarr;
     }//end blast
-    
+
     //--------------------------------------------------------------------------
     
     public static void parse_intermediate_results(ClusterData data){
